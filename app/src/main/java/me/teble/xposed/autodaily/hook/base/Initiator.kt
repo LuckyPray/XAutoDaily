@@ -46,6 +46,7 @@ object Initiator {
         if (confusedClass.contains(name)) {
             // 使用正常类名获取混淆类名
             val realClassName = classCache.getString("${name}#${qqVersionCode}")
+            LogUtil.d("Initiator", "混淆缓存：${name}#${qqVersionCode} -> $realClassName")
             return realClassName?.let {
                 val cls = classLoader.loadClass(getSimpleName(realClassName))
                 mClassCache[name] = cls

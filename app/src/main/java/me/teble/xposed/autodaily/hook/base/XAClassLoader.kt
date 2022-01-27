@@ -29,7 +29,10 @@ class XAClassLoader(
         // 代码中使用的qq类包名前缀写进此处
         private val hostPackages = listOf(
             "com.qq.",
-            "com.tencent.",
+            "com.tencent.common.app.",
+            "com.tencent.mobileqq.",
+            "com.tencent.qphone.base.",
+            "com.tencent.widget.",
             "mqq.",
             "oicq."
         )

@@ -23,13 +23,17 @@ object Config {
             mmkvDir.mkdirs()
         }
         val soFile = NativeUtil.getNativeLibrary(hostContext, "mmkv")
-        MMKV.initialize(hostContext, mmkvDir.absolutePath) {
-            try {
-                System.load(soFile.absolutePath)
-            } catch (e: Exception) {
-                LogUtil.e(e, "load mmkv lib failed")
-                throw UnsatisfiedLinkError("load mmkv lib failed")
+        try {
+            MMKV.initialize(hostContext, mmkvDir.absolutePath) {
+                try {
+                    System.load(soFile.absolutePath)
+                } catch (e: Exception) {
+                    LogUtil.e(e, "load mmkv lib failed")
+                    throw UnsatisfiedLinkError("load mmkv lib failed")
+                }
             }
+        } catch (e: Throwable) {
+            LogUtil.d("MMKV", "加载失败: " + e.stackTraceToString())
         }
     }
 

@@ -6,14 +6,11 @@ import android.content.res.XModuleResources
 import android.text.TextUtils
 import cn.hutool.core.util.ReflectUtil.*
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
-import com.github.kyuubiran.ezxhelper.utils.emptyParam
-import com.github.kyuubiran.ezxhelper.utils.findMethod
-import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import com.github.kyuubiran.ezxhelper.utils.*
 import de.robv.android.xposed.*
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadData
-import me.teble.xposed.autodaily.dex.utils.DexKit.findSubClasses
+import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadDex
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
@@ -22,14 +19,11 @@ import me.teble.xposed.autodaily.hook.base.Global.init
 import me.teble.xposed.autodaily.hook.base.Global.initContext
 import me.teble.xposed.autodaily.hook.base.Global.qqVersionCode
 import me.teble.xposed.autodaily.hook.base.Initiator
-import me.teble.xposed.autodaily.hook.base.Initiator.loadAs
 import me.teble.xposed.autodaily.hook.base.XAClassLoader
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
-import me.teble.xposed.autodaily.hook.proxy.ProxyManager
-import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
@@ -42,13 +36,15 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         private const val TAG = "MainHook"
     }
 
-//        private lateinit var subHookClasses: Set<String>
+//    private lateinit var subHookClasses: Set<String>
+
     private val subHookClasses: Set<Class<out BaseHook>> = setOf(
         FromServiceMsgHook::class.java,
         QLogHook::class.java,
         QQSettingSettingActivityHook::class.java,
         SplashActivityHook::class.java,
         ToServiceMsgHook::class.java,
+        CoreServiceHook::class.java
     )
     private lateinit var loadPackageParam: LoadPackageParam
 
@@ -61,7 +57,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
         LogUtil.i(TAG, "handleLoadPackage: $loadPackageParam")
         this.loadPackageParam = loadPackageParam
-        if (!QQTypeEnum.contain(loadPackageParam.packageName) || !loadPackageParam.isFirstApplication) {
+        if (!QQTypeEnum.contain(loadPackageParam.packageName)
+            || !loadPackageParam.isFirstApplication
+        ) {
             return
         }
         // TODO 分进程处理
@@ -74,8 +72,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     val init by lazy {
         LogUtil.d(TAG, "current process: ${loadPackageParam.processName}")
         EzXHelperInit.initHandleLoadPackage(loadPackageParam)
-        EzXHelperInit.setLogTag("Xposed")
-        EzXHelperInit.setToastTag("Xposed")
+        EzXHelperInit.setLogTag("XAutoDaily")
+        EzXHelperInit.setToastTag("XAutoDaily")
         doInit()
     }
 
@@ -86,36 +84,44 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         // 替换classloader
         replaceParentClassloader(loadPackageParam.classLoader)
         LogUtil.d(TAG, "loadPackageParam.packageName -> ${loadPackageParam.packageName}")
-        CoreServiceHook().coreServiceHook()
 
-        var unhook: XC_MethodHook.Unhook? = null
-        unhook =
-            findMethod(LoadData) { returnType == Boolean::class.java && emptyParam }.hookAfter {
-                // 防止hook多次被执行
+        findMethod(LoadDex) { returnType == Boolean::class.java && emptyParam }.hookAfter {
+            // 防止hook多次被执行
+            try {
                 if (isInjector(this::class.java.name)) {
                     return@hookAfter
                 }
                 val context = AndroidAppHelper.currentApplication()
                 // 初始化全局Context
                 initContext(context)
-                EzXHelperInit.initAppContext(context)
+//                EzXHelperInit.initAppContext(context)
                 // MMKV
                 Config.init()
                 //加载资源注入
-                ResInjectUtil.injectRes(context.resources)
+//                ResInjectUtil.injectRes(context.resources)
+                LogUtil.d(TAG, "injectRes")
+                EzXHelperInit.initAppContext(context, addPath = true, initModuleResources = true)
                 //初始化代理
-                ProxyManager.init
+                LogUtil.d(TAG, "initActivityProxyManager")
+                EzXHelperInit.initActivityProxyManager(
+                    modulePackageName = BuildConfig.APPLICATION_ID,
+                    hostActivityProxyName = "com.tencent.mobileqq.activity.photo.CameraPreviewActivity",
+                    moduleClassLoader = MainHook::class.java.classLoader!!,
+                    hostClassLoader = context.classLoader
+                )
+                LogUtil.d(TAG, "initSubActivity")
+                EzXHelperInit.initSubActivity()
+//                ProxyManager.init
                 // dex相关
-                if (Global.hostProcessName == "") {
-                    doDexInit()
-                }
+                LogUtil.d(TAG, "doDexInit")
+                doDexInit()
                 //初始化hook
-                try {
-                    initHook()
-                } catch (e: Exception) {
-                    LogUtil.e(TAG, e)
-                }
+                LogUtil.d(TAG, "doDexInit")
+                initHook()
+            } catch (e: Exception) {
+                LogUtil.e(TAG, e)
             }
+        }
     }
 
     private fun doDexInit() {
@@ -216,6 +222,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 LogUtil.e(TAG, e)
             }
         }
+        ToastUtil.send("模块加载完毕")
         LogUtil.i("模块加载完毕")
     }
 

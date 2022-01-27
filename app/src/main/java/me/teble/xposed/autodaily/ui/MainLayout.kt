@@ -43,7 +43,6 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Setting
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import kotlin.concurrent.thread
 
@@ -58,7 +57,7 @@ fun MainLayout(navController: NavHostController) {
     LaunchedEffect(notice) {
         thread {
             val info = Cache.versionInfoCache ?: fetchUpdateInfo()
-            if (System.currentTimeMillis() - Cache.lastFetchTime < 60 * 60 * 1000L)
+            if (System.currentTimeMillis() - Cache.lastFetchTime > 60 * 60 * 1000L)
                 fetchUpdateInfo()
             info ?: ToastUtil.send("拉取公告失败")
             notice.value = info?.notice ?: ""
