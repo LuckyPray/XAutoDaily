@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">XAutoDaily</string>
+    <string name="sign_select">签到设置</string>
+    <string name="res_inject_success">资源注入成功</string>
+    <string name="sign_in_switch">总开关</string>
+</resources>
