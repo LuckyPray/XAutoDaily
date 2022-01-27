@@ -186,12 +186,14 @@ fun EditEnvLayout(
                         OutlinedTextField(
                             value = envMap.value[env.name]?.value ?: env.default,
                             onValueChange = {
-                                when (env.type) {
-                                    "string" -> {
-                                        limitErr.value = it.length > env.limit
-                                    }
-                                    else -> {
-                                        limitErr.value = it.split(",").size > env.limit
+                                if (env.limit >0) {
+                                    when (env.type) {
+                                        "string" -> {
+                                            limitErr.value = it.length > env.limit
+                                        }
+                                        else -> {
+                                            limitErr.value = it.split(",").size > env.limit
+                                        }
                                     }
                                 }
                                 if (!limitErr.value) {

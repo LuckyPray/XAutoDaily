@@ -20,7 +20,7 @@ object Initiator {
 
     fun getSimpleName(className: String): String {
         var name = className
-        if (name.contains("/")) {
+        if (name.endsWith(';') || name.contains('/')) {
             var flag = 0
             if (name.startsWith("L")) {
                 flag = flag or (1 shl 1)

@@ -165,8 +165,8 @@ fun MainLayout(navController: NavHostController) {
                     title = "前往项目地址",
                     otherInfoList = listOf(
                         "模块作者：韵の祈(teble@github.com)",
-                        "特别鸣谢：KyuubiRan、Lagrio",
-                        "ps：我要好多小星星！"
+                        "特别鸣谢：KyuubiRan、MaiTungTM",
+                        "ps：我要好多好多小星星！"
                     ),
                     onClick = {
                         navController.context.startActivity(Intent().apply {
