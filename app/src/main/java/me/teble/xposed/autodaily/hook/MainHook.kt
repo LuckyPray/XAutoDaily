@@ -120,6 +120,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 initHook()
             } catch (e: Exception) {
                 LogUtil.e(TAG, e)
+                ToastUtil.send("初始化失败: " + e.stackTraceToString())
             }
         }
     }

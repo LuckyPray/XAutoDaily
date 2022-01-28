@@ -34,6 +34,7 @@ object Config {
             }
         } catch (e: Throwable) {
             LogUtil.d("MMKV", "加载失败: " + e.stackTraceToString())
+            throw e
         }
     }
 

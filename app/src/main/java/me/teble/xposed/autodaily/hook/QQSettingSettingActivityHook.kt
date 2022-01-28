@@ -9,12 +9,14 @@ import cn.hutool.core.util.ReflectUtil.invoke
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import me.teble.xposed.autodaily.BuildConfig
+import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.activity.module.ModuleActivity
 import me.teble.xposed.autodaily.config.QQClasses.Companion.FormCommonSingleLineItem
 import me.teble.xposed.autodaily.config.QQClasses.Companion.FormSimpleItem
 import me.teble.xposed.autodaily.config.QQClasses.Companion.QQSettingSettingActivity
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
+import me.teble.xposed.autodaily.hook.base.Global.hostContext
 import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
@@ -42,7 +44,7 @@ class QQSettingSettingActivityHook : BaseHook() {
             val context = param.thisObject as Activity
 
             val entity = clazz.new(context) as View
-            invoke<Unit>(entity, "setLeftText", "XAutoDaily")
+            invoke<Unit>(entity, "setLeftText", hostContext.getString(R.string.app_name))
             invoke<Unit>(entity, "setRightText", BuildConfig.VERSION_NAME)
             (item.parent as LinearLayout).apply {
                 addView(entity, 0)

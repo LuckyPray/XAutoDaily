@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.hook.base
 
+import android.content.Context
 import java.net.URL
 
 class XAClassLoader(
@@ -9,17 +10,18 @@ class XAClassLoader(
 
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
-        if (name == "androidx.lifecycle.ReportFragment" || name.startsWith("androidx.activity")) {
-            return try {
-                qClassLoader.loadClass(name)
-            } catch (e: Exception) {
-                mParentClassLoader.loadClass(name)
-            }
+        try {
+            return Context::class.java.classLoader!!.loadClass(name)
+        } catch (ignored: ClassNotFoundException) {
         }
-        return if (switchHostClass(name)) qClassLoader.loadClass(name) else mParentClassLoader.loadClass(name)
+        return if (switchHostClass(name)) {
+            qClassLoader.loadClass(name)
+        } else {
+            mParentClassLoader.loadClass(name)
+        }
     }
 
-    override fun getResource(name: String): URL {
+    override fun getResource(name: String): URL? {
         return mParentClassLoader.getResource(name) ?: qClassLoader.getResource(name)
     }
 
