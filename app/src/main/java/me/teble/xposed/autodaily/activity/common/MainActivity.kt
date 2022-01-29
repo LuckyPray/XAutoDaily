@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.activity.common
 
 import android.os.Bundle
-import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
+import androidx.activity.ComponentActivity
 
-class MainActivity : BaseActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
     }
