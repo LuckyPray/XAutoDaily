@@ -4,7 +4,6 @@ import me.teble.xposed.autodaily.hook.base.Global.qqVersionCode
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.classCache
 import me.teble.xposed.autodaily.utils.LogUtil
-import java.util.*
 
 object Initiator {
 

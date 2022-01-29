@@ -13,7 +13,6 @@ import mqq.manager.Manager
 import java.lang.reflect.Modifier
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.ArrayList
 
 open class FriendsManager : BaseFunction(
     TAG = "FriendsManager"
