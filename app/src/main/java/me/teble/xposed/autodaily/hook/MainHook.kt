@@ -118,7 +118,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 //初始化hook
                 LogUtil.d(TAG, "doDexInit")
                 initHook()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 LogUtil.e(TAG, e)
                 ToastUtil.send("初始化失败: " + e.stackTraceToString())
             }
@@ -159,6 +159,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 cache.putInt(key, hash)
                 needLocateClasses.add(it.key)
                 LogUtil.d(TAG, "need locate -> ${it.key}")
+            }
+            if (!cache.contains("${it.key}#${qqVersionCode}")) {
+                needLocateClasses.add(it.key)
+                LogUtil.d(TAG, "cache not found: ${it.key}#${qqVersionCode}")
             }
         }
         // 尝试获取，成功则加入新版缓存

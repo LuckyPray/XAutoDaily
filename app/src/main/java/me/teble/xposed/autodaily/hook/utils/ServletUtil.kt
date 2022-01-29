@@ -47,8 +47,8 @@ object ServletUtil {
             if (it.returnType == String::class.java && Modifier.isPublic(it.modifiers)
                     && it.parameterTypes.isEmpty()
                 ) {
-                val res = it.invoke(platformInfor) as String
-                if (res.contains("qimei")) {
+                val res = it.invoke(platformInfor) as String?
+                if (res?.contains("qimei") == true) {
                     info = res
                     return@forEach
                 }
