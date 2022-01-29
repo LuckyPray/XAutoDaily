@@ -7,6 +7,7 @@ XAutoDaily 是一个兼容QQ大部分版本的开源签到 Xposed 模块
 
 ## 使用方法
 
+下载：[Actions](https://github.com/LuckyPray/XAutoDaily/actions)  
 激活本模块后，在 QQ 客户端的设置中点击 "XAutoDaily 设置" 即可开关对应功能。
 
 ## 一切开发旨在学习，请勿用于非法用途
