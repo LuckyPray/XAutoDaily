@@ -78,7 +78,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             EzXHelperInit.setToastTag("XAutoDaily")
             doInit()
         } catch (e: Throwable) {
-            ToastUtil.send("load error: " + e.stackTraceToString())
+            ToastUtil.send("load module error: " + e.stackTraceToString())
+            LogUtil.d(TAG, "load module error: " + e.stackTraceToString())
         }
     }
 
