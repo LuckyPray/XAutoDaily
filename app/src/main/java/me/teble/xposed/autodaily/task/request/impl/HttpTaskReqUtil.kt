@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.request.impl
 
+import cn.hutool.core.util.ReUtil
 import cn.hutool.http.HttpUtil
 import cn.hutool.http.Method
 import function.task.module.Task
@@ -77,7 +78,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 TAG, """request ------------------------------------>
                 |   method: ${request.method}
                 |   url: ${request.url}
-                |   headers: ${request.headers()}
+                |   headers: ***
                 |   body: ${request.fieldValueAs<String>("body")}
                 """.trimMargin()
             )
