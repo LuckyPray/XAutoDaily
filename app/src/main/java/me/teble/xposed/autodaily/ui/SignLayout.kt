@@ -58,6 +58,8 @@ fun SignLayout(navController: NavHostController) {
                                 longPress = {
                                     ToastUtil.send("正在重置上次执行时间")
                                     accountConfig.remove("${task.id}#${LAST_EXEC_TIME}")
+                                    accountConfig.remove("${task.id}#${LAST_EXEC_MSG}")
+                                    accountConfig.remove("${task.id}#${NEXT_SHOULD_EXEC_TIME}")
                                 },
                                 otherInfoList = (mutableListOf<String>().apply {
                                     if (!checked.value) {

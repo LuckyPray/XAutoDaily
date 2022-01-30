@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.filter.chain
 
+import cn.hutool.core.date.DateUtil
 import cn.hutool.cron.pattern.CronPattern
 import cn.hutool.cron.pattern.CronPatternUtil
 import function.task.module.Task
@@ -47,21 +48,24 @@ class GroupTaskCheckExecuteFilter : GroupTaskFilter(
         if (!enabled) {
             return false
         }
-        // 获取上次执行任务时间，如果获取不到则立即执行，执行完毕后，存储当前执行时间与下次执行时间
+        // 获取上次执行任务时间
         val lastExecTime = parseDate(accountConfig.getString("${task.id}#${LAST_EXEC_TIME}"))
         LogUtil.d(TAG, "task -> ${task.id} 上次执行时间：${lastExecTime?.format()}")
-        lastExecTime ?: return true
-        // 如果当前时间超过所记录下次执行时间则立即执行，存在上次执行时间，理论不应该为空
-        // 如果为空，根据cron计算上次执行完毕后的理论下一次执行时间
         // 不保证一定在有效时间内执行
+        val now = Date()
         val nextShouldExecTime =
             parseDate(accountConfig.getString("${task.id}#${NEXT_SHOULD_EXEC_TIME}")) ?: let {
-                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron), lastExecTime, true)
+                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron), now, true)
                 accountConfig.putString("${task.id}#${NEXT_SHOULD_EXEC_TIME}", time.format())
                 time
             }
-        // 超过时限的任务，立即执行
-        if (nextShouldExecTime < Date()) {
+        lastExecTime ?: let {
+            // 第一次执行任务，如果下次执行时间不在当天，则立即执行
+            if (!DateUtil.isSameDay(now, nextShouldExecTime)) {
+                return true
+            }
+        }
+        if (nextShouldExecTime < now) {
             return true
         }
         // 否则更新全局下次执行时间

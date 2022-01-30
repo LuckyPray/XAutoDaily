@@ -275,11 +275,11 @@ object ConfigUtil {
     fun getCurrentExecTaskNum(): Int {
         var num = 0
         val conf = loadSaveConf()
-        val currentDate = Date().format().split(' ').first()
+        val nowStr = Date().format().split(' ').first()
         conf.taskGroups.forEach { taskGroup ->
             taskGroup.tasks.forEach { task ->
                 val time = accountConfig.getString("${task.id}#${Const.LAST_EXEC_TIME}") ?: ""
-                if (time.startsWith(currentDate)) {
+                if (time.startsWith(nowStr)) {
                     num++
                 }
             }
