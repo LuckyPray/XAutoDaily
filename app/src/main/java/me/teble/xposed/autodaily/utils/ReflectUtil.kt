@@ -88,10 +88,8 @@ fun Any.invoke(
 ): Any? {
     ReflectUtil.getMethods(if (this is Class<*>) this else this.javaClass).let { arrayOfMethods ->
         arrayOfMethods.forEach {
-            if (it.name == name && isAllAssignableFrom(
-                    ClassUtil.getClasses(*args),
-                    it.parameterTypes
-                )
+            if (it.name == name
+                && isAllAssignableFrom(it.parameterTypes, ClassUtil.getClasses(*args))
             ) {
                 return ReflectUtil.invoke(this, it, *args)
             }

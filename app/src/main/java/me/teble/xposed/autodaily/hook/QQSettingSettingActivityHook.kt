@@ -5,7 +5,6 @@ import android.content.Intent
 import android.view.View
 import android.widget.LinearLayout
 import androidx.compose.foundation.ExperimentalFoundationApi
-import cn.hutool.core.util.ReflectUtil.invoke
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import me.teble.xposed.autodaily.BuildConfig
@@ -18,9 +17,8 @@ import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global.hostContext
 import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValueAs
-import me.teble.xposed.autodaily.utils.new
+import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.utils.*
 
 /**
  * @author teble
@@ -38,14 +36,13 @@ class QQSettingSettingActivityHook : BaseHook() {
     @ExperimentalFoundationApi
     @MethodHook("创建模块设置入口")
     private fun addModuleEntrance() {
-        findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter { param ->
+        findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter(52) { param ->
             val clazz: Class<*> = load(FormSimpleItem) ?: load(FormCommonSingleLineItem)!!
             val item: View = param.thisObject.fieldValueAs(clazz)!!
             val context = param.thisObject as Activity
-
             val entity = clazz.new(context) as View
-            invoke<Unit>(entity, "setLeftText", hostContext.getString(R.string.app_name))
-            invoke<Unit>(entity, "setRightText", BuildConfig.VERSION_NAME)
+            entity.invoke("setLeftText", hostContext.getString(R.string.app_name))
+            entity.invoke("setRightText", BuildConfig.VERSION_NAME)
             (item.parent as LinearLayout).apply {
                 addView(entity, 0)
             }
