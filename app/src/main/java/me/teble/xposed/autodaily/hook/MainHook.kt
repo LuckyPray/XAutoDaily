@@ -6,10 +6,13 @@ import android.content.res.XModuleResources
 import android.text.TextUtils
 import cn.hutool.core.util.ReflectUtil.*
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
-import com.github.kyuubiran.ezxhelper.utils.*
-import de.robv.android.xposed.*
+import com.github.kyuubiran.ezxhelper.utils.emptyParam
+import com.github.kyuubiran.ezxhelper.utils.findMethod
+import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadDex
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -24,6 +27,8 @@ import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
+import me.teble.xposed.autodaily.hook.proxy.ProxyManager
+import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
@@ -57,24 +62,24 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
         LogUtil.i(TAG, "handleLoadPackage: $loadPackageParam")
         this.loadPackageParam = loadPackageParam
-        if (!QQTypeEnum.contain(loadPackageParam.packageName)
-            || !loadPackageParam.isFirstApplication
-        ) {
-            return
+        if (QQTypeEnum.contain(loadPackageParam.packageName)) {
+            // TODO 分进程处理
+            if (loadPackageParam.processName == loadPackageParam.packageName) {
+                init
+            }
         }
-        // TODO 分进程处理
-        if (loadPackageParam.processName != loadPackageParam.packageName) {
-            return
-        }
-        init
     }
 
     val init by lazy {
-        LogUtil.d(TAG, "current process: ${loadPackageParam.processName}")
-        EzXHelperInit.initHandleLoadPackage(loadPackageParam)
-        EzXHelperInit.setLogTag("XAutoDaily")
-        EzXHelperInit.setToastTag("XAutoDaily")
-        doInit()
+        try {
+            LogUtil.d(TAG, "current process: ${loadPackageParam.processName}")
+            EzXHelperInit.initHandleLoadPackage(loadPackageParam)
+            EzXHelperInit.setLogTag("XAutoDaily")
+            EzXHelperInit.setToastTag("XAutoDaily")
+            doInit()
+        } catch (e: Throwable) {
+            ToastUtil.send("load error: " + e.stackTraceToString())
+        }
     }
 
     private fun doInit() {
@@ -94,31 +99,21 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 val context = AndroidAppHelper.currentApplication()
                 // 初始化全局Context
                 initContext(context)
-//                EzXHelperInit.initAppContext(context)
+                EzXHelperInit.initAppContext(context)
                 // MMKV
                 Config.init()
                 //加载资源注入
-//                ResInjectUtil.injectRes(context.resources)
                 LogUtil.d(TAG, "injectRes")
-                EzXHelperInit.initAppContext(context, addPath = true, initModuleResources = true)
-                //初始化代理
-                LogUtil.d(TAG, "initActivityProxyManager")
-                EzXHelperInit.initActivityProxyManager(
-                    modulePackageName = BuildConfig.APPLICATION_ID,
-                    hostActivityProxyName = "com.tencent.mobileqq.activity.photo.CameraPreviewActivity",
-                    moduleClassLoader = MainHook::class.java.classLoader!!,
-                    hostClassLoader = context.classLoader
-                )
-                LogUtil.d(TAG, "initSubActivity")
-                EzXHelperInit.initSubActivity()
-//                ProxyManager.init
+                ResInjectUtil.injectRes(context.resources)
+                LogUtil.d(TAG, "init ActivityProxyManager")
+                ProxyManager.init
                 // dex相关
                 LogUtil.d(TAG, "doDexInit")
                 doDexInit()
                 //初始化hook
-                LogUtil.d(TAG, "doDexInit")
+                LogUtil.d(TAG, "initHook")
                 initHook()
-            } catch (e: Throwable) {
+            } catch (e: Exception) {
                 LogUtil.e(TAG, e)
                 ToastUtil.send("初始化失败: " + e.stackTraceToString())
             }
