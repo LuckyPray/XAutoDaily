@@ -93,8 +93,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         findMethod(LoadDex) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             try {
-                if (isInjector(this::class.java.name)) {
-                    return@hookAfter
+                synchronized(this) {
+                    if (isInjector(this::class.java.name)) {
+                        return@hookAfter
+                    }
                 }
                 val context = AndroidAppHelper.currentApplication()
                 // 初始化全局Context
@@ -173,7 +175,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             }
         }
         if (needLocateClasses.isEmpty()) {
-//            ToastUtil.send("无需重新定位，跳过执行")
             return
         }
         LogUtil.log("needLocateClasses -> $needLocateClasses")
@@ -222,7 +223,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 LogUtil.e(TAG, e)
             }
         }
-        ToastUtil.send("模块加载完毕")
         LogUtil.i("模块加载完毕")
     }
 
