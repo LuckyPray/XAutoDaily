@@ -9,6 +9,8 @@ interface QQClasses {
         const val NewRunTime = "com.tencent.mobileqq.startup.step.NewRuntime"
         const val LoadData = "com.tencent.mobileqq.startup.step.LoadData"
         const val LoadDex = "com.tencent.mobileqq.startup.step.LoadDex"
+        const val LoadModule = "com.tencent.mobileqq.startup.step.LoadModule"
+        const val NewRuntime = "com.tencent.mobileqq.startup.step.NewRuntime"
         const val AppRuntime = "mqq.app.AppRuntime"
         const val MobileQQ = "mqq.app.MobileQQ"
         const val BaseApplicationImpl = "com.tencent.common.app.BaseApplicationImpl"

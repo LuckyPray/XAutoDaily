@@ -47,7 +47,6 @@ object ConfigUtil {
     private val CONFIG_VERSION_REG = Pattern.compile("version:\\s+(\\d+)")
 
     private val lock = ReentrantLock()
-//    private var config: TaskProperties =
 
     init {
         loadLib()
@@ -176,9 +175,6 @@ object ConfigUtil {
                 confDir.mkdirs()
             }
             val propertiesFile = File(confDir, "xa_conf")
-            if (propertiesFile.isDirectory) {
-                FileUtil.del(propertiesFile)
-            }
             if (!propertiesFile.exists()) {
                 propertiesFile.createNewFile()
             }

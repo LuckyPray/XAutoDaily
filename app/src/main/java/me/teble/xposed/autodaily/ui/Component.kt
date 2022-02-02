@@ -106,38 +106,47 @@ fun LineButton(
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(0.87f)
             ) {
                 Text(
                     text = title,
                     color = Color(0xFF424242),
                     fontSize = 18.sp,
-                    modifier = Modifier.fillMaxWidth(0.87f)
                 )
+                desc?.let {
+                    Text(
+                        text = it,
+                        fontSize = 14.sp,
+                        color = Color(0xFFC0C4CC)
+                    )
+                }
+                otherInfoList?.forEach {
+                    Text(
+                        text = it,
+                        fontSize = 14.sp,
+                        color = Color(0xFFC0C4CC)
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
                 Image(
                     painter = painterResource(R.drawable.ic_right),
                     contentDescription = "",
                     modifier = Modifier
                         .width(16.dp)
                         .height(16.dp),
-                )
-            }
-            desc?.let {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    color = Color(0xFFC0C4CC)
-                )
-            }
-            otherInfoList?.forEach {
-                Text(
-                    text = it,
-                    fontSize = 14.sp,
-                    color = Color(0xFFC0C4CC)
                 )
             }
         }
@@ -174,22 +183,42 @@ fun LineSwitch(
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = title,
-                color = Color(0xFF424242),
-                fontSize = 18.sp,
+            Column(
                 modifier = Modifier.fillMaxWidth(0.87f)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    color = Color(0xFF424242),
+                    fontSize = 18.sp,
+                )
+                desc?.let {
+                    Text(
+                        text = it,
+                        fontSize = 14.sp,
+                        color = Color(0xFFC0C4CC)
+                    )
+                }
+                otherInfoList?.forEach {
+                    Text(
+                        text = it,
+                        fontSize = 12.sp,
+                        color = Color(0xFFFF4A4A)
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Switch(
+//                    modifier = Modifier.fillMaxHeight(),
                     checked = checked.value,
                     onCheckedChange = {
                         checked.value = it
@@ -197,20 +226,6 @@ fun LineSwitch(
                     }
                 )
             }
-        }
-        desc?.let {
-            Text(
-                text = it,
-                fontSize = 14.sp,
-                color = Color(0xFFC0C4CC)
-            )
-        }
-        otherInfoList?.forEach {
-            Text(
-                text = it,
-                fontSize = 12.sp,
-                color = Color(0xFFFF4A4A)
-            )
         }
     }
 }
@@ -245,22 +260,42 @@ fun LineCheckBox(
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text(
-                text = title,
-                color = Color(0xFF424242),
-                fontSize = 18.sp,
+            Column(
                 modifier = Modifier.fillMaxWidth(0.87f)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    color = Color(0xFF424242),
+                    fontSize = 18.sp,
+                )
+                desc?.let {
+                    Text(
+                        text = desc,
+                        fontSize = 14.sp,
+                        color = Color(0xFFC0C4CC)
+                    )
+                }
+                otherInfoList?.forEach {
+                    Text(
+                        text = it,
+                        fontSize = 12.sp,
+                        color = Color.Red
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.fillMaxHeight(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Checkbox(
+//                    modifier = Modifier.fillMaxHeight(),
                     checked = checked.value,
                     onCheckedChange = {
                         checked.value = it
@@ -268,20 +303,6 @@ fun LineCheckBox(
                     },
                 )
             }
-        }
-        desc?.let {
-            Text(
-                text = desc,
-                fontSize = 14.sp,
-                color = Color(0xFFC0C4CC)
-            )
-        }
-        otherInfoList?.forEach {
-            Text(
-                text = it,
-                fontSize = 12.sp,
-                color = Color.Red
-            )
         }
     }
 }
@@ -356,7 +377,6 @@ fun GroupList(
         verticalArrangement = Arrangement.Center
     ) {
         GroupListTitle(title)
-//        Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
         unit()
     }
 }

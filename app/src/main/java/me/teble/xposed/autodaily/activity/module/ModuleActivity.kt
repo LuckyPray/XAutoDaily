@@ -18,12 +18,12 @@ import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
 
+@ExperimentalFoundationApi
 class ModuleActivity : BaseActivity() {
     companion object {
         const val TAG = "ModuleActivity"
     }
 
-    @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)

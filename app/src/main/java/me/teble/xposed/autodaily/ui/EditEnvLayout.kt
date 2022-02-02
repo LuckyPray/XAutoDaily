@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import function.task.module.TaskEnv
@@ -99,24 +100,27 @@ fun EditEnvLayout(
     val showDialog = remember { mutableStateOf(false) }
     val taskEnv = remember { mutableStateOf<TaskEnv?>(null) }
     if (showDialog.value) {
-        if (taskEnv.value?.type == "friend") {
-            FriendsCheckDialog(
-                friends = friends,
-                uinListStr = envMap.value[taskEnv.value?.name]!!,
-                onConfirm = {
-                    showDialog.value = false
-                },
-                onDismiss = { showDialog.value = false }
-            )
-        } else if (taskEnv.value?.type == "group") {
-            TroopsCheckDialog(
-                troops = troops,
-                uinListStr = envMap.value[taskEnv.value?.name]!!,
-                onConfirm = {
-                    showDialog.value = false
-                },
-                onDismiss = { showDialog.value = false }
-            )
+        when (taskEnv.value?.type) {
+            "friend" -> {
+                FriendsCheckDialog(
+                    friends = friends,
+                    uinListStr = envMap.value[taskEnv.value?.name]!!,
+                    onConfirm = {
+                        showDialog.value = false
+                    },
+                    onDismiss = { showDialog.value = false }
+                )
+            }
+            "group" -> {
+                TroopsCheckDialog(
+                    troops = troops,
+                    uinListStr = envMap.value[taskEnv.value?.name]!!,
+                    onConfirm = {
+                        showDialog.value = false
+                    },
+                    onDismiss = { showDialog.value = false }
+                )
+            }
         }
     }
     ActivityView(
@@ -191,6 +195,15 @@ fun EditEnvLayout(
                                         "string" -> {
                                             limitErr.value = it.length > env.limit
                                         }
+                                        "num" -> {
+                                            if (it.isNotEmpty()) {
+                                                if (it.isDigitsOnly()) {
+                                                    limitErr.value = it.toInt() > env.limit
+                                                } else limitErr.value = true
+                                            } else {
+                                                limitErr.value = false
+                                            }
+                                        }
                                         else -> {
                                             limitErr.value = it.split(",").size > env.limit
                                         }
@@ -209,7 +222,7 @@ fun EditEnvLayout(
                         )
                         if (limitErr.value && env.limit > 0) {
                             Text(
-                                text = "变量长度限制为${env.limit}",
+                                text = "变量长度/大小限制为${env.limit}",
                                 color = Color(0xFFFF4A4A),
                                 fontSize = 14.sp,
                                 modifier = Modifier.padding(8.dp)

@@ -4,12 +4,16 @@
 # Sets the minimum version of CMake required to build the native library.
 
 cmake_minimum_required(VERSION 3.4.1)
+project(xa_native)
+
+set(CMAKE_CXX_STANDARD 17)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 include_directories(ACDAT)
+add_subdirectory(../../../../xa_mmkv/Android mmkv)
 
 add_library( # Sets the name of the library.
         xa_native
@@ -33,13 +37,17 @@ find_library( # Sets the name of the path variable.
         # you want CMake to locate.
         log)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=format-invalid-specifier -Werror=return-type -Wno-invalid-offsetof")
+
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
         xa_native
-
+        mmkv
+        c
+        dl
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})

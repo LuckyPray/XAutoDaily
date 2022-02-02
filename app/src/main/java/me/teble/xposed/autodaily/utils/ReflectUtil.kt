@@ -25,6 +25,7 @@ fun Any.fieldValue(
 ): Any? {
     ReflectUtil.getFields(if (this is Class<*>) this else this::class.java).forEach {
         if (it.type == fieldType) {
+            LogUtil.log("${it.type}: ${it.name} -> ${ReflectUtil.getFieldValue(this, it)}")
             return ReflectUtil.getFieldValue(this, it)
         }
     }

@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -10,10 +11,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -164,7 +162,7 @@ fun MainLayout(navController: NavHostController) {
                     title = "前往项目地址",
                     otherInfoList = listOf(
                         "模块作者：韵の祈(teble@github.com)",
-                        "特别鸣谢：KyuubiRan、MaiTungTM",
+                        "特别鸣谢：KyuubiRan、MaiTungTM、cinit",
                         "ps：我要好多好多小星星！"
                     ),
                     onClick = {
@@ -217,7 +215,7 @@ fun MainLayout(navController: NavHostController) {
                             if (res) {
                                 showUpdateDialog.value = true
                                 updateDialogText.value =
-                                    Cache.versionInfoCache!!.updateLog.joinToString("\n")
+                                    Cache.versionInfoCache?.updateLog?.joinToString("\n") ?: ""
                             }
                         }
                     },
@@ -334,6 +332,7 @@ fun BackgroundView() {
 }
 
 
+@SuppressLint("UnrememberedMutableState")
 @ExperimentalFoundationApi
 @Preview
 @Composable

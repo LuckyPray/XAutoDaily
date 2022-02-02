@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import cn.hutool.core.util.ReUtil
 import cn.hutool.http.HttpUtil
 import cn.hutool.http.Method
 import function.task.module.Task
+import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
 import me.teble.xposed.autodaily.task.request.model.TaskRequest
@@ -33,24 +33,28 @@ object HttpTaskReqUtil : ITaskReqUtil {
     ): List<TaskRequest> {
         val res = mutableListOf<TaskRequest>().apply {
             val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.qDomain, env)
+            val repeatNum = EnvFormatUtil.format(task.repeat, null, env).toInt()
             LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
             evalUrls.forEach {
-                env["req_url"] = it
-                val headers = mutableMapOf<String, String>()
-                task.reqHeaders?.entries?.forEach {
-                    headers[it.key] = EnvFormatUtil.format(it.value, task.qDomain, env)
+                LogUtil.d(TAG, "重复请求次数 -> $repeatNum")
+                for (cnt in 0 until repeatNum) {
+                    env["req_url"] = it
+                    val headers = mutableMapOf<String, String>()
+                    task.reqHeaders?.entries?.forEach {
+                        headers[it.key] = EnvFormatUtil.format(it.value, task.qDomain, env)
+                    }
+                    LogUtil.d(TAG, "header 头构造完毕: $headers")
+                    val cookie = task.qDomain?.let {
+                        getQDomainCookies(it)
+                    } ?: ""
+                    LogUtil.d(TAG, "cookie 构造完毕: $cookie")
+                    LogUtil.d(TAG, "开始format data -> ${task.reqData}")
+                    val body = task.reqData?.let { EnvFormatUtil.format(it, task.qDomain, env) }
+                    LogUtil.d(TAG, "body -> $body")
+                    val request = TaskRequest(it, task.reqMethod, headers, cookie, body)
+                    add(request)
+                    env.remove("req_url")
                 }
-                LogUtil.d(TAG, "header 头构造完毕: $headers")
-                val cookie = task.qDomain?.let {
-                    getQDomainCookies(it)
-                } ?: ""
-                LogUtil.d(TAG, "cookie 构造完毕: $cookie")
-                LogUtil.d(TAG, "开始format data -> ${task.reqData}")
-                val body = task.reqData?.let { EnvFormatUtil.format(it, task.qDomain, env) }
-                LogUtil.d(TAG, "body -> $body")
-                val request = TaskRequest(it, task.reqMethod, headers, cookie, body)
-                add(request)
-                env.remove("req_url")
             }
         }
         return res
@@ -64,6 +68,9 @@ object HttpTaskReqUtil : ITaskReqUtil {
             req.headers?.entries?.forEach { entry ->
                 LogUtil.d(TAG, "put header: key -> ${entry.key}, value -> ${entry.value}")
                 request = request.header(entry.key, entry.value)
+            }
+            if (req.headers?.containsKey("") == false) {
+                request.header("user-agent", Constants.qqUserAgent, true)
             }
             req.cookie?.let {
                 LogUtil.d(TAG, "put cookie -> $it")

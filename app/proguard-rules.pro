@@ -83,6 +83,12 @@
 -keep class * extends me.teble.xposed.autodaily.hook.base.BaseHook {
     <methods>;
 }
+#-keep class me.teble.xposed.autodaily.hook.config.Config {
+#    *;
+#}
+-keep class com.tencent.mmkv.** {
+    *;
+}
 # 插件代理混
 -keep class me.teble.xposed.autodaily.hook.function.proxy.* {
     <methods>;

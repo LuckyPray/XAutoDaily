@@ -19,12 +19,12 @@ object Initiator {
 
     fun getSimpleName(className: String): String {
         var name = className
-        if (name.endsWith(';') || name.contains('/')) {
+        if (name.startsWith('L') && name.endsWith(';') || name.contains('/')) {
             var flag = 0
-            if (name.startsWith("L")) {
+            if (name.startsWith('L')) {
                 flag = flag or (1 shl 1)
             }
-            if (name.endsWith(";")) {
+            if (name.endsWith(';')) {
                 flag = flag or 1
             }
             if (flag > 0) {

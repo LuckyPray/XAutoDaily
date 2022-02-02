@@ -53,6 +53,9 @@ object TaskUtil {
                 }
             }
             when (it.type) {
+                "num" -> {
+                    env[it.name] = confValue ?: it.default
+                }
                 "string" -> {
                     env[it.name] = confValue ?: it.default
                 }
@@ -76,16 +79,16 @@ object TaskUtil {
         val taskReqUtil = ReqFactory.getReq(reqType)
         val requests = taskReqUtil.create(task, env)
         var successNum = 0
-        lateinit var lastErrMsg: String
-        requests.forEachIndexed { index, it ->
+        lateinit var lastMsg: String
+        requests.forEachIndexed { _, it ->
             Thread.sleep((task.delay * 1000).toLong())
             val response = taskReqUtil.executor(it)
             val result = handleCallback(response, task, env)
             if (result.success) {
                 successNum++
             } else {
-                lastErrMsg = result.errMsg
-                LogUtil.i(TAG, "任务【${task.id}】执行失败: $lastErrMsg")
+                lastMsg = result.msg
+                LogUtil.i(TAG, "任务【${task.id}】执行失败: $lastMsg")
             }
         }
         // 正常cron任务，需要计算下次执行时间
@@ -100,11 +103,11 @@ object TaskUtil {
                 "${task.id}#${Const.LAST_EXEC_MSG}",
                 if (requests.size == 1) {
                     if (successNum == 1) {
-                        ToastUtil.send("任务【${task.id}】执行成功")
-                        "执行成功"
+                        ToastUtil.send("任务【${task.id}】 $lastMsg")
+                        lastMsg
                     } else {
-                        ToastUtil.send("任务【${task.id}】执行失败：$lastErrMsg")
-                        lastErrMsg
+                        ToastUtil.send("任务【${task.id}】 $lastMsg")
+                        lastMsg
                     }
                 } else {
                     LogUtil.i(TAG, "任务【${task.id}】执行完毕，成功${successNum}个，失败${requests.size - successNum}个")
@@ -135,21 +138,21 @@ object TaskUtil {
         } else {
             format(callback.assert.key, env) == format(callback.assert.value, env)
         }
-        var errMsg = "执行失败"
-        callback.errMsg?.let {
+        var resultMsg = if (success) "执行成功" else "执行失败"
+        callback.msg?.let {
             val msg = format(it, env)
-            if (msg.isNotEmpty()) errMsg = msg
+            if (msg.isNotEmpty()) resultMsg += ": $msg"
         }
         callback.replaces?.forEach {
-            errMsg = ReUtil.replaceAll(errMsg, it.match, it.replacement)
+            resultMsg = ReUtil.replaceAll(resultMsg, it.match, it.replacement)
         }
         LogUtil.d(
             TAG, """handleCallback -> 
             |   success: $success
-            |   errMsg: $errMsg
+            |   msg: $resultMsg
         """.trimMargin()
         )
-        return CallbackResult(success = success, errMsg = errMsg)
+        return CallbackResult(success = success, msg = resultMsg)
     }
 
     private fun extract(
@@ -201,6 +204,6 @@ object TaskUtil {
 
     data class CallbackResult(
         val success: Boolean,
-        val errMsg: String
+        val msg: String
     )
 }

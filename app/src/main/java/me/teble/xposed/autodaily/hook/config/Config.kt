@@ -6,12 +6,13 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.base.Global.hostContext
 import me.teble.xposed.autodaily.hook.base.Initiator.getSimpleName
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
-import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.NativeUtil
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 object Config {
+
+    private const val TAG = "Config"
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     fun init() {
@@ -22,19 +23,14 @@ object Config {
         if (!mmkvDir.exists()) {
             mmkvDir.mkdirs()
         }
-        val soFile = NativeUtil.getNativeLibrary(hostContext, "mmkv")
+        val soFile = NativeUtil.getNativeLibrary(hostContext, "xa_native")
         try {
             MMKV.initialize(hostContext, mmkvDir.absolutePath) {
-                try {
-                    System.load(soFile.absolutePath)
-                } catch (e: Exception) {
-                    LogUtil.e(e, "load mmkv lib failed")
-                    throw UnsatisfiedLinkError("load mmkv lib failed")
-                }
+                System.load(soFile.absolutePath)
             }
         } catch (e: Throwable) {
-            LogUtil.d("MMKV", "加载失败: " + e.stackTraceToString())
-            throw e
+            System.load(soFile.absolutePath)
+            MMKV.initialize(hostContext, soFile.absolutePath) {}
         }
     }
 

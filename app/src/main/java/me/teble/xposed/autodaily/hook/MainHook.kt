@@ -13,7 +13,7 @@ import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadDex
+import me.teble.xposed.autodaily.config.QQClasses.Companion.NewRuntime
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
@@ -71,16 +71,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     val init by lazy {
-        try {
-            LogUtil.d(TAG, "current process: ${loadPackageParam.processName}")
-            EzXHelperInit.initHandleLoadPackage(loadPackageParam)
-            EzXHelperInit.setLogTag("XAutoDaily")
-            EzXHelperInit.setToastTag("XAutoDaily")
-            doInit()
-        } catch (e: Throwable) {
-            ToastUtil.send("load module error: " + e.stackTraceToString())
-            LogUtil.d(TAG, "load module error: " + e.stackTraceToString())
-        }
+        LogUtil.d(TAG, "current process: ${loadPackageParam.processName}")
+        EzXHelperInit.initHandleLoadPackage(loadPackageParam)
+        EzXHelperInit.setLogTag("XAutoDaily")
+        EzXHelperInit.setToastTag("XAutoDaily")
+        doInit()
     }
 
     private fun doInit() {
@@ -91,7 +86,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         replaceParentClassloader(loadPackageParam.classLoader)
         LogUtil.d(TAG, "loadPackageParam.packageName -> ${loadPackageParam.packageName}")
 
-        findMethod(LoadDex) { returnType == Boolean::class.java && emptyParam }.hookAfter {
+        findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             try {
                 synchronized(this) {
@@ -116,7 +111,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 //初始化hook
                 LogUtil.d(TAG, "initHook")
                 initHook()
-            } catch (e: Exception) {
+            } catch (e: Throwable) {
                 LogUtil.e(TAG, e)
                 ToastUtil.send("初始化失败: " + e.stackTraceToString())
             }

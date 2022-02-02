@@ -95,7 +95,7 @@ object DexKit {
         val resultMap = mutableMapOf<String, LinkedList<String>>().apply {
             resourceMap.keys.forEach { this[it] = LinkedList() }
         }
-        val applicationInfo = QApplicationUtil.application.packageManager.getApplicationInfo(
+        val applicationInfo = Global.hostContext.packageManager.getApplicationInfo(
             Global.hostPackageName,
             0
         )
