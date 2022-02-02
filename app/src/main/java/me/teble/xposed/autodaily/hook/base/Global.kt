@@ -38,8 +38,6 @@ object Global {
     lateinit var moduleRes: XModuleResources
 
     fun init(loadPackageParam: LoadPackageParam) {
-        hostClassLoader = loadPackageParam.classLoader
-        LogUtil.d(TAG, "hostClassLoader -> $hostClassLoader")
         hostPackageName = loadPackageParam.packageName
         LogUtil.d(TAG, "hostPackageName -> $hostPackageName")
         val strings = loadPackageParam.processName.split(":", ignoreCase = false, limit = 2)
@@ -50,6 +48,8 @@ object Global {
 
     fun initContext(qContext: Context) {
         hostContext = qContext
+        hostClassLoader = hostContext.classLoader
+        LogUtil.d(TAG, "hostClassLoader -> $hostClassLoader")
         qqTypeEnum = QQTypeEnum.valueOfPackage(hostContext.packageName)
         LogUtil.d(TAG, "qqTypeEnum -> ${qqTypeEnum.appName}")
         qqVersionCode = getAppVersionCode(hostContext, qqTypeEnum.packageName)

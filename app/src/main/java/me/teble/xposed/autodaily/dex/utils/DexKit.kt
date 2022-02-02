@@ -1,12 +1,11 @@
 package me.teble.xposed.autodaily.dex.utils
 
+import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.dex.struct.*
 import me.teble.xposed.autodaily.dex.utils.ByteUtils.readInt
 import me.teble.xposed.autodaily.dex.utils.ByteUtils.readShort
-import me.teble.xposed.autodaily.dex.utils.ac.AhoCorasickDoubleArrayTrie
 import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import java.io.BufferedInputStream
