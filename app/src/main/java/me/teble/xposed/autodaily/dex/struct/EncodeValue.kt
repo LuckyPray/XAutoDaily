@@ -43,23 +43,29 @@ class EncodeValue {
     companion object {
         fun parser(src: ByteArray?, index: IntArray): EncodeValue {
             val encodeValue = EncodeValue()
-            val b: Int = (ByteUtils.readByte(src, index).toInt() and 0xff)
+            val b: Int = (ByteUtils.readByte(src, index))
             encodeValue.valueType = VALUE.valueOf(b and 0x1f)
             encodeValue.valueArg = b shr 5
             // 0x1d后的类型不存在value
-            if (encodeValue.valueType.type <= 0x1d) {
-                encodeValue.values = ByteUtils.copyByte(src, index[0], encodeValue.valueArg + 1)
-                index[0] += encodeValue.valueArg + 1
-                // TODO 浮点数等类型暂未解析
-                encodeValue.value = ByteUtils.bytes2num(encodeValue.values)
-            } else if (encodeValue.valueType == VALUE.VALUE_ARRAY) {
-                encodeValue.encodeArray = EncodeArray.parser(src, index)
-            } else if (encodeValue.valueType == VALUE.VALUE_ANNOTATION) {
-                encodeValue.encodeAnnotation = EncodeAnnotation.parser(src, index)
-            } else if (encodeValue.valueType == VALUE.VALUE_NULL) {
-                encodeValue.value = null
-            } else {
-                encodeValue.vBoolean = encodeValue.valueArg == 1
+            when {
+                encodeValue.valueType.type <= 0x1d -> {
+                    encodeValue.values = ByteUtils.copyByte(src, index[0], encodeValue.valueArg + 1)
+                    index[0] += encodeValue.valueArg + 1
+                    // TODO 浮点数等类型暂未解析
+                    encodeValue.value = ByteUtils.bytes2num(encodeValue.values)
+                }
+                encodeValue.valueType == VALUE.VALUE_ARRAY -> {
+                    encodeValue.encodeArray = EncodeArray.parser(src, index)
+                }
+                encodeValue.valueType == VALUE.VALUE_ANNOTATION -> {
+                    encodeValue.encodeAnnotation = EncodeAnnotation.parser(src, index)
+                }
+                encodeValue.valueType == VALUE.VALUE_NULL -> {
+                    encodeValue.value = null
+                }
+                else -> {
+                    encodeValue.vBoolean = encodeValue.valueArg == 1
+                }
             }
             return encodeValue
         }

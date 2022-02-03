@@ -6,7 +6,7 @@ import me.teble.xposed.autodaily.hook.FromServiceMsgHook
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
-import me.teble.xposed.autodaily.task.module.VoterInfo
+import me.teble.xposed.autodaily.task.model.VoterInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.util.*
 

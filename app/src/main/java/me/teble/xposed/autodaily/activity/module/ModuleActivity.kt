@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +17,6 @@ import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
 
-@ExperimentalFoundationApi
 class ModuleActivity : BaseActivity() {
     companion object {
         const val TAG = "ModuleActivity"
@@ -46,7 +44,6 @@ class ModuleActivity : BaseActivity() {
                 ) {
                     XAutoDailyApp()
                 }
-
             }
             // 保证点击事件不击穿
             setOnClickListener {}
@@ -56,7 +53,6 @@ class ModuleActivity : BaseActivity() {
             ViewTreeViewModelStoreOwner.set(it, this)
             ViewTreeSavedStateRegistryOwner.set(it, this)
         }
-
         setContentView(view)
     }
 }

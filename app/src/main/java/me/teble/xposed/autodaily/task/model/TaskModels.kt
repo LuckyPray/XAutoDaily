@@ -76,8 +76,10 @@ data class TaskCallback(
     val extracts: List<MsgExtract>?,
     // 判断任务是否执行成功的断言器，如果为空则使用http code
     val assert: Assert?,
-    // 签到失败提示 eval string，如果为空则使用默认成功/错误提示：执行成功/失败
-    val msg: String?,
+    // 签到失败提示 eval string，如果为空则使用默认成功提示：执行成功
+    val sucMsg: String?,
+    // 签到失败提示 eval string，如果为空则使用默认错误提示：执行失败
+    val errMsg: String?,
     // 签到提示的替换规则
     val replaces: List<MsgReplace>?
 )

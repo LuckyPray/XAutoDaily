@@ -8,10 +8,11 @@
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
 
 EXPORT jstring
-Java_me_teble_xposed_autodaily_task_util_ConfigUtil_getPublicKey(
+Java_me_teble_xposed_autodaily_task_util_ConfigUtil_getPrivateKey(
         JNIEnv *env,
         jobject obj) {
-    std::string enc_key = "GMJrGK0JYImJIMp3ZEOFKEWKK4JAKZYFaEXFhEYNiQdP15L4zogm4uERI4oTNdFOzts1LaU2i3EwbKMbxGYlNuarl9nKNqbVeA9h8f+BJSjOkDrEIEX8Y/OjU6kuHixx6gEmR3wyoVEQX83IlUXeKNLMKlc1o88jY33GnojHG6oq7bnBwFMjQCvODaggH1ZiArlh1T+tuBobux9u0cMZKEKF";
+    // TODO 单独提取成一个私有库
+    std::string enc_key = "GMJVKhOKGFGJFnmJIG49KhOJYYmJIG49KcOQFQiclcMFKEEhnUGyste9cWk/pFjBmwgtksApg4RC8P7dGAxnWTscXd6hYhRMXyLMwf0ZKEobHKAYKKHnS7vObAjs1sLVWK0Ls0tloZ7shbVH4svByB66bF1++6BzvQdiqrJO/aUOSmLpBaMbKXwJoEvHvdWdm7wSysz4";
     return env->NewStringUTF(CaesarCipher::decrypt(enc_key).c_str());
 }
 

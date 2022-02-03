@@ -3,15 +3,16 @@ package me.teble.xposed.autodaily.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -44,8 +45,6 @@ import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import kotlin.concurrent.thread
 
-@ExperimentalFoundationApi
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainLayout(navController: NavHostController) {
     val notice = remember { mutableStateOf("") }
@@ -90,7 +89,7 @@ fun MainLayout(navController: NavHostController) {
                 BackgroundView(/*scrollUpState = scrollUpState, viewOffset = maxOffsetY*/)
                 LineSpacer()
             }
-            stickyHeader {
+            item {
                 Announcement(post = notice)
             }
             item {
@@ -245,14 +244,17 @@ fun MainLayout(navController: NavHostController) {
 }
 
 @Composable
-fun BackgroundView() {
-    val lastClickTime = remember { mutableStateOf(0L) }
+fun BackgroundView() {    val lastClickTime = remember { mutableStateOf(0L) }
     val execTaskNum = remember { mutableStateOf(0) }
     LaunchedEffect(execTaskNum) {
-        val num = getCurrentExecTaskNum()
-        for (i in 1..num) {
-            delay(20)
-            execTaskNum.value++
+        try {
+            val num = getCurrentExecTaskNum()
+            for (i in 1..num) {
+                delay(20)
+                execTaskNum.value++
+            }
+        } catch (e: Exception) {
+            ToastUtil.send(e.stackTraceToString())
         }
     }
     Card(
@@ -333,7 +335,6 @@ fun BackgroundView() {
 
 
 @SuppressLint("UnrememberedMutableState")
-@ExperimentalFoundationApi
 @Preview
 @Composable
 fun PreviewMainLayout() {

@@ -2,8 +2,6 @@ package me.teble.xposed.autodaily.ui
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.navigation.NavType
@@ -23,8 +21,6 @@ object XAutoDailyApp {
     const val EditEnv = "EditEnvLayout"
 }
 
-@ExperimentalFoundationApi
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun XAutoDailyApp() {
     val navController = rememberNavController()

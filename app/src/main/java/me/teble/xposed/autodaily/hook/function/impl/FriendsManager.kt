@@ -4,7 +4,7 @@ import me.teble.xposed.autodaily.hook.base.Initiator.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.FunctionInitException
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
-import me.teble.xposed.autodaily.task.module.Friend
+import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValue

@@ -79,15 +79,15 @@ object TaskUtil {
         val taskReqUtil = ReqFactory.getReq(reqType)
         val requests = taskReqUtil.create(task, env)
         var successNum = 0
-        lateinit var lastMsg: String
+        var lastMsg = "任务没有执行"
         requests.forEachIndexed { _, it ->
             Thread.sleep((task.delay * 1000).toLong())
             val response = taskReqUtil.executor(it)
             val result = handleCallback(response, task, env)
+            lastMsg = result.msg
             if (result.success) {
                 successNum++
             } else {
-                lastMsg = result.msg
                 LogUtil.i(TAG, "任务【${task.id}】执行失败: $lastMsg")
             }
         }
@@ -110,7 +110,10 @@ object TaskUtil {
                         lastMsg
                     }
                 } else {
-                    LogUtil.i(TAG, "任务【${task.id}】执行完毕，成功${successNum}个，失败${requests.size - successNum}个")
+                    LogUtil.i(
+                        TAG,
+                        "任务【${task.id}】执行完毕，成功${successNum}个，失败${requests.size - successNum}个"
+                    )
                     ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${requests.size - successNum}个")
                     "执行成功${successNum}个，失败${requests.size - successNum}个"
                 }
@@ -138,10 +141,24 @@ object TaskUtil {
         } else {
             format(callback.assert.key, env) == format(callback.assert.value, env)
         }
-        var resultMsg = if (success) "执行成功" else "执行失败"
-        callback.msg?.let {
-            val msg = format(it, env)
-            if (msg.isNotEmpty()) resultMsg += ": $msg"
+        var resultMsg = buildString {
+            if (success) {
+                append("执行成功")
+                callback.sucMsg?.let {
+                    val msg = format(it, env)
+                    if (msg.isNotEmpty()) {
+                        append(": $msg")
+                    }
+                }
+            } else {
+                append("执行失败")
+                callback.errMsg?.let {
+                    val msg = format(it, env)
+                    if (msg.isNotEmpty()) {
+                        append(": $msg")
+                    }
+                }
+            }
         }
         callback.replaces?.forEach {
             resultMsg = ReUtil.replaceAll(resultMsg, it.match, it.replacement)

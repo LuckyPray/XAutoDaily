@@ -18,10 +18,10 @@ class CodeItem {
      * encoded_catch_handler_list handlers; // optional
      * }
      */
-    var registersSize: Short = 0
-    var insSize: Short = 0
-    var outsSize: Short = 0
-    var triesSize: Short = 0
+    var registersSize: Int = 0
+    var insSize: Int = 0
+    var outsSize: Int = 0
+    var triesSize: Int = 0
     var debugInfoOff = 0
     var insnsSize = 0
     lateinit var insns: ByteArray

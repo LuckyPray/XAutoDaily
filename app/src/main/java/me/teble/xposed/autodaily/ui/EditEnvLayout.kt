@@ -21,8 +21,8 @@ import function.task.module.TaskEnv
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.task.module.Friend
-import me.teble.xposed.autodaily.task.module.TroopInfo
+import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.utils.LogUtil

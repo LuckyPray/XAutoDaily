@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import function.task.module.Task
-import me.teble.xposed.autodaily.task.module.Friend
-import me.teble.xposed.autodaily.task.module.TroopInfo
+import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.task.model.TroopInfo
 
 @Composable
 fun FriendsCheckDialog(

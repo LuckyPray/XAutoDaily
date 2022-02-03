@@ -4,8 +4,8 @@ import android.annotation.SuppressLint
 import android.util.Log
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
+import cn.hutool.crypto.asymmetric.ECIES
 import cn.hutool.crypto.asymmetric.KeyType
-import cn.hutool.crypto.asymmetric.RSA
 import cn.hutool.http.HttpUtil
 import com.charleskorn.kaml.Yaml
 import function.task.module.TaskProperties
@@ -16,9 +16,9 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.task.module.PackageData
-import me.teble.xposed.autodaily.task.module.Result
-import me.teble.xposed.autodaily.task.module.VersionInfo
+import me.teble.xposed.autodaily.task.model.PackageData
+import me.teble.xposed.autodaily.task.model.Result
+import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.CHANGE_SIGN_BUTTON
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
 import me.teble.xposed.autodaily.task.util.Const.MOST_RECENT_EXEC_TIME
@@ -66,7 +66,7 @@ object ConfigUtil {
         System.load(soFilePath)
     }
 
-    private external fun getPublicKey(): String
+    private external fun getPrivateKey(): String
 
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
         try {
@@ -158,8 +158,8 @@ object ConfigUtil {
 
     fun decodeConfStr(encodeConfStr: String): String? {
         return try {
-            val rsa = RSA(null, getPublicKey())
-            rsa.decryptStr(encodeConfStr, KeyType.PublicKey)
+            val ecies = ECIES(getPrivateKey(), null)
+            ecies.decryptStr(encodeConfStr, KeyType.PrivateKey)
         } catch (e: Exception) {
             LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
             null
@@ -225,6 +225,7 @@ object ConfigUtil {
                 val version = readMinVersion(decodeConfStr)
                 if (version > BuildConfig.VERSION_CODE) {
                     LogUtil.i("插件版本过低，无法加载配置。配置要求最低插件版本: ${version}，当前插件版本: ${BuildConfig.VERSION_CODE}")
+//                    ToastUtil.send("插件版本过低，无法加载配置。配置要求最低插件版本: ${version}，当前插件版本: ${BuildConfig.VERSION_CODE}", true)
                     return null
                 }
                 // 版本不对应抛出异常

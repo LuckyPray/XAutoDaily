@@ -6,7 +6,7 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetCodeRsp
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetProfileRsp
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebRsp
 import me.teble.xposed.autodaily.hook.base.Initiator.load
-import me.teble.xposed.autodaily.task.module.MiniProfile
+import me.teble.xposed.autodaily.task.model.MiniProfile
 import me.teble.xposed.autodaily.utils.*
 
 object ServiceMsgParseUtil : QQClasses {

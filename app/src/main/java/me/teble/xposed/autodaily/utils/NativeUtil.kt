@@ -4,7 +4,6 @@ import android.content.Context
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.io.IoUtil
 import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.base.Initiator.load
 import java.io.BufferedInputStream
 import java.io.File
 

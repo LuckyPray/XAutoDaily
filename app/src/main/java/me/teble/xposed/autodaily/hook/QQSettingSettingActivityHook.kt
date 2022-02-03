@@ -17,8 +17,10 @@ import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global.hostContext
 import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
-import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.fieldValueAs
+import me.teble.xposed.autodaily.utils.invoke
+import me.teble.xposed.autodaily.utils.new
 
 /**
  * @author teble

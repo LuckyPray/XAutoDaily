@@ -129,7 +129,6 @@ android {
 }
 
 dependencies {
-//    implementation project(":stub")
     implementation project(":mmkv")
     implementation fileTree(dir: "libs", include: ["*.jar"])
     testImplementation "junit:junit:4.13.2"
@@ -161,7 +160,7 @@ dependencies {
     implementation "cn.hutool:hutool-crypto:$hutool_version"
 
     // Other
-//    implementation "com.tencent:mmkv-static:1.2.11"
+    implementation 'org.bouncycastle:bcprov-jdk15to18:1.70'
     implementation "com.hankcs:aho-corasick-double-array-trie:1.2.3"
     implementation "net.bytebuddy:byte-buddy-android:1.12.7"
     implementation "com.charleskorn.kaml:kaml:0.36.0"

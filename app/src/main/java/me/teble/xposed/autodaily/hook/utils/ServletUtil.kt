@@ -4,7 +4,9 @@ import com.tencent.mobileqq.pb.ByteStringMicro
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
 import me.teble.xposed.autodaily.hook.base.Initiator
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.fieldValue
+import me.teble.xposed.autodaily.utils.invoke
+import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Modifier
 import java.text.SimpleDateFormat
 import java.util.*
