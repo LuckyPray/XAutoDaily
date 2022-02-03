@@ -18,6 +18,8 @@ import java.util.zip.ZipFile
 
 object DexKit {
 
+    private const val TAG = "DexKit"
+
     private fun getAllDexEntry(zipFile: ZipFile): List<ZipEntry> {
         val zip: Enumeration<out ZipEntry> = zipFile.entries()
         val list = ArrayList<ZipEntry>()
@@ -165,7 +167,7 @@ object DexKit {
                                 continue
                             }
                             if (op == 0x1a) {
-                                idsSet.add(readShort(codeItem.insns, index + 2).toInt())
+                                idsSet.add(readShort(codeItem.insns, index + 2))
                             } else if (op == 0x1b) {
                                 idsSet.add(readInt(codeItem.insns, index + 2))
                             }
@@ -196,14 +198,14 @@ object DexKit {
                                 continue
                             }
                             if (op == 0x1a) {
-                                idsSet.add(readShort(codeItem.insns, index + 2).toInt())
+                                idsSet.add(readShort(codeItem.insns, index + 2))
                             } else if (op == 0x1b) {
                                 idsSet.add(readInt(codeItem.insns, index + 2))
                             }
                             index += OpCodeFormatUtils.getOpSize(op)
                         }
                     }
-                    val strSet = idsSet.map { strIndexMap[it] }
+                    val strSet = idsSet.mapNotNull { strIndexMap[it] }
                     resourceMap.entries.forEach { entry ->
                         val set = entry.value ?: emptySet()
                         if (set.size == (set intersect strSet).size) {
