@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.hook
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import me.teble.xposed.autodaily.config.QQClasses.Companion.SplashActivity
+import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.AUTO_EXEC
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -23,7 +24,7 @@ class SplashActivityHook : BaseHook() {
     private fun splashActivityHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
             loadSaveConf()
-            handler.sendEmptyMessage(CoreServiceHook.AUTO_EXEC)
+            handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
             if (Cache.needUpdate) {
                 ToastUtil.send("插件版本存在更新")
             }
