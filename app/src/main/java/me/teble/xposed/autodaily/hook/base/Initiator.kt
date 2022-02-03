@@ -46,11 +46,11 @@ object Initiator {
             // 使用正常类名获取混淆类名
             val realClassName = classCache.getString("${name}#${qqVersionCode}")
             LogUtil.d("Initiator", "混淆缓存：${name}#${qqVersionCode} -> $realClassName")
-            return realClassName?.let {
+            return if (realClassName != null && realClassName.isNotEmpty()) {
                 val cls = classLoader.loadClass(getSimpleName(realClassName))
                 mClassCache[name] = cls
                 cls
-            } ?: let {
+            } else {
                 mClassCache[name] = null
                 null
             }

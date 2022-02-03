@@ -141,18 +141,19 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             cache.clearAll()
             cache.putInt("hooksVersion", hooksVersion)
         }
-        // 加入修改了特征的类
         confuseInfo.forEach {
             val key = "${it.key}#hash"
             val hash = it.value.hashCode()
             val cacheHash = cache.getInt(key, 0)
             LogUtil.d(TAG, "${it.key} cacheHash -> $cacheHash")
             LogUtil.d(TAG, "${it.key} hash -> $hash")
+            // 加入修改了特征的类
             if (cacheHash != hash) {
                 cache.putInt(key, hash)
                 needLocateClasses.add(it.key)
                 LogUtil.d(TAG, "need locate -> ${it.key}")
             }
+            // 加入没有被搜索过的类
             if (!cache.contains("${it.key}#${qqVersionCode}")) {
                 needLocateClasses.add(it.key)
                 LogUtil.d(TAG, "cache not found: ${it.key}#${qqVersionCode}")
@@ -187,7 +188,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 locateNum++
             } else {
                 LogUtil.w(TAG, "locate not instance class: ${it.key} -> ${it.value}")
-                cache.putString("${it.key}#${qqVersionCode}", null)
+                // 保存为空字符串，表示已经搜索过，下次不再搜索
+                cache.putString("${it.key}#${qqVersionCode}", "")
             }
         }
         cache.putStringSet("confuseClasses", confuseInfoKeys)
