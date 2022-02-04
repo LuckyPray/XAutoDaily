@@ -3,17 +3,17 @@ package me.teble.xposed.autodaily.ui
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
@@ -95,7 +95,11 @@ fun LineButton(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(13.dp))
-            .click(onClick = onClick)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { onClick?.invoke() },
+                )
+            }
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
@@ -158,17 +162,12 @@ fun LineSwitch(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(13.dp))
-            .click(
-                onClick = {
-                    if (onClick == null) {
-                        checked.value = !checked.value
-                        onChange(checked.value)
-                    } else {
-                        onClick()
-                    }
-                },
-                longPress = longPress
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { onClick?.invoke() },
+                    onLongPress = { longPress?.invoke() }
+                )
+            }
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
@@ -232,17 +231,12 @@ fun LineCheckBox(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .click(
-                onClick = {
-                    if (onClick == null) {
-                        checked.value = !checked.value
-                        onChange(checked.value)
-                    } else {
-                        onClick()
-                    }
-                },
-                longPress = longPress
-            )
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onPress = { onClick?.invoke() },
+                    onLongPress = { longPress?.invoke() }
+                )
+            }
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
@@ -279,7 +273,6 @@ fun LineCheckBox(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Checkbox(
-//                    modifier = Modifier.fillMaxHeight(),
                     checked = checked.value,
                     onCheckedChange = {
                         checked.value = it
