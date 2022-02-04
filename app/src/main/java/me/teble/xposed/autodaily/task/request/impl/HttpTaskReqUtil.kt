@@ -12,6 +12,7 @@ import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.toJsonString
+import java.nio.charset.Charset
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"
@@ -35,10 +36,10 @@ object HttpTaskReqUtil : ITaskReqUtil {
             val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.qDomain, env)
             val repeatNum = EnvFormatUtil.format(task.repeat, null, env).toInt()
             LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
-            evalUrls.forEach {
+            evalUrls.forEach { url ->
                 LogUtil.d(TAG, "重复请求次数 -> $repeatNum")
                 for (cnt in 0 until repeatNum) {
-                    env["req_url"] = it
+                    env["req_url"] = url
                     val headers = mutableMapOf<String, String>()
                     task.reqHeaders?.entries?.forEach {
                         headers[it.key] = EnvFormatUtil.format(it.value, task.qDomain, env)
@@ -49,10 +50,17 @@ object HttpTaskReqUtil : ITaskReqUtil {
                     } ?: ""
                     LogUtil.d(TAG, "cookie 构造完毕: $cookie")
                     LogUtil.d(TAG, "开始format data -> ${task.reqData}")
-                    val body = task.reqData?.let { EnvFormatUtil.format(it, task.qDomain, env) }
-                    LogUtil.d(TAG, "body -> $body")
-                    val request = TaskRequest(it, task.reqMethod, headers, cookie, body)
-                    add(request)
+                    val bodyList = task.reqData?.let {
+                        EnvFormatUtil.formatList(it, task.qDomain, env)
+                    }
+                    LogUtil.d(TAG, "body -> $bodyList")
+                    bodyList?.forEach {
+                        val request = TaskRequest(url, task.reqMethod, headers, cookie, it)
+                        add(request)
+                    } ?: let {
+                        val request = TaskRequest(url, task.reqMethod, headers, cookie, null)
+                        add(request)
+                    }
                     env.remove("req_url")
                 }
             }
@@ -86,7 +94,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 |   method: ${request.method}
                 |   url: ${request.url}
                 |   headers: ***
-                |   body: ${request.fieldValueAs<String>("body")}
+                |   body: ${request.fieldValueAs<ByteArray>("bodyBytes")?.let { String(it) }}
                 """.trimMargin()
             )
             request.execute().let { response ->
