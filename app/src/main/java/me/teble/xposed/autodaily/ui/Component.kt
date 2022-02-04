@@ -56,13 +56,6 @@ fun AppBar(title: String, navController: NavHostController) {
             Text(title, color = Color.White)
         },
         backgroundColor = Color(0xFF409EFF),
-        navigationIcon = {
-            IconButton(onClick = {
-                navController.popBackStack()
-            }) {
-                Icon(Icons.Filled.ArrowBack, null, tint = Color.White)
-            }
-        },
         modifier = Modifier
             .background(Color(0xFF409EFF))
             .padding(
