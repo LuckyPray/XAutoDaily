@@ -1,13 +1,30 @@
 package me.teble.xposed.autodaily.utils
 
-import cn.hutool.json.JSONUtil
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.*
+import kotlinx.serialization.serializer
 
 /**
  * @author teble
  * @date 2021/6/9 18:07
  */
-fun Any?.toJsonString(): String = JSONUtil.toJsonStr(this)
+@OptIn(ExperimentalSerializationApi::class)
+fun Any?.toJsonElement(): JsonElement = when (this) {
+    null -> JsonNull
+    is JsonElement -> this
+    is Number -> JsonPrimitive(this)
+    is Boolean -> JsonPrimitive(this)
+    is String -> JsonPrimitive(this)
+    is Array<*> -> JsonArray(this.map { it.toJsonElement() })
+    is List<*> -> JsonArray(this.map { it.toJsonElement() })
+    is Map<*, *> -> JsonObject(this.map { it.key.toString() to it.value.toJsonElement() }.toMap())
+    else -> Json.encodeToJsonElement(serializer(this::class.java), this)
+}
+
+fun Any?.toJsonString(): String = Json.encodeToString(this.toJsonElement())
 
 inline fun <reified T> String.parse(): T {
-    return JSONUtil.toBean(this, T::class.java)
+    return Json.decodeFromString(this)
 }
