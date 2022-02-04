@@ -97,7 +97,7 @@ fun LineButton(
             .background(Color.White, RoundedCornerShape(13.dp))
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onPress = { onClick?.invoke() },
+                    onTap = { onClick?.invoke() },
                 )
             }
             .then(modifier)
@@ -164,7 +164,7 @@ fun LineSwitch(
             .background(Color.White, RoundedCornerShape(13.dp))
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onPress = { onClick?.invoke() },
+                    onTap = { onClick?.invoke() },
                     onLongPress = { longPress?.invoke() }
                 )
             }
@@ -233,7 +233,7 @@ fun LineCheckBox(
             .background(Color.White)
             .pointerInput(Unit) {
                 detectTapGestures(
-                    onPress = { onClick?.invoke() },
+                    onTap = { onClick?.invoke() },
                     onLongPress = { longPress?.invoke() }
                 )
             }
