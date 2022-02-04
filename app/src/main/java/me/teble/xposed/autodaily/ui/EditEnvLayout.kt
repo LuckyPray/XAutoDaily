@@ -40,9 +40,9 @@ fun EditEnvLayout(
         val conf = ConfigUtil.loadSaveConf()
         conf.taskGroups.forEach {
             if (it.id == groupId) {
-                it.tasks.forEach {
-                    if (it.id == taskId) {
-                        envList.value = it.envs ?: emptyList()
+                it.tasks.forEach { task ->
+                    if (task.id == taskId) {
+                        envList.value = task.envs ?: emptyList()
                         return@LaunchedEffect
                     }
                 }
@@ -52,11 +52,11 @@ fun EditEnvLayout(
             ToastUtil.send("没有需要编辑的环境变量")
         }
     }
-    val envMap = remember { mutableStateOf(HashMap<String, MutableState<String>>()) }
+    val envMap = remember { HashMap<String, MutableState<String>>() }
     val friends = remember { mutableStateOf(emptyList<Friend>()) }
     val troops = remember { mutableStateOf(emptyList<TroopInfo>()) }
     BackHandler(onBack = {
-        envMap.value.entries.forEach {
+        envMap.entries.forEach {
             if (it.value.value.isNotEmpty()) {
                 accountConfig.putString("$taskId#$ENV_VARIABLE#${it.key}", it.value.value)
             } else {
@@ -70,7 +70,7 @@ fun EditEnvLayout(
     val groupFlag = remember { mutableStateOf(false) }
     LaunchedEffect(envMap) {
         envList.value.forEach { env ->
-            envMap.value[env.name] = mutableStateOf(
+            envMap[env.name] = mutableStateOf(
                 accountConfig.getString("$taskId#$ENV_VARIABLE#${env.name}", env.default)
             )
             if (env.type == "friend") {
@@ -103,8 +103,8 @@ fun EditEnvLayout(
         when (taskEnv.value?.type) {
             "friend" -> {
                 FriendsCheckDialog(
-                    friends = friends,
-                    uinListStr = envMap.value[taskEnv.value?.name]!!,
+                    friends = friends.value,
+                    uinListStr = envMap[taskEnv.value?.name]!!,
                     onConfirm = {
                         showDialog.value = false
                     },
@@ -113,8 +113,8 @@ fun EditEnvLayout(
             }
             "group" -> {
                 TroopsCheckDialog(
-                    troops = troops,
-                    uinListStr = envMap.value[taskEnv.value?.name]!!,
+                    troops = troops.value,
+                    uinListStr = envMap[taskEnv.value?.name]!!,
                     onConfirm = {
                         showDialog.value = false
                     },
@@ -188,7 +188,7 @@ fun EditEnvLayout(
                             mutableStateOf(false)
                         }
                         OutlinedTextField(
-                            value = envMap.value[env.name]?.value ?: env.default,
+                            value = envMap[env.name]?.value ?: env.default,
                             onValueChange = {
                                 if (env.limit >0) {
                                     when (env.type) {
@@ -210,7 +210,7 @@ fun EditEnvLayout(
                                     }
                                 }
                                 if (!limitErr.value) {
-                                    envMap.value[env.name]?.value = it
+                                    envMap[env.name]?.value = it
                                 }
                             },
                             label = { Text(text = env.name) },
