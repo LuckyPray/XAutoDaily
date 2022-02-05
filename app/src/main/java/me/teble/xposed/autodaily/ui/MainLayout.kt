@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -241,13 +242,13 @@ fun MainLayout(navController: NavHostController) {
 @Composable
 fun BackgroundView() {
     var lastClickTime by remember { mutableStateOf(0L) }
-    var execTaskNum by remember { mutableStateOf(0) }
+    val execTaskNum = remember { mutableStateOf(0) }
     LaunchedEffect(execTaskNum) {
         try {
             val num = getCurrentExecTaskNum()
             for (i in 1..num) {
                 delay(20)
-                execTaskNum++
+                execTaskNum.value++
             }
         } catch (e: Exception) {
             ToastUtil.send(e.stackTraceToString())
@@ -291,7 +292,9 @@ fun BackgroundView() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = execTaskNum.toString(),
+                        text = execTaskNum.value.toString(),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
                         fontSize = 32.sp,
                         color = Color(0xFF409EFF),
                     )
