@@ -14,6 +14,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
@@ -31,9 +33,9 @@ fun SignLayout(navController: NavHostController) {
             mutableStateOf(ConfigUtil.loadSaveConf())
         }
         LazyColumn(
-            modifier = Modifier
-                .padding(top = 13.dp)
+            modifier = Modifier.padding(top = 13.dp)
                 .padding(horizontal = 13.dp),
+            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
             // 绘制间隔
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

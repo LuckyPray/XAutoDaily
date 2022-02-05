@@ -13,10 +13,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
 import kotlinx.coroutines.delay
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
@@ -81,20 +80,21 @@ fun MainLayout(navController: NavHostController) {
             }
         )
     }
+
     ActivityView(navController = navController) {
         LazyColumn(
             modifier = Modifier.padding(top = 13.dp)
-                .padding(horizontal = 13.dp)
+                .padding(horizontal = 13.dp),
+            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
                 BackgroundView(/*scrollUpState = scrollUpState, viewOffset = maxOffsetY*/)
-                LineSpacer()
             }
             item {
                 Announcement(post = notice)
             }
             item {
-                LineSpacer()
                 LineSwitch(
                     title = "总开关",
                     checked = mutableStateOf(
@@ -111,7 +111,6 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "签到配置",
                     desc = "在这里选择普通签到项目，以及进行相关的参数设置",
@@ -137,7 +136,6 @@ fun MainLayout(navController: NavHostController) {
 //                )
 //            }
             item {
-                LineSpacer()
                 LineButton(
                     title = "自定义签到脚本",
                     desc = "敬请期待",
@@ -157,7 +155,6 @@ fun MainLayout(navController: NavHostController) {
 //                )
 //            }
             item {
-                LineSpacer()
                 LineButton(
                     title = "前往项目地址",
                     otherInfoList = listOf(
@@ -175,7 +172,6 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "点击加入tg频道",
                     otherInfoList = listOf(
@@ -194,7 +190,6 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "检测更新",
                     otherInfoList = listOf(
@@ -223,7 +218,6 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "请吃作者辣条",
                     desc = "本模块完全免费开源，一切开发旨在学习，请勿用于非法用途。习欢本模块的可以捐赠支持我，谢谢~~",
@@ -245,14 +239,15 @@ fun MainLayout(navController: NavHostController) {
 }
 
 @Composable
-fun BackgroundView() {    val lastClickTime = remember { mutableStateOf(0L) }
-    val execTaskNum = remember { mutableStateOf(0) }
+fun BackgroundView() {
+    var lastClickTime by remember { mutableStateOf(0L) }
+    var execTaskNum by remember { mutableStateOf(0) }
     LaunchedEffect(execTaskNum) {
         try {
             val num = getCurrentExecTaskNum()
             for (i in 1..num) {
                 delay(20)
-                execTaskNum.value++
+                execTaskNum++
             }
         } catch (e: Exception) {
             ToastUtil.send(e.stackTraceToString())
@@ -296,7 +291,7 @@ fun BackgroundView() {    val lastClickTime = remember { mutableStateOf(0L) }
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
-                        text = execTaskNum.value.toString(),
+                        text = execTaskNum.toString(),
                         fontSize = 32.sp,
                         color = Color(0xFF409EFF),
                     )
@@ -311,11 +306,11 @@ fun BackgroundView() {    val lastClickTime = remember { mutableStateOf(0L) }
             Button(
                 onClick = {
                     val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastClickTime.value < 5000) {
+                    if (currentTime - lastClickTime < 5000) {
                         ToastUtil.send("点那么快怎么不上天呢")
                         return@Button
                     }
-                    lastClickTime.value = currentTime
+                    lastClickTime = currentTime
                     handler.sendEmptyMessage(EXEC_TASK)
                 },
                 shape = RoundedCornerShape(25.dp),

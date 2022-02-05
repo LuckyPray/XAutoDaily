@@ -12,13 +12,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 
 @Composable
 fun SettingLayout(navController: NavHostController) {
     ActivityView(title = "插件设置", navController = navController) {
         LazyColumn(
-            modifier = Modifier.padding(13.dp)
+            modifier = Modifier.padding(top = 13.dp)
+                .padding(horizontal = 13.dp),
+            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
         ) {
             item {
                 LineSwitch(

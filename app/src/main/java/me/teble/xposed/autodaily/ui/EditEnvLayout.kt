@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -20,6 +21,8 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.task.model.TaskEnv
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
@@ -38,7 +41,7 @@ fun EditEnvLayout(
     groupId: String?,
     taskId: String?
 ) {
-    val envList = remember { mutableStateOf(emptyList<TaskEnv>()) }
+    var envList by remember { mutableStateOf(emptyList<TaskEnv>()) }
     LaunchedEffect(envList) {
         LogUtil.log("--------------- init envList ---------------")
         val conf = ConfigUtil.loadSaveConf()
@@ -46,19 +49,19 @@ fun EditEnvLayout(
             if (it.id == groupId) {
                 it.tasks.forEach { task ->
                     if (task.id == taskId) {
-                        envList.value = task.envs ?: emptyList()
+                        envList = task.envs ?: emptyList()
                         return@LaunchedEffect
                     }
                 }
             }
         }
-        if (envList.value.isEmpty()) {
+        if (envList.isEmpty()) {
             ToastUtil.send("没有需要编辑的环境变量")
         }
     }
     val envMap = remember { HashMap<String, MutableState<String>>() }
-    val friends = remember { mutableStateOf(emptyList<Friend>()) }
-    val troops = remember { mutableStateOf(emptyList<TroopInfo>()) }
+    var friends by remember { mutableStateOf(emptyList<Friend>()) }
+    var troops by remember { mutableStateOf(emptyList<TroopInfo>()) }
     BackHandler(onBack = {
         envMap.entries.forEach {
             if (it.value.value.isNotEmpty()) {
@@ -73,7 +76,7 @@ fun EditEnvLayout(
     val friendFlag = remember { mutableStateOf(false) }
     val groupFlag = remember { mutableStateOf(false) }
     LaunchedEffect(envMap) {
-        envList.value.forEach { env ->
+        envList.forEach { env ->
             envMap[env.name] = mutableStateOf(
                 accountConfig.getString("$taskId#$ENV_VARIABLE#${env.name}", env.default)
             )
@@ -88,7 +91,7 @@ fun EditEnvLayout(
     LaunchedEffect(friends) {
         if (friendFlag.value) {
             thread {
-                friends.value = FunctionPool.friendsManager.getFriends() ?: emptyList()
+                friends = FunctionPool.friendsManager.getFriends() ?: emptyList()
                 friendFlag.value = false
             }
         }
@@ -96,7 +99,7 @@ fun EditEnvLayout(
     LaunchedEffect(troops) {
         if (groupFlag.value) {
             thread {
-                troops.value = FunctionPool.troopManager.getTroopInfoList() ?: emptyList()
+                troops = FunctionPool.troopManager.getTroopInfoList() ?: emptyList()
                 groupFlag.value = false
             }
         }
@@ -107,7 +110,7 @@ fun EditEnvLayout(
         when (taskEnv.value?.type) {
             "friend" -> {
                 FriendsCheckDialog(
-                    friends = friends.value,
+                    friends = friends,
                     uinListStr = envMap[taskEnv.value?.name]!!,
                     onConfirm = {
                         showDialog.value = false
@@ -117,7 +120,7 @@ fun EditEnvLayout(
             }
             "group" -> {
                 TroopsCheckDialog(
-                    troops = troops.value,
+                    troops = troops,
                     uinListStr = envMap[taskEnv.value?.name]!!,
                     onConfirm = {
                         showDialog.value = false
@@ -131,8 +134,13 @@ fun EditEnvLayout(
         title = "${taskId}-变量编辑",
         navController = navController
     ) {
-        LazyColumn(modifier = Modifier.padding(13.dp)) {
-            envList.value.forEach { env ->
+        LazyColumn(
+            modifier = Modifier.padding(top = 13.dp)
+            .padding(horizontal = 13.dp),
+            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            verticalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            envList.forEach { env ->
                 item {
                     Column(
                         modifier = Modifier
@@ -144,7 +152,7 @@ fun EditEnvLayout(
                                     taskEnv.value = env
                                     when (env.type) {
                                         "friend" -> {
-                                            if (!friendFlag.value && friends.value.isNotEmpty()) {
+                                            if (!friendFlag.value && friends.isNotEmpty()) {
                                                 showDialog.value = true
                                             } else {
                                                 if (friendFlag.value) {
@@ -155,7 +163,7 @@ fun EditEnvLayout(
                                             }
                                         }
                                         "group" -> {
-                                            if (!groupFlag.value && troops.value.isNotEmpty()) {
+                                            if (!groupFlag.value && troops.isNotEmpty()) {
                                                 showDialog.value = true
                                             } else {
                                                 if (groupFlag.value) {
@@ -189,7 +197,7 @@ fun EditEnvLayout(
                             color = Color(0xFFFF4A4A),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
-                        val limitErr = remember {
+                        var limitErr by remember {
                             mutableStateOf(false)
                         }
                         OutlinedTextField(
@@ -198,23 +206,23 @@ fun EditEnvLayout(
                                 if (env.limit >0) {
                                     when (env.type) {
                                         "string" -> {
-                                            limitErr.value = it.length > env.limit
+                                            limitErr = it.length > env.limit
                                         }
                                         "num" -> {
-                                            if (it.isNotEmpty()) {
+                                            limitErr = if (it.isNotEmpty()) {
                                                 if (it.isDigitsOnly()) {
-                                                    limitErr.value = it.toInt() > env.limit
-                                                } else limitErr.value = true
+                                                    it.toInt() > env.limit
+                                                } else true
                                             } else {
-                                                limitErr.value = false
+                                                false
                                             }
                                         }
                                         else -> {
-                                            limitErr.value = it.split(",").size > env.limit
+                                            limitErr = it.split(",").size > env.limit
                                         }
                                     }
                                 }
-                                if (!limitErr.value) {
+                                if (!limitErr) {
                                     envMap[env.name]?.value = it
                                 }
                             },
@@ -223,9 +231,9 @@ fun EditEnvLayout(
                                 .padding(horizontal = 10.dp)
                                 .fillMaxWidth()
                                 .padding(bottom = 10.dp),
-                            isError = limitErr.value
+                            isError = limitErr
                         )
-                        if (limitErr.value && env.limit > 0) {
+                        if (limitErr && env.limit > 0) {
                             Text(
                                 text = "变量长度/大小限制为${env.limit}",
                                 color = Color(0xFFFF4A4A),
@@ -234,7 +242,6 @@ fun EditEnvLayout(
                             )
                         }
                     }
-                    LineSpacer(height = 15.dp)
                 }
             }
         }

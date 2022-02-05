@@ -16,8 +16,10 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
+import com.google.accompanist.insets.ProvideWindowInsets
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
+import me.teble.xposed.autodaily.utils.navigationBarMode
 import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
 import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
@@ -33,6 +35,7 @@ class ModuleActivity : BaseActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         this.window.setStatusBarTranslation()
         this.window.setNavigationBarTranslation()
+        this.navigationBarMode(true)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val view = ComposeView(this).apply {
             // 设置布局为最大
@@ -42,12 +45,14 @@ class ModuleActivity : BaseActivity() {
             )
             this.setContent {
                 MaterialTheme {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                    ) {
-                        XAutoDailyApp()
+                    ProvideWindowInsets {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                        ) {
+                            XAutoDailyApp()
+                        }
                     }
                 }
 
