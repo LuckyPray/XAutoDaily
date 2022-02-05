@@ -1,9 +1,11 @@
 package me.teble.xposed.autodaily.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -25,24 +27,26 @@ import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 @Composable
 fun SignLayout(navController: NavHostController) {
     ActivityView(title = "签到设置", navController = navController) {
-        val conf = remember {
+        val conf by remember {
             mutableStateOf(ConfigUtil.loadSaveConf())
         }
         LazyColumn(
-            modifier = Modifier.padding(13.dp)
+            modifier = Modifier
+                .padding(top = 13.dp)
+                .padding(horizontal = 13.dp),
+            // 绘制间隔
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            conf.value.taskGroups.forEachIndexed { index, taskGroup ->
+            conf.taskGroups.forEach {taskGroup ->
                 item {
-                    if (index > 0) {
-                        LineSpacer()
-                    }
                     GroupList(title = taskGroup.id) {
                         taskGroup.tasks.forEach { task ->
-                            val checked = mutableStateOf(
+                            val checked = remember {mutableStateOf(
                                 accountConfig.getBoolean("${task.id}#${ENABLE}", false)
-                            )
+                            )}
+                            // 绘制分割线
                             Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
-                            val clickFlag = task.envs != null && task.envs.isNotEmpty()
+                            val clickFlag = remember { task.envs != null && task.envs.isNotEmpty() }
                             LineSwitch(
                                 title = buildString {
                                     append(task.id)

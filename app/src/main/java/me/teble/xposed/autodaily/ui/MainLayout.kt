@@ -83,7 +83,8 @@ fun MainLayout(navController: NavHostController) {
     }
     ActivityView(navController = navController) {
         LazyColumn(
-            modifier = Modifier.padding(13.dp)
+            modifier = Modifier.padding(top = 13.dp)
+                .padding(horizontal = 13.dp)
         ) {
             item {
                 BackgroundView(/*scrollUpState = scrollUpState, viewOffset = maxOffsetY*/)

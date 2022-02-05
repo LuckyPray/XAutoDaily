@@ -1,9 +1,10 @@
 package me.teble.xposed.autodaily.activity.module
 
+import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
-import android.view.WindowManager
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,24 +12,28 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
+import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
+import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
 class ModuleActivity : BaseActivity() {
     companion object {
         const val TAG = "ModuleActivity"
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-        // 透明状态栏 & 导航栏
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-
+        this.window.setStatusBarTranslation()
+        this.window.setNavigationBarTranslation()
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         val view = ComposeView(this).apply {
             // 设置布局为最大
             this.layoutParams = ViewGroup.LayoutParams(
@@ -36,7 +41,7 @@ class ModuleActivity : BaseActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             this.setContent {
-                MaterialTheme() {
+                MaterialTheme {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
