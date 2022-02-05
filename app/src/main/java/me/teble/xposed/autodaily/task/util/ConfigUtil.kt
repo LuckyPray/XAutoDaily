@@ -8,7 +8,7 @@ import cn.hutool.crypto.asymmetric.ECIES
 import cn.hutool.crypto.asymmetric.KeyType
 import cn.hutool.http.HttpUtil
 import com.charleskorn.kaml.Yaml
-import function.task.module.TaskProperties
+import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.NOTICE
 import me.teble.xposed.autodaily.config.Constants.XA_API_URL
@@ -162,6 +162,7 @@ object ConfigUtil {
             ecies.decryptStr(encodeConfStr, KeyType.PrivateKey)
         } catch (e: Exception) {
             LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
+            LogUtil.e(e)
             null
         }
     }

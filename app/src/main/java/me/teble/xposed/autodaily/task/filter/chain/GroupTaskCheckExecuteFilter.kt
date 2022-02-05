@@ -3,7 +3,7 @@ package me.teble.xposed.autodaily.task.filter.chain
 import cn.hutool.core.date.DateUtil
 import cn.hutool.cron.pattern.CronPattern
 import cn.hutool.cron.pattern.CronPatternUtil
-import function.task.module.Task
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.task.filter.FilterChain
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilter

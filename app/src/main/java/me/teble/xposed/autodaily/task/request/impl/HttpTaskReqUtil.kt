@@ -2,7 +2,7 @@ package me.teble.xposed.autodaily.task.request.impl
 
 import cn.hutool.http.HttpUtil
 import cn.hutool.http.Method
-import function.task.module.Task
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
@@ -12,7 +12,6 @@ import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.toJsonString
-import java.nio.charset.Charset
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"

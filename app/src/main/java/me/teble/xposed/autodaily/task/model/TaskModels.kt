@@ -1,4 +1,4 @@
-package function.task.module
+package me.teble.xposed.autodaily.task.model
 
 import kotlinx.serialization.Serializable
 

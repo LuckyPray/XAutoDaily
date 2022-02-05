@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import function.task.module.Task
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.favoriteManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.groupSignInManager

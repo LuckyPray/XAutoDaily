@@ -7,8 +7,8 @@ import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.DocumentContext
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.Option
-import function.task.module.MsgExtract
-import function.task.module.Task
+import me.teble.xposed.autodaily.task.model.MsgExtract
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.request.ReqFactory

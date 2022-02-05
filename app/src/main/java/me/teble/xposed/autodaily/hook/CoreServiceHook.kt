@@ -8,7 +8,7 @@ import cn.hutool.cron.CronUtil
 import cn.hutool.cron.task.Task
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
-import function.task.module.TaskProperties
+import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook

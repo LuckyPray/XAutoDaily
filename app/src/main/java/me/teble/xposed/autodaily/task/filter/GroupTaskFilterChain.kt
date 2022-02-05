@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.task.filter
 
-import function.task.module.Task
-import function.task.module.TaskGroup
+import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskCheckExecuteFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskExecuteBasicFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskPreFilter

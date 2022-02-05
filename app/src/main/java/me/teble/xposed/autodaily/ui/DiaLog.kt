@@ -11,7 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import function.task.module.Task
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.task.model.TroopInfo
 
