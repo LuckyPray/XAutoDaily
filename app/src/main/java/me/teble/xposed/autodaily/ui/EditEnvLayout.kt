@@ -1,6 +1,8 @@
 package me.teble.xposed.autodaily.ui
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -10,6 +12,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.utils.LogUtil
 import kotlin.concurrent.thread
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditEnvLayout(
     navController: NavHostController,
@@ -134,8 +138,8 @@ fun EditEnvLayout(
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.White, RoundedCornerShape(13.dp))
-                            .padding(horizontal = 13.dp, vertical = 5.dp)
-                            .click(
+                            .clip(RoundedCornerShape(13.dp))
+                            .combinedClickable(
                                 onClick = {
                                     taskEnv.value = env
                                     when (env.type) {
@@ -164,6 +168,7 @@ fun EditEnvLayout(
                                     }
                                 }
                             )
+                            .padding(horizontal = 13.dp, vertical = 5.dp)
                     ) {
                         Text(
                             text = buildString {

@@ -1,8 +1,10 @@
 package me.teble.xposed.autodaily.ui
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +14,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
@@ -83,6 +86,7 @@ fun ActivityView(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LineButton(
     modifier: Modifier = Modifier,
@@ -95,11 +99,10 @@ fun LineButton(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(13.dp))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { onClick?.invoke() },
-                )
-            }
+            .clip(RoundedCornerShape(13.dp))
+            .combinedClickable(
+                onClick = { onClick?.invoke() }
+            )
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
@@ -147,6 +150,7 @@ fun LineButton(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LineSwitch(
     modifier: Modifier = Modifier,
@@ -162,12 +166,11 @@ fun LineSwitch(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(13.dp))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { onClick?.invoke() },
-                    onLongPress = { longPress?.invoke() }
-                )
-            }
+            .clip(RoundedCornerShape(13.dp))
+            .combinedClickable(
+                onClick = { onClick?.invoke() },
+                onLongClick = longPress
+            )
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
@@ -216,6 +219,7 @@ fun LineSwitch(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LineCheckBox(
     modifier: Modifier = Modifier,
@@ -231,12 +235,11 @@ fun LineCheckBox(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = { onClick?.invoke() },
-                    onLongPress = { longPress?.invoke() }
-                )
-            }
+            .clip(RoundedCornerShape(13.dp))
+            .combinedClickable(
+                onClick = { onClick?.invoke() },
+                onLongClick = longPress
+            )
             .then(modifier)
             .padding(horizontal = 13.dp, vertical = 5.dp)
     ) {
