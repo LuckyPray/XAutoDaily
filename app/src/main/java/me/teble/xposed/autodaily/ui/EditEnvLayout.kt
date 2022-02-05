@@ -145,8 +145,8 @@ fun EditEnvLayout(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(Color.White, RoundedCornerShape(13.dp))
                             .clip(RoundedCornerShape(13.dp))
+                            .background(Color.White)
                             .combinedClickable(
                                 onClick = {
                                     taskEnv.value = env
