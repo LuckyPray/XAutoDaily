@@ -105,24 +105,22 @@
 
 ##########################################################################################################
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
-    public static void checkExpressionValueIsNotNull(java.lang.Object, java.lang.String);
-    public static void checkFieldIsNotNull(java.lang.Object, java.lang.String);
-    public static void checkFieldIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
-    public static void checkNotNull(java.lang.Object);
-    public static void checkNotNull(java.lang.Object, java.lang.String);
-    public static void checkNotNullExpressionValue(java.lang.Object, java.lang.String);
-    public static void checkNotNullParameter(java.lang.Object, java.lang.String);
-    public static void checkParameterIsNotNull(java.lang.Object, java.lang.String);
-    public static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String);
-    public static void checkReturnedValueIsNotNull(java.lang.Object, java.lang.String, java.lang.String);
+    public static void check*(...);
+    public static void throw*(...);
 }
-
+# 去除 DebugMetadataKt() 注释
+-assumenosideeffects class kotlin.coroutines.jvm.internal.BaseContinuationImpl {
+  java.lang.StackTraceElement getStackTraceElement() return null;
+}
+-assumenosideeffects public final class kotlin.coroutines.jvm.internal.DebugMetadataKt {
+   private static final kotlin.coroutines.jvm.internal.DebugMetadata getDebugMetadataAnnotation(kotlin.coroutines.jvm.internal.BaseContinuationImpl) return null;
+}
 ##########################################################################################################
 #-obfuscationdictionary          proguard-dic.txt
 #-renamesourcefileattribute      proguard-dic.txt
 #-classobfuscationdictionary     proguard-dic.txt
 #-packageobfuscationdictionary   proguard-dic.txt
--repackageclasses 'o'
+-repackageclasses ''
 -keepattributes Signature
 -keepattributes EnclosingMethod
 -keepattributes *Annotation*
