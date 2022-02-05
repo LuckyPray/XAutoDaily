@@ -1,10 +1,8 @@
 package me.teble.xposed.autodaily.activity.module
 
-import android.os.Build
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,7 +26,6 @@ class ModuleActivity : BaseActivity() {
         const val TAG = "ModuleActivity"
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // 状态栏和导航栏沉浸
