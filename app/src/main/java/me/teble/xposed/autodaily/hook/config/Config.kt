@@ -6,6 +6,7 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.base.Global.hostContext
 import me.teble.xposed.autodaily.hook.base.Initiator.getSimpleName
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.NativeUtil
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
@@ -48,6 +49,7 @@ object Config {
 
     val accountConfig: ConfProxy
         get() {
+            LogUtil.d(TAG, "curr -> $currentUin")
             if (!Global.isInit()) return MockConfProxy()
             return confProxyMap[currentUin] ?: let {
                 val currentConf =
