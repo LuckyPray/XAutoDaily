@@ -28,7 +28,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.Constants
@@ -51,7 +53,7 @@ fun MainLayout(navController: NavHostController) {
     val updateDialogText = remember { mutableStateOf("") }
     val lastClickTime = remember { mutableStateOf(0L) }
     LaunchedEffect(notice) {
-        thread {
+        launch(IO){
             val info = Cache.versionInfoCache ?: fetchUpdateInfo()
             if (System.currentTimeMillis() - Cache.lastFetchTime > 60 * 60 * 1000L)
                 fetchUpdateInfo()
