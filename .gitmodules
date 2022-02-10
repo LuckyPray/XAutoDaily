@@ -1,3 +1,6 @@
 [submodule "xa_mmkv"]
 	path = xa_mmkv
 	url = https://github.com/LuckyPray/xa_mmkv.git
+[submodule "xa_decrypt"]
+	path = xa_decrypt
+	url = git@github.com:LuckyPray/xa_decrypt.git

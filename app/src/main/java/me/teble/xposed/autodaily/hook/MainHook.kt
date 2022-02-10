@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.hook
 
-import android.app.AndroidAppHelper
+import android.app.AndroidAppHelper.currentApplication
 import android.app.Application
 import android.content.res.XModuleResources
 import android.text.TextUtils
@@ -30,9 +30,7 @@ import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValueAs
-import me.teble.xposed.autodaily.utils.new
+import me.teble.xposed.autodaily.utils.*
 import java.lang.reflect.Method
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -94,7 +92,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         return@hookAfter
                     }
                 }
-                val context = AndroidAppHelper.currentApplication()
+                val context = currentApplication()
                 // 初始化全局Context
                 initContext(context)
                 EzXHelperInit.initAppContext(context)
