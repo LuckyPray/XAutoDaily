@@ -13,7 +13,6 @@ if (performSigning) {
 android {
     compileSdkVersion 31
     buildToolsVersion "30.0.3"
-    ndkVersion '21.4.7075529'
 
     defaultConfig {
         applicationId "me.teble.xposed.autodaily"
@@ -27,7 +26,10 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11"
+                cppFlags "-std=c++14", "-frtti", "-fexceptions", "-DANDROID_TOOLCHAIN=clang"
+//                arguments "-DANDROID_TOOLCHAIN=clang",
+//                        "-DANDROID_STL=c++_shared",
+//                        "-DANDROID_CPP_FEATURES=rtti exceptions"
             }
         }
         ndk {

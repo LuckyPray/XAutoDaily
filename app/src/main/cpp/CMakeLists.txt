@@ -12,8 +12,9 @@ set(CMAKE_CXX_STANDARD 17)
 # or SHARED, and provides the relative paths to its source code.
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
-include_directories(ACDAT)
-add_subdirectory(../../../../xa_mmkv/Android mmkv)
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../xa_decrypt decrypt)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../xa_mmkv/Android mmkv)
 
 add_library( # Sets the name of the library.
         xa_native
@@ -22,7 +23,8 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        native-lib.cpp)
+        native-lib.cpp
+        )
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -37,7 +39,7 @@ find_library( # Sets the name of the path variable.
         # you want CMake to locate.
         log)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=format-invalid-specifier -Werror=return-type -Wno-invalid-offsetof")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=format-invalid-specifier -Werror=return-type -Wno-invalid-offsetof")
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
@@ -46,8 +48,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror=format-invalid-specifier -Werror
 target_link_libraries( # Specifies the target library.
         xa_native
         mmkv
-        c
-        dl
+        decrypt
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib})
