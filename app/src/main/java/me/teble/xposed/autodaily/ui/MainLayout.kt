@@ -36,12 +36,12 @@ import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
+import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import kotlin.concurrent.thread
@@ -100,14 +100,14 @@ fun MainLayout(navController: NavHostController) {
                 LineSwitch(
                     title = "总开关",
                     checked = mutableStateOf(
-                        accountConfig.getBoolean(
+                        currConf.getBoolean(
                             GLOBAL_ENABLE,
                             false
                         )
                     ),
                     desc = "关闭后一切任务都不会执行",
                     onChange = {
-                        accountConfig.putBoolean(GLOBAL_ENABLE, it)
+                        currConf.putBoolean(GLOBAL_ENABLE, it)
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )

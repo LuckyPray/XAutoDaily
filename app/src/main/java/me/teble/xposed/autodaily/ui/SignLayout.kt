@@ -16,13 +16,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
 import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_MSG
 import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
+import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.EditEnv
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 
@@ -44,7 +44,7 @@ fun SignLayout(navController: NavHostController) {
                     GroupList(title = taskGroup.id) {
                         taskGroup.tasks.forEach { task ->
                             val checked = remember {mutableStateOf(
-                                accountConfig.getBoolean("${task.id}#${ENABLE}", false)
+                                currConf.getBoolean("${task.id}#${ENABLE}", false)
                             )}
                             // 绘制分割线
                             Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
@@ -63,21 +63,21 @@ fun SignLayout(navController: NavHostController) {
                                 },
                                 longPress = {
                                     ToastUtil.send("正在重置上次执行时间")
-                                    accountConfig.remove("${task.id}#${LAST_EXEC_TIME}")
-                                    accountConfig.remove("${task.id}#${LAST_EXEC_MSG}")
-                                    accountConfig.remove("${task.id}#${NEXT_SHOULD_EXEC_TIME}")
+                                    currConf.remove("${task.id}#${LAST_EXEC_TIME}")
+                                    currConf.remove("${task.id}#${LAST_EXEC_MSG}")
+                                    currConf.remove("${task.id}#${NEXT_SHOULD_EXEC_TIME}")
                                 },
                                 otherInfoList = (mutableListOf<String>().apply {
                                     if (!checked.value) {
                                         return@apply
                                     }
                                     val lastExecTime =
-                                        accountConfig.getString("${task.id}#${LAST_EXEC_TIME}")
+                                        currConf.getString("${task.id}#${LAST_EXEC_TIME}")
                                             ?: "从未执行"
                                     val lastExecMsg =
-                                        accountConfig.getString("${task.id}#${LAST_EXEC_MSG}")
+                                        currConf.getString("${task.id}#${LAST_EXEC_MSG}")
                                     val nextShouldExecTime =
-                                        accountConfig.getString("${task.id}#${NEXT_SHOULD_EXEC_TIME}")
+                                        currConf.getString("${task.id}#${NEXT_SHOULD_EXEC_TIME}")
                                             ?: "从未执行"
                                     add("上次: $lastExecTime, 响应: $lastExecMsg")
                                     add("下次: $nextShouldExecTime")

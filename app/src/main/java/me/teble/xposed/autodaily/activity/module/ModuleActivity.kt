@@ -15,7 +15,9 @@ import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import com.google.accompanist.insets.ProvideWindowInsets
+import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
+import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
 import me.teble.xposed.autodaily.utils.navigationBarMode
 import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
@@ -34,6 +36,8 @@ class ModuleActivity : BaseActivity() {
         this.window.setNavigationBarTranslation()
         this.navigationBarMode(true)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        // 缓存当前账号配置类，避免在UI刷新时重复获取
+        currConf = accountConfig
         val view = ComposeView(this).apply {
             // 设置布局为最大
             this.layoutParams = ViewGroup.LayoutParams(

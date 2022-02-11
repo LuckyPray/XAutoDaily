@@ -22,13 +22,13 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.task.model.TaskEnv
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
+import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.utils.LogUtil
 import kotlin.concurrent.thread
 
@@ -63,9 +63,9 @@ fun EditEnvLayout(
     BackHandler(onBack = {
         envMap.entries.forEach {
             if (it.value.value.isNotEmpty()) {
-                accountConfig.putString("$taskId#$ENV_VARIABLE#${it.key}", it.value.value)
+                currConf.putString("$taskId#$ENV_VARIABLE#${it.key}", it.value.value)
             } else {
-                accountConfig.remove("$taskId#$ENV_VARIABLE#${it.key}")
+                currConf.remove("$taskId#$ENV_VARIABLE#${it.key}")
             }
         }
         ToastUtil.send("保存成功")
@@ -76,7 +76,7 @@ fun EditEnvLayout(
     LaunchedEffect(envMap) {
         envList.forEach { env ->
             envMap[env.name] = mutableStateOf(
-                accountConfig.getString("$taskId#$ENV_VARIABLE#${env.name}", env.default)
+                currConf.getString("$taskId#$ENV_VARIABLE#${env.name}", env.default)
             )
             if (env.type == "friend") {
                 friendFlag.value = true
