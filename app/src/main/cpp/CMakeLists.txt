@@ -25,6 +25,16 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         native-lib.cpp
         )
+set_target_properties(xa_native PROPERTIES
+        LINK_FLAGS "-Wl,--gc-sections,-s"
+        CXX_STANDARD 17
+        CXX_EXTENSIONS OFF
+        POSITION_INDEPENDENT_CODE ON
+        )
+
+# 去除未使用函数与变量
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections -Os")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS}")
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
@@ -51,4 +61,5 @@ target_link_libraries( # Specifies the target library.
         decrypt
         # Links the target library to the log library
         # included in the NDK.
-        ${log-lib})
+        ${log-lib}
+        )

@@ -1,20 +1,28 @@
 #include <jni.h>
 #include <iostream>
-#include "CaesarCipher.h"
+#include "log.h"
 //
 // Created by teble on 2020/2/10.
 //
 #define EXPORT extern "C" __attribute__((visibility("default")))
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
 extern "C" jint Decrypt_JNI_OnLoad(JavaVM *vm, void *reserved);
-extern "C" const char * GetPublicKey();
+extern "C" const char * decryptXAConf(std::string &src);
 
 EXPORT jstring
-Java_me_teble_xposed_autodaily_task_util_ConfigUtil_getPrivateKey(
+Java_me_teble_xposed_autodaily_task_util_ConfigUtil_decryptXAConf(
         JNIEnv *env,
-        jobject obj) {
-    std::string enc_key = "GMJVKhOKGFGJFnmJIG49KhOJYYmJIG49KcOQFQiclcMFKEEhnUGyste9cWk/pFjBmwgtksApg4RC8P7dGAxnWTscXd6hYhRMXyLMwf0ZKEobHKAYKKHnS7vObAjs1sLVWK0Ls0tloZ7shbVH4svByB66bF1++6BzvQdiqrJO/aUOSmLpBaMbKXwJoEvHvdWdm7wSysz4";
-    return env->NewStringUTF(CaesarCipher::decrypt(enc_key).c_str());
+        jobject obj, jstring enc_conf) {
+    const char *p = env->GetStringUTFChars(enc_conf, nullptr);
+    std::string encConf(p);
+    env->ReleaseStringUTFChars(enc_conf, p);
+    const char *res;
+    try {
+        res = decryptXAConf(encConf);
+    } catch (...) {
+        res = "";
+    }
+    return env->NewStringUTF(res);
 }
 
 EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {

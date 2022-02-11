@@ -4,11 +4,8 @@ import android.annotation.SuppressLint
 import android.util.Log
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
-import cn.hutool.crypto.asymmetric.ECIES
-import cn.hutool.crypto.asymmetric.KeyType
 import cn.hutool.http.HttpUtil
 import com.charleskorn.kaml.Yaml
-import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.NOTICE
 import me.teble.xposed.autodaily.config.Constants.XA_API_URL
@@ -18,6 +15,7 @@ import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.PackageData
 import me.teble.xposed.autodaily.task.model.Result
+import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.CHANGE_SIGN_BUTTON
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
@@ -66,7 +64,7 @@ object ConfigUtil {
         System.load(soFilePath)
     }
 
-    private external fun getPrivateKey(): String
+    private external fun decryptXAConf(encConf: String): String
 
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
         try {
@@ -157,14 +155,12 @@ object ConfigUtil {
     }
 
     fun decodeConfStr(encodeConfStr: String): String? {
-        return try {
-            val ecies = ECIES(getPrivateKey(), null)
-            ecies.decryptStr(encodeConfStr, KeyType.PrivateKey)
-        } catch (e: Exception) {
-            LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
-            LogUtil.e(e)
-            null
+        val conf = decryptXAConf(encodeConfStr)
+        if (conf.isNotEmpty()) {
+            return conf
         }
+        LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
+        return null
     }
 
     private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {
