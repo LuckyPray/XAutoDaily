@@ -162,7 +162,6 @@ dependencies {
     implementation "cn.hutool:hutool-crypto:$hutool_version"
 
     // Other
-    implementation 'org.bouncycastle:bcprov-jdk15to18:1.70'
     implementation "com.hankcs:aho-corasick-double-array-trie:1.2.3"
     implementation "net.bytebuddy:byte-buddy-android:1.12.7"
     implementation "com.charleskorn.kaml:kaml:0.36.0"

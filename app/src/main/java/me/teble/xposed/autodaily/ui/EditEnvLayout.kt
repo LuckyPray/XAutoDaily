@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -60,17 +61,6 @@ fun EditEnvLayout(
     val envMap = remember { HashMap<String, MutableState<String>>() }
     var friends by remember { mutableStateOf(emptyList<Friend>()) }
     var troops by remember { mutableStateOf(emptyList<TroopInfo>()) }
-    BackHandler(onBack = {
-        envMap.entries.forEach {
-            if (it.value.value.isNotEmpty()) {
-                currConf.putString("$taskId#$ENV_VARIABLE#${it.key}", it.value.value)
-            } else {
-                currConf.remove("$taskId#$ENV_VARIABLE#${it.key}")
-            }
-        }
-        ToastUtil.send("保存成功")
-        navController.popBackStack()
-    })
     val friendFlag = remember { mutableStateOf(false) }
     val groupFlag = remember { mutableStateOf(false) }
     LaunchedEffect(envMap) {
@@ -248,13 +238,30 @@ fun EditEnvLayout(
             }
 
             Box(modifier = Modifier
-                .align(Alignment.BottomCenter)
+                .align(Alignment.BottomEnd)
                 .padding(40.dp)
-                .height(56.dp)
-                .width(120.dp)
-                .clip(RoundedCornerShape(80.dp))
-                .background(Color.White)) {
-                Text(text = "按钮", modifier = Modifier.align(Alignment.Center))
+                .padding(bottom = 60.dp)
+                .size(70.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF409EFF))
+                .combinedClickable {
+                    envMap.entries.forEach {
+                        if (it.value.value.isNotEmpty()) {
+                            currConf.putString("$taskId#$ENV_VARIABLE#${it.key}", it.value.value)
+                        } else {
+                            currConf.remove("$taskId#$ENV_VARIABLE#${it.key}")
+                        }
+                    }
+                    ToastUtil.send("保存成功")
+//                    navController.popBackStack()
+                }
+            ) {
+                Text(
+                    text = "保存",
+                    fontSize = 23.sp,
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }

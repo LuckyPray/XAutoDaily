@@ -83,9 +83,6 @@
 -keep class * extends me.teble.xposed.autodaily.hook.base.BaseHook {
     <methods>;
 }
--keep class org.bouncycastle.jcajce.provider.asymmetric.ec.KeyFactorySpi$EC { *; }
--keep class org.bouncycastle.jcajce.provider.asymmetric.ec.IESCipher$ECIES { *; }
--keep class org.bouncycastle.jcajce.provider.asymmetric.EC$Mappings { *; }
 -keep class com.tencent.mmkv.** { *; }
 # 插件代理混
 -keep class me.teble.xposed.autodaily.hook.function.proxy.* {
