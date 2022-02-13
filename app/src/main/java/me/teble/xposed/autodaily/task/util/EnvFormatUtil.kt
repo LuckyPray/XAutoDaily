@@ -55,16 +55,16 @@ object EnvFormatUtil {
         if (args.isEmpty()) {
             resList = listOf(evalStr)
         } else {
-            var firstListSize = 0
+            var firstListSize = -1
             for (value in values) {
                 if (value is List<*>) {
-                    if (firstListSize == 0) firstListSize = value.size
+                    if (firstListSize == -1) firstListSize = value.size
                     else if (firstListSize != value.size) {
                         throw RuntimeException("参数列表长度不一致")
                     }
                 }
             }
-            if (firstListSize == 0) {
+            if (firstListSize == -1) {
                 resList = listOf(String.format(formatStr, *values.toTypedArray()))
             } else {
                 resList = mutableListOf<String>().apply {
