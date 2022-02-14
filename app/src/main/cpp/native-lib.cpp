@@ -7,8 +7,9 @@
 #define EXPORT extern "C" __attribute__((visibility("default")))
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
 extern "C" jint Decrypt_JNI_OnLoad(JavaVM *vm, void *reserved);
-extern "C" const char * decryptXAConf(const std::string &src);
+extern "C" const char *decryptXAConf(const std::string &src);
 extern "C" const char *hmacSha1Base64(const std::string &value);
+extern "C" const char *md5Hex(const std::string &value);
 
 EXPORT jbyteArray
 Java_me_teble_xposed_autodaily_task_util_ConfigUtil_decryptXAConf(
@@ -38,6 +39,17 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_getTencentDigest(
     int len = env->GetStringUTFLength(value);
     std::string encValue(p, len);
     const char *ret = hmacSha1Base64(encValue);
+    env->ReleaseStringUTFChars(value, p);
+    return env->NewStringUTF(ret);
+}
+
+EXPORT jstring
+Java_me_teble_xposed_autodaily_task_util_ConfigUtil_getMd5Hex(
+        JNIEnv *env, jobject thiz, jstring value) {
+    const char *p = env->GetStringUTFChars(value, nullptr);
+    int len = env->GetStringUTFLength(value);
+    std::string encValue(p, len);
+    const char *ret = md5Hex(encValue);
     env->ReleaseStringUTFChars(value, p);
     return env->NewStringUTF(ret);
 }

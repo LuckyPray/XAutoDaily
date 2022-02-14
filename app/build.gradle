@@ -159,7 +159,6 @@ dependencies {
     implementation "cn.hutool:hutool-core:$hutool_version"
     implementation "cn.hutool:hutool-cron:$hutool_version"
     implementation "cn.hutool:hutool-http:$hutool_version"
-    implementation "cn.hutool:hutool-crypto:$hutool_version"
 
     // Other
     implementation "com.hankcs:aho-corasick-double-array-trie:1.2.3"

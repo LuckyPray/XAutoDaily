@@ -71,6 +71,8 @@ object ConfigUtil {
 
     external fun getTencentDigest(value: String): String
 
+    external fun getMd5Hex(value: String): String
+
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
         try {
             ToastUtil.send("正在检测更新")

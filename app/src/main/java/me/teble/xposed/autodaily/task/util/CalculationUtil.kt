@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
-import cn.hutool.crypto.digest.DigestUtil
+import androidx.compose.ui.text.toLowerCase
 import java.util.*
 
 object CalculationUtil {
@@ -33,7 +33,7 @@ object CalculationUtil {
             cnt = element.code
         }
         stringBuilder.append(CSRF_TOKEN_END_STR)
-        return DigestUtil.md5Hex(stringBuilder.toString())
+        return ConfigUtil.getMd5Hex(stringBuilder.toString()).lowercase(Locale.getDefault())
     }
 
     fun getMicrosecondTime(): Long {
