@@ -2,16 +2,20 @@ package me.teble.xposed.autodaily.task.request.impl
 
 import cn.hutool.http.HttpUtil
 import cn.hutool.http.Method
-import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
+import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
 import me.teble.xposed.autodaily.task.request.model.TaskRequest
 import me.teble.xposed.autodaily.task.request.model.TaskResponse
+import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.toJsonString
+import java.text.SimpleDateFormat
+import java.util.*
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"
@@ -32,7 +36,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
         env: MutableMap<String, Any>
     ): List<TaskRequest> {
         val res = mutableListOf<TaskRequest>().apply {
-            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.qDomain, env)
+            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
             val repeatNum = EnvFormatUtil.format(task.repeat, null, env).toInt()
             LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
             evalUrls.forEach { url ->
@@ -41,16 +45,36 @@ object HttpTaskReqUtil : ITaskReqUtil {
                     env["req_url"] = url
                     val headers = mutableMapOf<String, String>()
                     task.reqHeaders?.entries?.forEach {
-                        headers[it.key] = EnvFormatUtil.format(it.value, task.qDomain, env)
+                        headers[it.key] = EnvFormatUtil.format(it.value, task.domain, env)
                     }
                     LogUtil.d(TAG, "header 头构造完毕: $headers")
-                    val cookie = task.qDomain?.let {
-                        getQDomainCookies(it)
-                    } ?: ""
+                    var cookie: String? = null
+                    when (task.domain) {
+                        null -> {}
+                        "daily.huasteble.cn" -> {
+                            val cd = Calendar.getInstance()
+                            val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
+                            sdf.timeZone = TimeZone.getTimeZone("GMT")
+                            val timeStr = sdf.format(cd.time)
+                            val signStr = "date: $timeStr\nuin: $currentUin"
+                            val secretId = "AKIDl03byn0gmi1cpfgtknn3qESie9c7w6joyLef"
+                            val sig: String = ConfigUtil.getTencentDigest(signStr)
+                            val authorization = """
+                                hmac id="$secretId", algorithm="hmac-sha1", headers="date uin", signature="$sig"
+                                """.trimIndent()
+                            headers["uin"] = "$currentUin"
+                            headers["date"] = timeStr
+                            headers["Authorization"] = authorization
+                        }
+                        // qqDomain
+                        else -> {
+                            cookie = getQDomainCookies(task.domain)
+                        }
+                    }
                     LogUtil.d(TAG, "cookie 构造完毕: $cookie")
                     LogUtil.d(TAG, "开始format data -> ${task.reqData}")
                     val bodyList = task.reqData?.let {
-                        EnvFormatUtil.formatList(it, task.qDomain, env)
+                        EnvFormatUtil.formatList(it, task.domain, env)
                     }
                     LogUtil.d(TAG, "body -> $bodyList")
                     bodyList?.forEach {

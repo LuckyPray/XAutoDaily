@@ -64,7 +64,12 @@ object ConfigUtil {
         System.load(soFilePath)
     }
 
-    private external fun decryptXAConf(encConf: String): String
+    /**
+     * 部分机型变量进入jni后字符丢失，这里分批传入，尝试避免单个变量11341个字符之后丢失的问题
+     */
+    private external fun decryptXAConf(encConfBytes: ByteArray): ByteArray
+
+    external fun getTencentDigest(value: String): String
 
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
         try {
@@ -155,12 +160,12 @@ object ConfigUtil {
     }
 
     fun decodeConfStr(encodeConfStr: String): String? {
-        val conf = decryptXAConf(encodeConfStr)
-        if (conf.isNotEmpty()) {
-            return conf
+        val res = decryptXAConf(encodeConfStr.toByteArray())
+        if (res.isEmpty()) {
+            LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
+            return null
         }
-        LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
-        return null
+        return String(res)
     }
 
     private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {

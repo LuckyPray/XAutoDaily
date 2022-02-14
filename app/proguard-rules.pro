@@ -77,6 +77,9 @@
 }
 # Hook 混淆
 -keep public class me.teble.xposed.autodaily.hook.MainHook
+-keep class me.teble.xposed.autodaily.utils.LogUtil {
+    *;
+}
 -keepclassmembers public class me.teble.xposed.autodaily.hook.MainHook {
     <init>(android.content.Context);
 }

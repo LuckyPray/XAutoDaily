@@ -88,7 +88,7 @@ android {
                 signingConfig signingConfigs.release
             }
             matchingFallbacks = ['release']
-            versionNameSuffix "-rc8"
+            versionNameSuffix "-rc9"
         }
     }
 

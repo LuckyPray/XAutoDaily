@@ -3,6 +3,8 @@ package me.teble.xposed.autodaily.utils
 import android.content.Context
 import android.os.Build
 import me.teble.xposed.autodaily.hook.base.Global
+import java.io.BufferedInputStream
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
@@ -45,11 +47,25 @@ fun getTextFromAssets(context: Context, fileName: String): String {
 
 fun getTextFromModuleAssets(fileName: String): String {
     try {
-        Global.moduleClassLoader.getResourceAsStream("assets/$fileName").use { stream ->
-            val length = stream.available()
-            val buffer = ByteArray(length)
-            stream.read(buffer)
-            return String(buffer, StandardCharsets.UTF_8)
+        Global.moduleRes.assets.open(fileName).use { stream ->
+//
+//        }
+//        Global.moduleClassLoader.getResourceAsStream("assets/$fileName").use { stream ->
+            val bis = BufferedInputStream(stream)
+            val bos = ByteArrayOutputStream()
+            val buffer = ByteArray(1024)
+            var len: Int
+            while (bis.read(buffer).also { len = it } != -1) {
+                bos.write(buffer, 0, len)
+            }
+//            val length = stream.available()
+//            LogUtil.log("file length -> $length")
+//            val buffer = ByteArray(length)
+//            stream.read(buffer)
+//            LogUtil.log("buffer size -> ${buffer.size}")
+//            val str = String(buffer, StandardCharsets.UTF_8)
+            LogUtil.log("str length -> ${bos.size()}")
+            return String(bos.toByteArray())
         }
     } catch (e: Exception) {
         LogUtil.e(e)

@@ -19,7 +19,7 @@ object FuncTaskReqUtil : ITaskReqUtil {
 
     override fun create(task: Task, env: MutableMap<String, Any>): List<TaskRequest> {
         return mutableListOf<TaskRequest>().apply {
-            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.qDomain, env)
+            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
             LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
             evalUrls.forEach {
                 add(TaskRequest(it, null, null, null, null))

@@ -8,8 +8,16 @@ data class TaskProperties(
     val version: Int,
     // 最小支持app版本
     val minAppVersion: Int,
+    // 配置更新日志
+    val updateLogs: List<UpdateInfo>,
     // 任务组
     val taskGroups: List<TaskGroup>,
+)
+
+@Serializable
+data class UpdateInfo(
+    val version: Int,
+    val desc: String
 )
 
 @Serializable
@@ -50,8 +58,8 @@ data class Task(
     val reqHeaders: Map<String, String>?,
     // 请求体
     val reqData: String?,
-    // 当前任务所属的qq域名，用于获取不同域下的cookie
-    val qDomain: String?,
+    // 当前任务所需要访问的域名，如果为qq域名，则获取不同域下的cookie
+    val domain: String?,
     // 请求回调
     val callback: TaskCallback
 )
