@@ -48,9 +48,6 @@ fun getTextFromAssets(context: Context, fileName: String): String {
 fun getTextFromModuleAssets(fileName: String): String {
     try {
         Global.moduleRes.assets.open(fileName).use { stream ->
-//
-//        }
-//        Global.moduleClassLoader.getResourceAsStream("assets/$fileName").use { stream ->
             val bis = BufferedInputStream(stream)
             val bos = ByteArrayOutputStream()
             val buffer = ByteArray(1024)
@@ -58,12 +55,6 @@ fun getTextFromModuleAssets(fileName: String): String {
             while (bis.read(buffer).also { len = it } != -1) {
                 bos.write(buffer, 0, len)
             }
-//            val length = stream.available()
-//            LogUtil.log("file length -> $length")
-//            val buffer = ByteArray(length)
-//            stream.read(buffer)
-//            LogUtil.log("buffer size -> ${buffer.size}")
-//            val str = String(buffer, StandardCharsets.UTF_8)
             LogUtil.log("str length -> ${bos.size()}")
             return String(bos.toByteArray())
         }
