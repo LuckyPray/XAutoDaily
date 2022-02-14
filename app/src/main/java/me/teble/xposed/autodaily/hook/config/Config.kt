@@ -49,7 +49,6 @@ object Config {
 
     val accountConfig: ConfProxy
         get() {
-            LogUtil.d(TAG, "curr -> $currentUin")
             if (!Global.isInit()) return MockConfProxy()
             return confProxyMap[currentUin] ?: let {
                 val currentConf =
