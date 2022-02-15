@@ -94,7 +94,7 @@ object EnvFormatUtil {
         when {
             argFunc.startsWith("randInt(") -> {
                 val tmpStr = argFunc.substring(8, argFunc.length - 1)
-                val strings = tmpStr.split(",\\s*").toTypedArray()
+                val strings = tmpStr.split(",\\s*".toRegex()).toTypedArray()
                 return when (strings.size) {
                     1 -> {
                         val integer = strings[0].toInt()
