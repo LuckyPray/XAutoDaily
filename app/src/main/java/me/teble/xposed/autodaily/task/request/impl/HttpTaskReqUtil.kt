@@ -37,55 +37,51 @@ object HttpTaskReqUtil : ITaskReqUtil {
     ): List<TaskRequest> {
         val res = mutableListOf<TaskRequest>().apply {
             val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
-            val repeatNum = EnvFormatUtil.format(task.repeat, null, env).toInt()
             LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
             evalUrls.forEach { url ->
-                LogUtil.d(TAG, "重复请求次数 -> $repeatNum")
-                for (cnt in 0 until repeatNum) {
-                    env["req_url"] = url
-                    val headers = mutableMapOf<String, String>()
-                    task.reqHeaders?.entries?.forEach {
-                        headers[it.key] = EnvFormatUtil.format(it.value, task.domain, env)
-                    }
-                    LogUtil.d(TAG, "header 头构造完毕: $headers")
-                    var cookie: String? = null
-                    when (task.domain) {
-                        null -> {}
-                        "daily.huasteble.cn" -> {
-                            val cd = Calendar.getInstance()
-                            val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
-                            sdf.timeZone = TimeZone.getTimeZone("GMT")
-                            val timeStr = sdf.format(cd.time)
-                            val signStr = "date: $timeStr\nuin: $currentUin"
-                            val secretId = "AKIDl03byn0gmi1cpfgtknn3qESie9c7w6joyLef"
-                            val sig: String = ConfigUtil.getTencentDigest(signStr)
-                            val authorization = """
+                env["req_url"] = url
+                val headers = mutableMapOf<String, String>()
+                task.reqHeaders?.entries?.forEach {
+                    headers[it.key] = EnvFormatUtil.format(it.value, task.domain, env)
+                }
+                LogUtil.d(TAG, "header 头构造完毕: $headers")
+                var cookie: String? = null
+                when (task.domain) {
+                    null -> {}
+                    "daily.huasteble.cn" -> {
+                        val cd = Calendar.getInstance()
+                        val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
+                        sdf.timeZone = TimeZone.getTimeZone("GMT")
+                        val timeStr = sdf.format(cd.time)
+                        val signStr = "date: $timeStr\nuin: $currentUin"
+                        val secretId = "AKIDl03byn0gmi1cpfgtknn3qESie9c7w6joyLef"
+                        val sig: String = ConfigUtil.getTencentDigest(signStr)
+                        val authorization = """
                                 hmac id="$secretId", algorithm="hmac-sha1", headers="date uin", signature="$sig"
                                 """.trimIndent()
-                            headers["uin"] = "$currentUin"
-                            headers["date"] = timeStr
-                            headers["Authorization"] = authorization
-                        }
-                        // qqDomain
-                        else -> {
-                            cookie = getQDomainCookies(task.domain)
-                        }
+                        headers["uin"] = "$currentUin"
+                        headers["date"] = timeStr
+                        headers["Authorization"] = authorization
                     }
-                    LogUtil.d(TAG, "cookie 构造完毕: ***(${cookie?.length})")
-                    LogUtil.d(TAG, "开始format data -> ${task.reqData}")
-                    val bodyList = task.reqData?.let {
-                        EnvFormatUtil.formatList(it, task.domain, env)
+                    // qqDomain
+                    else -> {
+                        cookie = getQDomainCookies(task.domain)
                     }
-                    LogUtil.d(TAG, "body -> $bodyList")
-                    bodyList?.forEach {
-                        val request = TaskRequest(url, task.reqMethod, headers, cookie, it)
-                        add(request)
-                    } ?: let {
-                        val request = TaskRequest(url, task.reqMethod, headers, cookie, null)
-                        add(request)
-                    }
-                    env.remove("req_url")
                 }
+                LogUtil.d(TAG, "cookie 构造完毕: ***(${cookie?.length})")
+                LogUtil.d(TAG, "开始format data -> ${task.reqData}")
+                val bodyList = task.reqData?.let {
+                    EnvFormatUtil.formatList(it, task.domain, env)
+                }
+                LogUtil.d(TAG, "body -> $bodyList")
+                bodyList?.forEach {
+                    val request = TaskRequest(url, task.reqMethod, headers, cookie, it)
+                    add(request)
+                } ?: let {
+                    val request = TaskRequest(url, task.reqMethod, headers, cookie, null)
+                    add(request)
+                }
+                env.remove("req_url")
             }
         }
         return res
@@ -127,7 +123,11 @@ object HttpTaskReqUtil : ITaskReqUtil {
                     |   body: ${response.body()}
                     """.trimMargin()
                 )
-                return TaskResponse(getHeadersText(response.headers()), response.body(), response.status)
+                return TaskResponse(
+                    getHeadersText(response.headers()),
+                    response.body(),
+                    response.status
+                )
             }
         }
     }

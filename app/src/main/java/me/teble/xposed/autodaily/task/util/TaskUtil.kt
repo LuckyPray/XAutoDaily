@@ -67,28 +67,34 @@ object TaskUtil {
             }
             LogUtil.d(TAG, "开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
         }
-        // 执行依赖任务
-        relays.forEach {
-            LogUtil.d(TAG, "开始执行依赖任务列表: ${task.relay}")
-            // 依赖任务失败，退出执行
-            if (!execute(reqType, it, relayMap, env)) {
-                // TODO 多次失败，任务禁用
-                return false
-            }
-        }
-        val taskReqUtil = ReqFactory.getReq(reqType)
-        val requests = taskReqUtil.create(task, env)
+        val repeatNum = format(task.repeat, null, env).toInt()
+        LogUtil.d(TAG, "重复请求次数 -> $repeatNum")
         var successNum = 0
+        var reqCount = 0
         var lastMsg = "任务没有执行"
-        requests.forEachIndexed { _, it ->
-            Thread.sleep((task.delay * 1000).toLong())
-            val response = taskReqUtil.executor(it)
-            val result = handleCallback(response, task, env)
-            lastMsg = result.msg
-            if (result.success) {
-                successNum++
-            } else {
-                LogUtil.i(TAG, "任务【${task.id}】执行失败: $lastMsg")
+        for (cnt in 0 until repeatNum) {
+            // 执行依赖任务
+            relays.forEach {
+                LogUtil.d(TAG, "开始执行依赖任务列表: ${task.relay}")
+                // 依赖任务失败，退出执行
+                if (!execute(reqType, it, relayMap, env)) {
+                    // TODO 多次失败，任务禁用
+                    return false
+                }
+            }
+            val taskReqUtil = ReqFactory.getReq(reqType)
+            val requests = taskReqUtil.create(task, env)
+            reqCount += requests.size
+            requests.forEachIndexed { _, it ->
+                Thread.sleep((task.delay * 1000).toLong())
+                val response = taskReqUtil.executor(it)
+                val result = handleCallback(response, task, env)
+                lastMsg = result.msg
+                if (result.success) {
+                    successNum++
+                } else {
+                    LogUtil.i(TAG, "任务【${task.id}】执行失败: $lastMsg")
+                }
             }
         }
         // 正常cron任务，需要计算下次执行时间
@@ -101,7 +107,7 @@ object TaskUtil {
             ConfigUtil.saveAndCheckMostRecentExecTime(nextTime)
             accountConfig.putString(
                 "${task.id}#${Const.LAST_EXEC_MSG}",
-                if (requests.size == 1) {
+                if (reqCount == 1) {
                     if (successNum == 1) {
                         ToastUtil.send("任务【${task.id}】 $lastMsg")
                         lastMsg
@@ -112,10 +118,10 @@ object TaskUtil {
                 } else {
                     LogUtil.i(
                         TAG,
-                        "任务【${task.id}】执行完毕，成功${successNum}个，失败${requests.size - successNum}个"
+                        "任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个"
                     )
-                    ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${requests.size - successNum}个")
-                    "执行成功${successNum}个，失败${requests.size - successNum}个"
+                    ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个")
+                    "执行成功${successNum}个，失败${reqCount - successNum}个"
                 }
             )
         }
