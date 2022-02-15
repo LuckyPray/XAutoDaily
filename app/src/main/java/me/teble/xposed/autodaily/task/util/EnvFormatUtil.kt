@@ -37,19 +37,19 @@ object EnvFormatUtil {
     fun formatList(evalStr: String, qDomain: String?, env: MutableMap<String, Any>): List<String> {
         val values = mutableListOf<Any>()
         val args = ReUtil.findAllGroup1(ARG_REG, evalStr).apply {
-            LogUtil.d(TAG, "regex find result -> ${this.toJsonString()}")
+//            LogUtil.d(TAG, "regex find result -> ${this.toJsonString()}")
             forEachIndexed { index, s ->
                 val start = if (s.startsWith("\${")) 2 else 1
                 val end = if (s.endsWith("}")) s.length - 1 else s.length
                 val name = s.substring(start, end)
-                LogUtil.d(TAG, "name -> $name")
+//                LogUtil.d(TAG, "name -> $name")
                 this[index] = name
                 values.add(getFormatArgValue(name, qDomain, env))
             }
         }
-        LogUtil.d(TAG, "evalString -> $evalStr")
-        LogUtil.d(TAG, "formatArgs -> ${args.toJsonString()}")
-        LogUtil.d(TAG, "formatValues -> ${values.toJsonString()}")
+//        LogUtil.d(TAG, "evalString -> $evalStr")
+//        LogUtil.d(TAG, "formatArgs -> ${args.toJsonString()}")
+//        LogUtil.d(TAG, "formatValues -> ${values.toJsonString()}")
         val formatStr = ReUtil.replaceAll(evalStr, ARG_REG, "%s")
         val resList: List<String>
         if (args.isEmpty()) {
@@ -82,7 +82,7 @@ object EnvFormatUtil {
                 }
             }
         }
-        LogUtil.d(TAG, "format -> $resList")
+//        LogUtil.d(TAG, "format -> $resList")
         return resList
     }
 
@@ -94,7 +94,7 @@ object EnvFormatUtil {
         when {
             argFunc.startsWith("randInt(") -> {
                 val tmpStr = argFunc.substring(8, argFunc.length - 1)
-                val strings = tmpStr.split(",\\s*".toRegex()).toTypedArray()
+                val strings = tmpStr.split(",\\s*".toRegex())
                 return when (strings.size) {
                     1 -> {
                         val integer = strings[0].toInt()

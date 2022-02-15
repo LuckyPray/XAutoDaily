@@ -4,11 +4,11 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.exceptions.UtilException
+import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.cron.CronUtil
 import cn.hutool.cron.task.Task
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
-import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -16,6 +16,7 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
+import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.CHANGE_SIGN_BUTTON
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
@@ -90,13 +91,18 @@ class CoreServiceHook : BaseHook() {
         }
 
         private fun executorTask(conf: TaskProperties) {
+            val threadPool = ThreadUtil.newExecutor(5, 5)
             for (taskGroup in conf.taskGroups) {
-                try {
-                    GroupTaskFilterChain.build(taskGroup)
-                        .doFilter(mutableMapOf(), mutableListOf(), mutableMapOf())
-                } catch (e: Exception) {
-                    LogUtil.e(taskGroup.id, e)
-                }
+                threadPool.execute(
+                    thread(false) {
+                        try {
+                            GroupTaskFilterChain.build(taskGroup)
+                                .doFilter(mutableMapOf(), mutableListOf(), mutableMapOf())
+                        } catch (e: Exception) {
+                            LogUtil.e(taskGroup.id, e)
+                        }
+                    }
+                )
             }
         }
     }
