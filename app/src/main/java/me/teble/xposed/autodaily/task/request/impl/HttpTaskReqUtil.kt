@@ -71,7 +71,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                             cookie = getQDomainCookies(task.domain)
                         }
                     }
-                    LogUtil.d(TAG, "cookie 构造完毕: $cookie")
+                    LogUtil.d(TAG, "cookie 构造完毕: ***(${cookie?.length})")
                     LogUtil.d(TAG, "开始format data -> ${task.reqData}")
                     val bodyList = task.reqData?.let {
                         EnvFormatUtil.formatList(it, task.domain, env)
@@ -104,7 +104,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 request.header("user-agent", Constants.qqUserAgent, true)
             }
             req.cookie?.let {
-                LogUtil.d(TAG, "put cookie -> $it")
+                LogUtil.d(TAG, "put cookie -> ***(${it.length})")
                 request.header("cookie", it, false)
             }
             req.data?.let {
