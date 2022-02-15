@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.hook.base
 
 import android.content.Context
+import me.teble.xposed.autodaily.utils.LogUtil
 import java.net.URL
 
 class XAClassLoader(
@@ -10,10 +11,6 @@ class XAClassLoader(
 
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
-        try {
-            return Context::class.java.classLoader!!.loadClass(name)
-        } catch (ignored: ClassNotFoundException) {
-        }
         return if (switchHostClass(name)) {
             qClassLoader.loadClass(name)
         } else {
