@@ -69,7 +69,7 @@ object CalculationUtil {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        println(getPsToken("0c6a52b1116d9628e65030cdbf0c7b01989c0b19e9f6a8e4eba24153cce9ba4c"))
-        println(getBkn("MJJMEGoGAS"))
+        println(getPsToken("rX7a-zQDUMn8vF3A9bpcvj-Y4ORXrAY6TMVZvvJsdkQ_"))
+        println(getBkn("MD0CNWKHXD"))
     }
 }

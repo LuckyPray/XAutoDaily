@@ -56,6 +56,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto=full")
 # 去除静态库不用的符号
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--exclude-libs,ALL")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--exclude-libs,ALL")
+# ollvm
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mllvm -fla")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mllvm -fla")
 
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
