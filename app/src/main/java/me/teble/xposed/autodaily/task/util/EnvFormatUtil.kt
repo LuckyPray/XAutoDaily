@@ -72,9 +72,9 @@ object EnvFormatUtil {
                         val lis = mutableListOf<String>()
                         for (value in values) {
                             if (value is List<*>) {
-                                lis.add(value[i] as String)
+                                lis.add("${value[i]}")
                             } else {
-                                lis.add(value as String)
+                                lis.add("$value")
                             }
                         }
                         add(String.format(formatStr, *lis.toTypedArray()))
