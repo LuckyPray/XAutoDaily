@@ -119,7 +119,8 @@ object TaskUtil {
                 }
             )
         }
-        return successNum > 0
+        // 未配置断言器允许失败，防止不重要的依赖任务中断任务流程
+        return task.callback.assert == null || successNum > 0
     }
 
     private fun handleCallback(
