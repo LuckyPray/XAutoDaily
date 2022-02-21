@@ -28,8 +28,6 @@ fun Window.setStatusBarTranslation() {
 fun Window.setNavigationBarTranslation() {
     // 设置导航栏透明,暂时没有更好的办法解决透明问题
     this.addFlags(FLAG_TRANSLUCENT_NAVIGATION)
-    if (SDK_INT >= R)
-        this.isNavigationBarContrastEnforced = false
     // 防止透明以后高对比度
     if (SDK_INT >= Q)
         this.isNavigationBarContrastEnforced = false
@@ -45,7 +43,7 @@ fun Window.setNavigationBarTranslation() {
  */
 @Suppress("DEPRECATION")
 fun Activity.navigationBarMode(enable: Boolean = true) {
-    if (SDK_INT >= O){
+    if (SDK_INT >= O) {
         window.decorView.systemUiVisibility = if (enable)
             window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         else

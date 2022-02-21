@@ -29,12 +29,12 @@ class ModuleActivity : BaseActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // 状态栏和导航栏沉浸
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
         this.window.setStatusBarTranslation()
         this.window.setNavigationBarTranslation()
         this.navigationBarMode(true)
+        super.onCreate(savedInstanceState)
+        // 状态栏和导航栏沉浸
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         // 缓存当前账号配置类，避免在UI刷新时重复获取
         currConf = accountConfig
