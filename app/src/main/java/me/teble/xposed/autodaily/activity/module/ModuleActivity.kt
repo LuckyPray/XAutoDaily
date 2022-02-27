@@ -6,6 +6,7 @@ import android.view.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,7 +46,7 @@ class ModuleActivity : BaseActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             this.setContent {
-                MaterialTheme {
+                MaterialTheme(colors = colors()) {
                     ProvideWindowInsets {
                         Box(
                             modifier = Modifier
@@ -69,3 +70,32 @@ class ModuleActivity : BaseActivity() {
         setContentView(view)
     }
 }
+
+fun colors(
+    primary: Color = Color(0xFF409EFF),
+    primaryVariant: Color = Color(0xFF2b7cd9),
+    secondary: Color = Color(0xFF409EFF),
+    secondaryVariant: Color = Color(0xFF2b7cd9),
+    background: Color = Color.White,
+    surface: Color = Color.White,
+    error: Color = Color(0xFFB00020),
+    onPrimary: Color = Color.White,
+    onSecondary: Color = Color.Black,
+    onBackground: Color = Color.Black,
+    onSurface: Color = Color.Black,
+    onError: Color = Color.White
+): Colors = Colors(
+    primary,
+    primaryVariant,
+    secondary,
+    secondaryVariant,
+    background,
+    surface,
+    error,
+    onPrimary,
+    onSecondary,
+    onBackground,
+    onSurface,
+    onError,
+    true
+)

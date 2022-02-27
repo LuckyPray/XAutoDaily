@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -15,6 +14,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,8 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -46,6 +44,7 @@ import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
 import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
+import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
 import kotlin.concurrent.thread
 
 @Composable
@@ -94,9 +93,7 @@ fun MainLayout(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             BackgroundView(/*scrollUpState = scrollUpState, viewOffset = maxOffsetY*/)
-            LineSpacer()
             Announcement(post = notice)
-            LineSpacer()
             LineSwitch(
                 title = "总开关",
                 checked = mutableStateOf(
@@ -122,7 +119,6 @@ fun MainLayout(navController: NavHostController) {
                 },
                 modifier = Modifier.padding(vertical = 8.dp),
             )
-            LineSpacer()
 //            item {
 //                LineSpacer()
 //                LineButton(
@@ -142,7 +138,6 @@ fun MainLayout(navController: NavHostController) {
                 onClick = { ToastUtil.send("敬请期待") },
                 modifier = Modifier.padding(vertical = 8.dp),
             )
-            LineSpacer()
 //            item {
 //                LineSpacer()
 //                LineButton(
@@ -169,7 +164,6 @@ fun MainLayout(navController: NavHostController) {
                 },
                 modifier = Modifier.padding(vertical = 8.dp),
             )
-            LineSpacer()
             LineButton(
                 title = "点击加入tg频道",
                 otherInfoList = listOf(
@@ -186,7 +180,6 @@ fun MainLayout(navController: NavHostController) {
                 },
                 modifier = Modifier.padding(vertical = 8.dp),
             )
-            LineSpacer()
             LineButton(
                 title = "检测更新",
                 otherInfoList = listOf(
@@ -213,7 +206,6 @@ fun MainLayout(navController: NavHostController) {
                 },
                 modifier = Modifier.padding(vertical = 8.dp),
             )
-            LineSpacer()
             LineButton(
                 title = "请吃作者辣条",
                 desc = "本模块完全免费开源，一切开发旨在学习，请勿用于非法用途。习欢本模块的可以捐赠支持我，谢谢~~",
@@ -300,27 +292,37 @@ fun BackgroundView() {
                 }
             }
             LineSpacer()
-            Button(
-                onClick = {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastClickTime < 5000) {
-                        ToastUtil.send("点那么快怎么不上天呢")
-                        return@Button
-                    }
-                    lastClickTime = currentTime
-                    handler.sendEmptyMessage(EXEC_TASK)
-                },
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.textButtonColors(backgroundColor = Color.White),
-                modifier = Modifier
-                    .height(35.dp)
-            ) {
-                Text(
-                    text = "立即签到",
-                    fontSize = 15.sp,
-                    color = Color(0xFF409EFF),
-                    textAlign = TextAlign.Center
+            CompositionLocalProvider(
+                LocalRippleTheme provides RippleCustomTheme(
+                    color = Color(
+                        0xFF409EFF
+                    )
                 )
+            ) {
+                
+                Button(
+                    onClick = {
+                        val currentTime = System.currentTimeMillis()
+                        if (currentTime - lastClickTime < 5000) {
+                            ToastUtil.send("点那么快怎么不上天呢")
+                            return@Button
+                        }
+                        lastClickTime = currentTime
+                        handler.sendEmptyMessage(EXEC_TASK)
+                    },
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.textButtonColors(backgroundColor = Color.White),
+                    modifier = Modifier
+                        .height(35.dp)
+                ) {
+
+                    Text(
+                        text = "立即签到",
+                        fontSize = 15.sp,
+                        color = Color(0xFF409EFF),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
