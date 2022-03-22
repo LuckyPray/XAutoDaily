@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.utils
 
 import android.app.Activity
+import android.app.Dialog
 import android.graphics.Color.TRANSPARENT
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.*
@@ -48,5 +49,17 @@ fun Activity.navigationBarMode(enable: Boolean = true) {
             window.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         else
             window.decorView.systemUiVisibility xor View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+    }
+}
+
+@Suppress("DEPRECATION")
+fun Dialog.navigationBarMode(enable: Boolean = true) {
+    window?.let {
+        if (SDK_INT >= O) {
+            it.decorView.systemUiVisibility = if (enable)
+                it.decorView.systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            else
+                it.decorView.systemUiVisibility xor View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+        }
     }
 }
