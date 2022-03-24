@@ -140,15 +140,16 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 """.trimMargin()
             )
             val response = OkHttpClient().newCall(request).execute()
+            val responseBody = response.body?.string() ?: ""
             LogUtil.d(
                 TAG, """response <------------------------------------
                 |   code: ${response.code}
-                |   body: ${response.body?.string()}
+                |   body: $responseBody
                 """.trimMargin()
             )
             return TaskResponse(
                 getHeadersText(response.headers.toMultimap()),
-                response.body?.string() ?: "",
+                responseBody,
                 response.code
             )
         }

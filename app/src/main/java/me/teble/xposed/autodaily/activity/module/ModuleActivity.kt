@@ -16,6 +16,9 @@ import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import com.google.accompanist.insets.ProvideWindowInsets
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.Cache.currConf
@@ -24,9 +27,14 @@ import me.teble.xposed.autodaily.utils.navigationBarMode
 import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
 import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
-class ModuleActivity : BaseActivity() {
+class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
     companion object {
         const val TAG = "ModuleActivity"
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        this.cancel()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

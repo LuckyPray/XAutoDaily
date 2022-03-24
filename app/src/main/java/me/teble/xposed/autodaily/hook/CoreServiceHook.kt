@@ -16,16 +16,13 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
+import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
-import me.teble.xposed.autodaily.task.util.Const.CHANGE_SIGN_BUTTON
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
-import me.teble.xposed.autodaily.task.util.format
-import me.teble.xposed.autodaily.task.util.millisecond
 import me.teble.xposed.autodaily.ui.Cache
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.time.LocalDateTime
-import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
@@ -71,28 +68,30 @@ class CoreServiceHook : BaseHook() {
                     }
                     if (once) {
                         ToastUtil.send("开始执行签到")
+                    } else {
+                        LogUtil.d(TAG, "定时执行")
                     }
-                    val changeSignButton = accountConfig.getBoolean(CHANGE_SIGN_BUTTON, false)
-                    val mostRecentExecTime = ConfigUtil.getMostRecentExecTime()
-                    LogUtil.d(
-                        TAG,
-                        "isChange=$changeSignButton, isOnce=$once, mostRecentExecTime=${
-                            Date(mostRecentExecTime).format()
-                        }"
-                    )
-                    if (changeSignButton || once || LocalDateTime.now().millisecond > mostRecentExecTime) {
-                        executorTask(ConfigUtil.loadSaveConf())
-                    }
-                    if (changeSignButton) {
-                        accountConfig.putBoolean(CHANGE_SIGN_BUTTON, false)
-                    }
+                    executorTask(ConfigUtil.loadSaveConf())
                 }
             }
         }
 
         private fun executorTask(conf: TaskProperties) {
+            val needExecGroups = mutableListOf<TaskGroup>()
+            for (group in conf.taskGroups) {
+                for (task in group.tasks) {
+                    if (ConfigUtil.checkExecuteTask(task)) {
+                        needExecGroups.add(group)
+                        break
+                    }
+                }
+            }
+            if (needExecGroups.isEmpty()) {
+                return
+            }
+            // TODO 是否启用多线程
             val threadPool = ThreadUtil.newExecutor(5, 5)
-            for (taskGroup in conf.taskGroups) {
+            for (taskGroup in needExecGroups) {
                 threadPool.execute(
                     thread(false) {
                         try {

@@ -104,7 +104,6 @@ object TaskUtil {
             val nextTime =
                 CronPatternUtil.nextDateAfter(CronPattern(task.cron), currentTime, true)
             accountConfig.putString("${task.id}#${NEXT_SHOULD_EXEC_TIME}", nextTime.format())
-            ConfigUtil.saveAndCheckMostRecentExecTime(nextTime)
             accountConfig.putString(
                 "${task.id}#${Const.LAST_EXEC_MSG}",
                 if (reqCount == 1) {
