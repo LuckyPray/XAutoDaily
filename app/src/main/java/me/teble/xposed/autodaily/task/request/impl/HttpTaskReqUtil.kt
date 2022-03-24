@@ -1,7 +1,5 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import cn.hutool.http.HttpUtil
-import cn.hutool.http.Method
 import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
@@ -12,24 +10,29 @@ import me.teble.xposed.autodaily.task.request.model.TaskResponse
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.toJsonString
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.Buffer
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"
 
-    private val METHOD_MAP = mutableMapOf(
-        "get" to Method.GET,
-        "post" to Method.POST,
-        "put" to Method.PUT,
-        "patch" to Method.PATCH,
-        "head" to Method.HEAD,
-        "delete" to Method.DELETE,
-        "trace" to Method.TRACE,
-        "connect" to Method.CONNECT,
-    )
+    object METHOD {
+        private const val GET = "GET"
+        private const val POST = "POST"
+        private const val PUT = "PUT"
+        private const val PATCH = "PATCH"
+        private const val HEAD = "HEAD"
+        private const val DELETE = "DELETE"
+        private const val TRACE = "TRACE"
+    }
 
     override fun create(
         task: Task,
@@ -75,10 +78,11 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 }
                 LogUtil.d(TAG, "body -> $bodyList")
                 bodyList?.forEach {
-                    val request = TaskRequest(url, task.reqMethod, headers, cookie, it)
+                    val request = TaskRequest(url, task.reqMethod.uppercase(), headers, cookie, it)
                     add(request)
                 } ?: let {
-                    val request = TaskRequest(url, task.reqMethod, headers, cookie, null)
+                    val request =
+                        TaskRequest(url, task.reqMethod.uppercase(), headers, cookie, null)
                     add(request)
                 }
                 env.remove("req_url")
@@ -91,44 +95,62 @@ object HttpTaskReqUtil : ITaskReqUtil {
         taskRequest: TaskRequest
     ): TaskResponse {
         taskRequest.let { req ->
-            var request = HttpUtil.createRequest(METHOD_MAP[req.method], req.url)
-            req.headers?.entries?.forEach { entry ->
-                LogUtil.d(TAG, "put header: key -> ${entry.key}, value -> ${entry.value}")
-                request = request.header(entry.key, entry.value)
-            }
-            if (req.headers?.containsKey("") == false) {
-                request.header("user-agent", Constants.qqUserAgent, true)
-            }
-            req.cookie?.let {
-                LogUtil.d(TAG, "put cookie -> ***(${it.length})")
-                request.header("cookie", it, false)
-            }
-            req.data?.let {
-                LogUtil.d(TAG, "put data -> $it")
-                request.body(it)
-            }
+            val request = Request.Builder().apply {
+                url(req.url)
+                req.headers?.entries?.forEach {
+                    addHeader(it.key, it.value)
+                }
+                val existsUserAgent = req.headers?.keys?.stream()?.anyMatch {
+                    it.lowercase() == "user-agent"
+                } ?: false
+                if (!existsUserAgent) {
+                    addHeader("user-agent", Constants.qqUserAgent)
+                }
+                req.cookie?.let {
+                    addHeader("Cookie", it)
+                }
+                if (req.data == null) {
+                    method(req.method!!, null)
+                } else {
+                    req.data.let {
+                        addHeader("Content-Length", it.length.toString())
+                        if (it.startsWith("{") && it.endsWith("}")) {
+                            addHeader("Content-Type", "application/json")
+                            method(
+                                req.method!!,
+                                it.toRequestBody("application/json".toMediaTypeOrNull())
+                            )
+                        } else {
+                            addHeader("Content-Type", "application/x-www-form-urlencoded")
+                            method(
+                                req.method!!,
+                                it.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+                            )
+                        }
+                    }
+                }
+            }.build()
             LogUtil.d(TAG, "开始执行请求")
             LogUtil.d(
                 TAG, """request ------------------------------------>
                 |   method: ${request.method}
                 |   url: ${request.url}
                 |   headers: ***
-                |   body: ${request.fieldValueAs<ByteArray>("bodyBytes")?.let { String(it) }}
+                |   body: ${request.body?.bodyString()}
                 """.trimMargin()
             )
-            request.execute().let { response ->
-                LogUtil.d(
-                    TAG, """response <------------------------------------
-                    |   code: ${response.status}
-                    |   body: ${response.body()}
-                    """.trimMargin()
-                )
-                return TaskResponse(
-                    getHeadersText(response.headers()),
-                    response.body(),
-                    response.status
-                )
-            }
+            val response = OkHttpClient().newCall(request).execute()
+            LogUtil.d(
+                TAG, """response <------------------------------------
+                |   code: ${response.code}
+                |   body: ${response.body?.string()}
+                """.trimMargin()
+            )
+            return TaskResponse(
+                getHeadersText(response.headers.toMultimap()),
+                response.body?.string() ?: "",
+                response.code
+            )
         }
     }
 
@@ -142,5 +164,15 @@ object HttpTaskReqUtil : ITaskReqUtil {
 
     private fun getQDomainCookies(qDomain: String): String {
         return FunctionPool.ticketManager.getCookies(qDomain)
+    }
+
+    private fun RequestBody.bodyString(): String {
+        return try {
+            val buffer = Buffer()
+            writeTo(buffer)
+            buffer.readUtf8()
+        } catch (e: IOException) {
+            ""
+        }
     }
 }
