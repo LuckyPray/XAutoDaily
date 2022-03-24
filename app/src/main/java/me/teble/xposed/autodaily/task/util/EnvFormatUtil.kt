@@ -9,8 +9,6 @@ import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.ticketManager
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.VersionUtil
 import me.teble.xposed.autodaily.task.model.MiniProfile
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.toJsonString
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.Pattern.DOTALL

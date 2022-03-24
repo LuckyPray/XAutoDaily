@@ -1,11 +1,11 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.favoriteManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.groupSignInManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.publicAccountManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.sendMessageManager
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
 import me.teble.xposed.autodaily.task.request.model.TaskRequest
 import me.teble.xposed.autodaily.task.request.model.TaskResponse

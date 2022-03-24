@@ -30,8 +30,11 @@ import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.fieldValueAs
+import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Method
+import kotlin.collections.set
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 

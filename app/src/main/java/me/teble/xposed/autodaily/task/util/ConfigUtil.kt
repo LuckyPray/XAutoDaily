@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
-import cn.hutool.http.HttpUtil
 import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.NOTICE
@@ -23,10 +22,7 @@ import me.teble.xposed.autodaily.task.util.Const.MOST_RECENT_EXEC_TIME
 import me.teble.xposed.autodaily.ui.Cache.configVer
 import me.teble.xposed.autodaily.ui.Cache.lastFetchTime
 import me.teble.xposed.autodaily.ui.Cache.versionInfoCache
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.NativeUtil
-import me.teble.xposed.autodaily.utils.getTextFromModuleAssets
-import me.teble.xposed.autodaily.utils.parse
+import me.teble.xposed.autodaily.utils.*
 import java.io.File
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
@@ -77,7 +73,7 @@ object ConfigUtil {
         try {
             ToastUtil.send("正在检测更新")
             LogUtil.i("正在检测更新")
-            val res = HttpUtil.get("https://data.jsdelivr.com/v1/package/gh/teble/XAutoDaily-Conf")
+            val res = "https://data.jsdelivr.com/v1/package/gh/teble/XAutoDaily-Conf".get()
             val packageData: PackageData = res.parse()
             if (packageData.versions.isNotEmpty() && currentConfigVersion < packageData.versions[0].toInt()) {
                 return packageData.versions[0]
@@ -89,8 +85,7 @@ object ConfigUtil {
     }
 
     fun updateCdnConfig(newConfVersion: Int): Boolean {
-        val encRes =
-            HttpUtil.get("https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@${newConfVersion}/xa_conf")
+        val encRes = "https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@${newConfVersion}/xa_conf".get()
         val res = decodeConfStr(encRes)
         val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
         if (minAppVersion > BuildConfig.VERSION_CODE) {
@@ -134,7 +129,7 @@ object ConfigUtil {
 
     fun updateConfig(confUrl: String, showToast: Boolean): Boolean {
         try {
-            val encRes = HttpUtil.get(confUrl)
+            val encRes = confUrl.get()
             val res = decodeConfStr(encRes)
             val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
             val confVersion = ReUtil.getGroup1(CONFIG_VERSION_REG, res).toInt()
@@ -290,7 +285,7 @@ object ConfigUtil {
 
     fun fetchUpdateInfo(): VersionInfo? {
         return try {
-            val text = HttpUtil.get("$XA_API_URL$NOTICE")
+            val text = "$XA_API_URL$NOTICE".get()
             LogUtil.d(TAG, "getNotice -> $text")
             val res: Result = text.parse()
             versionInfoCache = res.data

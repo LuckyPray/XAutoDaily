@@ -5,16 +5,12 @@ import android.app.Dialog
 import android.content.Context
 import android.text.TextUtils
 import android.view.View
-import android.view.Window
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
-import me.teble.xposed.autodaily.utils.navigationBarMode
-import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
-import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
 @SuppressLint("ResourceType")
 class CustomDialog(context: Context) : Dialog(context, 5),
@@ -40,10 +36,10 @@ class CustomDialog(context: Context) : Dialog(context, 5),
     }
 
     override fun setContentView(view: View) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        window?.setStatusBarTranslation()
-        window?.setNavigationBarTranslation()
-        navigationBarMode(true)
+//        requestWindowFeature(Window.FEATURE_NO_TITLE)
+//        window?.setStatusBarTranslation()
+//        window?.setNavigationBarTranslation()
+//        navigationBarMode(true)
         super.setContentView(view)
         ViewTreeLifecycleOwner.set(view, this)
         ViewTreeViewModelStoreOwner.set(view, this)

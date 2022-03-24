@@ -1,7 +1,5 @@
 package me.teble.xposed.autodaily.hook.base
 
-import android.content.Context
-import me.teble.xposed.autodaily.utils.LogUtil
 import java.net.URL
 
 class XAClassLoader(

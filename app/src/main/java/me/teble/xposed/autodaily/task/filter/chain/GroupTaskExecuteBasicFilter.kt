@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.task.filter.chain
 
-import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.filter.FilterChain
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilter
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.enum.ReqType
 import me.teble.xposed.autodaily.task.util.TaskUtil
 import me.teble.xposed.autodaily.utils.LogUtil

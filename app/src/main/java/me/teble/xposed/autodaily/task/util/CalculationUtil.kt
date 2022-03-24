@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.task.util
 
-import androidx.compose.ui.text.toLowerCase
 import java.util.*
 
 object CalculationUtil {
