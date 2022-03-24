@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
@@ -9,11 +10,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.icons.materialIcon
+import androidx.compose.material.icons.materialPath
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,10 +27,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
-import me.teble.xposed.autodaily.task.model.TaskEnv
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.task.model.TaskEnv
 import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
@@ -239,33 +244,72 @@ fun EditEnvLayout(
 
             Box(modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(40.dp)
+                .padding(30.dp)
                 .padding(bottom = 60.dp)
-                .size(70.dp)
+                .size(60.dp)
                 .clip(CircleShape)
                 .background(Color(0xFF409EFF))
                 .combinedClickable {
                     envMap.entries.forEach {
                         if (it.value.value.isNotEmpty()) {
-                            currConf.putString("$taskId#$ENV_VARIABLE#${it.key}", it.value.value)
+                            currConf.putString(
+                                "$taskId#$ENV_VARIABLE#${it.key}",
+                                it.value.value
+                            )
                         } else {
                             currConf.remove("$taskId#$ENV_VARIABLE#${it.key}")
                         }
                     }
                     ToastUtil.send("保存成功")
-//                    navController.popBackStack()
                 }
             ) {
-                Text(
-                    text = "保存",
-                    fontSize = 23.sp,
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.Center)
+                Image(
+                    Save, "保存",
+                    colorFilter = ColorFilter.tint(Color.White),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(35.dp)
                 )
             }
         }
     }
 }
+
+public val Save: ImageVector
+    get() {
+        if (_save != null) {
+            return _save!!
+        }
+        _save = materialIcon(name = "Filled.Save") {
+            materialPath {
+                moveTo(17.0f, 3.0f)
+                lineTo(5.0f, 3.0f)
+                curveToRelative(-1.11f, 0.0f, -2.0f, 0.9f, -2.0f, 2.0f)
+                verticalLineToRelative(14.0f)
+                curveToRelative(0.0f, 1.1f, 0.89f, 2.0f, 2.0f, 2.0f)
+                horizontalLineToRelative(14.0f)
+                curveToRelative(1.1f, 0.0f, 2.0f, -0.9f, 2.0f, -2.0f)
+                lineTo(21.0f, 7.0f)
+                lineToRelative(-4.0f, -4.0f)
+                close()
+                moveTo(12.0f, 19.0f)
+                curveToRelative(-1.66f, 0.0f, -3.0f, -1.34f, -3.0f, -3.0f)
+                reflectiveCurveToRelative(1.34f, -3.0f, 3.0f, -3.0f)
+                reflectiveCurveToRelative(3.0f, 1.34f, 3.0f, 3.0f)
+                reflectiveCurveToRelative(-1.34f, 3.0f, -3.0f, 3.0f)
+                close()
+                moveTo(15.0f, 9.0f)
+                lineTo(5.0f, 9.0f)
+                lineTo(5.0f, 5.0f)
+                horizontalLineToRelative(10.0f)
+                verticalLineToRelative(4.0f)
+                close()
+            }
+        }
+        return _save!!
+    }
+
+private var _save: ImageVector? = null
 
 @Preview
 @Composable
