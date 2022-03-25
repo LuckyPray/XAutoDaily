@@ -22,6 +22,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
 import me.teble.xposed.autodaily.ui.Cache
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.time.LocalDateTime
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -125,8 +126,13 @@ class CoreServiceHook : BaseHook() {
                                 Cache.needUpdate = true
                             }
                         })
+                        CronUtil.schedule("0 0 0/3 * * *", Task {
+                            TimeUtil.init()
+                        })
                     } catch (ignore: UtilException) {
                         // Scheduler has been started, please stop it first!
+                    } catch (ignore: ExceptionInInitializerError) {
+                        // ignore
                     }
                 }
             })

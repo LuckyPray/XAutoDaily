@@ -293,7 +293,8 @@ object ConfigUtil {
         // 获取上次执行任务时间
         val lastExecTime = parseDate(accountConfig.getString("${task.id}#${Const.LAST_EXEC_TIME}"))
         // 不保证一定在有效时间内执行
-        val now = Date()
+        val now = Date(TimeUtil.getCurrentTime())
+        val sysTime = System.currentTimeMillis()
         val nextShouldExecTime =
             parseDate(accountConfig.getString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}")) ?: let {
                 val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron), now, true)
@@ -305,6 +306,12 @@ object ConfigUtil {
             if (!DateUtil.isSameDay(now, nextShouldExecTime)) {
                 return true
             }
+        }
+        // 因为系统时间可能存在误差，如果系统时间大于下次执行时间，但是网络时间还未到，则阻塞当前线程时间差，避免提前执行
+        if (sysTime > now.time && nextShouldExecTime > now) {
+            try {
+                Thread.sleep(sysTime - now.time)
+            } catch (e: Exception) {}
         }
         if (nextShouldExecTime < now) {
             return true

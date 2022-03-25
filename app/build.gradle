@@ -33,7 +33,7 @@ android {
                     // release 签名
                     cppFlags.add("-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600")
                 } else {
-                    // android 默认 debug 签名
+                    // android 默认 debug md5 签名可通过 signingReport 获取
                     cppFlags.add("-DMODULE_SIGNATURE=CB49EE96102F0D9C331AB59A5921AA42")
                 }
                 arguments "-DANDROID_TOOLCHAIN=clang"

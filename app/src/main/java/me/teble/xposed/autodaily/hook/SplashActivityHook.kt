@@ -11,6 +11,8 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.ui.Cache
+import me.teble.xposed.autodaily.utils.TimeUtil
+import kotlin.concurrent.thread
 
 class SplashActivityHook : BaseHook() {
 
@@ -23,10 +25,13 @@ class SplashActivityHook : BaseHook() {
     @MethodHook("SplashActivity Hook")
     private fun splashActivityHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
-            loadSaveConf()
-            handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
-            if (Cache.needUpdate) {
-                ToastUtil.send("插件版本存在更新")
+            thread {
+                loadSaveConf()
+                handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
+                if (Cache.needUpdate) {
+                    ToastUtil.send("插件版本存在更新")
+                }
+                TimeUtil.init()
             }
         }
     }
