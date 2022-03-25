@@ -18,6 +18,7 @@ import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import java.io.IOException
+import java.lang.Integer.min
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -131,24 +132,23 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 }
             }.build()
             LogUtil.d(TAG, "开始执行请求")
+            val response = OkHttpClient().newCall(request).execute()
+            val responseBody = response.body?.string() ?: ""
+            val responseHeadersText = getHeadersText(response.headers.toMultimap())
             LogUtil.d(
                 TAG, """request ------------------------------------>
                 |   method: ${request.method}
                 |   url: ${request.url}
                 |   headers: ***
                 |   body: ${request.body?.bodyString()}
-                """.trimMargin()
-            )
-            val response = OkHttpClient().newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
-            LogUtil.d(
-                TAG, """response <------------------------------------
+                |   response <------------------------------------
                 |   code: ${response.code}
-                |   body: $responseBody
+                |   headers: ***
+                |   body: ${responseBody.substring(0, min(responseBody.length, 1000))}
                 """.trimMargin()
             )
             return TaskResponse(
-                getHeadersText(response.headers.toMultimap()),
+                responseHeadersText,
                 responseBody,
                 response.code
             )
