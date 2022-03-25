@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
@@ -25,7 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
 import me.teble.xposed.autodaily.R
 
 @Composable
@@ -50,7 +50,7 @@ fun VerticaLine(
 }
 
 @Composable
-fun AppBar(title: String, navController: NavHostController) {
+fun AppBar(title: String) {
     TopAppBar(
         elevation = 0.dp,
         title = {
@@ -60,7 +60,7 @@ fun AppBar(title: String, navController: NavHostController) {
         modifier = Modifier
             .background(Color(0xFF409EFF))
             .padding(
-                top = navController.context
+                top = LocalContext.current
                     .getStatusBarHeightPx()
                     .toDp()
             )
@@ -71,7 +71,6 @@ fun AppBar(title: String, navController: NavHostController) {
 @Composable
 fun ActivityView(
     title: String = "XAutoDaily",
-    navController: NavHostController,
     unit: @Composable () -> Unit = {}
 ) {
     Column(
@@ -79,7 +78,7 @@ fun ActivityView(
             .fillMaxSize()
             .background(Color(0xFFF0F2F5))
     ) {
-        AppBar(title, navController)
+        AppBar(title)
         unit()
     }
 }

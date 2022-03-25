@@ -27,4 +27,5 @@ object Cache {
     var needUpdate: Boolean = false
     var lastFetchTime: Long = 0
     var versionInfoCache: VersionInfo? = null
+    var needShowUpdateLog: Boolean = false
 }

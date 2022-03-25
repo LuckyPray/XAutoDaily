@@ -123,10 +123,7 @@ fun EditEnvLayout(
             }
         }
     }
-    ActivityView(
-        title = "${taskId}-变量编辑",
-        navController = navController
-    ) {
+    ActivityView(title = "${taskId}-变量编辑") {
         Box(Modifier.fillMaxSize()){
 
             LazyColumn(

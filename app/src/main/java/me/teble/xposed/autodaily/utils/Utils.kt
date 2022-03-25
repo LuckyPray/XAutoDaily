@@ -1,6 +1,8 @@
 package me.teble.xposed.autodaily.utils
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import me.teble.xposed.autodaily.hook.base.Global
 import java.io.BufferedInputStream
@@ -62,4 +64,19 @@ fun getTextFromModuleAssets(fileName: String): String {
         LogUtil.e(e)
     }
     return ""
+}
+
+
+fun Context.openUrl(url: String) {
+    val contentUrl = Uri.parse(url)
+    val intent = Intent()
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    intent.action = Intent.ACTION_VIEW
+    intent.data = contentUrl
+    try {
+        this.startActivity(intent)
+    } catch (e: Exception) {
+        LogUtil.e(e)
+        throw e
+    }
 }

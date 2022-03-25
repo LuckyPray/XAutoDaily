@@ -35,6 +35,7 @@ import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.Constants
+import me.teble.xposed.autodaily.config.Constants.ALIPAY_QRCODE
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -44,8 +45,10 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
 import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
+import me.teble.xposed.autodaily.ui.XAutoDailyApp.Setting
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
+import me.teble.xposed.autodaily.utils.openUrl
 import kotlin.concurrent.thread
 
 @Composable
@@ -85,7 +88,7 @@ fun MainLayout(navController: NavHostController) {
         )
     }
 
-    ActivityView(navController = navController) {
+    ActivityView(title = "XAutoDaily") {
         LazyColumn(
             modifier = Modifier
                 .padding(top = 13.dp)
@@ -95,7 +98,7 @@ fun MainLayout(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
-                BackgroundView(/*scrollUpState = scrollUpState, viewOffset = maxOffsetY*/)
+                BackgroundView()
             }
             item {
                 Announcement(post = notice)
@@ -126,19 +129,18 @@ fun MainLayout(navController: NavHostController) {
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
-//            item {
-//                LineSpacer()
-//                LineButton(
-//                    title = "模块设置",
-//                    desc = "模块相关的功能配置",
-//                    onClick = {
-//                        navController.navigate(Setting) {
-//                            popUpTo(Main)
-//                        }
-//                    },
-//                    modifier = Modifier.padding(vertical = 8.dp),
-//                )
-//            }
+            item {
+                LineButton(
+                    title = "模块设置",
+                    desc = "模块相关的功能配置",
+                    onClick = {
+                        navController.navigate(Setting) {
+                            popUpTo(Main)
+                        }
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
             item {
                 LineButton(
                     title = "自定义签到脚本",
@@ -147,23 +149,24 @@ fun MainLayout(navController: NavHostController) {
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
-//            item {
-//                LineSpacer()
-//                LineButton(
-//                    title = "获取测试版本配置(BETA通道)",
-//                    desc = "仅测试人员可见",
-//                    onClick = {
-//                        showFriendsDialog.value = true
-//                    },
-//                    modifier = Modifier.padding(vertical = 8.dp),
-//                )
-//            }
+            if (BuildConfig.DEBUG) {
+                item {
+                    LineButton(
+                        title = "获取测试版本配置(BETA通道)",
+                        desc = "仅测试人员可见",
+                        onClick = {
+                            ToastUtil.send("")
+                        },
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
+            }
             item {
                 LineButton(
                     title = "前往项目地址",
                     otherInfoList = listOf(
                         "模块作者：韵の祈(teble@github.com)",
-                        "特别鸣谢：KyuubiRan、MaiTungTM、cinit",
+                        "特别鸣谢：KyuubiRan、MaiTungTM、cinit、Agoines",
                         "ps：我要好多好多小星星！"
                     ),
                     onClick = {
@@ -227,13 +230,15 @@ fun MainLayout(navController: NavHostController) {
                     desc = "本模块完全免费开源，一切开发旨在学习，请勿用于非法用途。习欢本模块的可以捐赠支持我，谢谢~~",
                     onClick = {
                         ToastUtil.send("正在跳转，请稍后")
-                        val qrCode = Constants.ALIPAY_QRCODE
-                        val intent = Intent.parseUri(
-                            "intent://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F{qrCode}%3F_s%3Dweb-other&_t=1472443966571#Intent;scheme=alipayqr;package=com.eg.android.AlipayGphone;end"
-                                .replace("{qrCode}", qrCode),
-                            0
-                        )
-                        navController.context.startActivity(intent)
+                        val context = navController.context
+                        try {
+                            context.openUrl(
+                                "alipayqr://platformapi/startapp?saId=10000007&clientVersion=" +
+                                    "3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F$ALIPAY_QRCODE%3F_s%3Dweb-other"
+                            )
+                        } catch (e: Exception) {
+                            context.openUrl("https://mobilecodec.alipay.com/client_download.htm?qrcode=$ALIPAY_QRCODE")
+                        }
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )

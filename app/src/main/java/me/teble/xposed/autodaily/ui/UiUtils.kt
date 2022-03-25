@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
 import androidx.activity.ComponentActivity
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -18,6 +15,9 @@ fun Dp.toPx(): Float {
     val context = LocalContext.current
     return context.resources.displayMetrics.density * value
 }
+
+fun Int.toDp(context: Context): Int =
+    (this / context.resources.displayMetrics.density).toInt()
 
 @Composable
 fun Float.toDp(): Dp {
@@ -56,17 +56,4 @@ fun Context.getActivity(): ComponentActivity? {
         currentContext = currentContext.baseContext
     }
     return null
-}
-
-@SuppressLint("ModifierFactoryUnreferencedReceiver")
-fun Modifier.click(
-    onClick: (() -> Unit)? = null,
-    doubleClick: (() -> Unit)? = null,
-    longPress: (() -> Unit)? = null,
-): Modifier = this.pointerInput(Unit) {
-    detectTapGestures(
-        onTap = { onClick?.invoke() },
-        onDoubleTap = { doubleClick?.invoke() },
-        onLongPress = { longPress?.invoke() },
-    )
 }

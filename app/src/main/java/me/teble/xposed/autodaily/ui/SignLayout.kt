@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -28,7 +27,7 @@ import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 
 @Composable
 fun SignLayout(navController: NavHostController) {
-    ActivityView(title = "签到设置", navController = navController) {
+    ActivityView(title = "签到设置") {
         val conf by remember {
             mutableStateOf(ConfigUtil.loadSaveConf())
         }
@@ -103,7 +102,7 @@ fun SignLayout(navController: NavHostController) {
 @Preview
 @Composable
 fun PreviewSignLayout() {
-    ActivityView(title = "签到设置", navController = rememberNavController()) {
+    ActivityView(title = "签到设置") {
         LazyColumn(
             modifier = Modifier.padding(13.dp)
         ) {

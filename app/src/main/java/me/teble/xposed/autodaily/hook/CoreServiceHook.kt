@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.hook
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
-import cn.hutool.core.exceptions.UtilException
 import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.cron.CronUtil
 import cn.hutool.cron.task.Task
@@ -37,6 +36,7 @@ class CoreServiceHook : BaseHook() {
     companion object {
         const val TAG = "CoreService"
         private val lock = ReentrantLock()
+        private val cronLock = ReentrantLock()
         const val EXEC_TASK = 1
         const val AUTO_EXEC = 2
         private val handlerThread by lazy {
@@ -109,32 +109,42 @@ class CoreServiceHook : BaseHook() {
 
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
-
         XposedHelpers.findAndHookMethod(load(CoreService),
             "onCreate", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    try {
-                        LogUtil.d(TAG, "调用 ---------------> ${param.method.name}")
-                        CronUtil.setMatchSecond(true)
-                        CronUtil.start()
-                        logd("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
-                        CronUtil.schedule("0 */10 * * * *", Task {
-                            handler.sendEmptyMessage(AUTO_EXEC)
-                        })
-                        CronUtil.schedule("0 0 9/3 * * *", Task {
-                            if (ConfigUtil.checkUpdate(false)) {
-                                Cache.needUpdate = true
-                            }
-                        })
-                        CronUtil.schedule("0 0 0/3 * * *", Task {
-                            TimeUtil.init()
-                        })
-                    } catch (ignore: UtilException) {
-                        // Scheduler has been started, please stop it first!
-                    } catch (ignore: ExceptionInInitializerError) {
-                        // ignore
+                    if (cronLock.isLocked) {
+                        return
                     }
+                    cronLock.lock()
+                    LogUtil.d(TAG, "调用 ---------------> ${param.method.name}")
+                    CronUtil.setMatchSecond(true)
+                    try {
+                        CronUtil.start()
+                    } catch (ignore: Throwable) {
+                    }
+                    logd("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
+                    CronUtil.schedule("0 */10 * * * *", Task {
+                        handler.sendEmptyMessage(AUTO_EXEC)
+                    })
+                    CronUtil.schedule("0 0 9/3 * * *", Task {
+                        if (ConfigUtil.checkUpdate(false)) {
+                            Cache.needUpdate = true
+                        }
+                    })
+                    CronUtil.schedule("0 0 0/3 * * *", Task {
+                        TimeUtil.init()
+                    })
                 }
-            })
+            }
+        )
+
+        XposedHelpers.findAndHookMethod(load(CoreService),
+            "onDestroy", object : XC_MethodHook() {
+                override fun beforeHookedMethod(param: MethodHookParam) {
+                    CronUtil.stop()
+                    cronLock.unlock()
+                }
+            }
+        )
     }
 }

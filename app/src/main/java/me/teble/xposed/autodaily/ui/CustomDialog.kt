@@ -36,15 +36,19 @@ class CustomDialog(context: Context) : Dialog(context, 5),
     }
 
     override fun setContentView(view: View) {
-//        requestWindowFeature(Window.FEATURE_NO_TITLE)
-//        window?.setStatusBarTranslation()
-//        window?.setNavigationBarTranslation()
-//        navigationBarMode(true)
         super.setContentView(view)
         ViewTreeLifecycleOwner.set(view, this)
         ViewTreeViewModelStoreOwner.set(view, this)
         ViewTreeSavedStateRegistryOwner.set(view, this)
     }
+
+//    override fun setView(view: View) {
+////        requestWindowFeature(Window.FEATURE_NO_TITLE)
+////        window?.setStatusBarTranslation()
+////        window?.setNavigationBarTranslation()
+////        navigationBarMode(true)
+//        super.setView(view)
+//    }
 
     private fun handleLifecycleEvent(event: Lifecycle.Event) =
         lifecycleRegistry.handleLifecycleEvent(event)
