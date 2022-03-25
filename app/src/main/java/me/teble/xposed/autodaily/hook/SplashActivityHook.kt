@@ -33,15 +33,21 @@ class SplashActivityHook : BaseHook() {
     @MethodHook("SplashActivity Hook")
     private fun splashActivityHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
-            val context = it.thisObject as Activity
             thread {
                 loadSaveConf()
                 handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
                 TimeUtil.init()
+            }
+        }
+
+        findMethod(SplashActivity) { name == "doOnStart" }.hookAfter {
+            val context = it.thisObject as Activity
+            thread {
                 if (Cache.needUpdate) {
                     context.openAppUpdateDialog()
                 } else if (Cache.needShowUpdateLog) {
                     context.openConfigUpdateLog()
+                    Cache.needShowUpdateLog = false
                 }
             }
         }

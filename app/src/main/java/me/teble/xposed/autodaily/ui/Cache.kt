@@ -9,6 +9,7 @@ import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
+import me.teble.xposed.autodaily.task.util.Const.NEED_SHOW_LOG
 
 object Cache {
     var qqVersionName: String by mutableStateOf(
@@ -17,15 +18,17 @@ object Cache {
     var qqVersionCode: Long by mutableStateOf(
         if (Global.isInit()) Global.qqVersionCode else 9999L
     )
-    var configVer: Int by mutableStateOf(
+    var configVersion: Int by mutableStateOf(
         xaConfig.getInt(CONFIG_VERSION, 1)
     )
     var currConf: ConfProxy by mutableStateOf(
         accountConfig
     )
-
     var needUpdate: Boolean = false
+    var needShowUpdateLog: Boolean
+        get() = xaConfig.getBoolean(NEED_SHOW_LOG, false)
+        set(value) = xaConfig.putBoolean(NEED_SHOW_LOG, value)
+
     var lastFetchTime: Long = 0
     var versionInfoCache: VersionInfo? = null
-    var needShowUpdateLog: Boolean = false
 }

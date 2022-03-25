@@ -17,7 +17,8 @@ import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.*
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
-import me.teble.xposed.autodaily.ui.Cache.configVer
+import me.teble.xposed.autodaily.ui.Cache
+import me.teble.xposed.autodaily.ui.Cache.configVersion
 import me.teble.xposed.autodaily.ui.Cache.lastFetchTime
 import me.teble.xposed.autodaily.ui.Cache.versionInfoCache
 import me.teble.xposed.autodaily.utils.*
@@ -100,7 +101,7 @@ object ConfigUtil {
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchUpdateInfo()
         info?.let {
-            val currConfVer = xaConfig.getInt(CONFIG_VERSION, 1)
+            val currConfVer = configVersion
             if (BuildConfig.VERSION_CODE < info.appVersion) {
                 if (showToast) {
                     ToastUtil.send("插件版本存在更新")
@@ -139,13 +140,14 @@ object ConfigUtil {
                 LogUtil.i(TAG, "插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
                 return false
             }
-            if (confVersion <= xaConfig.getInt(CONFIG_VERSION, 0)) {
+            if (confVersion <= configVersion) {
                 if (showToast) {
                     ToastUtil.send("当前配置已是最新，无需更新")
                 }
                 return false
             }
             saveConfFile(encRes, confVersion)
+            Cache.needShowUpdateLog = true
             ToastUtil.send("配置文件更新完毕，如有选项更新，请前往配置目录进行勾选")
             return true
         } catch (e: Exception) {
@@ -177,7 +179,7 @@ object ConfigUtil {
                 propertiesFile.createNewFile()
             }
             FileUtil.writeUtf8String(encConfStr, propertiesFile)
-            configVer = configVersion
+            Cache.configVersion = configVersion
             xaConfig.putInt(CONFIG_VERSION, configVersion)
             return true
         } catch (e: Exception) {
@@ -218,6 +220,9 @@ object ConfigUtil {
                 conf = defaultConf
                 saveConfFile(encodeConfig, defaultConf.version)
                 ToastUtil.send("正在解压内置配置文件，如有选项更新，请前往配置目录进行勾选")
+                if (conf.version < defaultConf.version) {
+                    Cache.needShowUpdateLog = true
+                }
             }
         }
         _conf = conf

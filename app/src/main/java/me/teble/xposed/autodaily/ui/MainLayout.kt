@@ -202,7 +202,7 @@ fun MainLayout(navController: NavHostController) {
                     otherInfoList = listOf(
                         "当前模块版本：${BuildConfig.VERSION_NAME}",
                         "当前宿主版本：${Cache.qqVersionName}(${Cache.qqVersionCode})",
-                        "当前配置版本：${Cache.configVer}"
+                        "当前配置版本：${Cache.configVersion}"
                     ),
                     onClick = {
                         val time = System.currentTimeMillis()
