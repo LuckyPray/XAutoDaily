@@ -212,17 +212,18 @@ object ConfigUtil {
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
             LogUtil.d(TAG, "defaultConf version -> ${defaultConf.version}")
             saveConfFile(encodeConfig, defaultConf.version)
+            Cache.needShowUpdateLog = true
         } else {
             // 配置正常加载，表示配置版本与当前model一致，判断内置文件版本是否需要覆盖当前配置
             // 内置配置版本与本地配置版本一致的情况，如果hashcode不一致，内置覆盖本地
             // 内置版本 > 本地配置版本，内置覆盖本地
             if (conf.version <= defaultConf.version && conf != defaultConf) {
-                conf = defaultConf
-                saveConfFile(encodeConfig, defaultConf.version)
-                ToastUtil.send("正在解压内置配置文件，如有选项更新，请前往配置目录进行勾选")
                 if (conf.version < defaultConf.version) {
                     Cache.needShowUpdateLog = true
                 }
+                conf = defaultConf
+                saveConfFile(encodeConfig, defaultConf.version)
+                ToastUtil.send("正在解压内置配置文件，如有选项更新，请前往配置目录进行勾选")
             }
         }
         _conf = conf
