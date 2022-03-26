@@ -31,6 +31,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color(0xFFF0F2F5))
+                .padding(bottom = 60.dp)
         ) {
             TopAppBar(
                 elevation = 0.dp,
@@ -67,7 +68,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomEnd)
-                .padding(15.dp),
+                .padding(12.dp),
             horizontalArrangement = Arrangement.End
         ) {
             val context = LocalContext.current
