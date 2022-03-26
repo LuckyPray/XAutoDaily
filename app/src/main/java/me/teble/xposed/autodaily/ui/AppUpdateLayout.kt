@@ -1,5 +1,7 @@
 package me.teble.xposed.autodaily.ui
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -16,6 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import me.teble.xposed.autodaily.config.Constants
+import me.teble.xposed.autodaily.hook.config.Config.xaConfig
+import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
+import me.teble.xposed.autodaily.task.util.formatDate
+import java.util.*
 
 @Composable
 fun AppUpdateLayout(dialog: CustomDialog) {
@@ -28,7 +35,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             TopAppBar(
                 elevation = 0.dp,
                 title = {
-                    Text("XAutoDaily检测到新版本", color = Color.White)
+                    Text("检测到新版本", color = Color.White)
                 },
                 backgroundColor = Color(0xFF409EFF),
                 modifier = Modifier
@@ -63,10 +70,29 @@ fun AppUpdateLayout(dialog: CustomDialog) {
                 .padding(15.dp),
             horizontalArrangement = Arrangement.End
         ) {
+            val context = LocalContext.current
             TextButton(onClick = {
                 dialog.dismiss()
+                xaConfig.putString(BLOCK_UPDATE_ONE_DAY, Date().formatDate())
             }) {
-                Text(text = "确定")
+                Text(text = "今日不再提醒")
+            }
+
+            TextButton(onClick = {
+                context.startActivity(Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(Constants.GITHUB_RELEASE_URL)
+                })
+            }) {
+                Text(text = "蓝奏云")
+            }
+            TextButton(onClick = {
+                context.startActivity(Intent().apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse(Constants.PAN_URL)
+                })
+            }) {
+                Text(text = "Github")
             }
         }
     }

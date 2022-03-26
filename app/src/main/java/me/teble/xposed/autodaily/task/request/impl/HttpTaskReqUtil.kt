@@ -19,6 +19,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import java.io.IOException
 import java.lang.Integer.min
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -133,7 +134,12 @@ object HttpTaskReqUtil : ITaskReqUtil {
             }.build()
             LogUtil.d(TAG, "开始执行请求")
             val response = OkHttpClient().newCall(request).execute()
-            val responseBody = response.body?.string() ?: ""
+            val responseBytes = response.body?.bytes() ?: ByteArray(0)
+            var responseBody = String(responseBytes)
+            if (responseBody.contains("encoding=\"GBK\"")){
+                // fix xml default encoding is GBK
+                responseBody = String(responseBytes, Charset.forName("GBK"))
+            }
             val responseHeadersText = getHeadersText(response.headers.toMultimap())
             LogUtil.d(
                 TAG, """request ------------------------------------>

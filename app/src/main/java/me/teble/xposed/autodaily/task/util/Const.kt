@@ -4,6 +4,7 @@ object Const {
     const val CONFIG_VERSION = "config_version"
     const val NEED_UPDATE = "need_update"
     const val NEED_SHOW_LOG = "need_show_log"
+    const val BLOCK_UPDATE_ONE_DAY = "block_update_one_day"
     const val POST = "post"
     const val GLOBAL_ENABLE = "global_enable"
     const val ENABLE = "enable"

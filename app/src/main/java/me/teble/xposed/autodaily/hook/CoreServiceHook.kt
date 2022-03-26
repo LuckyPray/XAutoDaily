@@ -5,7 +5,6 @@ import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
 import cn.hutool.cron.CronUtil
-import cn.hutool.cron.task.Task
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
@@ -123,26 +122,30 @@ class CoreServiceHook : BaseHook() {
                     } catch (ignore: Throwable) {
                     }
                     logd("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
-                    CronUtil.schedule("0 */10 * * * *", Task {
-                        handler.sendEmptyMessage(AUTO_EXEC)
-                    })
-                    CronUtil.schedule("0 0 9/3 * * *", Task {
-                        if (ConfigUtil.checkUpdate(false)) {
-                            Cache.needUpdate = true
+                    val scheduler = CronUtil.getScheduler()
+                    if (!scheduler.isStarted) {
+                        ToastUtil.send("任务调度器启动失败 >_<")
+                        LogUtil.d(TAG, "任务调度器启动失败 >_<")
+                        return
+                    }
+                    val taskTable = scheduler.taskTable
+                    if (taskTable.isEmpty) {
+                        CronUtil.schedule("task_timer",
+                            "0 */10 * * * *") {
+                            handler.sendEmptyMessage(AUTO_EXEC)
                         }
-                    })
-                    CronUtil.schedule("0 0 0/3 * * *", Task {
-                        TimeUtil.init()
-                    })
-                }
-            }
-        )
-
-        XposedHelpers.findAndHookMethod(load(CoreService),
-            "onDestroy", object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    CronUtil.stop()
-                    cronLock.unlock()
+                        CronUtil.schedule("check_update_task",
+                            "0 0 9/3 * * *") {
+                            if (ConfigUtil.checkUpdate(false)) {
+                                Cache.needUpdate = true
+                            }
+                        }
+                        CronUtil.schedule("time_correction",
+                            "0 0 0/3 * * *") {
+                            TimeUtil.init()
+                        }
+                        return
+                    }
                 }
             }
         )
