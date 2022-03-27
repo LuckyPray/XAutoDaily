@@ -20,6 +20,7 @@ import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.format
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.formatList
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.toJsonString
 import java.util.*
 
@@ -99,7 +100,7 @@ object TaskUtil {
         }
         // 正常cron任务，需要计算下次执行时间
         if (task.cron != null && task.cron != "basic") {
-            val currentTime = Date()
+            val currentTime = Date(TimeUtil.getCurrentTime())
             accountConfig.putString("${task.id}#${LAST_EXEC_TIME}", currentTime.format())
             val nextTime =
                 CronPatternUtil.nextDateAfter(CronPattern(task.cron), currentTime, true)
