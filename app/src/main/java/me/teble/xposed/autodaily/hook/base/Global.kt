@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.XModuleResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import me.teble.xposed.autodaily.BuildConfig.VERSION_CODE
-import me.teble.xposed.autodaily.BuildConfig.VERSION_NAME
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.getAppVersionCode
@@ -54,8 +52,6 @@ object Global {
         hostClassLoader = hostContext.classLoader
         qqTypeEnum = QQTypeEnum.valueOfPackage(hostContext.packageName)
         qqVersionCode = getAppVersionCode(hostContext, qqTypeEnum.packageName)
-        LogUtil.i("qq version -> ${qqTypeEnum.appName}($qqVersionCode)")
-        LogUtil.i("module version -> ${VERSION_NAME}($VERSION_CODE)")
         qqVersionName = getAppVersionName(hostContext, qqTypeEnum.packageName)
         initContextFlag = true
     }

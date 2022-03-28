@@ -2,13 +2,21 @@ package me.teble.xposed.autodaily.utils
 
 import android.util.Log
 import de.robv.android.xposed.XposedBridge
+import me.teble.xposed.autodaily.hook.base.Global
 import java.lang.Integer.min
+import java.time.LocalDateTime
 
 object LogUtil {
     private const val tagName = "XALog"
     private const val maxLength = 2000
+    private val pid by lazy { android.os.Process.myPid() }
 
-    private fun doLog(f: (String, String) -> Unit, msg: String?, e: Throwable?, toXposed: Boolean = false) {
+    private fun doLog(
+        f: (String, String) -> Unit,
+        msg: String?,
+        e: Throwable?,
+        toXposed: Boolean = false
+    ) {
         val str = buildString {
             if (msg != null) {
                 append(msg)
@@ -27,6 +35,9 @@ object LogUtil {
             }
         } else {
             f(tagName, str)
+            if (Global.isInit()) {
+                FileUtil.appendLog("${LocalDateTime.now()} $pid $tagName: $str\n")
+            }
             if (toXposed) {
                 XposedBridge.log("$tagName : $str")
             }
@@ -59,7 +70,7 @@ object LogUtil {
     }
 
     @JvmStatic
-    fun getStackTrace(tag: String, e: Exception = RuntimeException("---getStackTrace---")) {
+    fun printStackTrace(e: Exception = RuntimeException("---getStackTrace---")) {
         d(Log.getStackTraceString(e))
     }
 }

@@ -13,6 +13,7 @@ import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QQClasses.Companion.NewRuntime
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -96,6 +97,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 val context = currentApplication()
                 // 初始化全局Context
                 initContext(context)
+                LogUtil.i("qq version -> ${Global.qqTypeEnum.appName}($qqVersionCode)")
+                LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
                 EzXHelperInit.initAppContext(context)
                 // MMKV
                 Config.init()
