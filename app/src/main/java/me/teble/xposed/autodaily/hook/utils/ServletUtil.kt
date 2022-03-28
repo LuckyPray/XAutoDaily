@@ -15,7 +15,7 @@ import java.util.*
 object ServletUtil {
     private val sdf = SimpleDateFormat("MMddHHmmss", Locale.CHINA)
 
-    fun getTraceId(): String {
+    private fun getTraceId(): String {
         return buildString {
             append(currentUin)
             append("_")
@@ -41,7 +41,7 @@ object ServletUtil {
         return webReq?.invoke("toByteArray") as ByteArray
     }
 
-    val deviceInfo by lazy {
+    private val deviceInfo by lazy {
         val cPlatformInfor = Initiator.load("cooperation.qzone.PlatformInfor")
         val platformInfor = cPlatformInfor?.fieldValue(cPlatformInfor)!!
         var info = ""

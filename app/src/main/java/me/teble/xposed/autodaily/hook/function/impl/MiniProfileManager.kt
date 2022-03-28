@@ -42,7 +42,7 @@ open class MiniProfileManager : BaseFunction(
                 return it
             }
         }
-        LogUtil.i(TAG, "尝试小程序获取用户信息超时")
+        LogUtil.i("尝试小程序获取用户信息超时")
         return null
     }
 

@@ -13,7 +13,7 @@ object TimeUtil {
 
     fun init() {
         val networkTime = getNetworkTime()
-        LogUtil.d(TAG, "networkTime: $networkTime")
+        LogUtil.d("networkTime: $networkTime")
         networkTime?.let {
             timeDiff = it - System.currentTimeMillis()
         }

@@ -24,7 +24,7 @@ object QApplicationUtil {
     val appInterface: AppInterface = appRuntime as AppInterface
     val currentUin: Long
         inline get() = appRuntime.longAccountUin
-    val msf: Any?
+    private val msf: Any?
         get() = load(MsfServiceSdk)?.invoke("get")
 
     val versionName = VersionUtil.qqVersionName

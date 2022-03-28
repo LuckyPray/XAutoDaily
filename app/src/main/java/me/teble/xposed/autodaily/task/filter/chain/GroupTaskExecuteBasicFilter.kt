@@ -28,7 +28,7 @@ class GroupTaskExecuteBasicFilter: GroupTaskFilter(
     }
 
     private fun executeBasicTask(reqType: ReqType, task: Task, relayTaskMap: Map<String, Task>, env: MutableMap<String, Any>) {
-        LogUtil.d(TAG, "执行basic请求：${task.id}")
+        LogUtil.d("执行basic请求：${task.id}")
         TaskUtil.execute(reqType, task, relayTaskMap, env)
     }
 }

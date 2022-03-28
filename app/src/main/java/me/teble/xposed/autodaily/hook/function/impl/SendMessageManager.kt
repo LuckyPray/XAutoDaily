@@ -35,7 +35,7 @@ open class SendMessageManager : BaseFunction(
                     sendMsgMethod = mi
                     sendMsgMethod.isAccessible = true
                     cSendMsgParams = argt[5]
-                    LogUtil.d(TAG, "MessageManager: method -> $sendMsgMethod")
+                    LogUtil.d("MessageManager: method -> $sendMsgMethod")
                     return
                 }
             }

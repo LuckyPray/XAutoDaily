@@ -35,7 +35,6 @@ import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.ui.Cache.currConf
-import me.teble.xposed.autodaily.utils.LogUtil
 import kotlin.concurrent.thread
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -47,7 +46,6 @@ fun EditEnvLayout(
 ) {
     var envList by remember { mutableStateOf(emptyList<TaskEnv>()) }
     LaunchedEffect(envList) {
-        LogUtil.log("--------------- init envList ---------------")
         val conf = ConfigUtil.loadSaveConf()
         conf.taskGroups.forEach {
             if (it.id == groupId) {

@@ -35,18 +35,18 @@ object NativeUtil {
         try {
             FileUtil.writeFromStream(libStream, tmpSoFile)
             if (!soFile.exists()) {
-                LogUtil.d(TAG, "so文件不存在，正在尝试加载")
+                LogUtil.d("so文件不存在，正在尝试加载")
                 tmpSoFile.renameTo(soFile)
             } else {
                 val oldStream = FileUtil.getInputStream(soFile)
                 val newStream = FileUtil.getInputStream(tmpSoFile)
                 if (!IoUtil.contentEquals(oldStream, newStream)) {
-                    LogUtil.d(TAG, "so文件版本存在更新，正在重新加载")
+                    LogUtil.d("so文件版本存在更新，正在重新加载")
                     soFile.delete()
                     tmpSoFile.renameTo(soFile)
                 }
             }
-            LogUtil.d(TAG, "加载so文件成功 -> ${soFile.path}")
+            LogUtil.d("加载so文件成功 -> ${soFile.path}")
             return soFile
         } catch (e: Exception) {
             LogUtil.e(e)

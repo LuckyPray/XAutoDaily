@@ -23,14 +23,14 @@ class CrashCatchHandler : Thread.UncaughtExceptionHandler {
             }
             mContext = context
             mDefaultCaughtExceptionHandler = Thread.getDefaultUncaughtExceptionHandler()
-            LogUtil.d(TAG, mDefaultCaughtExceptionHandler.toString())
+            LogUtil.d(mDefaultCaughtExceptionHandler.toString())
             Thread.setDefaultUncaughtExceptionHandler(this)
 
         }
     }
 
     override fun uncaughtException(t: Thread, e: Throwable) {
-        LogUtil.d(TAG, "接收到异常" + e.stackTraceToString())
+        LogUtil.d("接收到异常" + e.stackTraceToString())
         when (e) {
             is BaseException -> ToastUtil.send(mContext!!, e.message!!)
             is RuntimeException -> ToastUtil.send(

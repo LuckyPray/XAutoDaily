@@ -2,57 +2,64 @@ package me.teble.xposed.autodaily.utils
 
 import android.util.Log
 import de.robv.android.xposed.XposedBridge
-import me.teble.xposed.autodaily.BuildConfig
+import java.lang.Integer.min
 
 object LogUtil {
     private const val tagName = "XALog"
+    private const val maxLength = 2000
 
-    private fun tag(tag: String): String {
-        return if (BuildConfig.DEBUG) "$tagName/$tag" else tagName
+    private fun doLog(f: (String, String) -> Unit, msg: String?, e: Throwable?, toXposed: Boolean = false) {
+        val str = buildString {
+            if (msg != null) {
+                append(msg)
+            }
+            if (e != null) {
+                append("\n")
+                append(Log.getStackTraceString(e))
+            }
+        }
+        if (str.length > maxLength) {
+            var i = 0
+            while (i < str.length) {
+                val sub = str.substring(i, min(i + maxLength, str.length))
+                doLog(f, sub, null, toXposed)
+                i += maxLength
+            }
+        } else {
+            f(tagName, str)
+            if (toXposed) {
+                XposedBridge.log("$tagName : $str")
+            }
+        }
     }
 
+    @JvmStatic
     fun log(msg: String) {
-        d(tagName, msg)
+        i(msg)
     }
 
-    fun d(tag: String, msg: String) {
-//        Log.d(tag(tag), msg)
-        XposedBridge.log("D/${tag(tag)}: $msg")
+    @JvmStatic
+    fun d(msg: String) {
+        doLog(Log::d, msg, null)
     }
 
+    @JvmStatic
     fun i(msg: String) {
-        i(tagName, msg)
+        doLog(Log::i, msg, null)
     }
 
-    fun i(tag: String, msg: String) {
-//        Log.i(tag(tag), msg)
-        XposedBridge.log("I/${tag(tag)}: $msg")
+    @JvmStatic
+    fun w(msg: String) {
+        doLog(Log::w, msg, null)
     }
 
-    fun w(tag: String, msg: String) {
-//        Log.w(tag(tag), msg)
-        XposedBridge.log("W/${tag(tag)}: $msg")
-    }
-
+    @JvmStatic
     fun e(t: Throwable, msg: String = "") {
-        XposedBridge.log(t)
-//        if (msg.isEmpty()) {
-//            Log.e(tagName, t.stackTraceToString())
-//        } else {
-//            Log.e(tagName, "$msg -> \n${t.stackTraceToString()}")
-//        }
+        doLog(Log::e, msg, t)
     }
 
-    fun e(tag: String, t: Throwable, msg: String = "") {
-        XposedBridge.log(t)
-//        if (msg.isEmpty()) {
-//            Log.e(tag(tag), t.stackTraceToString())
-//        } else {
-//            Log.e(tag(tag), "$msg -> \n${t.stackTraceToString()}")
-//        }
-    }
-
+    @JvmStatic
     fun getStackTrace(tag: String, e: Exception = RuntimeException("---getStackTrace---")) {
-        d(tag, Log.getStackTraceString(e))
+        d(Log.getStackTraceString(e))
     }
 }

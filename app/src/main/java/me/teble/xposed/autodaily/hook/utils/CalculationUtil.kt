@@ -6,10 +6,10 @@ import java.security.NoSuchAlgorithmException
 import java.util.*
 
 object CalculationUtil {
-    private val TAG = "CalculationUtil"
+    private const val TAG = "CalculationUtil"
     private const val CSRF_TOKEN_END_STR = "tencentQQVIP123443safde&!%^%1282"
 
-    fun getBkn(sKey: String): Int {
+    private fun getBkn(sKey: String): Int {
         var base = 5381
         for (element in sKey) {
             base += (base shl 5) + element.code
@@ -17,7 +17,7 @@ object CalculationUtil {
         return base and 2147483647
     }
 
-    fun getPsToken(pskey: String): Int {
+    private fun getPsToken(pskey: String): Int {
         var base = 5381
         for (element in pskey) {
             base += (base shl 5) + element.code
@@ -30,9 +30,8 @@ object CalculationUtil {
         val stringBuilder = StringBuilder()
         stringBuilder.append(cnt shl 5)
         for (element in sKey) {
-            val ch = element
-            stringBuilder.append((cnt shl 5) + ch.code)
-            cnt = ch.code
+            stringBuilder.append((cnt shl 5) + element.code)
+            cnt = element.code
         }
         stringBuilder.append(CSRF_TOKEN_END_STR)
         return getMD5(stringBuilder.toString())
@@ -66,10 +65,4 @@ object CalculationUtil {
 
     val random: Double
         get() = Random().nextDouble()
-
-    @JvmStatic
-    fun main(args: Array<String>) {
-        println(getPsToken("rX7a-zQDUMn8vF3A9bpcvj-Y4ORXrAY6TMVZvvJsdkQ_"))
-        println(getBkn("MD0CNWKHXD"))
-    }
 }

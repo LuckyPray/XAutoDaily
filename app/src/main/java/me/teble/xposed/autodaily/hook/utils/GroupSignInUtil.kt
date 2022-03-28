@@ -27,7 +27,7 @@ object GroupSignInUtil {
         toServiceMsg.extraData.putString("memberUin", "$currentUin")
         toServiceMsg.extraData.putInt("signInScene", 0)
         toServiceMsg.extraData.putBoolean("isWrite", true)
-        LogUtil.d(TAG, toServiceMsg.toString())
+        LogUtil.d(toServiceMsg.toString())
         QApplicationUtil.appInterface.sendToService(toServiceMsg)
     }
 }

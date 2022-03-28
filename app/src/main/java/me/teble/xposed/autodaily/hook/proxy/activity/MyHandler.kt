@@ -44,7 +44,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                 try {
                     clientTransaction?.let { cTrans ->
                         //获取列表
-                        LogUtil.log("clientTransaction -> $cTrans")
+//                        LogUtil.log("clientTransaction -> $cTrans")
                         val clientTransactionItems =
                             cTrans.invoke("getCallbacks") as List<*>
                         for (item in clientTransactionItems) {

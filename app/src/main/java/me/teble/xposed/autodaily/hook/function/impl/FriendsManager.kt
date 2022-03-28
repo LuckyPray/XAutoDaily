@@ -92,7 +92,7 @@ open class FriendsManager : BaseFunction(
             if (Modifier.isPrivate(it.modifiers)
                 && it.returnType == ConcurrentHashMap::class.java
             ) {
-                LogUtil.d(TAG, "${it.parameterTypes}")
+                LogUtil.d("${it.parameterTypes}")
                 it.isAccessible = true
                 return it.invoke(manager, true) as ConcurrentHashMap<*, *>
             }

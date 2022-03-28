@@ -41,12 +41,12 @@ open class MiniLoginManager : BaseFunction(
                 return it
             }
         }
-        LogUtil.i(TAG, "尝试小程序登录，获取js_code超时")
+        LogUtil.i("尝试小程序登录，获取js_code超时")
         return null
     }
 
     private fun sendLoginRequest(miniAppId: String) {
-        val packet = Packet::class.java.new("${currentUin}")
+        val packet = Packet::class.java.new("$currentUin")
         val miniAppGetLoginCodeServlet = cMiniAppGetLoginCodeServlet.new()
         val request = cGetLoginCodeRequest.new(miniAppId)
         val traceId: String? = miniAppGetLoginCodeServlet.invokeAs("getTraceId")

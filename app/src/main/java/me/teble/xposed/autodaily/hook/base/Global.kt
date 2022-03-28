@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.XModuleResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import me.teble.xposed.autodaily.BuildConfig.VERSION_CODE
+import me.teble.xposed.autodaily.BuildConfig.VERSION_NAME
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.getAppVersionCode
@@ -39,21 +41,21 @@ object Global {
 
     fun init(loadPackageParam: LoadPackageParam) {
         hostPackageName = loadPackageParam.packageName
-        LogUtil.d(TAG, "hostPackageName -> $hostPackageName")
+        LogUtil.d("hostPackageName -> $hostPackageName")
         val strings = loadPackageParam.processName.split(":", ignoreCase = false, limit = 2)
+        // TODO ProcessEnum
         hostProcessName = if (strings.size > 1) strings[strings.size - 1] else ""
-        LogUtil.d(TAG, "hostProcessName -> $hostProcessName")
+        LogUtil.d("hostProcessName -> ${hostProcessName.ifEmpty { "main" }}")
         initLPPFlag = true
     }
 
     fun initContext(qContext: Context) {
         hostContext = qContext
         hostClassLoader = hostContext.classLoader
-        LogUtil.d(TAG, "hostClassLoader -> $hostClassLoader")
         qqTypeEnum = QQTypeEnum.valueOfPackage(hostContext.packageName)
-        LogUtil.d(TAG, "qqTypeEnum -> ${qqTypeEnum.appName}")
         qqVersionCode = getAppVersionCode(hostContext, qqTypeEnum.packageName)
-        LogUtil.d(TAG, "qqVersion -> $qqVersionCode")
+        LogUtil.i("qq version -> ${qqTypeEnum.appName}($qqVersionCode)")
+        LogUtil.i("module version -> ${VERSION_NAME}($VERSION_CODE)")
         qqVersionName = getAppVersionName(hostContext, qqTypeEnum.packageName)
         initContextFlag = true
     }

@@ -56,7 +56,7 @@ class CoreServiceHook : BaseHook() {
                 if (lock.isLocked) return@thread
                 lock.withLock {
                     while (!Global.isInit()) {
-                        LogUtil.d("CoreServiceHook", "等待初始化完毕")
+                        LogUtil.d("等待初始化完毕")
                         Thread.sleep(500)
                     }
                     val globalEnable = accountConfig.getBoolean(GLOBAL_ENABLE, false)
@@ -69,7 +69,7 @@ class CoreServiceHook : BaseHook() {
                     if (once) {
                         ToastUtil.send("开始执行签到")
                     } else {
-                        LogUtil.d(TAG, "定时执行")
+                        LogUtil.d("定时执行")
                     }
                     executorTask(ConfigUtil.loadSaveConf())
                 }
@@ -98,7 +98,7 @@ class CoreServiceHook : BaseHook() {
                             GroupTaskFilterChain.build(taskGroup)
                                 .doFilter(mutableMapOf(), mutableListOf(), mutableMapOf())
                         } catch (e: Exception) {
-                            LogUtil.e(taskGroup.id, e)
+                            LogUtil.e(e)
                         }
                     }
                 )
@@ -115,7 +115,6 @@ class CoreServiceHook : BaseHook() {
                         return
                     }
                     cronLock.lock()
-                    LogUtil.d(TAG, "调用 ---------------> ${param.method.name}")
                     CronUtil.setMatchSecond(true)
                     try {
                         CronUtil.start()
@@ -125,7 +124,7 @@ class CoreServiceHook : BaseHook() {
                     val scheduler = CronUtil.getScheduler()
                     if (!scheduler.isStarted) {
                         ToastUtil.send("任务调度器启动失败 >_<")
-                        LogUtil.d(TAG, "任务调度器启动失败 >_<")
+                        LogUtil.d("任务调度器启动失败 >_<")
                         return
                     }
                     val taskTable = scheduler.taskTable

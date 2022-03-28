@@ -29,14 +29,14 @@ class IActivityManagerHandler(private val mOrigin: Any) : InvocationHandler {
 //            LogUtil.d(TAG, " -------> ${method.name}")
                 when (method.name) {
                     "startActivity" -> {
-                        LogUtil.d(TAG, " -------> startActivity")
+                        LogUtil.d(" -------> startActivity")
                         foundFirstIntentOfArgs(args)?.let { pair ->
                             val component = pair.second.component
                             component?.let {
                                 if (it.packageName == Global.hostPackageName
                                     && it.className.startsWith(BuildConfig.APPLICATION_ID)
                                 ) {
-                                    LogUtil.d(TAG, "开始替换")
+                                    LogUtil.d("开始替换")
                                     val wrapper = Intent().apply {
                                         this.setClassName(
                                             component.packageName,
@@ -48,7 +48,7 @@ class IActivityManagerHandler(private val mOrigin: Any) : InvocationHandler {
                                         )
                                     }
                                     args[pair.first] = wrapper
-                                    LogUtil.d(TAG, "替换完成")
+                                    LogUtil.d("替换完成")
                                 }
                             }
                         }

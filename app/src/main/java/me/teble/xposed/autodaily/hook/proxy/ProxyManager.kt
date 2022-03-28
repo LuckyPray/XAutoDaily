@@ -20,7 +20,7 @@ object ProxyManager {
 
     val init by lazy {
         try {
-            LogUtil.d(TAG, "start init proxy manager")
+            LogUtil.d("start init proxy manager")
             val currentActivityThread = load("android.app.ActivityThread")!!
                 .fieldValue("sCurrentActivityThread")!!
             replaceInstrumentation(currentActivityThread)
@@ -31,7 +31,7 @@ object ProxyManager {
             } catch (e: Exception) {}
         } catch (e: Exception) {
             ToastUtil.send("代理初始化失败")
-            LogUtil.e("ProxyManager", e)
+            LogUtil.e(e)
             XposedBridge.log("ProxyManager init fail" + e.stackTraceToString())
         }
     }
@@ -40,7 +40,7 @@ object ProxyManager {
         val fInstrumentation = activityThread.field("mInstrumentation")!!
         val mInstrumentation = fInstrumentation.get(activityThread) as Instrumentation
         fInstrumentation.set(activityThread, MyInstrumentation(mInstrumentation))
-        LogUtil.d(TAG, "replace Instrumentation success")
+        LogUtil.d("replace Instrumentation success")
     }
 
     private fun replaceHandler(activityThread: Any) {
@@ -48,7 +48,7 @@ object ProxyManager {
         val fCallback = handler.field("mCallback")!!
         val callback = fCallback.get(handler) as Handler.Callback?
         fCallback.set(handler, MyHandler(callback))
-        LogUtil.d(TAG, "replace Handler success")
+        LogUtil.d("replace Handler success")
     }
 
     private fun replaceIActivityManager() {
@@ -64,13 +64,12 @@ object ProxyManager {
                 IActivityManagerHandler(activityManager)
             )
         )
-        LogUtil.d(TAG, "replace IActivityManager success")
+        LogUtil.d("replace IActivityManager success")
     }
 
     private fun replaceIActivityTaskManager() {
         val cSingleton = load("android.util.Singleton")!!
         val mInstance = load("android.app.ActivityTaskManager")?.fieldValue(cSingleton)
-        XposedBridge.log("mInstance -> $mInstance")
         val fmInstance = mInstance?.field("mInstance")
         val activityTaskManager = mInstance?.invoke("get")!!
         fmInstance?.set(
@@ -80,6 +79,6 @@ object ProxyManager {
                 IActivityManagerHandler(activityTaskManager)
             )
         )
-        LogUtil.d(TAG, "replace IActivityTaskManager success")
+        LogUtil.d("replace IActivityTaskManager success")
     }
 }

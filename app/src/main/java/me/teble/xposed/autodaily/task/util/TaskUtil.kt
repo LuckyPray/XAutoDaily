@@ -35,7 +35,7 @@ object TaskUtil {
         relayMap: Map<String, Task>,
         env: MutableMap<String, Any>
     ): Boolean {
-        LogUtil.d(TAG, "开始执行任务：${task.id}")
+        LogUtil.d("开始执行任务：${task.id}")
         val relays: List<Task> = task.relay?.let {
             mutableListOf<Task>().apply {
                 it.split("|").forEach {
@@ -66,17 +66,17 @@ object TaskUtil {
                 }
                 else -> throw RuntimeException("未处理的变量类型：${it.type}")
             }
-            LogUtil.d(TAG, "开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
+            LogUtil.d("开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
         }
         val repeatNum = format(task.repeat, null, env).toInt()
-        LogUtil.d(TAG, "重复请求次数 -> $repeatNum")
+        LogUtil.d("重复请求次数 -> $repeatNum")
         var successNum = 0
         var reqCount = 0
         var lastMsg = "任务没有执行"
         for (cnt in 0 until repeatNum) {
             // 执行依赖任务
             relays.forEach {
-                LogUtil.d(TAG, "开始执行依赖任务列表: ${task.relay}")
+                LogUtil.d("开始执行依赖任务列表: ${task.relay}")
                 // 依赖任务失败，退出执行
                 if (!execute(reqType, it, relayMap, env)) {
                     // TODO 多次失败，任务禁用
@@ -94,7 +94,7 @@ object TaskUtil {
                 if (result.success) {
                     successNum++
                 } else {
-                    LogUtil.i(TAG, "任务【${task.id}】执行失败: $lastMsg")
+                    LogUtil.i("任务【${task.id}】执行失败: $lastMsg")
                 }
             }
         }
@@ -117,7 +117,6 @@ object TaskUtil {
                     }
                 } else {
                     LogUtil.i(
-                        TAG,
                         "任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个"
                     )
                     ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个")
@@ -138,7 +137,7 @@ object TaskUtil {
         var data: String? = response.body.trim()
         callback.dataRegex?.let {
             data = ReUtil.getGroup1(callback.dataRegex, data)
-            LogUtil.d(TAG, "handleCallback -> 正则处理后data为: $data")
+            LogUtil.d("handleCallback -> 正则处理后data为: $data")
         }
         // 是否合理
         data ?: throw RuntimeException("响应为空")
@@ -171,7 +170,7 @@ object TaskUtil {
             resultMsg = ReUtil.replaceAll(resultMsg, it.match, it.replacement)
         }
         LogUtil.d(
-            TAG, """handleCallback -> 
+            """handleCallback -> 
             |   success: $success
             |   msg: $resultMsg
         """.trimMargin()
@@ -190,23 +189,22 @@ object TaskUtil {
             documentContext = JsonPath.using(jsonPathConf).parse(data)
         }
         extracts?.forEach {
-            LogUtil.d(TAG, "开始提取变量 -> ${it.toJsonString()}")
+            LogUtil.d("开始提取变量 -> ${it.toJsonString()}")
             val res: Any
             if (it.match.startsWith("$")) {
                 try {
                     res = documentContext!!.read(it.match) ?: ""
                     LogUtil.d(
-                        TAG,
                         "JsonPath从 body 提取变量: ${it.match}, ${it.key} = ${res.toJsonString()}"
                     )
                 } catch (e: Exception) {
-                    LogUtil.e(TAG, e)
+                    LogUtil.e(e)
                     throw e
                 }
             } else {
                 res = ReUtil.getGroup1(it.match, if (it.from == "headers") headersText else data)
                     ?: ""
-                LogUtil.d(TAG, "正则从 ${it.from} 提取变量: ${it.match}, ${it.key} = $res")
+                LogUtil.d("正则从 ${it.from} 提取变量: ${it.match}, ${it.key} = $res")
             }
             env["this"] = res
             if (res is List<*>) {

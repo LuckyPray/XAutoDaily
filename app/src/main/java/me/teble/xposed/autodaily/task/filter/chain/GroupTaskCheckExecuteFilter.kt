@@ -20,13 +20,13 @@ class GroupTaskCheckExecuteFilter : GroupTaskFilter(
         val taskGroup = (chain as GroupTaskFilterChain).taskGroup
         taskGroup.tasks.forEach {
             if (ConfigUtil.checkExecuteTask(it)) {
-                LogUtil.d(TAG, "task -> ${it.id} 将被执行")
+                LogUtil.d("task -> ${it.id} 将被执行")
                 taskList.add(it)
             }
         }
         if (taskList.isEmpty()) {
             // 没有任何任务需要执行
-            LogUtil.d(TAG, "${taskGroup.id}: 没有任何任务需要执行")
+            LogUtil.d("${taskGroup.id}: 没有任何任务需要执行")
             return
         }
         chain.doFilter(relayTaskMap, taskList, env)

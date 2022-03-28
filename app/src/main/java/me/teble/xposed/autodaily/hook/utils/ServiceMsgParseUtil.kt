@@ -7,27 +7,24 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetProfileRsp
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebRsp
 import me.teble.xposed.autodaily.hook.base.Initiator.load
 import me.teble.xposed.autodaily.task.model.MiniProfile
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.fieldValue
+import me.teble.xposed.autodaily.utils.invoke
+import me.teble.xposed.autodaily.utils.invokeAs
+import me.teble.xposed.autodaily.utils.new
 
 object ServiceMsgParseUtil : QQClasses {
 
     fun parseLoginCode(fromServiceMsg: FromServiceMsg): String? {
         val res = load(StQWebRsp)?.new()
         var wupBuffer = fromServiceMsg.fieldValue("wupBuffer") as ByteArray?
-        LogUtil.d("ServiceMsgParseUtil", String(wupBuffer!!))
         wupBuffer = WupUtil.decode(wupBuffer)
         res?.invoke("mergeFrom", wupBuffer)
         val busiBuff = res?.fieldValue("busiBuff")
-        LogUtil.d("ServiceMsgParseUtil", "busiBuff -> $busiBuff")
         val byteString = busiBuff?.invoke("get")
-        LogUtil.d("ServiceMsgParseUtil", "byteString -> $byteString")
         val bytes = byteString?.invoke("toByteArray")
-        LogUtil.d("ServiceMsgParseUtil", "bytes -> $bytes")
         val codeRes = load(StGetCodeRsp)?.new()
-        LogUtil.d("ServiceMsgParseUtil", "codeRes -> $codeRes")
         codeRes?.invoke("mergeFrom", bytes)
         val pbCode = codeRes?.fieldValue("code")
-        LogUtil.d("ServiceMsgParseUtil", "pbCode -> $pbCode")
         return pbCode?.invokeAs("get")
     }
 

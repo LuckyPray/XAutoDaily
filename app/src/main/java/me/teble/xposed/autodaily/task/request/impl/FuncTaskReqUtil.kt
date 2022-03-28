@@ -20,7 +20,7 @@ object FuncTaskReqUtil : ITaskReqUtil {
     override fun create(task: Task, env: MutableMap<String, Any>): List<TaskRequest> {
         return mutableListOf<TaskRequest>().apply {
             val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
-            LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
+            LogUtil.d("urls -> ${evalUrls.toJsonString()}")
             evalUrls.forEach {
                 add(TaskRequest(it, null, null, null, null))
             }
@@ -30,21 +30,21 @@ object FuncTaskReqUtil : ITaskReqUtil {
     override fun executor(taskRequest: TaskRequest): TaskResponse {
         val url = taskRequest.url
         val paramMap = splitParam(url)
-        LogUtil.d(TAG, "paramMap -> $paramMap")
+        LogUtil.d("paramMap -> $paramMap")
         val manager: BaseFunction
-        LogUtil.d(TAG, "--------$url-------")
+        LogUtil.d("--------$url-------")
         when {
             url.startsWith("xa://FavoriteManager/favoriteAllYesterdayVoter") -> {
-                LogUtil.d(TAG, "--------favoriteAllYesterdayVoter-------")
+                LogUtil.d("--------favoriteAllYesterdayVoter-------")
                 val maxPage = paramMap["maxPage"]!!.toInt()
-                LogUtil.d(TAG, "maxPage: $maxPage")
+                LogUtil.d("maxPage: $maxPage")
                 manager = favoriteManager
                 val res = favoriteManager.getAllYesterdayVoter(maxPage)
-                LogUtil.d(TAG, "昨日点赞列表人数: ${res?.size}")
+                LogUtil.d("昨日点赞列表人数: ${res?.size}")
                 res ?: throw RuntimeException("获取点赞列表失败")
                 var favoriteCnt = 0
                 res.forEach {
-                    LogUtil.d(TAG, it.toString())
+                    LogUtil.d(it.toString())
                     val cnt = it.availableCnt
                     val uin = it.uin
                     if (it.availableCnt > 0) {

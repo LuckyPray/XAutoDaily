@@ -21,7 +21,7 @@ class GroupTaskPreFilter : GroupTaskFilter(
         if (arr[0] == "mini") {
             env["mini_app_id"] = arr[1]
         }
-        LogUtil.d(TAG, "groupTask -> ${groupTask.id} 任务类型为: ${arr[0]}")
+        LogUtil.d("groupTask -> ${groupTask.id} 任务类型为: ${arr[0]}")
         chain.doFilter(relayTaskMap, taskList, env)
     }
 }

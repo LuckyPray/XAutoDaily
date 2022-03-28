@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.charset.StandardCharsets
 
+@Suppress("DEPRECATION")
 fun getAppVersionCode(context: Context, packageName: String): Long {
     return try {
         val pi = context.packageManager.getPackageInfo(packageName, 0)
@@ -57,7 +58,6 @@ fun getTextFromModuleAssets(fileName: String): String {
             while (bis.read(buffer).also { len = it } != -1) {
                 bos.write(buffer, 0, len)
             }
-            LogUtil.log("str length -> ${bos.size()}")
             return String(bos.toByteArray())
         }
     } catch (e: Exception) {

@@ -97,7 +97,7 @@ class BaseActivityClassLoader(referencer: ClassLoader) :
 
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
-        LogUtil.d("BaseActivityClassLoader", "loadClass -> $name")
+        LogUtil.d("loadClass -> $name")
         try {
             if (name.startsWith("androidx.compose")
                 || name.startsWith("androidx.navigation")

@@ -42,14 +42,14 @@ object HttpTaskReqUtil : ITaskReqUtil {
     ): List<TaskRequest> {
         val res = mutableListOf<TaskRequest>().apply {
             val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
-            LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
+            LogUtil.d("urls -> ${evalUrls.toJsonString()}")
             evalUrls.forEach { url ->
                 env["req_url"] = url
                 val headers = mutableMapOf<String, String>()
                 task.reqHeaders?.entries?.forEach {
                     headers[it.key] = EnvFormatUtil.format(it.value, task.domain, env)
                 }
-                LogUtil.d(TAG, "header 头构造完毕: $headers")
+                LogUtil.d("header 头构造完毕: $headers")
                 var cookie: String? = null
                 when (task.domain) {
                     null -> {}
@@ -73,12 +73,12 @@ object HttpTaskReqUtil : ITaskReqUtil {
                         cookie = getQDomainCookies(task.domain)
                     }
                 }
-                LogUtil.d(TAG, "cookie 构造完毕: ***(${cookie?.length})")
-                LogUtil.d(TAG, "开始format data -> ${task.reqData}")
+                LogUtil.d("cookie 构造完毕: ***(${cookie?.length})")
+                LogUtil.d("开始format data -> ${task.reqData}")
                 val bodyList = task.reqData?.let {
                     EnvFormatUtil.formatList(it, task.domain, env)
                 }
-                LogUtil.d(TAG, "body -> $bodyList")
+                LogUtil.d("body -> $bodyList")
                 bodyList?.forEach {
                     val request = TaskRequest(url, task.reqMethod.uppercase(), headers, cookie, it)
                     add(request)
@@ -132,7 +132,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                     }
                 }
             }.build()
-            LogUtil.d(TAG, "开始执行请求")
+            LogUtil.d("开始执行请求")
             val response = OkHttpClient().newCall(request).execute()
             val responseBytes = response.body?.bytes() ?: ByteArray(0)
             var responseBody = String(responseBytes)
@@ -142,7 +142,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
             }
             val responseHeadersText = getHeadersText(response.headers.toMultimap())
             LogUtil.d(
-                TAG, """request ------------------------------------>
+                """request ------------------------------------>
                 |   method: ${request.method}
                 |   url: ${request.url}
                 |   headers: ***

@@ -78,7 +78,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                     )
                 }
             } catch (e: Throwable) {
-                LogUtil.e(TAG, e)
+                LogUtil.e(e)
                 ToastUtil.send("创建入口失败")
             }
         }

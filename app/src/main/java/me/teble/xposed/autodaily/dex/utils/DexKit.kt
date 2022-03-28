@@ -30,7 +30,7 @@ object DexKit {
                 list.add(zipEntry)
             }
         }
-        LogUtil.log("dexList -> $list")
+//        LogUtil.log("dexList -> $list")
         return list.sortedWith(compareBy { it.name })
     }
 

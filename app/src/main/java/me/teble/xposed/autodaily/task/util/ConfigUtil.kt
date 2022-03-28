@@ -79,7 +79,7 @@ object ConfigUtil {
                 return packageData.versions[0]
             }
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
         }
         return null
     }
@@ -90,7 +90,7 @@ object ConfigUtil {
         val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
         if (minAppVersion > BuildConfig.VERSION_CODE) {
             ToastUtil.send("插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置", true)
-            LogUtil.i(TAG, "插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置")
+            LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置")
             return false
         }
         saveConfFile(encRes, newConfVersion)
@@ -137,7 +137,7 @@ object ConfigUtil {
                 if (showToast) {
                     ToastUtil.send("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置", true)
                 }
-                LogUtil.i(TAG, "插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
+                LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
                 return false
             }
             if (confVersion <= configVersion) {
@@ -151,7 +151,7 @@ object ConfigUtil {
             ToastUtil.send("配置文件更新完毕，如有选项更新，请前往配置目录进行勾选")
             return true
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
             ToastUtil.send("更新配置文件失败，详情请看日志")
             return false
         }
@@ -160,7 +160,7 @@ object ConfigUtil {
     private fun decodeConfStr(encodeConfStr: String): String? {
         val res = decryptXAConf(encodeConfStr.toByteArray())
         if (res.isEmpty()) {
-            LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
+            LogUtil.w("解密配置文件失败，请检查插件是否为最新版本")
             return null
         }
         return String(res)
@@ -183,7 +183,7 @@ object ConfigUtil {
             xaConfig.putInt(CONFIG_VERSION, configVersion)
             return true
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
             ToastUtil.send("保存配置文件失败，详情请看日志")
             return false
         } finally {
@@ -210,7 +210,7 @@ object ConfigUtil {
         if (conf == null) {
             conf = defaultConf
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
-            LogUtil.d(TAG, "defaultConf version -> ${defaultConf.version}")
+            LogUtil.d("defaultConf version -> ${defaultConf.version}")
             saveConfFile(encodeConfig, defaultConf.version)
             Cache.needShowUpdateLog = true
         } else {
@@ -243,7 +243,7 @@ object ConfigUtil {
                 return Yaml.default.decodeFromString(TaskProperties.serializer(), decodeConfStr)
             }
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
 //            ToastUtil.send("配置加载失败，请检查插件是否为最新版本", true)
         }
         return null
@@ -280,7 +280,7 @@ object ConfigUtil {
     fun fetchUpdateInfo(): VersionInfo? {
         return try {
             val text = "$XA_API_URL$NOTICE".get()
-            LogUtil.d(TAG, "getNotice -> $text")
+            LogUtil.d("getNotice -> $text")
             val res: Result = text.parse()
             versionInfoCache = res.data
             lastFetchTime = System.currentTimeMillis()

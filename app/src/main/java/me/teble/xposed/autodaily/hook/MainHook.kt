@@ -61,7 +61,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
-        LogUtil.i(TAG, "handleLoadPackage: $loadPackageParam")
         this.loadPackageParam = loadPackageParam
         if (QQTypeEnum.contain(loadPackageParam.packageName)) {
             // TODO 分进程处理
@@ -72,7 +71,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     val init by lazy {
-        LogUtil.d(TAG, "current process: ${loadPackageParam.processName}")
+        LogUtil.d("current process: ${loadPackageParam.processName}")
         EzXHelperInit.initHandleLoadPackage(loadPackageParam)
         EzXHelperInit.setLogTag("XAutoDaily")
         EzXHelperInit.setToastTag("XAutoDaily")
@@ -85,7 +84,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         init(loadPackageParam)
         // 替换classloader
         replaceParentClassloader(loadPackageParam.classLoader)
-        LogUtil.d(TAG, "loadPackageParam.packageName -> ${loadPackageParam.packageName}")
 
         findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
@@ -102,18 +100,18 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 // MMKV
                 Config.init()
                 //加载资源注入
-                LogUtil.d(TAG, "injectRes")
+                LogUtil.d("injectRes")
                 ResInjectUtil.injectRes(context.resources)
-                LogUtil.d(TAG, "init ActivityProxyManager")
+                LogUtil.d("init ActivityProxyManager")
                 ProxyManager.init
                 // dex相关
-                LogUtil.d(TAG, "doDexInit")
+                LogUtil.d("doDexInit")
                 doDexInit()
                 //初始化hook
-                LogUtil.d(TAG, "initHook")
+                LogUtil.d("initHook")
                 initHook()
             } catch (e: Throwable) {
-                LogUtil.e(TAG, e)
+                LogUtil.e(e)
                 ToastUtil.send("初始化失败: " + e.stackTraceToString())
             }
         }
@@ -138,7 +136,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val needLocateClasses = mutableSetOf<String>()
         // 清空混淆缓存
         if (cache.getInt("hooksVersion", 0) < hooksVersion) {
-            LogUtil.d(TAG, "清空Hooks缓存")
+            LogUtil.d("清空Hooks缓存")
             cache.clearAll()
             cache.putInt("hooksVersion", hooksVersion)
         }
@@ -146,26 +144,26 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val key = "${it.key}#hash"
             val hash = it.value.hashCode()
             val cacheHash = cache.getInt(key, 0)
-            LogUtil.d(TAG, "${it.key} cacheHash -> $cacheHash")
-            LogUtil.d(TAG, "${it.key} hash -> $hash")
+            LogUtil.d("${it.key} cacheHash -> $cacheHash")
+            LogUtil.d("${it.key} hash -> $hash")
             // 加入修改了特征的类
             if (cacheHash != hash) {
                 cache.putInt(key, hash)
                 needLocateClasses.add(it.key)
-                LogUtil.d(TAG, "need locate -> ${it.key}")
+                LogUtil.d("need locate -> ${it.key}")
             }
             // 加入没有被搜索过的类
             if (!cache.contains("${it.key}#${qqVersionCode}")) {
                 needLocateClasses.add(it.key)
-                LogUtil.d(TAG, "cache not found: ${it.key}#${qqVersionCode}")
+                LogUtil.d("cache not found: ${it.key}#${qqVersionCode}")
             }
         }
         // 尝试获取，成功则加入新版缓存
         needLocateClasses.removeIf { classSimpleName ->
-            LogUtil.d(TAG, "尝试获取类：$classSimpleName")
+            LogUtil.d("尝试获取类：$classSimpleName")
             try {
                 val cls = hostClassLoader.loadClass(classSimpleName)
-                LogUtil.d(TAG, "尝试获取类成功 -> ${cls.canonicalName}")
+                LogUtil.d("尝试获取类成功 -> ${cls.canonicalName}")
                 cache.putString("$classSimpleName#${qqVersionCode}", classSimpleName)
                 return@removeIf true
             } catch (e: Exception) {
@@ -184,11 +182,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         var locateNum = 0
         locateRes.forEach {
             if (it.value.size == 1) {
-                LogUtil.i(TAG, "locate info: ${it.key} -> ${it.value[0]}")
+                LogUtil.i("locate info: ${it.key} -> ${it.value[0]}")
                 cache.putString("${it.key}#${qqVersionCode}", it.value[0])
                 locateNum++
             } else {
-                LogUtil.w(TAG, "locate not instance class: ${it.key} -> ${it.value}")
+                LogUtil.w("locate not instance class: ${it.key} -> ${it.value}")
                 // 保存为空字符串，表示已经搜索过，下次不再搜索
                 cache.putString("${it.key}#${qqVersionCode}", "")
             }
@@ -203,23 +201,21 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val parentClassloader = getFieldValue(mClassloader, "parent") as ClassLoader
         try {
             if (XAClassLoader::class.java != parentClassloader.javaClass) {
-                LogUtil.d(TAG, "replace parent classloader")
+                LogUtil.d("replace parent classloader")
                 setFieldValue(mClassloader, fParent, XAClassLoader(qClassloader, parentClassloader))
             }
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
         }
     }
 
     private fun initHook() {
-        LogUtil.d(TAG, "initHook: ->$this")
         for (cls in subHookClasses) {
             try {
-                LogUtil.d(TAG, "load hook class -> $cls")
 //                loadAs<BaseHook>(cls, Global.moduleClassLoader).new().init()
                 cls.new().init()
             } catch (e: Exception) {
-                LogUtil.e(TAG, e)
+                LogUtil.e(e)
             }
         }
         LogUtil.i("模块加载完毕")
