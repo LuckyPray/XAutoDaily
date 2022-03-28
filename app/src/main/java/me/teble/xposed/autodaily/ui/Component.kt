@@ -168,6 +168,7 @@ fun LineSwitch(
                 onClick = {
                     if (onClick == null) {
                         checked.value = !checked.value
+                        onChange(checked.value)
                     } else {
                         onClick.invoke()
                     }
@@ -243,6 +244,7 @@ fun LineCheckBox(
                 onClick = {
                     if (onClick == null) {
                         checked.value = !checked.value
+                        onChange(checked.value)
                     } else {
                         onClick.invoke()
                     }

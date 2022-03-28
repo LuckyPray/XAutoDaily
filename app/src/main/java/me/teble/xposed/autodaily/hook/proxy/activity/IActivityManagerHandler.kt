@@ -26,10 +26,8 @@ class IActivityManagerHandler(private val mOrigin: Any) : InvocationHandler {
     override fun invoke(proxy: Any, method: Method, args: Array<Any>?): Any? {
         try {
             args?.let {
-//            LogUtil.d(TAG, " -------> ${method.name}")
                 when (method.name) {
                     "startActivity" -> {
-                        LogUtil.d(" -------> startActivity")
                         foundFirstIntentOfArgs(args)?.let { pair ->
                             val component = pair.second.component
                             component?.let {

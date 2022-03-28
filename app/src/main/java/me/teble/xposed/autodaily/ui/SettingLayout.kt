@@ -13,13 +13,18 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.utils.FileUtil
 
 @Composable
 fun SettingLayout(navController: NavHostController) {
     ActivityView(title = "插件设置") {
         LazyColumn(
-            modifier = Modifier.padding(top = 13.dp)
+            modifier = Modifier
+                .padding(top = 13.dp)
                 .padding(horizontal = 13.dp),
             contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
             // 绘制间隔
@@ -46,13 +51,16 @@ fun SettingLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSwitch(
-                    title = "日志输出",
-                    desc = "输出日志文件",
-                    checked = mutableStateOf(false),
-                    onChange = {
-                        ToastUtil.send("暂未开发")
-                    }
+                LineButton(
+                    title = "日志导出",
+                    desc = "保存日志文件到 /Download 目录",
+                    onClick = {
+                        MainScope().launch(IO) {
+                            FileUtil.saveLogs()
+                            ToastUtil.send("保存成功")
+                        }
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
         }
