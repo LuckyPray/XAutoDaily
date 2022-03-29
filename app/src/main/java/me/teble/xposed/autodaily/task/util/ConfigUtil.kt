@@ -5,8 +5,6 @@ import android.util.Log
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
-import cn.hutool.cron.pattern.CronPattern
-import cn.hutool.cron.pattern.CronPatternUtil
 import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.NOTICE
@@ -15,6 +13,8 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
+import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.*
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
 import me.teble.xposed.autodaily.ui.Cache
@@ -303,7 +303,7 @@ object ConfigUtil {
         val sysTime = System.currentTimeMillis()
         val nextShouldExecTime =
             parseDate(accountConfig.getString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}")) ?: let {
-                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron), now, true)
+                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), now, true)!!
                 accountConfig.putString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}", time.format())
                 time
             }

@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
-import cn.hutool.cron.CronUtil
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
@@ -13,6 +12,7 @@ import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.model.TaskProperties
@@ -22,6 +22,7 @@ import me.teble.xposed.autodaily.ui.Cache
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.time.LocalDateTime
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
@@ -53,7 +54,9 @@ class CoreServiceHook : BaseHook() {
 
         fun runTasks(once: Boolean) {
             thread {
-                if (lock.isLocked) return@thread
+                if (lock.isLocked) {
+                    return@thread
+                }
                 lock.withLock {
                     while (!Global.isInit()) {
                         LogUtil.d("等待初始化完毕")
@@ -103,6 +106,7 @@ class CoreServiceHook : BaseHook() {
                     }
                 )
             }
+            threadPool.awaitTermination(10, TimeUnit.SECONDS)
         }
     }
 
@@ -111,40 +115,41 @@ class CoreServiceHook : BaseHook() {
         XposedHelpers.findAndHookMethod(load(CoreService),
             "onCreate", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
-                    if (cronLock.isLocked) {
+                    val scheduler = CronUtil.scheduler
+                    if (scheduler.isStarted) {
                         return
                     }
-                    cronLock.lock()
                     CronUtil.setMatchSecond(true)
                     try {
                         CronUtil.start()
-                    } catch (ignore: Throwable) {
+                    } catch (e: Throwable) {
+                        LogUtil.e(e, "CronUtil.start error: ")
+                        ToastUtil.send("任务调度器启动失败，详情请查看日志")
                     }
                     logd("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
-                    val scheduler = CronUtil.getScheduler()
-                    if (!scheduler.isStarted) {
-                        ToastUtil.send("任务调度器启动失败 >_<")
-                        LogUtil.d("任务调度器启动失败 >_<")
-                        return
+                    LogUtil.d("任务调度器启动成功")
+                    CronUtil.schedule(
+                        "task_timer",
+                        "0 */1 * * * *"
+                    ) {
+                        LogUtil.d("执行定时task")
+                        handler.sendEmptyMessage(AUTO_EXEC)
                     }
-                    val taskTable = scheduler.taskTable
-                    if (taskTable.isEmpty) {
-                        CronUtil.schedule("task_timer",
-                            "0 */10 * * * *") {
-                            handler.sendEmptyMessage(AUTO_EXEC)
+                    CronUtil.schedule(
+                        "check_update_task",
+                        "0 0 9/3 * * *"
+                    ) {
+                        if (ConfigUtil.checkUpdate(false)) {
+                            Cache.needUpdate = true
                         }
-                        CronUtil.schedule("check_update_task",
-                            "0 0 9/3 * * *") {
-                            if (ConfigUtil.checkUpdate(false)) {
-                                Cache.needUpdate = true
-                            }
-                        }
-                        CronUtil.schedule("time_correction",
-                            "0 0 0/3 * * *") {
-                            TimeUtil.init()
-                        }
-                        return
                     }
+                    CronUtil.schedule(
+                        "time_correction",
+                        "0 0 0/3 * * *"
+                    ) {
+                        TimeUtil.init()
+                    }
+                    LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
                 }
             }
         )

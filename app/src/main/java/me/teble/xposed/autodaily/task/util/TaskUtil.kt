@@ -1,14 +1,14 @@
 package me.teble.xposed.autodaily.task.util
 
 import cn.hutool.core.util.ReUtil
-import cn.hutool.cron.pattern.CronPattern
-import cn.hutool.cron.pattern.CronPatternUtil
 import com.jayway.jsonpath.Configuration
 import com.jayway.jsonpath.DocumentContext
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.Option
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
+import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.MsgExtract
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ReqFactory
@@ -103,7 +103,7 @@ object TaskUtil {
             val currentTime = Date(TimeUtil.getCurrentTime())
             accountConfig.putString("${task.id}#${LAST_EXEC_TIME}", currentTime.format())
             val nextTime =
-                CronPatternUtil.nextDateAfter(CronPattern(task.cron), currentTime, true)
+                CronPatternUtil.nextDateAfter(CronPattern(task.cron), currentTime, true)!!
             accountConfig.putString("${task.id}#${NEXT_SHOULD_EXEC_TIME}", nextTime.format())
             accountConfig.putString(
                 "${task.id}#${Const.LAST_EXEC_MSG}",
