@@ -130,7 +130,7 @@ class CoreServiceHook : BaseHook() {
                     LogUtil.d("任务调度器启动成功")
                     CronUtil.schedule(
                         "task_timer",
-                        "0 */1 * * * *"
+                        "0 */10 * * * *"
                     ) {
                         LogUtil.d("执行定时task")
                         handler.sendEmptyMessage(AUTO_EXEC)
