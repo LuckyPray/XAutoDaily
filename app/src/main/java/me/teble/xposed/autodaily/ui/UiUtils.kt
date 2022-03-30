@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.ui
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
@@ -47,10 +47,10 @@ fun Context.getStatusBarHeightPx(): Int {
     return res
 }
 
-fun Context.getActivity(): ComponentActivity? {
+fun Context.getActivity(): Activity? {
     var currentContext = this
     while (currentContext is ContextWrapper) {
-        if (currentContext is ComponentActivity) {
+        if (currentContext is Activity) {
             return currentContext
         }
         currentContext = currentContext.baseContext

@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import me.teble.xposed.autodaily.task.model.Friend
-import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TroopInfo
 
 @Composable
@@ -262,7 +261,7 @@ fun UpdateDialog(
                 LineSpacer()
                 Text(
                     text = text,
-                    fontSize = 13.sp,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(8.dp)
                 )
                 LineSpacer()
@@ -283,12 +282,14 @@ fun UpdateDialog(
 }
 
 @Composable
-fun EditVariableDialog(
-    task: Task,
-    onConfirmClicked: () -> Unit,
+fun ConfirmDialog(
+    title: String,
+    text: String,
+    onConfirmText: String,
+    onConfirm: () -> Unit,
+    onDismissText: String,
     onDismiss: () -> Unit
 ) {
-
     Dialog(
         onDismissRequest = onDismiss,
     ) {
@@ -300,17 +301,25 @@ fun EditVariableDialog(
 
                 // TITLE
                 Text(
-                    text = "自定义变量列表",
+                    text = title,
                     fontSize = 23.sp,
                     modifier = Modifier.padding(8.dp)
                 )
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = {
-
-                    },
-                    label = { Text(text = "关键词") }
+                LineSpacer()
+                Text(
+                    text = text,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(8.dp)
                 )
+                LineSpacer()
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) {
+                        Text(text = onDismissText)
+                    }
+                    TextButton(onClick = onConfirm) {
+                        Text(text = onConfirmText)
+                    }
+                }
             }
         }
     }

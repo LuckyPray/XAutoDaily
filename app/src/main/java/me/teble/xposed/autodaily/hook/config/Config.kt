@@ -13,16 +13,19 @@ import java.util.concurrent.ConcurrentHashMap
 object Config {
 
     private const val TAG = "Config"
+    val mmkvDir by lazy {
+        val dir = File(hostContext.filesDir, "xa_mmkv")
+        if (dir.isFile) {
+            dir.delete()
+        }
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        return@lazy dir
+    }
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     fun init() {
-        val mmkvDir = File(hostContext.filesDir, "xa_mmkv")
-        if (mmkvDir.isFile) {
-            mmkvDir.delete()
-        }
-        if (!mmkvDir.exists()) {
-            mmkvDir.mkdirs()
-        }
         val soFile = NativeUtil.getNativeLibrary(hostContext, "xa_native")
         try {
             MMKV.initialize(hostContext, mmkvDir.absolutePath) {
