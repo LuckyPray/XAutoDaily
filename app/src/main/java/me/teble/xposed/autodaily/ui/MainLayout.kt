@@ -255,7 +255,7 @@ fun BackgroundView() {
         try {
             val num = getCurrentExecTaskNum()
             for (i in 1..num) {
-                delay(20)
+                delay(15)
                 execTaskNum.value++
             }
         } catch (e: Exception) {

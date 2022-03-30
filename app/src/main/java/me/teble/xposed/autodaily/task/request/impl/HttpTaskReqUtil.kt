@@ -22,6 +22,7 @@ import java.lang.Integer.min
 import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"
@@ -133,12 +134,22 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 }
             }.build()
             LogUtil.d("开始执行请求")
-            val response = OkHttpClient().newCall(request).execute()
-            val responseBytes = response.body?.bytes() ?: ByteArray(0)
-            var responseBody = String(responseBytes)
-            if (responseBody.contains("encoding=\"GBK\"")){
-                // fix xml default encoding is GBK
-                responseBody = String(responseBytes, Charset.forName("GBK"))
+            val client = OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
+                .build()
+            val response = client.newCall(request).execute()
+            val responseBody: String
+            if (response.body?.contentType().toString() == "text/xml") {
+                val responseBytes = response.body?.bytes() ?: ByteArray(0)
+                var string = String(responseBytes)
+                if (string.contains("encoding=\"GBK\"")) {
+                    // fix xml default encoding is GBK
+                    string = String(responseBytes, Charset.forName("GBK"))
+                }
+                responseBody = string
+            } else {
+                responseBody = response.body?.string() ?: ""
             }
             val responseHeadersText = getHeadersText(response.headers.toMultimap())
             LogUtil.d(

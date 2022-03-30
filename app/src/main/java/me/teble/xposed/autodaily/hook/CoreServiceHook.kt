@@ -55,6 +55,9 @@ class CoreServiceHook : BaseHook() {
         fun runTasks(once: Boolean) {
             thread {
                 if (lock.isLocked) {
+                    if (once) {
+                        ToastUtil.send("当前存在任务正在执行，请稍后再试")
+                    }
                     return@thread
                 }
                 lock.withLock {
@@ -109,7 +112,7 @@ class CoreServiceHook : BaseHook() {
                     }
                 )
             }
-            threadPool.awaitTermination(10, TimeUnit.SECONDS)
+            threadPool.awaitTermination(10, TimeUnit.MINUTES)
         }
     }
 
