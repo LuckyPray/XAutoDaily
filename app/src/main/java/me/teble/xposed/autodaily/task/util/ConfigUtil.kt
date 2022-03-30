@@ -105,8 +105,8 @@ object ConfigUtil {
             if (BuildConfig.VERSION_CODE < info.appVersion) {
                 if (showToast) {
                     ToastUtil.send("插件版本存在更新")
-                    return true
                 }
+                return true
             }
             if (currConfVer < info.confVersion) {
                 if (BuildConfig.VERSION_CODE >= info.minAppVersion) {

@@ -97,7 +97,7 @@ android {
                 signingConfig signingConfigs.release
             }
             matchingFallbacks = ['release']
-            versionNameSuffix "-rc9.1"
+            versionNameSuffix "-rc10"
         }
     }
 
