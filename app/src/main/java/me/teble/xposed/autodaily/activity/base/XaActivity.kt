@@ -53,13 +53,13 @@ open class XaActivity : Activity(),
             mActivityResultRegistry.onSaveInstanceState(outState)
             outState
         }
-        addOnContextAvailableListener(OnContextAvailableListener {
+        addOnContextAvailableListener {
             val instanceState = savedStateRegistry
                 .consumeRestoredStateForKey(ACTIVITY_RESULT_TAG)
             if (instanceState != null) {
                 mActivityResultRegistry.onRestoreInstanceState(instanceState)
             }
-        })
+        }
     }
 
     override fun onStart() {
