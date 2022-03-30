@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.filter
 
+import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskCheckExecuteFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskExecuteBasicFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskPreFilter
@@ -7,8 +8,12 @@ import me.teble.xposed.autodaily.task.filter.chain.GroupTaskRelayBuilderFilter
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.request.enum.ReqType
+import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.TaskUtil
+import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
+import java.util.*
 
 class GroupTaskFilterChain(
     val taskGroup: TaskGroup
@@ -43,11 +48,29 @@ class GroupTaskFilterChain(
             filter.doFilter(relayTaskMap, taskList, env, this)
         } else {
             val reqType = ReqType.getType(taskGroup.type.split("|")[0])
+            val currentDate = Date(TimeUtil.getCurrentTime()).formatDate()
             for (task in taskList) {
+                var errCount = 0
+                var date = ""
+                accountConfig.getString("${task.id}#${TASK_EXCEPTION_COUNT}").let {
+                    it?.let {
+                        try {
+                            val arr = it.split("|")
+                            date = arr[0]
+                            errCount = arr[1].toInt()
+                        } catch (e: Throwable) {}
+                    }
+                }
+                if (errCount >= 3 && date == currentDate) {
+                    LogUtil.d("任务${task.id}今日执行错误次数超过3次，跳过执行")
+                    continue
+                }
                 try {
+                    // 进行异常计数，超过一定次数，当天不再执行该任务
                     TaskUtil.execute(reqType, task, relayTaskMap, env.toMutableMap())
                 } catch (e: Exception) {
-                    LogUtil.e(e)
+                    LogUtil.e(e, "执行任务${task.id}异常: ")
+                    accountConfig.putString("${task.id}#${TASK_EXCEPTION_COUNT}", "$currentDate|${++errCount}")
                 }
             }
         }

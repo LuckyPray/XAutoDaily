@@ -16,4 +16,5 @@ object Const {
     const val ENV_VARIABLE = "env_variable"
     const val USED_THREAD_POOL = "used_thread_pool"
     const val SHOW_TASK_TOAST = "do_not_show_task_toast"
+    const val TASK_EXCEPTION_COUNT = "task_exception_count"
 }

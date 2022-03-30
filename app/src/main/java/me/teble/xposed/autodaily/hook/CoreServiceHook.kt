@@ -138,7 +138,6 @@ class CoreServiceHook : BaseHook() {
                         "task_timer",
                         "0 */10 * * * *"
                     ) {
-                        LogUtil.d("执行定时task")
                         handler.sendEmptyMessage(AUTO_EXEC)
                     }
                     CronUtil.schedule(
