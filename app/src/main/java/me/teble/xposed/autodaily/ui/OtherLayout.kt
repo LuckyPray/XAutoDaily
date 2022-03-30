@@ -30,7 +30,7 @@ import kotlin.system.exitProcess
 
 
 @Composable
-fun SettingLayout(navController: NavHostController) {
+fun OtherLayout(navController: NavHostController) {
     var fileUri by remember { mutableStateOf<Uri?>(null) }
     val restoreLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
@@ -103,7 +103,7 @@ fun SettingLayout(navController: NavHostController) {
             }
         }
     }
-    ActivityView(title = "插件设置") {
+    ActivityView(title = "其它") {
         LazyColumn(
             modifier = Modifier
                 .padding(top = 13.dp)
@@ -120,7 +120,8 @@ fun SettingLayout(navController: NavHostController) {
                     checked = checked,
                     onChange = {
                         Cache.showTaskToast = it
-                    }
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
             item {
@@ -131,7 +132,8 @@ fun SettingLayout(navController: NavHostController) {
                     checked = checked,
                     onChange = {
                         Cache.usedThreadPool = it
-                    }
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
             item {
@@ -178,5 +180,5 @@ fun SettingLayout(navController: NavHostController) {
 @Preview
 @Composable
 fun PreviewSettingLayout() {
-    SettingLayout(rememberNavController())
+    OtherLayout(rememberNavController())
 }

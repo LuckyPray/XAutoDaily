@@ -11,13 +11,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.EditEnv
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Setting
+import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 
 object XAutoDailyApp {
     const val Main = "MainLayout"
     const val Sign = "SignLayout"
-    const val Setting = "SettingLayout"
+    const val Other = "OtherLayout"
     const val EditEnv = "EditEnvLayout"
 }
 
@@ -34,8 +34,8 @@ fun XAutoDailyApp() {
         composable(Sign) {
             SignLayout(navController = navController)
         }
-        composable(Setting) {
-            SettingLayout(navController = navController)
+        composable(Other) {
+            OtherLayout(navController = navController)
         }
         composable(
             route = "$EditEnv/{groupId}/{taskId}",

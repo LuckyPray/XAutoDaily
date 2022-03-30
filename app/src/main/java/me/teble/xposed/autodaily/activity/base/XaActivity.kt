@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.TextUtils
-import android.util.Log
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.contextaware.ContextAware
@@ -137,7 +136,6 @@ open class XaActivity : Activity(),
             input: I,
             options: ActivityOptionsCompat?
         ) {
-            Log.d(TAG, "------------onLaunch: $requestCode")
             val activity: Activity = this@XaActivity
 
             // Immediate result path
@@ -215,7 +213,6 @@ open class XaActivity : Activity(),
         registry: ActivityResultRegistry,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        Log.d("XALog", "registerForActivityResult ---- 1")
         return registry.register(
             "activity_rq#${mNextLocalRequestCode.getAndIncrement()}",
             this, contract, callback
@@ -226,7 +223,6 @@ open class XaActivity : Activity(),
         contract: ActivityResultContract<I, O>,
         callback: ActivityResultCallback<O>
     ): ActivityResultLauncher<I> {
-        Log.d("XALog", "registerForActivityResult ---- 2")
         return registerForActivityResult(contract, mActivityResultRegistry, callback)
     }
 

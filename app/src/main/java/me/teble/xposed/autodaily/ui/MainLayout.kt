@@ -45,10 +45,11 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
 import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Setting
+import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
 import me.teble.xposed.autodaily.utils.openUrl
+import java.util.concurrent.CompletableFuture.runAsync
 import kotlin.concurrent.thread
 
 @Composable
@@ -131,10 +132,10 @@ fun MainLayout(navController: NavHostController) {
             }
             item {
                 LineButton(
-                    title = "模块设置",
-                    desc = "模块相关的功能配置",
+                    title = "其它",
+                    desc = "模块配置、日志及备份",
                     onClick = {
-                        navController.navigate(Setting) {
+                        navController.navigate(Other) {
                             popUpTo(Main)
                         }
                     },
@@ -321,16 +322,17 @@ fun BackgroundView() {
                     )
                 )
             ) {
-
                 Button(
                     onClick = {
-                        val currentTime = System.currentTimeMillis()
-                        if (currentTime - lastClickTime < 5000) {
-                            ToastUtil.send("点那么快怎么不上天呢")
-                            return@Button
+                        runAsync {
+                            val currentTime = System.currentTimeMillis()
+                            if (currentTime - lastClickTime < 5000) {
+                                ToastUtil.send("点那么快怎么不上天呢")
+                                return@runAsync
+                            }
+                            lastClickTime = currentTime
+                            handler.sendEmptyMessage(EXEC_TASK)
                         }
-                        lastClickTime = currentTime
-                        handler.sendEmptyMessage(EXEC_TASK)
                     },
                     shape = RoundedCornerShape(25.dp),
                     colors = ButtonDefaults.textButtonColors(backgroundColor = Color.White),
