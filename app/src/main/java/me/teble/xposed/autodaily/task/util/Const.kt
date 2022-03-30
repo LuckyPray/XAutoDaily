@@ -14,4 +14,6 @@ object Const {
     const val CHANGE_SIGN_BUTTON = "change_sign_button"
     const val LAST_EXEC_MSG = "last_exec_msg"
     const val ENV_VARIABLE = "env_variable"
+    const val USED_THREAD_POOL = "used_thread_pool"
+    const val SHOW_TASK_TOAST = "do_not_show_task_toast"
 }

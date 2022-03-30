@@ -92,8 +92,11 @@ class CoreServiceHook : BaseHook() {
             if (needExecGroups.isEmpty()) {
                 return
             }
-            // TODO 是否启用多线程
-            val threadPool = ThreadUtil.newExecutor(5, 5)
+            var threadCount = 1
+            if (Cache.usedThreadPool) {
+                threadCount = 5
+            }
+            val threadPool = ThreadUtil.newExecutor(threadCount, threadCount)
             for (taskGroup in needExecGroups) {
                 threadPool.execute(
                     thread(false) {

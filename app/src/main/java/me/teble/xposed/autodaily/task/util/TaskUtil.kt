@@ -19,6 +19,7 @@ import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.format
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.formatList
+import me.teble.xposed.autodaily.ui.Cache
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.toJsonString
@@ -109,17 +110,23 @@ object TaskUtil {
                 "${task.id}#${Const.LAST_EXEC_MSG}",
                 if (reqCount == 1) {
                     if (successNum == 1) {
-                        ToastUtil.send("任务【${task.id}】 $lastMsg")
+                        if (Cache.showTaskToast) {
+                            ToastUtil.send("任务【${task.id}】 $lastMsg")
+                        }
                         lastMsg
                     } else {
-                        ToastUtil.send("任务【${task.id}】 $lastMsg")
+                        if (Cache.showTaskToast) {
+                            ToastUtil.send("任务【${task.id}】 $lastMsg")
+                        }
                         lastMsg
                     }
                 } else {
                     LogUtil.i(
                         "任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个"
                     )
-                    ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个")
+                    if (Cache.showTaskToast) {
+                        ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个")
+                    }
                     "执行成功${successNum}个，失败${reqCount - successNum}个"
                 }
             )

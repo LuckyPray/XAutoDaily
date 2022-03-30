@@ -113,22 +113,24 @@ fun SettingLayout(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
+                val checked = remember { mutableStateOf(Cache.showTaskToast) }
                 LineSwitch(
-                    title = "免打扰",
-                    desc = "关闭签到提醒",
-                    checked = mutableStateOf(false),
+                    title = "签到提示",
+                    desc = "执行完签到任务是否提示",
+                    checked = checked,
                     onChange = {
-                        ToastUtil.send("暂未开发")
+                        Cache.showTaskToast = it
                     }
                 )
             }
             item {
+                val checked = remember { mutableStateOf(Cache.usedThreadPool) }
                 LineSwitch(
                     title = "多线程执行",
                     desc = "是否启用线程池执行任务，加快任务执行速度",
-                    checked = mutableStateOf(false),
+                    checked = checked,
                     onChange = {
-                        ToastUtil.send("暂未开发")
+                        Cache.usedThreadPool = it
                     }
                 )
             }
