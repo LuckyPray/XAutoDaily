@@ -19,8 +19,6 @@ import androidx.compose.ui.unit.sp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.config.Constants
-import me.teble.xposed.autodaily.hook.config.Config.xaConfig
-import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.formatDate
 import java.util.*
 
@@ -44,7 +42,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             )
             var updateLog by remember { mutableStateOf(emptyList<String>()) }
             LaunchedEffect(updateLog) {
-                updateLog = Cache.versionInfoCache?.updateLog?: emptyList()
+                updateLog = ConfUnit.versionInfoCache?.updateLog?: emptyList()
             }
             LazyColumn(
                 modifier = Modifier
@@ -74,7 +72,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             val context = LocalContext.current
             TextButton(onClick = {
                 dialog.dismiss()
-                xaConfig.putString(BLOCK_UPDATE_ONE_DAY, Date().formatDate())
+                ConfUnit.blockUpdateOneDay = Date().formatDate()
             }) {
                 Text(text = "今日不再提醒")
             }

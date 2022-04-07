@@ -38,16 +38,16 @@ import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.config.Constants.ALIPAY_QRCODE
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
+import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
-import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
-import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.openUrl
 import java.util.concurrent.CompletableFuture.runAsync
 import kotlin.concurrent.thread
@@ -60,8 +60,8 @@ fun MainLayout(navController: NavHostController) {
     val lastClickTime = remember { mutableStateOf(0L) }
     LaunchedEffect(notice) {
         launch(IO) {
-            val info = Cache.versionInfoCache ?: fetchUpdateInfo()
-            if (System.currentTimeMillis() - Cache.lastFetchTime > 60 * 60 * 1000L)
+            val info = ConfUnit.versionInfoCache ?: fetchUpdateInfo()
+            if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
                 fetchUpdateInfo()
             info ?: ToastUtil.send("拉取公告失败")
             notice.value = info?.notice ?: ""
@@ -106,14 +106,14 @@ fun MainLayout(navController: NavHostController) {
             }
             item {
                 val globalSwitch = remember {
-                    mutableStateOf(currConf.getBoolean(GLOBAL_ENABLE, false))
+                    mutableStateOf(ConfUnit.globalEnable)
                 }
                 LineSwitch(
                     title = "总开关",
                     checked = globalSwitch,
                     desc = "关闭后一切任务都不会执行",
                     onChange = {
-                        currConf.putBoolean(GLOBAL_ENABLE, it)
+                        ConfUnit.globalEnable = it
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
@@ -198,12 +198,24 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
+                var moduleVersionName by remember { mutableStateOf("") }
+                var moduleVersionCode by remember { mutableStateOf(0) }
+                var qqVersionName by remember { mutableStateOf("") }
+                var qqVersionCode by remember { mutableStateOf(0L) }
+                var configVersion by remember { mutableStateOf(0) }
+                LaunchedEffect(qqVersionName) {
+                    moduleVersionName = BuildConfig.VERSION_NAME
+                    moduleVersionCode = BuildConfig.VERSION_CODE
+                    qqVersionName = Global.qqVersionName
+                    qqVersionCode = Global.qqVersionCode
+                    configVersion = ConfUnit.configVersion
+                }
                 LineButton(
                     title = "检测更新",
                     otherInfoList = listOf(
-                        "当前模块版本：${BuildConfig.VERSION_NAME}",
-                        "当前宿主版本：${Cache.qqVersionName}(${Cache.qqVersionCode})",
-                        "当前配置版本：${Cache.configVersion}"
+                        "当前模块版本：${moduleVersionName}(${moduleVersionCode})",
+                        "当前宿主版本：${qqVersionName}(${qqVersionCode})",
+                        "当前配置版本：${configVersion}"
                     ),
                     onClick = {
                         val time = System.currentTimeMillis()
@@ -218,8 +230,9 @@ fun MainLayout(navController: NavHostController) {
                             if (res) {
                                 showUpdateDialog.value = true
                                 updateDialogText.value =
-                                    Cache.versionInfoCache?.updateLog?.joinToString("\n") ?: ""
+                                    ConfUnit.versionInfoCache?.updateLog?.joinToString("\n") ?: ""
                             }
+                            configVersion = ConfUnit.configVersion
                         }
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
@@ -238,6 +251,7 @@ fun MainLayout(navController: NavHostController) {
                                     "3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F$ALIPAY_QRCODE%3F_s%3Dweb-other"
                             )
                         } catch (e: Exception) {
+                            LogUtil.e(e, "open alipay qr error: ")
                             context.openUrl("https://mobilecodec.alipay.com/client_download.htm?qrcode=$ALIPAY_QRCODE")
                         }
                     },

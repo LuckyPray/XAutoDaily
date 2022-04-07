@@ -14,13 +14,11 @@ import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
-import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.AppUpdateLayout
-import me.teble.xposed.autodaily.ui.Cache
+import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.ConfigUpdateLayout
 import me.teble.xposed.autodaily.ui.CustomDialog
 import me.teble.xposed.autodaily.utils.TimeUtil
@@ -44,13 +42,13 @@ class SplashActivityHook : BaseHook() {
                 handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
                 TimeUtil.init()
                 if (ConfigUtil.checkUpdate(false)) {
-                    Cache.needUpdate = true
+                    ConfUnit.needUpdate = true
                 }
-                if (Cache.needUpdate) {
+                if (ConfUnit.needUpdate) {
                     context.openAppUpdateDialog()
-                } else if (Cache.needShowUpdateLog) {
+                } else if (ConfUnit.needShowUpdateLog) {
                     context.openConfigUpdateLog()
-                    Cache.needShowUpdateLog = false
+                    ConfUnit.needShowUpdateLog = false
                 }
             }
         }
@@ -58,11 +56,11 @@ class SplashActivityHook : BaseHook() {
         findMethod(SplashActivity) { name == "doOnStart" }.hookAfter {
             val context = it.thisObject as Activity
             thread {
-                if (Cache.needUpdate) {
+                if (ConfUnit.needUpdate) {
                     context.openAppUpdateDialog()
-                } else if (Cache.needShowUpdateLog) {
+                } else if (ConfUnit.needShowUpdateLog) {
                     context.openConfigUpdateLog()
-                    Cache.needShowUpdateLog = false
+                    ConfUnit.needShowUpdateLog = false
                 }
             }
         }
@@ -91,7 +89,7 @@ fun Activity.openAppUpdateDialog() {
                 setContentView(view)
             }
         }
-        val skipShow = xaConfig.getString(BLOCK_UPDATE_ONE_DAY) == Date().formatDate()
+        val skipShow = ConfUnit.blockUpdateOneDay == Date().formatDate()
         if (!dialog.isShowing && !skipShow) {
             dialog.show()
         }

@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.task.filter
 
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskCheckExecuteFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskExecuteBasicFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskPreFilter
@@ -8,9 +7,9 @@ import me.teble.xposed.autodaily.task.filter.chain.GroupTaskRelayBuilderFilter
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.request.enum.ReqType
-import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.TaskUtil
 import me.teble.xposed.autodaily.task.util.formatDate
+import me.teble.xposed.autodaily.ui.taskExceptionFlag
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.*
@@ -52,7 +51,7 @@ class GroupTaskFilterChain(
             for (task in taskList) {
                 var errCount = 0
                 var date = ""
-                accountConfig.getString("${task.id}#${TASK_EXCEPTION_COUNT}").let {
+                task.taskExceptionFlag.let {
                     it?.let {
                         try {
                             val arr = it.split("|")
@@ -70,7 +69,7 @@ class GroupTaskFilterChain(
                     TaskUtil.execute(reqType, task, relayTaskMap, env.toMutableMap())
                 } catch (e: Exception) {
                     LogUtil.e(e, "执行任务${task.id}异常: ")
-                    accountConfig.putString("${task.id}#${TASK_EXCEPTION_COUNT}", "$currentDate|${++errCount}")
+                    task.taskExceptionFlag = "$currentDate|${++errCount}"
                 }
             }
         }

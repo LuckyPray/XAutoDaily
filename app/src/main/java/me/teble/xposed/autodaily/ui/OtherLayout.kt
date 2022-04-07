@@ -113,25 +113,25 @@ fun OtherLayout(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
-                val checked = remember { mutableStateOf(Cache.showTaskToast) }
+                val checked = remember { mutableStateOf(ConfUnit.showTaskToast) }
                 LineSwitch(
                     title = "签到提示",
                     desc = "执行完签到任务是否提示",
                     checked = checked,
                     onChange = {
-                        Cache.showTaskToast = it
+                        ConfUnit.showTaskToast = it
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
             item {
-                val checked = remember { mutableStateOf(Cache.usedThreadPool) }
+                val checked = remember { mutableStateOf(ConfUnit.usedThreadPool) }
                 LineSwitch(
                     title = "多线程执行",
                     desc = "是否启用线程池执行任务，加快任务执行速度",
                     checked = checked,
                     onChange = {
-                        Cache.usedThreadPool = it
+                        ConfUnit.usedThreadPool = it
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )

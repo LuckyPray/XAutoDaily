@@ -10,15 +10,13 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
-import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
-import me.teble.xposed.autodaily.ui.Cache
+import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.time.LocalDateTime
@@ -65,7 +63,7 @@ class CoreServiceHook : BaseHook() {
                     LogUtil.d("等待初始化完毕")
                     Thread.sleep(500)
                 }
-                val globalEnable = accountConfig.getBoolean(GLOBAL_ENABLE, false)
+                val globalEnable = ConfUnit.globalEnable
                 if (!globalEnable) {
                     if (once) {
                         ToastUtil.send("未启用模块，跳过执行")
@@ -101,7 +99,7 @@ class CoreServiceHook : BaseHook() {
             }
             runtimeTasks.addAll(needExecGroups)
             var threadCount = 1
-            if (Cache.usedThreadPool) {
+            if (ConfUnit.usedThreadPool) {
                 threadCount = 5
             }
             val threadPool = ThreadUtil.newExecutor(threadCount, threadCount)
@@ -160,7 +158,7 @@ class CoreServiceHook : BaseHook() {
                         "0 0 9/3 * * *"
                     ) {
                         if (ConfigUtil.checkUpdate(false)) {
-                            Cache.needUpdate = true
+                            ConfUnit.needUpdate = true
                         }
                     }
                     LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")

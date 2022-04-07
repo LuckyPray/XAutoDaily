@@ -19,9 +19,7 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
-import me.teble.xposed.autodaily.ui.Cache.currConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
 import me.teble.xposed.autodaily.utils.navigationBarMode
 import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
@@ -45,8 +43,6 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        // 缓存当前账号配置类，避免在UI刷新时重复获取
-        currConf = accountConfig
         val view = ComposeView(this).apply {
             // 设置布局为最大
             this.layoutParams = ViewGroup.LayoutParams(

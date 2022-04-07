@@ -17,10 +17,13 @@ import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.*
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
-import me.teble.xposed.autodaily.ui.Cache
-import me.teble.xposed.autodaily.ui.Cache.configVersion
-import me.teble.xposed.autodaily.ui.Cache.lastFetchTime
-import me.teble.xposed.autodaily.ui.Cache.versionInfoCache
+import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.ConfUnit.configVersion
+import me.teble.xposed.autodaily.ui.ConfUnit.lastFetchTime
+import me.teble.xposed.autodaily.ui.ConfUnit.versionInfoCache
+import me.teble.xposed.autodaily.ui.enable
+import me.teble.xposed.autodaily.ui.lastExecTime
+import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.utils.*
 import java.io.File
 import java.util.*
@@ -147,7 +150,7 @@ object ConfigUtil {
                 return false
             }
             saveConfFile(encRes, confVersion)
-            Cache.needShowUpdateLog = true
+            ConfUnit.needShowUpdateLog = true
             ToastUtil.send("配置文件更新完毕，如有选项更新，请前往配置目录进行勾选")
             return true
         } catch (e: Exception) {
@@ -179,7 +182,7 @@ object ConfigUtil {
                 propertiesFile.createNewFile()
             }
             FileUtil.writeUtf8String(encConfStr, propertiesFile)
-            Cache.configVersion = configVersion
+            ConfUnit.configVersion = configVersion
             xaConfig.putInt(CONFIG_VERSION, configVersion)
             return true
         } catch (e: Exception) {
@@ -212,14 +215,14 @@ object ConfigUtil {
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
             LogUtil.d("defaultConf version -> ${defaultConf.version}")
             saveConfFile(encodeConfig, defaultConf.version)
-            Cache.needShowUpdateLog = true
+            ConfUnit.needShowUpdateLog = true
         } else {
             // 配置正常加载，表示配置版本与当前model一致，判断内置文件版本是否需要覆盖当前配置
             // 内置配置版本与本地配置版本一致的情况，如果hashcode不一致，内置覆盖本地
             // 内置版本 > 本地配置版本，内置覆盖本地
             if (conf.version <= defaultConf.version && conf != defaultConf) {
                 if (conf.version < defaultConf.version) {
-                    Cache.needShowUpdateLog = true
+                    ConfUnit.needShowUpdateLog = true
                 }
                 conf = defaultConf
                 saveConfFile(encodeConfig, defaultConf.version)
@@ -268,7 +271,7 @@ object ConfigUtil {
         val nowStr = Date(TimeUtil.getCurrentTime()).format().split(' ').first()
         conf.taskGroups.forEach { taskGroup ->
             taskGroup.tasks.forEach { task ->
-                val time = accountConfig.getString("${task.id}#${Const.LAST_EXEC_TIME}") ?: ""
+                val time = task.lastExecTime ?: ""
                 if (time.startsWith(nowStr)) {
                     num++
                 }
@@ -292,20 +295,20 @@ object ConfigUtil {
     }
 
     fun checkExecuteTask(task: Task): Boolean {
-        val enabled = accountConfig.getBoolean("${task.id}#${Const.ENABLE}", false)
+        val enabled = task.enable
         if (!enabled) {
             return false
         }
         // 获取上次执行任务时间
-        val lastExecTime = parseDate(accountConfig.getString("${task.id}#${Const.LAST_EXEC_TIME}"))
+        val lastExecTime = parseDate(task.lastExecTime)
         // 不保证一定在有效时间内执行
         val currentTimestamp = TimeUtil.getCurrentTime()
         val now = Date(currentTimestamp)
         val sysTime = System.currentTimeMillis()
         val nextShouldExecTime =
-            parseDate(accountConfig.getString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}")) ?: let {
+            parseDate(task.nextShouldExecTime) ?: let {
                 val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), Date(currentTimestamp + 1), true)!!
-                accountConfig.putString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}", time.format())
+                task.nextShouldExecTime = time.format()
                 time
             }
         lastExecTime ?: let {

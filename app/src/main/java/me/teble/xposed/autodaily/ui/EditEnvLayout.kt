@@ -30,11 +30,10 @@ import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskEnv
 import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
-import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
-import me.teble.xposed.autodaily.ui.Cache.currConf
 import kotlin.concurrent.thread
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -45,13 +44,15 @@ fun EditEnvLayout(
     taskId: String?
 ) {
     var envList by remember { mutableStateOf(emptyList<TaskEnv>()) }
+    lateinit var task: Task
     LaunchedEffect(envList) {
         val conf = ConfigUtil.loadSaveConf()
-        conf.taskGroups.forEach {
-            if (it.id == groupId) {
-                it.tasks.forEach { task ->
-                    if (task.id == taskId) {
-                        envList = task.envs ?: emptyList()
+        conf.taskGroups.forEach { taskGroup ->
+            if (taskGroup.id == groupId) {
+                taskGroup.tasks.forEach {
+                    if (it.id == taskId) {
+                        envList = it.envs ?: emptyList()
+                        task = it
                         return@LaunchedEffect
                     }
                 }
@@ -69,7 +70,7 @@ fun EditEnvLayout(
     LaunchedEffect(envMap) {
         envList.forEach { env ->
             envMap[env.name] = mutableStateOf(
-                currConf.getString("$taskId#$ENV_VARIABLE#${env.name}", env.default)
+                task.getVariable(env.name, env.default)
             )
             if (env.type == "friend") {
                 friendFlag.value = true
@@ -247,12 +248,9 @@ fun EditEnvLayout(
                 .combinedClickable {
                     envMap.entries.forEach {
                         if (it.value.value.isNotEmpty()) {
-                            currConf.putString(
-                                "$taskId#$ENV_VARIABLE#${it.key}",
-                                it.value.value
-                            )
+                            task.setVariable(it.key, it.value.value)
                         } else {
-                            currConf.remove("$taskId#$ENV_VARIABLE#${it.key}")
+                            task.setVariable(it.key, null)
                         }
                     }
                     ToastUtil.send("保存成功")

@@ -15,11 +15,12 @@ import me.teble.xposed.autodaily.task.request.ReqFactory
 import me.teble.xposed.autodaily.task.request.enum.ReqType
 import me.teble.xposed.autodaily.task.request.model.TaskResponse
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
-import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_TIME
-import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.format
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.formatList
-import me.teble.xposed.autodaily.ui.Cache
+import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.lastExecMsg
+import me.teble.xposed.autodaily.ui.lastExecTime
+import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.toJsonString
@@ -102,20 +103,19 @@ object TaskUtil {
         // 正常cron任务，需要计算下次执行时间
         if (task.cron != null && task.cron != "basic") {
             val currentTime = Date(TimeUtil.getCurrentTime())
-            accountConfig.putString("${task.id}#${LAST_EXEC_TIME}", currentTime.format())
+            task.lastExecTime = currentTime.format()
             val nextTime =
                 CronPatternUtil.nextDateAfter(CronPattern(task.cron), currentTime, true)!!
-            accountConfig.putString("${task.id}#${NEXT_SHOULD_EXEC_TIME}", nextTime.format())
-            accountConfig.putString(
-                "${task.id}#${Const.LAST_EXEC_MSG}",
+            task.nextShouldExecTime = nextTime.format()
+            task.lastExecMsg =
                 if (reqCount == 1) {
                     if (successNum == 1) {
-                        if (Cache.showTaskToast) {
+                        if (ConfUnit.showTaskToast) {
                             ToastUtil.send("任务【${task.id}】 $lastMsg")
                         }
                         lastMsg
                     } else {
-                        if (Cache.showTaskToast) {
+                        if (ConfUnit.showTaskToast) {
                             ToastUtil.send("任务【${task.id}】 $lastMsg")
                         }
                         lastMsg
@@ -124,12 +124,11 @@ object TaskUtil {
                     LogUtil.i(
                         "任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个"
                     )
-                    if (Cache.showTaskToast) {
+                    if (ConfUnit.showTaskToast) {
                         ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个")
                     }
                     "执行成功${successNum}个，失败${reqCount - successNum}个"
                 }
-            )
         }
         // 未配置断言器允许失败，防止不重要的依赖任务中断任务流程
         return task.callback.assert == null || successNum > 0
