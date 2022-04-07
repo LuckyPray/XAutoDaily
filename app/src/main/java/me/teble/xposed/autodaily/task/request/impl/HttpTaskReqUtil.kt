@@ -26,6 +26,10 @@ import java.util.concurrent.TimeUnit
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"
+    private val  client = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(20, TimeUnit.SECONDS)
+        .build()
 
     object METHOD {
         private const val GET = "GET"
@@ -134,10 +138,6 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 }
             }.build()
             LogUtil.d("开始执行请求")
-            val client = OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(20, TimeUnit.SECONDS)
-                .build()
             val response = client.newCall(request).execute()
             val responseBody: String
             if (response.body?.contentType().toString() == "text/xml") {

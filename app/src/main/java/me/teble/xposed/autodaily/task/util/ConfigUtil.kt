@@ -299,11 +299,12 @@ object ConfigUtil {
         // 获取上次执行任务时间
         val lastExecTime = parseDate(accountConfig.getString("${task.id}#${Const.LAST_EXEC_TIME}"))
         // 不保证一定在有效时间内执行
-        val now = Date(TimeUtil.getCurrentTime())
+        val currentTimestamp = TimeUtil.getCurrentTime()
+        val now = Date(currentTimestamp)
         val sysTime = System.currentTimeMillis()
         val nextShouldExecTime =
             parseDate(accountConfig.getString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}")) ?: let {
-                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), now, true)!!
+                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), Date(currentTimestamp + 1), true)!!
                 accountConfig.putString("${task.id}#${Const.NEXT_SHOULD_EXEC_TIME}", time.format())
                 time
             }

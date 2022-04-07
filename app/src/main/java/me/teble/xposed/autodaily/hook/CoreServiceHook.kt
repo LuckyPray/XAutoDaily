@@ -42,6 +42,7 @@ class CoreServiceHook : BaseHook() {
         private val handlerThread by lazy {
             HandlerThread("CoreServiceHookThread").apply { start() }
         }
+        private val runtimeTasks = mutableSetOf<TaskGroup>()
 
         val handler = object : Handler(handlerThread.looper) {
             override fun handleMessage(msg: Message) {
@@ -60,41 +61,45 @@ class CoreServiceHook : BaseHook() {
                     }
                     return@thread
                 }
-                lock.withLock {
-                    while (!Global.isInit()) {
-                        LogUtil.d("等待初始化完毕")
-                        Thread.sleep(500)
-                    }
-                    val globalEnable = accountConfig.getBoolean(GLOBAL_ENABLE, false)
-                    if (!globalEnable) {
-                        if (once) {
-                            ToastUtil.send("未启用模块，跳过执行")
-                        }
-                        return@thread
-                    }
-                    if (once) {
-                        ToastUtil.send("开始执行签到")
-                    } else {
-                        LogUtil.d("定时执行")
-                    }
-                    executorTask(ConfigUtil.loadSaveConf())
+                while (!Global.isInit()) {
+                    LogUtil.d("等待初始化完毕")
+                    Thread.sleep(500)
                 }
+                val globalEnable = accountConfig.getBoolean(GLOBAL_ENABLE, false)
+                if (!globalEnable) {
+                    if (once) {
+                        ToastUtil.send("未启用模块，跳过执行")
+                    }
+                    return@thread
+                }
+                if (once) {
+                    ToastUtil.send("开始执行签到")
+                } else {
+                    LogUtil.d("定时执行")
+                }
+                executorTask(ConfigUtil.loadSaveConf())
             }
         }
 
         private fun executorTask(conf: TaskProperties) {
+            val executeTime = TimeUtil.getCurrentTime()
             val needExecGroups = mutableListOf<TaskGroup>()
-            for (group in conf.taskGroups) {
-                for (task in group.tasks) {
-                    if (ConfigUtil.checkExecuteTask(task)) {
-                        needExecGroups.add(group)
-                        break
+            lock.withLock {
+                for (group in conf.taskGroups) {
+                    for (task in group.tasks) {
+                        if (ConfigUtil.checkExecuteTask(task)) {
+                            if (!runtimeTasks.contains(group)) {
+                                needExecGroups.add(group)
+                            }
+                            break
+                        }
                     }
                 }
             }
             if (needExecGroups.isEmpty()) {
                 return
             }
+            runtimeTasks.addAll(needExecGroups)
             var threadCount = 1
             if (Cache.usedThreadPool) {
                 threadCount = 5
@@ -112,7 +117,17 @@ class CoreServiceHook : BaseHook() {
                     }
                 )
             }
-            threadPool.awaitTermination(10, TimeUnit.MINUTES)
+            while (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                if (TimeUtil.getCurrentTime() - executeTime > 20 * 60 * 1000) {
+                    // 关闭运行时间超过20分钟的任务
+                    threadPool.shutdownNow()
+                    needExecGroups.forEach {
+                        if (runtimeTasks.contains(it)) {
+                            runtimeTasks.remove(it)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -147,12 +162,6 @@ class CoreServiceHook : BaseHook() {
                         if (ConfigUtil.checkUpdate(false)) {
                             Cache.needUpdate = true
                         }
-                    }
-                    CronUtil.schedule(
-                        "time_correction",
-                        "0 0 0/3 * * *"
-                    ) {
-                        TimeUtil.init()
                     }
                     LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
                 }
