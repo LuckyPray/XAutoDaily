@@ -43,7 +43,7 @@ class GroupTaskFilterChain(
     ) {
         if (pos < filters.size) {
             val filter = filters[pos++]
-            LogUtil.d("当前filter -> ${filter::class.java.simpleName}")
+            LogUtil.d("当前filter -> ${filter.TAG}")
             filter.doFilter(relayTaskMap, taskList, env, this)
         } else {
             val reqType = ReqType.getType(taskGroup.type.split("|")[0])

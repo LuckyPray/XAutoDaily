@@ -72,6 +72,7 @@ fun SignLayout(navController: NavHostController) {
                                     task.lastExecTime = null
                                     task.lastExecMsg = null
                                     task.nextShouldExecTime = null
+                                    task.taskExceptionFlag = null
                                     lastExecTime = "从未执行"
                                     lastExecMsg = ""
                                     nextShouldExecTime = "从未执行"

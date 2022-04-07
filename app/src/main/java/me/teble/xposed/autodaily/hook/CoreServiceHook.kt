@@ -119,11 +119,11 @@ class CoreServiceHook : BaseHook() {
                 if (TimeUtil.getCurrentTime() - executeTime > 20 * 60 * 1000) {
                     // 关闭运行时间超过20分钟的任务
                     threadPool.shutdownNow()
-                    needExecGroups.forEach {
-                        if (runtimeTasks.contains(it)) {
-                            runtimeTasks.remove(it)
-                        }
-                    }
+                }
+            }
+            needExecGroups.forEach {
+                if (runtimeTasks.contains(it)) {
+                    runtimeTasks.remove(it)
                 }
             }
         }
