@@ -39,12 +39,12 @@ object Config {
 
     val classCache by lazy {
         if (!Global.isInit()) MockConfProxy()
-        else ConfProxy(MMKV.mmkvWithID("XAHooks", MMKV.SINGLE_PROCESS_MODE))
+        else ConfProxy(MMKV.mmkvWithID("XAHooks", MMKV.MULTI_PROCESS_MODE))
     }
 
     val xaConfig by lazy {
         if (!Global.isInit()) MockConfProxy()
-        else ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.SINGLE_PROCESS_MODE))
+        else ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.MULTI_PROCESS_MODE))
     }
 
     private val confProxyMap = ConcurrentHashMap<Long, ConfProxy>(5)
@@ -54,7 +54,7 @@ object Config {
             if (!Global.isInit()) return MockConfProxy()
             return confProxyMap[currentUin] ?: let {
                 val currentConf =
-                    ConfProxy(MMKV.mmkvWithID("XASettings-${currentUin}", MMKV.SINGLE_PROCESS_MODE))
+                    ConfProxy(MMKV.mmkvWithID("XASettings-${currentUin}", MMKV.MULTI_PROCESS_MODE))
                 confProxyMap[currentUin] = currentConf
                 currentConf
             }
@@ -69,7 +69,7 @@ object Config {
             "qimei",
         )
     )
-    val hooksVersion = 1
+    const val hooksVersion = 1
     val confuseInfo = mutableMapOf<String, Set<String>>().apply {
         obfuscate.forEach { (k, v) ->
             put(getSimpleName(k), v)

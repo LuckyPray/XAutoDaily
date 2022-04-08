@@ -99,7 +99,7 @@
     *;
 }
 -keep class net.bytebuddy.** {
-  *;
+    *;
 }
 
 

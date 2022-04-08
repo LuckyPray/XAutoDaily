@@ -67,7 +67,7 @@ class GroupTaskFilterChain(
                 try {
                     // 进行异常计数，超过一定次数，当天不再执行该任务
                     TaskUtil.execute(reqType, task, relayTaskMap, env.toMutableMap())
-                } catch (e: Exception) {
+                } catch (e: Throwable) {
                     LogUtil.e(e, "执行任务${task.id}异常: ")
                     task.taskExceptionFlag = "$currentDate|${++errCount}"
                 }

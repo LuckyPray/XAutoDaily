@@ -1,12 +1,11 @@
 package me.teble.xposed.autodaily.task.util
 
 import cn.hutool.core.util.ReUtil
-import com.jayway.jsonpath.Configuration
-import com.jayway.jsonpath.DocumentContext
-import com.jayway.jsonpath.JsonPath
-import com.jayway.jsonpath.Option
+import kotlinx.serialization.json.JsonElement
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.ksonpath.parse
+import me.teble.xposed.autodaily.ksonpath.read
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.MsgExtract
@@ -28,8 +27,6 @@ import java.util.*
 
 object TaskUtil {
     private const val TAG = "TaskUtil"
-    private val jsonPathConf = Configuration.defaultConfiguration()
-        .addOptions(Option.SUPPRESS_EXCEPTIONS, Option.DEFAULT_PATH_LEAF_TO_NULL)
 
     fun execute(
         reqType: ReqType,
@@ -190,16 +187,16 @@ object TaskUtil {
         extracts: List<MsgExtract>?,
         env: MutableMap<String, Any>
     ) {
-        var documentContext: DocumentContext? = null
+        var jsonNode: JsonElement? = null
         if (data.startsWith("{") && data.endsWith("}")) {
-            documentContext = JsonPath.using(jsonPathConf).parse(data)
+            jsonNode = data.parse()
         }
         extracts?.forEach {
             LogUtil.d("开始提取变量 -> ${it.toJsonString()}")
             val res: Any
             if (it.match.startsWith("$")) {
                 try {
-                    res = documentContext!!.read(it.match) ?: ""
+                    res = jsonNode!!.read<JsonElement>(it.match) ?: ""
                     LogUtil.d(
                         "JsonPath从 body 提取变量: ${it.match}, ${it.key} = ${res.toJsonString()}"
                     )
