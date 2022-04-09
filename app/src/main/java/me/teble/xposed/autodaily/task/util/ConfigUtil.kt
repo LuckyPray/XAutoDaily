@@ -58,7 +58,7 @@ object ConfigUtil {
         if (!xaLibDir.exists()) {
             xaLibDir.mkdirs()
         }
-        val soFilePath = NativeUtil.getNativeLibrary(Global.hostContext, "xa_native").absolutePath
+        val soFilePath = NativeUtil.getNativeLibrary(Global.hostContext, "xa_decrypt").absolutePath
         Log.d(TAG, "loadLib: $soFilePath")
         System.load(soFilePath)
     }
