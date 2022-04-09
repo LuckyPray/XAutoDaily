@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/github/license/teble/XAutoDaily.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub release](https://img.shields.io/github/release/teble/XAutoDaily.svg)](https://github.com/cinit/teble/XAutoDaily/latest)
 
-XAutoDaily 是一个兼容QQ大部分版本的开源签到 Xposed 模块
+XAutoDaily 是一个兼容QQ大部分版本(包括新版TIM)的开源签到 Xposed 模块
 
 ## 使用方法
 
