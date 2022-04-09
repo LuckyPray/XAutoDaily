@@ -13,7 +13,6 @@ set(CMAKE_CXX_STANDARD 17)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../xa_decrypt decrypt)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../xa_mmkv/Android mmkv)
 
 add_library( # Sets the name of the library.
@@ -82,7 +81,6 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
         xa_native
         mmkv
-        decrypt
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib}

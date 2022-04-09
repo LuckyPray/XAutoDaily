@@ -1,7 +1,5 @@
 include ':app'
 include ':mmkv'
 project(':mmkv').projectDir = new File(settingsDir, "xa_mmkv" + File.separator + "Android")
-include ':decrypt'
-project(':decrypt').projectDir = new File(settingsDir, "xa_decrypt")
 
 rootProject.name = "XAutoDaily"
