@@ -34,6 +34,7 @@ import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskEnv
 import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.utils.LogUtil
 import kotlin.concurrent.thread
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -44,8 +45,8 @@ fun EditEnvLayout(
     taskId: String?
 ) {
     var envList by remember { mutableStateOf(emptyList<TaskEnv>()) }
-    lateinit var task: Task
-    LaunchedEffect(envList) {
+    var task by remember { mutableStateOf<Task?>(null) }
+    LaunchedEffect(task) {
         val conf = ConfigUtil.loadSaveConf()
         conf.taskGroups.forEach { taskGroup ->
             if (taskGroup.id == groupId) {
@@ -70,7 +71,7 @@ fun EditEnvLayout(
     LaunchedEffect(envMap) {
         envList.forEach { env ->
             envMap[env.name] = mutableStateOf(
-                task.getVariable(env.name, env.default)
+                task!!.getVariable(env.name, env.default)
             )
             if (env.type == "friend") {
                 friendFlag.value = true
@@ -246,14 +247,19 @@ fun EditEnvLayout(
                 .clip(CircleShape)
                 .background(Color(0xFF409EFF))
                 .combinedClickable {
-                    envMap.entries.forEach {
-                        if (it.value.value.isNotEmpty()) {
-                            task.setVariable(it.key, it.value.value)
-                        } else {
-                            task.setVariable(it.key, null)
+                    try {
+                        envMap.entries.forEach {
+                            if (it.value.value.isNotEmpty()) {
+                                task?.setVariable(it.key, it.value.value)
+                            } else {
+                                task?.setVariable(it.key, null)
+                            }
                         }
+                        ToastUtil.send("保存成功")
+                    } catch (e: Throwable) {
+                        ToastUtil.send("保存失败，详情查看日志")
+                        LogUtil.e(e, "保存变量失败：")
                     }
-                    ToastUtil.send("保存成功")
                 }
             ) {
                 Image(
