@@ -1,7 +1,9 @@
 package me.teble.xposed.autodaily.task.util
 
 import cn.hutool.core.util.ReUtil
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonPrimitive
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.ksonpath.parse
@@ -193,10 +195,15 @@ object TaskUtil {
         }
         extracts?.forEach {
             LogUtil.d("开始提取变量 -> ${it.toJsonString()}")
-            val res: Any
+            var res: Any
             if (it.match.startsWith("$")) {
                 try {
                     res = jsonNode!!.read<JsonElement>(it.match) ?: ""
+                    // fix JsonString.toString to be quote
+                    when {
+                        res is JsonPrimitive && res.isString -> res = res.content
+                        res is JsonArray -> res = res.map { (it as JsonPrimitive).content }
+                    }
                     LogUtil.d(
                         "JsonPath从 body 提取变量: ${it.match}, ${it.key} = ${res.toJsonString()}"
                     )
