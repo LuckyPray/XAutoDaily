@@ -1,7 +1,10 @@
 package me.teble.xposed.autodaily.utils
 
+import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import java.net.URL
 import java.net.URLConnection
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 
 object TimeUtil {
     private const val TAG = "TimeUtil"
@@ -15,7 +18,7 @@ object TimeUtil {
         val networkTime = getNetworkTime()
         LogUtil.d("networkTime: $networkTime")
         networkTime?.let {
-            timeDiff = it - System.currentTimeMillis()
+            timeDiff = it - getCNTime()
         }
     }
 
@@ -27,12 +30,18 @@ object TimeUtil {
             uc.connect()
             uc.date
         } catch (e: Exception) {
-            LogUtil.e(e)
+            LogUtil.e(e, "get network time error:")
+            ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")
             null
         }
     }
 
-    fun getCurrentTime(): Long {
-        return System.currentTimeMillis() + diff
+    private fun getCNTime(): Long {
+        val time: LocalDateTime = LocalDateTime.now()
+        return time.toInstant(ZoneOffset.of("+8")).toEpochMilli()
+    }
+
+    fun currentTimeMillis(): Long {
+        return getCNTime() + diff
     }
 }

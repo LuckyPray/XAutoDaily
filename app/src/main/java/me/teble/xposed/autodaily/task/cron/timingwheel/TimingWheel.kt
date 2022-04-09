@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.task.cron.timingwheel
 
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.function.Consumer
 
 
@@ -57,7 +58,7 @@ class TimingWheel(
     constructor(tickMs: Long, wheelSize: Int, consumer: Consumer<TimerTaskList?>) : this(
         tickMs,
         wheelSize,
-        System.currentTimeMillis(),
+        TimeUtil.currentTimeMillis(),
         consumer
     ) {
     }

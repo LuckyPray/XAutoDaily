@@ -38,9 +38,8 @@ class SplashActivityHook : BaseHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
             val context = it.thisObject as Activity
             thread {
-                loadSaveConf()
-                handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
                 TimeUtil.init()
+                loadSaveConf()
                 if (ConfigUtil.checkUpdate(false)) {
                     ConfUnit.needUpdate = true
                 }
@@ -50,6 +49,7 @@ class SplashActivityHook : BaseHook() {
                     context.openConfigUpdateLog()
                     ConfUnit.needShowUpdateLog = false
                 }
+                handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
             }
         }
 

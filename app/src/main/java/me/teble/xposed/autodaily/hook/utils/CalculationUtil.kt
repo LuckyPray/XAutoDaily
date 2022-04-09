@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.hook.utils
 
 import android.util.Log
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.*
@@ -58,10 +59,10 @@ object CalculationUtil {
     }
 
     val microsecondTime: Long
-        get() = System.currentTimeMillis()
+        get() = TimeUtil.currentTimeMillis()
 
     val secondTime: Int
-        get() = (System.currentTimeMillis() / 1000).toInt()
+        get() = (TimeUtil.currentTimeMillis() / 1000).toInt()
 
     val random: Double
         get() = Random().nextDouble()

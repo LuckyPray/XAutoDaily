@@ -47,7 +47,7 @@ class GroupTaskFilterChain(
             filter.doFilter(relayTaskMap, taskList, env, this)
         } else {
             val reqType = ReqType.getType(taskGroup.type.split("|")[0])
-            val currentDate = Date(TimeUtil.getCurrentTime()).formatDate()
+            val currentDate = Date(TimeUtil.currentTimeMillis()).formatDate()
             for (task in taskList) {
                 var errCount = 0
                 var date = ""

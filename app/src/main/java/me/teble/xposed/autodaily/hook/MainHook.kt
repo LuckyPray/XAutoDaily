@@ -32,6 +32,7 @@ import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Method
@@ -179,9 +180,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         LogUtil.log("needLocateClasses -> $needLocateClasses")
         ToastUtil.send("正在尝试定位QQ混淆类")
         val info = needLocateClasses.associateWith { confuseInfo[it] }
-        val startTime = System.currentTimeMillis()
+        val startTime = TimeUtil.currentTimeMillis()
         val locateRes = locateClasses(info)
-        val useTime = System.currentTimeMillis() - startTime
+        val useTime = TimeUtil.currentTimeMillis() - startTime
         var locateNum = 0
         locateRes.forEach {
             if (it.value.size == 1) {

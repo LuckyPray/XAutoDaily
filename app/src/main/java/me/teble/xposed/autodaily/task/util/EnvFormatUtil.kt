@@ -9,6 +9,7 @@ import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.ticketManager
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.VersionUtil
 import me.teble.xposed.autodaily.task.model.MiniProfile
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.Pattern.DOTALL
@@ -139,8 +140,8 @@ object EnvFormatUtil {
             return getFormatArgFunction(argField, qDomain, env)
         }
         val res = when (argField) {
-            "week_day_index" -> buildString { append((DateUtil.dayOfWeek(Date()) + 5) % 7) }
-            "week_day" -> buildString { append((DateUtil.dayOfWeek(Date()) + 5) % 7 + 1) }
+            "week_day_index" -> buildString { append((DateUtil.dayOfWeek(Date(TimeUtil.currentTimeMillis())) + 5) % 7) }
+            "week_day" -> buildString { append((DateUtil.dayOfWeek(Date(TimeUtil.currentTimeMillis())) + 5) % 7 + 1) }
             "random" -> CalculationUtil.getRandom().toString()
             "microsecond" -> CalculationUtil.getMicrosecondTime().toString()
             "second" -> CalculationUtil.getSecondTime().toString()

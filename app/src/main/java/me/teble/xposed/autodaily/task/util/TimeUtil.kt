@@ -60,7 +60,7 @@ fun LocalDateTime.toDate(): Date =
 fun Date.toLocalDateTime(): LocalDateTime =
     this.toInstant().atZone(ZoneId.of("GMT+8")).toLocalDateTime()
 
-inline val LocalDateTime.second: Int
+inline val LocalDateTime.timestamp: Int
     get() = this.toEpochSecond(ZoneOffset.of("+8")).toInt()
 
 inline val LocalDateTime.millisecond: Long

@@ -80,7 +80,7 @@ class CoreServiceHook : BaseHook() {
         }
 
         private fun executorTask(conf: TaskProperties) {
-            val executeTime = TimeUtil.getCurrentTime()
+            val executeTime = TimeUtil.currentTimeMillis()
             val needExecGroups = mutableListOf<TaskGroup>()
             lock.withLock {
                 for (group in conf.taskGroups) {
@@ -116,7 +116,7 @@ class CoreServiceHook : BaseHook() {
                 )
             }
             while (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
-                if (TimeUtil.getCurrentTime() - executeTime > 20 * 60 * 1000) {
+                if (TimeUtil.currentTimeMillis() - executeTime > 20 * 60 * 1000) {
                     // 关闭运行时间超过20分钟的任务
                     threadPool.shutdownNow()
                 }

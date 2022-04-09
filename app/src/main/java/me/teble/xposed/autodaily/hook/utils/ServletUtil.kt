@@ -4,6 +4,7 @@ import com.tencent.mobileqq.pb.ByteStringMicro
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
 import me.teble.xposed.autodaily.hook.base.Initiator
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.new
@@ -20,11 +21,11 @@ object ServletUtil {
             append(currentUin)
             append("_")
             append(sdf.format(Date()))
-            append(System.currentTimeMillis() % 1000)
+            append(TimeUtil.currentTimeMillis() % 1000)
             append("_")
             append(
                 Random().apply {
-                    setSeed(System.currentTimeMillis())
+                    setSeed(TimeUtil.currentTimeMillis())
                 }.nextInt(90000) + 10000
             )
         }

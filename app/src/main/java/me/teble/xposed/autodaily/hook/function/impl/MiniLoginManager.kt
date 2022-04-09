@@ -11,6 +11,7 @@ import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.WupUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 import mqq.app.Packet
@@ -29,11 +30,11 @@ open class MiniLoginManager : BaseFunction(
     }
 
     open fun syncGetLoginCode(miniAppId: String): String? {
-        val startTime = System.currentTimeMillis()
+        val startTime = TimeUtil.currentTimeMillis()
         val id = "syncGetLoginCode"
         FromServiceMsgHook.resMap[id] = null
         sendLoginRequest(miniAppId)
-        while (System.currentTimeMillis() - startTime < 10_000) {
+        while (TimeUtil.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             val tmp = FromServiceMsgHook.resMap[id] as String?
             tmp?.let {

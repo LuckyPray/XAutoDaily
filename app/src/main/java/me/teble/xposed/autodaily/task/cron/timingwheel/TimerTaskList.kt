@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.cron.timingwheel
 
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.concurrent.Delayed
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicLong
@@ -95,7 +96,7 @@ class TimerTaskList : Delayed {
     override fun getDelay(unit: TimeUnit): Long {
         return max(
             0,
-            unit.convert(expire.get() - System.currentTimeMillis(), TimeUnit.MILLISECONDS)
+            unit.convert(expire.get() - TimeUtil.currentTimeMillis(), TimeUnit.MILLISECONDS)
         )
     }
 

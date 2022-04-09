@@ -48,6 +48,7 @@ import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.openUrl
 import java.util.concurrent.CompletableFuture.runAsync
 import kotlin.concurrent.thread
@@ -61,7 +62,7 @@ fun MainLayout(navController: NavHostController) {
     LaunchedEffect(notice) {
         launch(IO) {
             val info = ConfUnit.versionInfoCache ?: fetchUpdateInfo()
-            if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
+            if (TimeUtil.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
                 fetchUpdateInfo()
             info ?: ToastUtil.send("拉取公告失败")
             notice.value = info?.notice ?: ""
@@ -218,7 +219,7 @@ fun MainLayout(navController: NavHostController) {
                         "当前配置版本：${configVersion}"
                     ),
                     onClick = {
-                        val time = System.currentTimeMillis()
+                        val time = TimeUtil.currentTimeMillis()
                         if (time - lastClickTime.value < 15_000) {
                             ToastUtil.send("不要频繁点击哦~")
                             return@LineButton
@@ -339,7 +340,7 @@ fun BackgroundView() {
                 Button(
                     onClick = {
                         runAsync {
-                            val currentTime = System.currentTimeMillis()
+                            val currentTime = TimeUtil.currentTimeMillis()
                             if (currentTime - lastClickTime < 5000) {
                                 ToastUtil.send("点那么快怎么不上天呢")
                                 return@runAsync

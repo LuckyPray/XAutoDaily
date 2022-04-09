@@ -1,5 +1,7 @@
 package me.teble.xposed.autodaily.task.cron.timingwheel
 
+import me.teble.xposed.autodaily.utils.TimeUtil
+
 
 /**
  * 延迟任务
@@ -11,7 +13,7 @@ open class TimerTask(task: Runnable?, delayMs: Long) {
     /**
      * 延迟时间
      */
-    val delayMs: Long = System.currentTimeMillis() + delayMs
+    val delayMs: Long = TimeUtil.currentTimeMillis() + delayMs
 
     /**
      * 任务

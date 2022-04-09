@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.*
 
 object CalculationUtil {
@@ -36,11 +37,11 @@ object CalculationUtil {
     }
 
     fun getMicrosecondTime(): Long {
-        return System.currentTimeMillis()
+        return TimeUtil.currentTimeMillis()
     }
 
     fun getSecondTime(): Int {
-        return (System.currentTimeMillis() / 1000).toInt()
+        return (TimeUtil.currentTimeMillis() / 1000).toInt()
     }
 
     fun getRandom(): Double {

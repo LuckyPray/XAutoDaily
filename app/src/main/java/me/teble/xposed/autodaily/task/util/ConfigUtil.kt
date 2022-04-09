@@ -268,7 +268,7 @@ object ConfigUtil {
     fun getCurrentExecTaskNum(): Int {
         var num = 0
         val conf = loadSaveConf()
-        val nowStr = Date(TimeUtil.getCurrentTime()).format().split(' ').first()
+        val nowStr = Date(TimeUtil.currentTimeMillis()).format().split(' ').first()
         conf.taskGroups.forEach { taskGroup ->
             taskGroup.tasks.forEach { task ->
                 val time = task.lastExecTime ?: ""
@@ -286,7 +286,7 @@ object ConfigUtil {
             LogUtil.d("getNotice -> $text")
             val res: Result = text.parse()
             versionInfoCache = res.data
-            lastFetchTime = System.currentTimeMillis()
+            lastFetchTime = TimeUtil.currentTimeMillis()
             return res.data
         } catch (e: Exception) {
             LogUtil.e(e, "拉取公告失败：")
@@ -302,9 +302,9 @@ object ConfigUtil {
         // 获取上次执行任务时间
         val lastExecTime = parseDate(task.lastExecTime)
         // 不保证一定在有效时间内执行
-        val currentTimestamp = TimeUtil.getCurrentTime()
+        val currentTimestamp = TimeUtil.currentTimeMillis()
         val now = Date(currentTimestamp)
-        val sysTime = System.currentTimeMillis()
+        val sysTime = TimeUtil.currentTimeMillis()
         val nextShouldExecTime =
             parseDate(task.nextShouldExecTime) ?: let {
                 val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), Date(currentTimestamp + 1), true)!!
