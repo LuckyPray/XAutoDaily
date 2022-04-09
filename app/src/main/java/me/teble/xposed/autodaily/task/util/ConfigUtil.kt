@@ -63,9 +63,6 @@ object ConfigUtil {
         System.load(soFilePath)
     }
 
-    /**
-     * 部分机型变量进入jni后字符丢失，这里分批传入，尝试避免单个变量11341个字符之后丢失的问题
-     */
     private external fun decryptXAConf(encConfBytes: ByteArray): ByteArray
 
     external fun getTencentDigest(value: String): String
