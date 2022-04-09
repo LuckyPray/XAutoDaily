@@ -20,6 +20,7 @@ import androidx.annotation.CallSuper
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.*
+import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import java.util.concurrent.atomic.AtomicInteger
@@ -42,7 +43,7 @@ open class XaActivity : Activity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mSavedStateRegistry.performRestore(null)
+        mSavedStateRegistryController.performRestore(null)
         handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
 
         savedStateRegistry.registerSavedStateProvider(
@@ -102,9 +103,11 @@ open class XaActivity : Activity(),
 
     //SaveStateRegestry Methods
 
-    private val mSavedStateRegistry = SavedStateRegistryController.create(this)
+    private val mSavedStateRegistryController: SavedStateRegistryController =
+        SavedStateRegistryController.create(this)
 
-    override fun getSavedStateRegistry() = mSavedStateRegistry.savedStateRegistry
+    override val savedStateRegistry: SavedStateRegistry =
+        mSavedStateRegistryController.savedStateRegistry
 
     private val mOnBackPressedDispatcher = OnBackPressedDispatcher {
         // Calling onBackPressed() on an Activity with its state saved can cause an

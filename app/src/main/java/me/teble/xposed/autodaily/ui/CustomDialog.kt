@@ -8,6 +8,7 @@ import android.view.View
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.lifecycle.*
+import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
@@ -26,7 +27,7 @@ class CustomDialog(context: Context) : Dialog(context, 5),
 
     override fun onStart() {
         super.onStart()
-        savedStateRegistry.performRestore(null)
+        mSavedStateRegistryController.performRestore(null)
         handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
     }
 
@@ -52,9 +53,11 @@ class CustomDialog(context: Context) : Dialog(context, 5),
 
     //SaveStateRegestry Methods
 
-    private val savedStateRegistry = SavedStateRegistryController.create(this)
+    private val mSavedStateRegistryController: SavedStateRegistryController =
+        SavedStateRegistryController.create(this)
 
-    override fun getSavedStateRegistry() = savedStateRegistry.savedStateRegistry
+    override val savedStateRegistry: SavedStateRegistry =
+        mSavedStateRegistryController.savedStateRegistry
 
     private val mOnBackPressedDispatcher = OnBackPressedDispatcher {
         // Calling onBackPressed() on an Activity with its state saved can cause an
@@ -63,14 +66,19 @@ class CustomDialog(context: Context) : Dialog(context, 5),
         try {
             super.onBackPressed()
         } catch (e: IllegalStateException) {
-            if (!TextUtils.equals(e.message,
-                    "Can not perform this action after onSaveInstanceState")) {
+            if (!TextUtils.equals(
+                    e.message,
+                    "Can not perform this action after onSaveInstanceState"
+                )
+            ) {
                 throw e
             }
         }
     }
+
     override fun onBackPressed() {
         mOnBackPressedDispatcher.onBackPressed()
     }
+
     override fun getOnBackPressedDispatcher() = mOnBackPressedDispatcher
 }
