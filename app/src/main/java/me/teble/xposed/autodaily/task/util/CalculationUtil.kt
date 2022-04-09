@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
-import cn.hutool.crypto.digest.DigestUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.*
 
 object CalculationUtil {
@@ -33,15 +33,15 @@ object CalculationUtil {
             cnt = element.code
         }
         stringBuilder.append(CSRF_TOKEN_END_STR)
-        return DigestUtil.md5Hex(stringBuilder.toString())
+        return ConfigUtil.getMd5Hex(stringBuilder.toString()).lowercase(Locale.getDefault())
     }
 
     fun getMicrosecondTime(): Long {
-        return System.currentTimeMillis()
+        return TimeUtil.currentTimeMillis()
     }
 
     fun getSecondTime(): Int {
-        return (System.currentTimeMillis() / 1000).toInt()
+        return (TimeUtil.currentTimeMillis() / 1000).toInt()
     }
 
     fun getRandom(): Double {

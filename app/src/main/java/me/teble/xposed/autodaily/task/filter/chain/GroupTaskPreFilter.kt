@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.task.filter.chain
 
-import function.task.module.Task
 import me.teble.xposed.autodaily.task.filter.FilterChain
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilter
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.utils.LogUtil
 
 class GroupTaskPreFilter : GroupTaskFilter(
@@ -21,7 +21,7 @@ class GroupTaskPreFilter : GroupTaskFilter(
         if (arr[0] == "mini") {
             env["mini_app_id"] = arr[1]
         }
-        LogUtil.d(TAG, "groupTask -> ${groupTask.id} 任务类型为: ${arr[0]}")
+        LogUtil.d("groupTask -> ${groupTask.id} 任务类型为: ${arr[0]}")
         chain.doFilter(relayTaskMap, taskList, env)
     }
 }

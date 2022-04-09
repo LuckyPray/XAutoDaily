@@ -2,8 +2,6 @@ package me.teble.xposed.autodaily.ui
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.navigation.NavType
@@ -13,18 +11,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.EditEnv
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Setting
+import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 
 object XAutoDailyApp {
     const val Main = "MainLayout"
     const val Sign = "SignLayout"
-    const val Setting = "SettingLayout"
+    const val Other = "OtherLayout"
     const val EditEnv = "EditEnvLayout"
 }
 
-@ExperimentalFoundationApi
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun XAutoDailyApp() {
     val navController = rememberNavController()
@@ -38,8 +34,8 @@ fun XAutoDailyApp() {
         composable(Sign) {
             SignLayout(navController = navController)
         }
-        composable(Setting) {
-            SettingLayout(navController = navController)
+        composable(Other) {
+            OtherLayout(navController = navController)
         }
         composable(
             route = "$EditEnv/{groupId}/{taskId}",

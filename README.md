@@ -3,7 +3,7 @@
 [![license](https://img.shields.io/github/license/teble/XAutoDaily.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub release](https://img.shields.io/github/release/teble/XAutoDaily.svg)](https://github.com/cinit/teble/XAutoDaily/latest)
 
-XAutoDaily 是一个兼容QQ大部分版本的开源签到 Xposed 模块
+XAutoDaily 是一个兼容QQ大部分版本(包括新版TIM)的开源签到 Xposed 模块
 
 ## 使用方法
 
@@ -23,11 +23,16 @@ XAutoDaily 是一个兼容QQ大部分版本的开源签到 Xposed 模块
 - 会员排行榜点赞
 - QQ日签卡
 - 小程序打卡/任务
-- 大会员任务
+- 大会员任务(个性赞需要手动点赞)
 - 好友名片自动点赞回赞
 - 好友续火（避免滥用限制字符为20）
 - 会员公众号签到
 - 新版群打卡
+- QQ好友字符抽取
+- 萌宠任务
+- 好友空间互访
+- 好友名片点赞
+- 好友续火
 
 ## License
 

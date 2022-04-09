@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.filter
 
-import function.task.module.Task
+import me.teble.xposed.autodaily.task.model.Task
 
 abstract class GroupTaskFilter(
     val TAG: String

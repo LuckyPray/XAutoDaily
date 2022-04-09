@@ -2,13 +2,10 @@ package me.teble.xposed.autodaily.task.util
 
 import android.annotation.SuppressLint
 import android.util.Log
+import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
-import cn.hutool.crypto.asymmetric.KeyType
-import cn.hutool.crypto.asymmetric.RSA
-import cn.hutool.http.HttpUtil
 import com.charleskorn.kaml.Yaml
-import function.task.module.TaskProperties
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.NOTICE
 import me.teble.xposed.autodaily.config.Constants.XA_API_URL
@@ -16,19 +13,18 @@ import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.task.module.PackageData
-import me.teble.xposed.autodaily.task.module.Result
-import me.teble.xposed.autodaily.task.module.VersionInfo
-import me.teble.xposed.autodaily.task.util.Const.CHANGE_SIGN_BUTTON
+import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
+import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
+import me.teble.xposed.autodaily.task.model.*
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
-import me.teble.xposed.autodaily.task.util.Const.MOST_RECENT_EXEC_TIME
-import me.teble.xposed.autodaily.ui.Cache.configVer
-import me.teble.xposed.autodaily.ui.Cache.lastFetchTime
-import me.teble.xposed.autodaily.ui.Cache.versionInfoCache
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.NativeUtil
-import me.teble.xposed.autodaily.utils.getTextFromModuleAssets
-import me.teble.xposed.autodaily.utils.parse
+import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.ConfUnit.configVersion
+import me.teble.xposed.autodaily.ui.ConfUnit.lastFetchTime
+import me.teble.xposed.autodaily.ui.ConfUnit.versionInfoCache
+import me.teble.xposed.autodaily.ui.enable
+import me.teble.xposed.autodaily.ui.lastExecTime
+import me.teble.xposed.autodaily.ui.nextShouldExecTime
+import me.teble.xposed.autodaily.utils.*
 import java.io.File
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
@@ -47,7 +43,7 @@ object ConfigUtil {
     private val CONFIG_VERSION_REG = Pattern.compile("version:\\s+(\\d+)")
 
     private val lock = ReentrantLock()
-//    private var config: TaskProperties =
+    private var _conf: TaskProperties? = null
 
     init {
         loadLib()
@@ -62,36 +58,39 @@ object ConfigUtil {
         if (!xaLibDir.exists()) {
             xaLibDir.mkdirs()
         }
-        val soFilePath = NativeUtil.getNativeLibrary(Global.hostContext, "xa_native").absolutePath
+        val soFilePath = NativeUtil.getNativeLibrary(Global.hostContext, "xa_decrypt").absolutePath
         Log.d(TAG, "loadLib: $soFilePath")
         System.load(soFilePath)
     }
 
-    private external fun getPublicKey(): String
+    private external fun decryptXAConf(encConfBytes: ByteArray): ByteArray
+
+    external fun getTencentDigest(value: String): String
+
+    external fun getMd5Hex(value: String): String
 
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
         try {
             ToastUtil.send("正在检测更新")
             LogUtil.i("正在检测更新")
-            val res = HttpUtil.get("https://data.jsdelivr.com/v1/package/gh/teble/XAutoDaily-Conf")
+            val res = "https://data.jsdelivr.com/v1/package/gh/teble/XAutoDaily-Conf".get()
             val packageData: PackageData = res.parse()
             if (packageData.versions.isNotEmpty() && currentConfigVersion < packageData.versions[0].toInt()) {
                 return packageData.versions[0]
             }
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
         }
         return null
     }
 
     fun updateCdnConfig(newConfVersion: Int): Boolean {
-        val encRes =
-            HttpUtil.get("https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@${newConfVersion}/xa_conf")
+        val encRes = "https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@${newConfVersion}/xa_conf".get()
         val res = decodeConfStr(encRes)
         val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
         if (minAppVersion > BuildConfig.VERSION_CODE) {
             ToastUtil.send("插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置", true)
-            LogUtil.i(TAG, "插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置")
+            LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置")
             return false
         }
         saveConfFile(encRes, newConfVersion)
@@ -102,12 +101,12 @@ object ConfigUtil {
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchUpdateInfo()
         info?.let {
-            val currConfVer = xaConfig.getInt(CONFIG_VERSION, 1)
+            val currConfVer = configVersion
             if (BuildConfig.VERSION_CODE < info.appVersion) {
                 if (showToast) {
                     ToastUtil.send("插件版本存在更新")
-                    return true
                 }
+                return true
             }
             if (currConfVer < info.confVersion) {
                 if (BuildConfig.VERSION_CODE >= info.minAppVersion) {
@@ -128,9 +127,9 @@ object ConfigUtil {
         return false
     }
 
-    fun updateConfig(confUrl: String, showToast: Boolean): Boolean {
+    private fun updateConfig(confUrl: String, showToast: Boolean): Boolean {
         try {
-            val encRes = HttpUtil.get(confUrl)
+            val encRes = confUrl.get()
             val res = decodeConfStr(encRes)
             val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
             val confVersion = ReUtil.getGroup1(CONFIG_VERSION_REG, res).toInt()
@@ -138,33 +137,33 @@ object ConfigUtil {
                 if (showToast) {
                     ToastUtil.send("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置", true)
                 }
-                LogUtil.i(TAG, "插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
+                LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
                 return false
             }
-            if (confVersion <= xaConfig.getInt(CONFIG_VERSION, 0)) {
+            if (confVersion <= configVersion) {
                 if (showToast) {
                     ToastUtil.send("当前配置已是最新，无需更新")
                 }
                 return false
             }
             saveConfFile(encRes, confVersion)
+            ConfUnit.needShowUpdateLog = true
             ToastUtil.send("配置文件更新完毕，如有选项更新，请前往配置目录进行勾选")
             return true
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
             ToastUtil.send("更新配置文件失败，详情请看日志")
             return false
         }
     }
 
-    fun decodeConfStr(encodeConfStr: String): String? {
-        return try {
-            val rsa = RSA(null, getPublicKey())
-            rsa.decryptStr(encodeConfStr, KeyType.PublicKey)
-        } catch (e: Exception) {
-            LogUtil.w(TAG, "解密配置文件失败，请检查插件是否为最新版本")
-            null
+    private fun decodeConfStr(encodeConfStr: String): String? {
+        val res = decryptXAConf(encodeConfStr.toByteArray())
+        if (res.isEmpty()) {
+            LogUtil.w("解密配置文件失败，请检查插件是否为最新版本")
+            return null
         }
+        return String(res)
     }
 
     private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {
@@ -176,28 +175,31 @@ object ConfigUtil {
                 confDir.mkdirs()
             }
             val propertiesFile = File(confDir, "xa_conf")
-            if (propertiesFile.isDirectory) {
-                FileUtil.del(propertiesFile)
-            }
             if (!propertiesFile.exists()) {
                 propertiesFile.createNewFile()
             }
             FileUtil.writeUtf8String(encConfStr, propertiesFile)
-            configVer = configVersion
+            ConfUnit.configVersion = configVersion
             xaConfig.putInt(CONFIG_VERSION, configVersion)
             return true
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
             ToastUtil.send("保存配置文件失败，详情请看日志")
             return false
+        } finally {
+            // clear cache
+            _conf = null
         }
     }
 
-    fun getDefaultConf(): String {
+    private fun getDefaultConf(): String {
         return getTextFromModuleAssets("default_conf")
     }
 
     fun loadSaveConf(): TaskProperties {
+        if (_conf != null) {
+            return _conf as TaskProperties
+        }
         var conf: TaskProperties? = null
         val propertiesFile = File(confDir, "xa_conf")
         if (propertiesFile.exists()) {
@@ -208,18 +210,23 @@ object ConfigUtil {
         if (conf == null) {
             conf = defaultConf
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
-            LogUtil.d(TAG, "defaultConf version -> ${defaultConf.version}")
+            LogUtil.d("defaultConf version -> ${defaultConf.version}")
             saveConfFile(encodeConfig, defaultConf.version)
+            ConfUnit.needShowUpdateLog = true
         } else {
             // 配置正常加载，表示配置版本与当前model一致，判断内置文件版本是否需要覆盖当前配置
             // 内置配置版本与本地配置版本一致的情况，如果hashcode不一致，内置覆盖本地
             // 内置版本 > 本地配置版本，内置覆盖本地
             if (conf.version <= defaultConf.version && conf != defaultConf) {
+                if (conf.version < defaultConf.version) {
+                    ConfUnit.needShowUpdateLog = true
+                }
                 conf = defaultConf
                 saveConfFile(encodeConfig, defaultConf.version)
                 ToastUtil.send("正在解压内置配置文件，如有选项更新，请前往配置目录进行勾选")
             }
         }
+        _conf = conf
         return conf
     }
 
@@ -229,13 +236,14 @@ object ConfigUtil {
                 val version = readMinVersion(decodeConfStr)
                 if (version > BuildConfig.VERSION_CODE) {
                     LogUtil.i("插件版本过低，无法加载配置。配置要求最低插件版本: ${version}，当前插件版本: ${BuildConfig.VERSION_CODE}")
+//                    ToastUtil.send("插件版本过低，无法加载配置。配置要求最低插件版本: ${version}，当前插件版本: ${BuildConfig.VERSION_CODE}", true)
                     return null
                 }
                 // 版本不对应抛出异常
                 return Yaml.default.decodeFromString(TaskProperties.serializer(), decodeConfStr)
             }
         } catch (e: Exception) {
-            LogUtil.e(TAG, e)
+            LogUtil.e(e)
 //            ToastUtil.send("配置加载失败，请检查插件是否为最新版本", true)
         }
         return null
@@ -250,36 +258,18 @@ object ConfigUtil {
         return minAppVersion
     }
 
-    fun saveAndCheckMostRecentExecTime(date: Date) {
-        lock.lock()
-        val nextTime = xaConfig.getLong(MOST_RECENT_EXEC_TIME, Long.MAX_VALUE)
-        val currentTime = Date().time
-        // 缓存的下次执行时间已经过了，表示该任务已经准备执行了，或者执行完毕了
-        if (nextTime < currentTime
-            || date.time < nextTime
-        ) {
-            xaConfig.putLong(MOST_RECENT_EXEC_TIME, date.time)
-        }
-        lock.unlock()
-    }
-
-    fun getMostRecentExecTime(): Long {
-        return xaConfig.getLong(MOST_RECENT_EXEC_TIME, -1)
-    }
-
     fun changeSignButton(key: String, boolean: Boolean) {
         accountConfig.putBoolean(key, boolean)
-        accountConfig.putBoolean(CHANGE_SIGN_BUTTON, true)
     }
 
     fun getCurrentExecTaskNum(): Int {
         var num = 0
         val conf = loadSaveConf()
-        val currentDate = Date().format().split(' ').first()
+        val nowStr = Date(TimeUtil.currentTimeMillis()).format().split(' ').first()
         conf.taskGroups.forEach { taskGroup ->
             taskGroup.tasks.forEach { task ->
-                val time = accountConfig.getString("${task.id}#${Const.LAST_EXEC_TIME}") ?: ""
-                if (time.startsWith(currentDate)) {
+                val time = task.lastExecTime ?: ""
+                if (time.startsWith(nowStr)) {
                     num++
                 }
             }
@@ -289,15 +279,50 @@ object ConfigUtil {
 
     fun fetchUpdateInfo(): VersionInfo? {
         return try {
-            val text = HttpUtil.get("$XA_API_URL$NOTICE")
-            LogUtil.d(TAG, "getNotice -> $text")
+            val text = "$XA_API_URL$NOTICE".get()
+            LogUtil.d("getNotice -> $text")
             val res: Result = text.parse()
             versionInfoCache = res.data
-            lastFetchTime = System.currentTimeMillis()
+            lastFetchTime = TimeUtil.currentTimeMillis()
             return res.data
         } catch (e: Exception) {
             LogUtil.e(e, "拉取公告失败：")
             null
         }
+    }
+
+    fun checkExecuteTask(task: Task): Boolean {
+        val enabled = task.enable
+        if (!enabled) {
+            return false
+        }
+        // 获取上次执行任务时间
+        val lastExecTime = parseDate(task.lastExecTime)
+        // 不保证一定在有效时间内执行
+        val currentTimestamp = TimeUtil.currentTimeMillis()
+        val now = Date(currentTimestamp)
+        val sysTime = TimeUtil.currentTimeMillis()
+        val nextShouldExecTime =
+            parseDate(task.nextShouldExecTime) ?: let {
+                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), Date(currentTimestamp + 1), true)!!
+                task.nextShouldExecTime = time.format()
+                time
+            }
+        lastExecTime ?: let {
+            // 第一次执行任务，如果下次执行时间不在当天，则立即执行
+            if (!DateUtil.isSameDay(now, nextShouldExecTime)) {
+                return true
+            }
+        }
+        // 因为系统时间可能存在误差，如果系统时间大于下次执行时间，但是网络时间还未到，则阻塞当前线程时间差，避免提前执行
+        if (sysTime > now.time && nextShouldExecTime > now) {
+            try {
+                Thread.sleep(sysTime - now.time)
+            } catch (e: Exception) {}
+        }
+        if (nextShouldExecTime < now) {
+            return true
+        }
+        return false
     }
 }

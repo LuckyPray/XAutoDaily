@@ -3,7 +3,7 @@ package me.teble.xposed.autodaily.hook.function.impl
 import me.teble.xposed.autodaily.hook.base.Initiator.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
-import me.teble.xposed.autodaily.task.module.TroopInfo
+import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.getMethods

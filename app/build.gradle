@@ -12,14 +12,14 @@ if (performSigning) {
 
 android {
     compileSdkVersion 31
-    buildToolsVersion "30.0.3"
-    ndkVersion '21.4.7075529'
+    buildToolsVersion "32.0.0"
+//    ndkVersion '23.1.7779620'
 
     defaultConfig {
         applicationId "me.teble.xposed.autodaily"
         minSdkVersion 24
         //noinspection OldTargetApi
-        targetSdkVersion 30
+        targetSdkVersion 31
         versionCode mVersionCode
         versionName "3.0.0"
 
@@ -27,7 +27,18 @@ android {
 
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++11"
+                cppFlags "-std=c++14"
+                // 静态库内置签名验证
+                if (performSigning) {
+                    // release 签名
+                    cppFlags.add("-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600")
+                } else {
+                    // android 默认 debug md5 签名可通过 signingReport 获取
+                    cppFlags.add("-DMODULE_SIGNATURE=CB49EE96102F0D9C331AB59A5921AA42")
+                }
+                arguments "-DANDROID_TOOLCHAIN=clang"
+//                        "-DANDROID_STL=c++_shared"
+//                        "-DANDROID_CPP_FEATURES=rtti exceptions"
             }
         }
         ndk {
@@ -86,7 +97,7 @@ android {
                 signingConfig signingConfigs.release
             }
             matchingFallbacks = ['release']
-            versionNameSuffix "-rc"
+            versionNameSuffix "-rc10"
         }
     }
 
@@ -99,7 +110,7 @@ android {
     externalNativeBuild {
         cmake {
             path "src/main/cpp/CMakeLists.txt"
-            version "3.6.0"
+            version "3.10.2"
         }
     }
 
@@ -129,13 +140,14 @@ android {
 }
 
 dependencies {
-//    implementation project(":stub")
+    implementation project(":mmkv")
     implementation fileTree(dir: "libs", include: ["*.jar"])
     testImplementation "junit:junit:4.13.2"
     androidTestImplementation "androidx.test.ext:junit:1.1.3"
     androidTestImplementation "androidx.test.espresso:espresso-core:3.4.0"
 
     // Xposed
+    //noinspection GradleDependency
     implementation "com.github.kyuubiran:EzXHelper:0.6.1"
     compileOnly "de.robv.android.xposed:api:82"
 
@@ -150,20 +162,22 @@ dependencies {
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.navigation:navigation-compose:2.4.0-rc01"
+    // implementation "androidx.compose.material:material-icons-extended:$compose_version"
+    implementation "androidx.navigation:navigation-compose:2.5.0-alpha04"
 
     // hutool
-    def hutool_version = "5.7.15"
+    def hutool_version = "5.8.0.M1"
     implementation "cn.hutool:hutool-core:$hutool_version"
-    implementation "cn.hutool:hutool-cron:$hutool_version"
-    implementation "cn.hutool:hutool-http:$hutool_version"
-    implementation "cn.hutool:hutool-crypto:$hutool_version"
+
+    implementation "com.squareup.okhttp3:okhttp:4.9.3"
 
     // Other
-    implementation "com.tencent:mmkv-static:1.2.11"
+    implementation "com.hankcs:aho-corasick-double-array-trie:1.2.3"
     implementation "net.bytebuddy:byte-buddy-android:1.12.7"
     implementation "com.charleskorn.kaml:kaml:0.36.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0"
-    implementation "org.apache-extras.beanshell:bsh:2.0b6"
-    implementation 'com.jayway.jsonpath:json-path:2.6.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2"
+    // implementation "org.apache-extras.beanshell:bsh:2.0b6"
+
+    // 导航栏
+    implementation "com.google.accompanist:accompanist-insets:0.24.6-alpha"
 }

@@ -1,54 +1,97 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import cn.hutool.http.HttpUtil
-import cn.hutool.http.Method
-import function.task.module.Task
+import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
+import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
 import me.teble.xposed.autodaily.task.request.model.TaskRequest
 import me.teble.xposed.autodaily.task.request.model.TaskResponse
+import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.toJsonString
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.Buffer
+import java.io.IOException
+import java.lang.Integer.min
+import java.nio.charset.Charset
+import java.text.SimpleDateFormat
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 object HttpTaskReqUtil : ITaskReqUtil {
     private const val TAG = "HttpTaskReqUtil"
+    private val  client = OkHttpClient.Builder()
+        .connectTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(20, TimeUnit.SECONDS)
+        .build()
 
-    private val METHOD_MAP = mutableMapOf(
-        "get" to Method.GET,
-        "post" to Method.POST,
-        "put" to Method.PUT,
-        "patch" to Method.PATCH,
-        "head" to Method.HEAD,
-        "delete" to Method.DELETE,
-        "trace" to Method.TRACE,
-        "connect" to Method.CONNECT,
-    )
+    object METHOD {
+        private const val GET = "GET"
+        private const val POST = "POST"
+        private const val PUT = "PUT"
+        private const val PATCH = "PATCH"
+        private const val HEAD = "HEAD"
+        private const val DELETE = "DELETE"
+        private const val TRACE = "TRACE"
+    }
 
     override fun create(
         task: Task,
         env: MutableMap<String, Any>
     ): List<TaskRequest> {
         val res = mutableListOf<TaskRequest>().apply {
-            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.qDomain, env)
-            LogUtil.d(TAG, "urls -> ${evalUrls.toJsonString()}")
-            evalUrls.forEach {
-                env["req_url"] = it
+            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
+            LogUtil.d("urls -> ${evalUrls.toJsonString()}")
+            evalUrls.forEach { url ->
+                env["req_url"] = url
                 val headers = mutableMapOf<String, String>()
                 task.reqHeaders?.entries?.forEach {
-                    headers[it.key] = EnvFormatUtil.format(it.value, task.qDomain, env)
+                    headers[it.key] = EnvFormatUtil.format(it.value, task.domain, env)
                 }
-                LogUtil.d(TAG, "header 头构造完毕: $headers")
-                val cookie = task.qDomain?.let {
-                    getQDomainCookies(it)
-                } ?: ""
-                LogUtil.d(TAG, "cookie 构造完毕: $cookie")
-                LogUtil.d(TAG, "开始format data -> ${task.reqData}")
-                val body = task.reqData?.let { EnvFormatUtil.format(it, task.qDomain, env) }
-                LogUtil.d(TAG, "body -> $body")
-                val request = TaskRequest(it, task.reqMethod, headers, cookie, body)
-                add(request)
+                LogUtil.d("header 头构造完毕: $headers")
+                var cookie: String? = null
+                when (task.domain) {
+                    null -> {}
+                    "daily.huasteble.cn" -> {
+                        val cd = Calendar.getInstance()
+                        val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
+                        sdf.timeZone = TimeZone.getTimeZone("GMT")
+                        val timeStr = sdf.format(cd.time)
+                        val signStr = "date: $timeStr\nuin: $currentUin"
+                        val secretId = "AKIDl03byn0gmi1cpfgtknn3qESie9c7w6joyLef"
+                        val sig: String = ConfigUtil.getTencentDigest(signStr)
+                        val authorization = """
+                                hmac id="$secretId", algorithm="hmac-sha1", headers="date uin", signature="$sig"
+                                """.trimIndent()
+                        headers["uin"] = "$currentUin"
+                        headers["date"] = timeStr
+                        headers["Authorization"] = authorization
+                    }
+                    // qqDomain
+                    else -> {
+                        cookie = getQDomainCookies(task.domain)
+                    }
+                }
+                LogUtil.d("cookie 构造完毕: ***(${cookie?.length})")
+                LogUtil.d("开始format data -> ${task.reqData}")
+                val bodyList = task.reqData?.let {
+                    EnvFormatUtil.formatList(it, task.domain, env)
+                }
+                LogUtil.d("body -> $bodyList")
+                bodyList?.forEach {
+                    val request = TaskRequest(url, task.reqMethod.uppercase(), headers, cookie, it)
+                    add(request)
+                } ?: let {
+                    val request =
+                        TaskRequest(url, task.reqMethod.uppercase(), headers, cookie, null)
+                    add(request)
+                }
                 env.remove("req_url")
             }
         }
@@ -59,37 +102,73 @@ object HttpTaskReqUtil : ITaskReqUtil {
         taskRequest: TaskRequest
     ): TaskResponse {
         taskRequest.let { req ->
-            var request = HttpUtil.createRequest(METHOD_MAP[req.method], req.url)
-            req.headers?.entries?.forEach { entry ->
-                LogUtil.d(TAG, "put header: key -> ${entry.key}, value -> ${entry.value}")
-                request = request.header(entry.key, entry.value)
+            val request = Request.Builder().apply {
+                url(req.url)
+                req.headers?.entries?.forEach {
+                    addHeader(it.key, it.value)
+                }
+                val existsUserAgent = req.headers?.keys?.stream()?.anyMatch {
+                    it.lowercase() == "user-agent"
+                } ?: false
+                if (!existsUserAgent) {
+                    addHeader("user-agent", Constants.qqUserAgent)
+                }
+                req.cookie?.let {
+                    addHeader("Cookie", it)
+                }
+                if (req.data == null) {
+                    method(req.method!!, null)
+                } else {
+                    req.data.let {
+                        addHeader("Content-Length", it.length.toString())
+                        if (it.startsWith("{") && it.endsWith("}")) {
+                            addHeader("Content-Type", "application/json")
+                            method(
+                                req.method!!,
+                                it.toRequestBody("application/json".toMediaTypeOrNull())
+                            )
+                        } else {
+                            addHeader("Content-Type", "application/x-www-form-urlencoded")
+                            method(
+                                req.method!!,
+                                it.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+                            )
+                        }
+                    }
+                }
+            }.build()
+            LogUtil.d("开始执行请求")
+            val response = client.newCall(request).execute()
+            val responseBody: String
+            if (response.body?.contentType().toString() == "text/xml") {
+                val responseBytes = response.body?.bytes() ?: ByteArray(0)
+                var string = String(responseBytes)
+                if (string.contains("encoding=\"GBK\"")) {
+                    // fix xml default encoding is GBK
+                    string = String(responseBytes, Charset.forName("GBK"))
+                }
+                responseBody = string
+            } else {
+                responseBody = response.body?.string() ?: ""
             }
-            req.cookie?.let {
-                LogUtil.d(TAG, "put cookie -> $it")
-                request.header("cookie", it, false)
-            }
-            req.data?.let {
-                LogUtil.d(TAG, "put data -> $it")
-                request.body(it)
-            }
-            LogUtil.d(TAG, "开始执行请求")
+            val responseHeadersText = getHeadersText(response.headers.toMultimap())
             LogUtil.d(
-                TAG, """request ------------------------------------>
+                """request ------------------------------------>
                 |   method: ${request.method}
                 |   url: ${request.url}
-                |   headers: ${request.headers()}
-                |   body: ${request.fieldValueAs<String>("body")}
+                |   headers: ***
+                |   body: ${request.body?.bodyString()}
+                |   response <------------------------------------
+                |   code: ${response.code}
+                |   headers: ***
+                |   body: ${responseBody.substring(0, min(responseBody.length, 1000))}
                 """.trimMargin()
             )
-            request.execute().let { response ->
-                LogUtil.d(
-                    TAG, """response <------------------------------------
-                    |   code: ${response.status}
-                    |   body: ${response.body()}
-                    """.trimMargin()
-                )
-                return TaskResponse(getHeadersText(response.headers()), response.body(), response.status)
-            }
+            return TaskResponse(
+                responseHeadersText,
+                responseBody,
+                response.code
+            )
         }
     }
 
@@ -103,5 +182,15 @@ object HttpTaskReqUtil : ITaskReqUtil {
 
     private fun getQDomainCookies(qDomain: String): String {
         return FunctionPool.ticketManager.getCookies(qDomain)
+    }
+
+    private fun RequestBody.bodyString(): String {
+        return try {
+            val buffer = Buffer()
+            writeTo(buffer)
+            buffer.readUtf8()
+        } catch (e: IOException) {
+            ""
+        }
     }
 }

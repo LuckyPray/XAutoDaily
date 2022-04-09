@@ -1,0 +1,3 @@
+[submodule "xa_mmkv"]
+	path = xa_mmkv
+	url = https://github.com/LuckyPray/xa_mmkv.git

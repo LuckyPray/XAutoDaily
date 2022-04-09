@@ -1,9 +1,8 @@
 package me.teble.xposed.autodaily.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -14,10 +13,8 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,25 +27,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.rememberInsetsPaddingValues
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.Constants
+import me.teble.xposed.autodaily.config.Constants.ALIPAY_QRCODE
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
+import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
-import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Setting
+import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
+import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.openUrl
+import java.util.concurrent.CompletableFuture.runAsync
 import kotlin.concurrent.thread
 
-@ExperimentalFoundationApi
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainLayout(navController: NavHostController) {
     val notice = remember { mutableStateOf("") }
@@ -56,9 +60,9 @@ fun MainLayout(navController: NavHostController) {
     val updateDialogText = remember { mutableStateOf("") }
     val lastClickTime = remember { mutableStateOf(0L) }
     LaunchedEffect(notice) {
-        thread {
-            val info = Cache.versionInfoCache ?: fetchUpdateInfo()
-            if (System.currentTimeMillis() - Cache.lastFetchTime < 60 * 60 * 1000L)
+        launch(IO) {
+            val info = ConfUnit.versionInfoCache ?: fetchUpdateInfo()
+            if (TimeUtil.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
                 fetchUpdateInfo()
             info ?: ToastUtil.send("拉取公告失败")
             notice.value = info?.notice ?: ""
@@ -85,36 +89,37 @@ fun MainLayout(navController: NavHostController) {
             }
         )
     }
-    ActivityView(navController = navController) {
+
+    ActivityView(title = "XAutoDaily") {
         LazyColumn(
-            modifier = Modifier.padding(13.dp)
+            modifier = Modifier
+                .padding(top = 13.dp)
+                .padding(horizontal = 13.dp),
+            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            // 绘制间隔
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
-                BackgroundView(/*scrollUpState = scrollUpState, viewOffset = maxOffsetY*/)
-                LineSpacer()
+                BackgroundView()
             }
-            stickyHeader {
+            item {
                 Announcement(post = notice)
             }
             item {
-                LineSpacer()
+                val globalSwitch = remember {
+                    mutableStateOf(ConfUnit.globalEnable)
+                }
                 LineSwitch(
                     title = "总开关",
-                    checked = mutableStateOf(
-                        accountConfig.getBoolean(
-                            GLOBAL_ENABLE,
-                            false
-                        )
-                    ),
+                    checked = globalSwitch,
                     desc = "关闭后一切任务都不会执行",
                     onChange = {
-                        accountConfig.putBoolean(GLOBAL_ENABLE, it)
+                        ConfUnit.globalEnable = it
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "签到配置",
                     desc = "在这里选择普通签到项目，以及进行相关的参数设置",
@@ -126,21 +131,19 @@ fun MainLayout(navController: NavHostController) {
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
-//            item {
-//                LineSpacer()
-//                LineButton(
-//                    title = "模块设置",
-//                    desc = "模块相关的功能配置",
-//                    onClick = {
-//                        navController.navigate(Setting) {
-//                            popUpTo(Main)
-//                        }
-//                    },
-//                    modifier = Modifier.padding(vertical = 8.dp),
-//                )
-//            }
             item {
-                LineSpacer()
+                LineButton(
+                    title = "其它",
+                    desc = "模块配置、日志及备份",
+                    onClick = {
+                        navController.navigate(Other) {
+                            popUpTo(Main)
+                        }
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+            item {
                 LineButton(
                     title = "自定义签到脚本",
                     desc = "敬请期待",
@@ -148,25 +151,25 @@ fun MainLayout(navController: NavHostController) {
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
-//            item {
-//                LineSpacer()
-//                LineButton(
-//                    title = "获取测试版本配置(BETA通道)",
-//                    desc = "仅测试人员可见",
-//                    onClick = {
-//                        showFriendsDialog.value = true
-//                    },
-//                    modifier = Modifier.padding(vertical = 8.dp),
-//                )
-//            }
+            if (BuildConfig.DEBUG) {
+                item {
+                    LineButton(
+                        title = "获取测试版本配置(BETA通道)",
+                        desc = "仅测试人员可见",
+                        onClick = {
+                            ToastUtil.send("")
+                        },
+                        modifier = Modifier.padding(vertical = 8.dp),
+                    )
+                }
+            }
             item {
-                LineSpacer()
                 LineButton(
                     title = "前往项目地址",
                     otherInfoList = listOf(
                         "模块作者：韵の祈(teble@github.com)",
-                        "特别鸣谢：KyuubiRan、Lagrio",
-                        "ps：我要好多小星星！"
+                        "特别鸣谢：KyuubiRan、MaiTungTM、cinit、Agoines",
+                        "ps：我要好多好多小星星！"
                     ),
                     onClick = {
                         navController.context.startActivity(Intent().apply {
@@ -178,7 +181,6 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "点击加入tg频道",
                     otherInfoList = listOf(
@@ -197,16 +199,27 @@ fun MainLayout(navController: NavHostController) {
                 )
             }
             item {
-                LineSpacer()
+                var moduleVersionName by remember { mutableStateOf("") }
+                var moduleVersionCode by remember { mutableStateOf(0) }
+                var qqVersionName by remember { mutableStateOf("") }
+                var qqVersionCode by remember { mutableStateOf(0L) }
+                var configVersion by remember { mutableStateOf(0) }
+                LaunchedEffect(qqVersionName) {
+                    moduleVersionName = BuildConfig.VERSION_NAME
+                    moduleVersionCode = BuildConfig.VERSION_CODE
+                    qqVersionName = Global.qqVersionName
+                    qqVersionCode = Global.qqVersionCode
+                    configVersion = ConfUnit.configVersion
+                }
                 LineButton(
                     title = "检测更新",
                     otherInfoList = listOf(
-                        "当前模块版本：${BuildConfig.VERSION_NAME}",
-                        "当前宿主版本：${Cache.qqVersionName}(${Cache.qqVersionCode})",
-                        "当前配置版本：${Cache.configVer}"
+                        "当前模块版本：${moduleVersionName}(${moduleVersionCode})",
+                        "当前宿主版本：${qqVersionName}(${qqVersionCode})",
+                        "当前配置版本：${configVersion}"
                     ),
                     onClick = {
-                        val time = System.currentTimeMillis()
+                        val time = TimeUtil.currentTimeMillis()
                         if (time - lastClickTime.value < 15_000) {
                             ToastUtil.send("不要频繁点击哦~")
                             return@LineButton
@@ -218,27 +231,30 @@ fun MainLayout(navController: NavHostController) {
                             if (res) {
                                 showUpdateDialog.value = true
                                 updateDialogText.value =
-                                    Cache.versionInfoCache!!.updateLog.joinToString("\n")
+                                    ConfUnit.versionInfoCache?.updateLog?.joinToString("\n") ?: ""
                             }
+                            configVersion = ConfUnit.configVersion
                         }
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
             item {
-                LineSpacer()
                 LineButton(
                     title = "请吃作者辣条",
                     desc = "本模块完全免费开源，一切开发旨在学习，请勿用于非法用途。习欢本模块的可以捐赠支持我，谢谢~~",
                     onClick = {
                         ToastUtil.send("正在跳转，请稍后")
-                        val qrCode = Constants.ALIPAY_QRCODE
-                        val intent = Intent.parseUri(
-                            "intent://platformapi/startapp?saId=10000007&clientVersion=3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F{qrCode}%3F_s%3Dweb-other&_t=1472443966571#Intent;scheme=alipayqr;package=com.eg.android.AlipayGphone;end"
-                                .replace("{qrCode}", qrCode),
-                            0
-                        )
-                        navController.context.startActivity(intent)
+                        val context = navController.context
+                        try {
+                            context.openUrl(
+                                "alipayqr://platformapi/startapp?saId=10000007&clientVersion=" +
+                                    "3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F$ALIPAY_QRCODE%3F_s%3Dweb-other"
+                            )
+                        } catch (e: Exception) {
+                            LogUtil.e(e, "open alipay qr error: ")
+                            context.openUrl("https://mobilecodec.alipay.com/client_download.htm?qrcode=$ALIPAY_QRCODE")
+                        }
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
@@ -249,13 +265,17 @@ fun MainLayout(navController: NavHostController) {
 
 @Composable
 fun BackgroundView() {
-    val lastClickTime = remember { mutableStateOf(0L) }
+    var lastClickTime by remember { mutableStateOf(0L) }
     val execTaskNum = remember { mutableStateOf(0) }
     LaunchedEffect(execTaskNum) {
-        val num = getCurrentExecTaskNum()
-        for (i in 1..num) {
-            delay(20)
-            execTaskNum.value++
+        try {
+            val num = getCurrentExecTaskNum()
+            for (i in 1..num) {
+                delay(15)
+                execTaskNum.value++
+            }
+        } catch (e: Exception) {
+            ToastUtil.send(e.stackTraceToString())
         }
     }
     Card(
@@ -297,6 +317,8 @@ fun BackgroundView() {
                 ) {
                     Text(
                         text = execTaskNum.value.toString(),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
                         fontSize = 32.sp,
                         color = Color(0xFF409EFF),
                     )
@@ -308,34 +330,45 @@ fun BackgroundView() {
                 }
             }
             LineSpacer()
-            Button(
-                onClick = {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastClickTime.value < 5000) {
-                        ToastUtil.send("点那么快怎么不上天呢")
-                        return@Button
-                    }
-                    lastClickTime.value = currentTime
-                    handler.sendEmptyMessage(EXEC_TASK)
-                },
-                shape = RoundedCornerShape(25.dp),
-                colors = ButtonDefaults.textButtonColors(backgroundColor = Color.White),
-                modifier = Modifier
-                    .height(35.dp)
-            ) {
-                Text(
-                    text = "立即签到",
-                    fontSize = 15.sp,
-                    color = Color(0xFF409EFF),
-                    textAlign = TextAlign.Center
+            CompositionLocalProvider(
+                LocalRippleTheme provides RippleCustomTheme(
+                    color = Color(
+                        0xFF409EFF
+                    )
                 )
+            ) {
+                Button(
+                    onClick = {
+                        runAsync {
+                            val currentTime = TimeUtil.currentTimeMillis()
+                            if (currentTime - lastClickTime < 5000) {
+                                ToastUtil.send("点那么快怎么不上天呢")
+                                return@runAsync
+                            }
+                            lastClickTime = currentTime
+                            handler.sendEmptyMessage(EXEC_TASK)
+                        }
+                    },
+                    shape = RoundedCornerShape(25.dp),
+                    colors = ButtonDefaults.textButtonColors(backgroundColor = Color.White),
+                    modifier = Modifier
+                        .height(35.dp)
+                ) {
+
+                    Text(
+                        text = "立即签到",
+                        fontSize = 15.sp,
+                        color = Color(0xFF409EFF),
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
 }
 
 
-@ExperimentalFoundationApi
+@SuppressLint("UnrememberedMutableState")
 @Preview
 @Composable
 fun PreviewMainLayout() {

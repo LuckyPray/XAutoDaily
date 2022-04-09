@@ -55,7 +55,7 @@ class QLogHook : BaseHook() {
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(p0: MethodHookParam): Any {
                     if (qTagFilter.isEmpty() || containsTag(p0.args[0] as String?)) {
-                        LogUtil.i("QLog", "QTag: ${p0.args[0]}, msg: ${p0.args[2]}")
+                        LogUtil.i("QTag: ${p0.args[0]}, msg: ${p0.args[2]}")
                     }
                     return Unit
                 }
@@ -71,7 +71,7 @@ class QLogHook : BaseHook() {
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(p0: MethodHookParam): Any {
                     if (qTagFilter.isEmpty() || p0.args[0] in qTagFilter) {
-                        LogUtil.d("QLog", "QTag: ${p0.args[0]}, msg: ${p0.args[2]}")
+                        LogUtil.d("QTag: ${p0.args[0]}, msg: ${p0.args[2]}")
                     }
                     return Unit
                 }

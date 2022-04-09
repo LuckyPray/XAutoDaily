@@ -9,17 +9,14 @@ class XAClassLoader(
 
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
-        if (name == "androidx.lifecycle.ReportFragment" || name.startsWith("androidx.activity")) {
-            return try {
-                qClassLoader.loadClass(name)
-            } catch (e: Exception) {
-                mParentClassLoader.loadClass(name)
-            }
+        return if (switchHostClass(name)) {
+            qClassLoader.loadClass(name)
+        } else {
+            mParentClassLoader.loadClass(name)
         }
-        return if (switchHostClass(name)) qClassLoader.loadClass(name) else mParentClassLoader.loadClass(name)
     }
 
-    override fun getResource(name: String): URL {
+    override fun getResource(name: String): URL? {
         return mParentClassLoader.getResource(name) ?: qClassLoader.getResource(name)
     }
 
@@ -29,7 +26,10 @@ class XAClassLoader(
         // 代码中使用的qq类包名前缀写进此处
         private val hostPackages = listOf(
             "com.qq.",
-            "com.tencent.",
+            "com.tencent.common.app.",
+            "com.tencent.mobileqq.",
+            "com.tencent.qphone.base.",
+            "com.tencent.widget.",
             "mqq.",
             "oicq."
         )

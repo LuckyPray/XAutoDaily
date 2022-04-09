@@ -12,8 +12,8 @@ import java.time.format.DateTimeFormatterBuilder
 import java.util.*
 import java.util.regex.Pattern
 
-
-private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
+private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.CHINA)
+private val simpleDateTimeFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
 private val dateTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
 private val regexTime = Pattern.compile("^(\\d{4}-\\d{2}-\\d{2}.\\d{2}:\\d{2}.*)$")
 
@@ -49,6 +49,9 @@ fun LocalDateTime.format(): String =
     dateTimeFormat.format(this)
 
 fun Date.format(): String =
+    simpleDateTimeFormat.format(this)
+
+fun Date.formatDate(): String =
     simpleDateFormat.format(this)
 
 fun LocalDateTime.toDate(): Date =
@@ -57,7 +60,7 @@ fun LocalDateTime.toDate(): Date =
 fun Date.toLocalDateTime(): LocalDateTime =
     this.toInstant().atZone(ZoneId.of("GMT+8")).toLocalDateTime()
 
-inline val LocalDateTime.second: Int
+inline val LocalDateTime.timestamp: Int
     get() = this.toEpochSecond(ZoneOffset.of("+8")).toInt()
 
 inline val LocalDateTime.millisecond: Long

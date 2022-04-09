@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.dex.struct
 
 import me.teble.xposed.autodaily.dex.utils.ByteUtils
-import java.util.*
 
 class ClassDefItem {
     /**

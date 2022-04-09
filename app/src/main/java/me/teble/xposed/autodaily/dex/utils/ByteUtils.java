@@ -53,24 +53,24 @@ public class ByteUtils {
 
     public static int readInt(byte[] res, int index) {
         return (res[index] & 0xff) | ((res[index + 1] << 8) & 0xff00)
-            | ((res[index + 2] << 24) >>> 8) | (res[index + 3] << 24);
+            | ((res[index + 2] << 24) >>> 8) | ((res[index + 3] & 0xff) << 24);
     }
 
     public static int readInt(byte[] res, int[] index) {
         return (res[index[0]++] & 0xff) | ((res[index[0]++] << 8) & 0xff00)
-            | ((res[index[0]++] << 24) >>> 8) | (res[index[0]++] << 24);
+            | ((res[index[0]++] << 24) >>> 8) | ((res[index[0]++] & 0xff) << 24);
     }
 
-    public static short readShort(byte[] res, int index) {
-        return (short) ((res[index] & 0xff) | (res[index + 1] << 8));
+    public static int readShort(byte[] res, int index) {
+        return (res[index] & 0xff) | ((res[index + 1] & 0xff) << 8);
     }
 
-    public static short readShort(byte[] res, int[] index) {
-        return (short) ((res[index[0]++] & 0xff) | (res[index[0]++] << 8));
+    public static int readShort(byte[] res, int[] index) {
+        return (res[index[0]++] & 0xff) | ((res[index[0]++] & 0xff) << 8);
     }
 
-    public static byte readByte(byte[] res, int[] index) {
-        return (byte) (res[index[0]++] & 0xff);
+    public static int readByte(byte[] res, int[] index) {
+        return res[index[0]++] & 0xff;
     }
 
     public static int readUleb128(byte[] src, int[] index) {

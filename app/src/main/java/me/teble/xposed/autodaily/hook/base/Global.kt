@@ -38,22 +38,20 @@ object Global {
     lateinit var moduleRes: XModuleResources
 
     fun init(loadPackageParam: LoadPackageParam) {
-        hostClassLoader = loadPackageParam.classLoader
-        LogUtil.d(TAG, "hostClassLoader -> $hostClassLoader")
         hostPackageName = loadPackageParam.packageName
-        LogUtil.d(TAG, "hostPackageName -> $hostPackageName")
+        LogUtil.d("hostPackageName -> $hostPackageName")
         val strings = loadPackageParam.processName.split(":", ignoreCase = false, limit = 2)
+        // TODO ProcessEnum
         hostProcessName = if (strings.size > 1) strings[strings.size - 1] else ""
-        LogUtil.d(TAG, "hostProcessName -> $hostProcessName")
+        LogUtil.d("hostProcessName -> ${hostProcessName.ifEmpty { "main" }}")
         initLPPFlag = true
     }
 
     fun initContext(qContext: Context) {
         hostContext = qContext
+        hostClassLoader = hostContext.classLoader
         qqTypeEnum = QQTypeEnum.valueOfPackage(hostContext.packageName)
-        LogUtil.d(TAG, "qqTypeEnum -> ${qqTypeEnum.appName}")
         qqVersionCode = getAppVersionCode(hostContext, qqTypeEnum.packageName)
-        LogUtil.d(TAG, "qqVersion -> $qqVersionCode")
         qqVersionName = getAppVersionName(hostContext, qqTypeEnum.packageName)
         initContextFlag = true
     }

@@ -11,7 +11,6 @@ import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Method
-import java.util.*
 
 open class SendMessageManager : BaseFunction(
     TAG = "SendMessageManager"
@@ -36,7 +35,7 @@ open class SendMessageManager : BaseFunction(
                     sendMsgMethod = mi
                     sendMsgMethod.isAccessible = true
                     cSendMsgParams = argt[5]
-                    LogUtil.d(TAG, "MessageManager: method -> $sendMsgMethod")
+                    LogUtil.d("MessageManager: method -> $sendMsgMethod")
                     return
                 }
             }

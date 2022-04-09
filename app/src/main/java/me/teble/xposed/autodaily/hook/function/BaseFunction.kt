@@ -11,7 +11,7 @@ abstract class BaseFunction(
     val isInit by lazy {
         try {
             init()
-            LogUtil.i(TAG, "function [$TAG] is initialize success.$this")
+            LogUtil.i("function [$TAG] is initialize success.$this")
             true
         } catch (e: Exception) {
             ToastUtil.send("初始化功能${TAG}失败。")

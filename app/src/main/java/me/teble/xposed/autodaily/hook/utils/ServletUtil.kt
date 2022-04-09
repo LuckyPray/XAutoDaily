@@ -4,7 +4,10 @@ import com.tencent.mobileqq.pb.ByteStringMicro
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
 import me.teble.xposed.autodaily.hook.base.Initiator
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.fieldValue
+import me.teble.xposed.autodaily.utils.invoke
+import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Modifier
 import java.text.SimpleDateFormat
 import java.util.*
@@ -13,16 +16,16 @@ import java.util.*
 object ServletUtil {
     private val sdf = SimpleDateFormat("MMddHHmmss", Locale.CHINA)
 
-    fun getTraceId(): String {
+    private fun getTraceId(): String {
         return buildString {
             append(currentUin)
             append("_")
             append(sdf.format(Date()))
-            append(System.currentTimeMillis() % 1000)
+            append(TimeUtil.currentTimeMillis() % 1000)
             append("_")
             append(
                 Random().apply {
-                    setSeed(System.currentTimeMillis())
+                    setSeed(TimeUtil.currentTimeMillis())
                 }.nextInt(90000) + 10000
             )
         }
@@ -39,7 +42,7 @@ object ServletUtil {
         return webReq?.invoke("toByteArray") as ByteArray
     }
 
-    val deviceInfo by lazy {
+    private val deviceInfo by lazy {
         val cPlatformInfor = Initiator.load("cooperation.qzone.PlatformInfor")
         val platformInfor = cPlatformInfor?.fieldValue(cPlatformInfor)!!
         var info = ""
@@ -47,8 +50,8 @@ object ServletUtil {
             if (it.returnType == String::class.java && Modifier.isPublic(it.modifiers)
                     && it.parameterTypes.isEmpty()
                 ) {
-                val res = it.invoke(platformInfor) as String
-                if (res.contains("qimei")) {
+                val res = it.invoke(platformInfor) as String?
+                if (res?.contains("qimei") == true) {
                     info = res
                     return@forEach
                 }

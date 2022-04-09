@@ -31,7 +31,7 @@ static String getVersionName() {
 }
 
 static String getBuildNum() {
-    return new SimpleDateFormat("HHmm", Locale.ENGLISH).format(new Date())
+    return new SimpleDateFormat("MMddHH", Locale.ENGLISH).format(new Date())
 }
 
 static String getBuildTime() {

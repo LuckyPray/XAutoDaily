@@ -6,8 +6,9 @@ import me.teble.xposed.autodaily.hook.FromServiceMsgHook
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
-import me.teble.xposed.autodaily.task.module.VoterInfo
+import me.teble.xposed.autodaily.task.model.VoterInfo
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.*
 
 open class FavoriteManager : BaseFunction(
@@ -17,7 +18,7 @@ open class FavoriteManager : BaseFunction(
     override fun init() {}
 
     open fun favorite(targetUin: Long, count: Int = 20) {
-        LogUtil.d(TAG, "favorite -> $targetUin count: $count")
+        LogUtil.d("favorite -> $targetUin count: $count")
         val toServiceMsg: ToServiceMsg = ToServiceMsg(
             "mobileqq.service",
             "$currentUin", "VisitorSvc.ReqFavorite"
@@ -36,12 +37,12 @@ open class FavoriteManager : BaseFunction(
     }
 
     open fun syncGetVoterList(page: Int, pageSize: Int): List<VoterInfo>? {
-        LogUtil.d(TAG, "正在获取点赞列表 page: $page, pageSize: $pageSize")
-        val startTime = System.currentTimeMillis()
+        LogUtil.d("正在获取点赞列表 page: $page, pageSize: $pageSize")
+        val startTime = TimeUtil.currentTimeMillis()
         val id = "syncGetVoterList"
         FromServiceMsgHook.resMap[id] = null
         getVoterList(page, pageSize)
-        while (System.currentTimeMillis() - startTime < 10_000) {
+        while (TimeUtil.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             @Suppress("UNCHECKED_CAST")
             val tmp = FromServiceMsgHook.resMap[id] as List<VoterInfo>?
@@ -50,17 +51,17 @@ open class FavoriteManager : BaseFunction(
                 return it
             }
         }
-        LogUtil.i(TAG, "尝试小程序登录，获取点赞列表超时")
+        LogUtil.i("尝试小程序登录，获取点赞列表超时")
         return null
     }
 
     open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo>? {
-        LogUtil.d(TAG, "正在获取前${maxPage}页的点赞列表")
-        val beginOfYesterday = DateUtil.beginOfDay(Date()).time / 1000 - 24 * 60 * 60
+        LogUtil.d("正在获取前${maxPage}页的点赞列表")
+        val beginOfYesterday = DateUtil.beginOfDay(Date(TimeUtil.currentTimeMillis())).time / 1000 - 24 * 60 * 60
         val mutableList = mutableListOf<VoterInfo>()
         for (i in 1..maxPage) {
             val list = syncGetVoterList(i, 30)
-            LogUtil.d(TAG, "i: $i, list -> $list")
+            LogUtil.d("i: $i, list -> $list")
             list?.let {
                 if (it.isEmpty()) {
                     return mutableList

@@ -4,7 +4,7 @@ import me.teble.xposed.autodaily.hook.base.Initiator.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.FunctionInitException
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
-import me.teble.xposed.autodaily.task.module.Friend
+import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValue
@@ -13,7 +13,6 @@ import mqq.manager.Manager
 import java.lang.reflect.Modifier
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.ArrayList
 
 open class FriendsManager : BaseFunction(
     TAG = "FriendsManager"
@@ -93,7 +92,7 @@ open class FriendsManager : BaseFunction(
             if (Modifier.isPrivate(it.modifiers)
                 && it.returnType == ConcurrentHashMap::class.java
             ) {
-                LogUtil.d(TAG, "${it.parameterTypes}")
+                LogUtil.d("${it.parameterTypes}")
                 it.isAccessible = true
                 return it.invoke(manager, true) as ConcurrentHashMap<*, *>
             }

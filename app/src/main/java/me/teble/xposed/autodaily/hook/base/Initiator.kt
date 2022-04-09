@@ -4,7 +4,6 @@ import me.teble.xposed.autodaily.hook.base.Global.qqVersionCode
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.classCache
 import me.teble.xposed.autodaily.utils.LogUtil
-import java.util.*
 
 object Initiator {
 
@@ -20,12 +19,12 @@ object Initiator {
 
     fun getSimpleName(className: String): String {
         var name = className
-        if (name.contains("/")) {
+        if (name.startsWith('L') && name.endsWith(';') || name.contains('/')) {
             var flag = 0
-            if (name.startsWith("L")) {
+            if (name.startsWith('L')) {
                 flag = flag or (1 shl 1)
             }
-            if (name.endsWith(";")) {
+            if (name.endsWith(';')) {
                 flag = flag or 1
             }
             if (flag > 0) {
@@ -46,11 +45,12 @@ object Initiator {
         if (confusedClass.contains(name)) {
             // 使用正常类名获取混淆类名
             val realClassName = classCache.getString("${name}#${qqVersionCode}")
-            return realClassName?.let {
+            LogUtil.d("混淆缓存：${name}#${qqVersionCode} -> $realClassName")
+            return if (realClassName != null && realClassName.isNotEmpty()) {
                 val cls = classLoader.loadClass(getSimpleName(realClassName))
                 mClassCache[name] = cls
                 cls
-            } ?: let {
+            } else {
                 mClassCache[name] = null
                 null
             }

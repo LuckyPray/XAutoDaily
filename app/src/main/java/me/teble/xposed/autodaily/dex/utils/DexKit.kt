@@ -1,12 +1,11 @@
 package me.teble.xposed.autodaily.dex.utils
 
+import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.dex.struct.*
 import me.teble.xposed.autodaily.dex.utils.ByteUtils.readInt
 import me.teble.xposed.autodaily.dex.utils.ByteUtils.readShort
-import me.teble.xposed.autodaily.dex.utils.ac.AhoCorasickDoubleArrayTrie
 import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import java.io.BufferedInputStream
@@ -16,9 +15,10 @@ import java.net.URL
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
-import kotlin.collections.ArrayList
 
 object DexKit {
+
+    private const val TAG = "DexKit"
 
     private fun getAllDexEntry(zipFile: ZipFile): List<ZipEntry> {
         val zip: Enumeration<out ZipEntry> = zipFile.entries()
@@ -30,7 +30,7 @@ object DexKit {
                 list.add(zipEntry)
             }
         }
-        LogUtil.log("dexList -> $list")
+//        LogUtil.log("dexList -> $list")
         return list.sortedWith(compareBy { it.name })
     }
 
@@ -96,7 +96,7 @@ object DexKit {
         val resultMap = mutableMapOf<String, LinkedList<String>>().apply {
             resourceMap.keys.forEach { this[it] = LinkedList() }
         }
-        val applicationInfo = QApplicationUtil.application.packageManager.getApplicationInfo(
+        val applicationInfo = Global.hostContext.packageManager.getApplicationInfo(
             Global.hostPackageName,
             0
         )
@@ -167,7 +167,7 @@ object DexKit {
                                 continue
                             }
                             if (op == 0x1a) {
-                                idsSet.add(readShort(codeItem.insns, index + 2).toInt())
+                                idsSet.add(readShort(codeItem.insns, index + 2))
                             } else if (op == 0x1b) {
                                 idsSet.add(readInt(codeItem.insns, index + 2))
                             }
@@ -198,14 +198,14 @@ object DexKit {
                                 continue
                             }
                             if (op == 0x1a) {
-                                idsSet.add(readShort(codeItem.insns, index + 2).toInt())
+                                idsSet.add(readShort(codeItem.insns, index + 2))
                             } else if (op == 0x1b) {
                                 idsSet.add(readInt(codeItem.insns, index + 2))
                             }
                             index += OpCodeFormatUtils.getOpSize(op)
                         }
                     }
-                    val strSet = idsSet.map { strIndexMap[it] }
+                    val strSet = idsSet.mapNotNull { strIndexMap[it] }
                     resourceMap.entries.forEach { entry ->
                         val set = entry.value ?: emptySet()
                         if (set.size == (set intersect strSet).size) {

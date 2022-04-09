@@ -10,8 +10,9 @@ import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.WupUtil
-import me.teble.xposed.autodaily.task.module.MiniProfile
+import me.teble.xposed.autodaily.task.model.MiniProfile
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 import mqq.app.Packet
@@ -30,11 +31,11 @@ open class MiniProfileManager : BaseFunction(
     }
 
     open fun syncGetProfile(miniAppId: String): MiniProfile? {
-        val startTime = System.currentTimeMillis()
+        val startTime = TimeUtil.currentTimeMillis()
         val id = "syncGetProfile"
         FromServiceMsgHook.resMap[id] = null
         sendGetProfileRequest(miniAppId)
-        while (System.currentTimeMillis() - startTime < 10_000) {
+        while (TimeUtil.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             val tmp = FromServiceMsgHook.resMap[id] as MiniProfile?
             tmp?.let {
@@ -42,7 +43,7 @@ open class MiniProfileManager : BaseFunction(
                 return it
             }
         }
-        LogUtil.i(TAG, "尝试小程序获取用户信息超时")
+        LogUtil.i("尝试小程序获取用户信息超时")
         return null
     }
 

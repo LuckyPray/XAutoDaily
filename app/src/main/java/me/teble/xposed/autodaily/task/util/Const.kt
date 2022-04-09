@@ -2,9 +2,15 @@ package me.teble.xposed.autodaily.task.util
 
 object Const {
     const val CONFIG_VERSION = "config_version"
-    const val POST = "post"
+    const val NEED_SHOW_LOG = "need_show_log"
+    const val BLOCK_UPDATE_ONE_DAY = "block_update_one_day"
     const val GLOBAL_ENABLE = "global_enable"
     const val ENABLE = "enable"
+    const val USED_THREAD_POOL = "used_thread_pool"
+    const val SHOW_TASK_TOAST = "do_not_show_task_toast"
+    const val TASK_EXCEPTION_COUNT = "task_exception_count"
+
+    // -------------------------------------------------- //
     const val MOST_RECENT_EXEC_TIME = "most_recent_exec_time"
     const val NEXT_SHOULD_EXEC_TIME = "next_should_exec_time"
     const val LAST_EXEC_TIME = "last_exec_time"

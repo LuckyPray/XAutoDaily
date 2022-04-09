@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.dex.struct
 
 import me.teble.xposed.autodaily.dex.utils.ByteUtils
-import java.util.*
 
 class EncodeArray {
     var size = 0
@@ -29,9 +28,6 @@ class EncodeArray {
             val encodeArray = EncodeArray()
             encodeArray.size = ByteUtils.readUleb128(src, index)
             encodeArray.values = Array(encodeArray.size) { EncodeValue.parser(src, index) }
-//            for (i in 0 until encodeArray.size) {
-//                encodeArray.values[i] = EncodeValue.parser(src, index)
-//            }
             return encodeArray
         }
     }

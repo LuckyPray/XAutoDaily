@@ -25,6 +25,7 @@ fun Any.fieldValue(
 ): Any? {
     ReflectUtil.getFields(if (this is Class<*>) this else this::class.java).forEach {
         if (it.type == fieldType) {
+//            LogUtil.log("${it.type}: ${it.name} -> ${ReflectUtil.getFieldValue(this, it)}")
             return ReflectUtil.getFieldValue(this, it)
         }
     }
@@ -88,10 +89,8 @@ fun Any.invoke(
 ): Any? {
     ReflectUtil.getMethods(if (this is Class<*>) this else this.javaClass).let { arrayOfMethods ->
         arrayOfMethods.forEach {
-            if (it.name == name && isAllAssignableFrom(
-                    ClassUtil.getClasses(*args),
-                    it.parameterTypes
-                )
+            if (it.name == name
+                && isAllAssignableFrom(it.parameterTypes, ClassUtil.getClasses(*args))
             ) {
                 return ReflectUtil.invoke(this, it, *args)
             }
@@ -107,7 +106,7 @@ fun <T> Class<T>.new(vararg args: Any?): T = ReflectUtil.newInstance(this, *args
 
 fun Any.printAllField() {
     val obj = this
-    LogUtil.d("PrintField", buildString {
+    LogUtil.d(buildString {
         append("\n")
         ReflectUtil.getFields(if (obj is Class<*>) obj else obj.javaClass).forEach {
             it.isAccessible = true

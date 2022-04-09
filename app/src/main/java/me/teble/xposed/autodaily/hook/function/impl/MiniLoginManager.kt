@@ -11,6 +11,7 @@ import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.WupUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 import mqq.app.Packet
@@ -29,11 +30,11 @@ open class MiniLoginManager : BaseFunction(
     }
 
     open fun syncGetLoginCode(miniAppId: String): String? {
-        val startTime = System.currentTimeMillis()
+        val startTime = TimeUtil.currentTimeMillis()
         val id = "syncGetLoginCode"
         FromServiceMsgHook.resMap[id] = null
         sendLoginRequest(miniAppId)
-        while (System.currentTimeMillis() - startTime < 10_000) {
+        while (TimeUtil.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             val tmp = FromServiceMsgHook.resMap[id] as String?
             tmp?.let {
@@ -41,12 +42,12 @@ open class MiniLoginManager : BaseFunction(
                 return it
             }
         }
-        LogUtil.i(TAG, "尝试小程序登录，获取js_code超时")
+        LogUtil.i("尝试小程序登录，获取js_code超时")
         return null
     }
 
     private fun sendLoginRequest(miniAppId: String) {
-        val packet = Packet::class.java.new("${currentUin}")
+        val packet = Packet::class.java.new("$currentUin")
         val miniAppGetLoginCodeServlet = cMiniAppGetLoginCodeServlet.new()
         val request = cGetLoginCodeRequest.new(miniAppId)
         val traceId: String? = miniAppGetLoginCodeServlet.invokeAs("getTraceId")

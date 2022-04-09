@@ -8,7 +8,7 @@ import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.utils.ServiceMsgParseUtil
-import me.teble.xposed.autodaily.task.module.VoterInfo
+import me.teble.xposed.autodaily.task.model.VoterInfo
 import me.teble.xposed.autodaily.utils.fieldValue
 import mqq.app.MainService
 
