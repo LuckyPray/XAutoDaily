@@ -21,7 +21,7 @@ android {
         //noinspection OldTargetApi
         targetSdkVersion 31
         versionCode mVersionCode
-        versionName "3.0.0"
+        versionName "3.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -97,7 +97,7 @@ android {
                 signingConfig signingConfigs.release
             }
             matchingFallbacks = ['release']
-            versionNameSuffix "-rc10"
+            versionNameSuffix "-rc"
         }
     }
 

@@ -5,7 +5,6 @@ import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.FunctionInitException
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.task.model.Friend
-import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.getMethods
@@ -87,12 +86,10 @@ open class FriendsManager : BaseFunction(
     // 高版本qq判断方式
     // Map<分组名, List<好友>>
     private fun getFriendsMap(manager: Any): ConcurrentHashMap<*, *> {
-        LogUtil.log(manager.toString())
         manager.getMethods().forEach {
             if (Modifier.isPrivate(it.modifiers)
                 && it.returnType == ConcurrentHashMap::class.java
             ) {
-                LogUtil.d("${it.parameterTypes}")
                 it.isAccessible = true
                 return it.invoke(manager, true) as ConcurrentHashMap<*, *>
             }
