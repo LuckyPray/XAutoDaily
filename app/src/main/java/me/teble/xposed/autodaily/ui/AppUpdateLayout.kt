@@ -80,7 +80,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             TextButton(onClick = {
                 context.startActivity(Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(Constants.GITHUB_RELEASE_URL)
+                    data = Uri.parse(Constants.PAN_URL)
                 })
             }) {
                 Text(text = "蓝奏云")
@@ -88,7 +88,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             TextButton(onClick = {
                 context.startActivity(Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(Constants.PAN_URL)
+                    data = Uri.parse(Constants.GITHUB_RELEASE_URL)
                 })
             }) {
                 Text(text = "Github")
