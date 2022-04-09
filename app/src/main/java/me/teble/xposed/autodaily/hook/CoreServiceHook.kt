@@ -53,12 +53,6 @@ class CoreServiceHook : BaseHook() {
 
         fun runTasks(once: Boolean) {
             thread {
-                if (lock.isLocked) {
-                    if (once) {
-                        ToastUtil.send("当前存在任务正在执行，请稍后再试")
-                    }
-                    return@thread
-                }
                 while (!Global.isInit()) {
                     LogUtil.d("等待初始化完毕")
                     Thread.sleep(500)
@@ -97,33 +91,37 @@ class CoreServiceHook : BaseHook() {
             if (needExecGroups.isEmpty()) {
                 return
             }
-            runtimeTasks.addAll(needExecGroups)
-            var threadCount = 1
-            if (ConfUnit.usedThreadPool) {
-                threadCount = 5
-            }
-            val threadPool = ThreadUtil.newExecutor(threadCount, threadCount)
-            for (taskGroup in needExecGroups) {
-                threadPool.execute(
-                    thread(false) {
-                        try {
-                            GroupTaskFilterChain.build(taskGroup)
-                                .doFilter(mutableMapOf(), mutableListOf(), mutableMapOf())
-                        } catch (e: Exception) {
-                            LogUtil.e(e)
-                        }
-                    }
-                )
-            }
-            while (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
-                if (TimeUtil.currentTimeMillis() - executeTime > 20 * 60 * 1000) {
-                    // 关闭运行时间超过20分钟的任务
-                    threadPool.shutdownNow()
+            try {
+                runtimeTasks.addAll(needExecGroups)
+                var threadCount = 1
+                if (ConfUnit.usedThreadPool) {
+                    threadCount = 5
                 }
-            }
-            needExecGroups.forEach {
-                if (runtimeTasks.contains(it)) {
-                    runtimeTasks.remove(it)
+                val threadPool = ThreadUtil.newExecutor(threadCount, threadCount)
+                for (taskGroup in needExecGroups) {
+                    threadPool.execute(
+                        thread(false) {
+                            try {
+                                GroupTaskFilterChain.build(taskGroup)
+                                    .doFilter(mutableMapOf(), mutableListOf(), mutableMapOf())
+                            } catch (e: Exception) {
+                                LogUtil.e(e)
+                            }
+                        }
+                    )
+                }
+                threadPool.shutdown()
+                while (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                    if (TimeUtil.currentTimeMillis() - executeTime > 20 * 60 * 1000) {
+                        // 关闭运行时间超过20分钟的任务
+                        threadPool.shutdownNow()
+                    }
+                }
+            } finally {
+                needExecGroups.forEach {
+                    if (runtimeTasks.contains(it)) {
+                        runtimeTasks.remove(it)
+                    }
                 }
             }
         }
