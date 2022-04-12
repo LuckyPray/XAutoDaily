@@ -12,6 +12,7 @@ object ResInjectUtil {
     fun injectRes(res: Resources = hostContext.resources) {
         try {
             res.getString(R.string.res_inject_success)
+            return
         } catch (ignored: Resources.NotFoundException) {
         }
         LogUtil.log("Module path = $modulePath")

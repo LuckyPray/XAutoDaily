@@ -15,8 +15,8 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.FormSimpleItem
 import me.teble.xposed.autodaily.config.QQClasses.Companion.QQSettingSettingActivity
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.Global.hostContext
 import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
+import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
@@ -46,7 +46,8 @@ class QQSettingSettingActivityHook : BaseHook() {
                 val vg = item.parent as ViewGroup
                 val context = param.thisObject as Activity
                 val entity = clazz.new(context) as View
-                entity.invoke("setLeftText", hostContext.getString(R.string.app_name))
+                ResInjectUtil.injectRes(context.resources)
+                entity.invoke("setLeftText", context.getString(R.string.app_name))
                 entity.invoke("setRightText", BuildConfig.VERSION_NAME)
                 entity.setOnClickListener {
                     try {
