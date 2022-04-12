@@ -13,7 +13,7 @@ open class TimerTask(task: Runnable?, delayMs: Long) {
     /**
      * 延迟时间
      */
-    val delayMs: Long = TimeUtil.currentTimeMillis() + delayMs
+    val delayMs: Long = TimeUtil.cnTimeMillis() + delayMs
 
     /**
      * 任务

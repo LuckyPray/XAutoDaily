@@ -26,25 +26,25 @@ class CronTimer
     private var isStop = false
     override fun run() {
         val timerUnit = if (scheduler.config.matchSecond) TIMER_UNIT_SECOND else TIMER_UNIT_MINUTE
-        var thisTime = TimeUtil.currentTimeMillis()
+        var thisTime = TimeUtil.cnTimeMillis()
         var nextTime: Long
         var sleep: Long
         while (false == isStop) {
             //下一时间计算是按照上一个执行点开始时间计算的
             //此处除以定时单位是为了清零单位以下部分，例如单位是分则秒和毫秒清零
             nextTime = (thisTime / timerUnit + 1) * timerUnit
-            sleep = nextTime - TimeUtil.currentTimeMillis()
+            sleep = nextTime - TimeUtil.cnTimeMillis()
             if (isValidSleepMillis(sleep, timerUnit)) {
                 if (!ThreadUtil.safeSleep(sleep)) {
                     //等待直到下一个时间点，如果被中断直接退出Timer
                     break
                 }
                 //执行点，时间记录为执行开始的时间，而非结束时间
-                thisTime = TimeUtil.currentTimeMillis()
+                thisTime = TimeUtil.cnTimeMillis()
                 spawnLauncher(thisTime)
             } else {
                 // 非正常时间重新计算（issue#1224@Github）
-                thisTime = TimeUtil.currentTimeMillis()
+                thisTime = TimeUtil.cnTimeMillis()
             }
         }
     }

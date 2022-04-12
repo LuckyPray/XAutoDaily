@@ -18,13 +18,8 @@ object LogUtil {
         toXposed: Boolean = false
     ) {
         val str = buildString {
-            if (msg != null) {
-                append(msg)
-            }
-            if (e != null) {
-                append("\n")
-                append(Log.getStackTraceString(e))
-            }
+            msg?.let { append(it) }
+            e?.let { append("\n").append(Log.getStackTraceString(it)) }
         }
         if (str.length > maxLength) {
             var i = 0
@@ -70,7 +65,7 @@ object LogUtil {
     }
 
     @JvmStatic
-    fun printStackTrace(e: Exception = RuntimeException("---getStackTrace---")) {
+    fun printStackTrace(e: Throwable = RuntimeException("---getStackTrace---")) {
         d(Log.getStackTraceString(e))
     }
 }

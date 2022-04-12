@@ -38,11 +38,11 @@ open class FavoriteManager : BaseFunction(
 
     open fun syncGetVoterList(page: Int, pageSize: Int): List<VoterInfo>? {
         LogUtil.d("正在获取点赞列表 page: $page, pageSize: $pageSize")
-        val startTime = TimeUtil.currentTimeMillis()
+        val startTime = System.currentTimeMillis()
         val id = "syncGetVoterList"
         FromServiceMsgHook.resMap[id] = null
         getVoterList(page, pageSize)
-        while (TimeUtil.currentTimeMillis() - startTime < 10_000) {
+        while (System.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             @Suppress("UNCHECKED_CAST")
             val tmp = FromServiceMsgHook.resMap[id] as List<VoterInfo>?
@@ -57,7 +57,7 @@ open class FavoriteManager : BaseFunction(
 
     open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo>? {
         LogUtil.d("正在获取前${maxPage}页的点赞列表")
-        val beginOfYesterday = DateUtil.beginOfDay(Date(TimeUtil.currentTimeMillis())).time / 1000 - 24 * 60 * 60
+        val beginOfYesterday = DateUtil.beginOfDay(Date(TimeUtil.cnTimeMillis())).time / 1000 - 24 * 60 * 60
         val mutableList = mutableListOf<VoterInfo>()
         for (i in 1..maxPage) {
             val list = syncGetVoterList(i, 30)

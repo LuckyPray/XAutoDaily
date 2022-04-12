@@ -19,6 +19,10 @@ fun Dp.toPx(): Float {
 fun Int.toDp(context: Context): Int =
     (this / context.resources.displayMetrics.density).toInt()
 
+fun Dp.toPx(context: Context): Float {
+    return context.resources.displayMetrics.density * value
+}
+
 @Composable
 fun Float.toDp(): Dp {
     val context = LocalContext.current

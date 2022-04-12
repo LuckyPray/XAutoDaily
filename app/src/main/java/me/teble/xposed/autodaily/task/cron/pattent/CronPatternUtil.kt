@@ -35,6 +35,20 @@ object CronPatternUtil {
         } else null
     }
 
+    fun nextDateAfter(timezone: TimeZone?, pattern: CronPattern, start: Date, isMatchSecond: Boolean): Date? {
+        val matchedDates: List<Date> = matchedDates(
+            timezone,
+            pattern,
+            start.time,
+            DateUtil.endOfYear(start).time,
+            1,
+            isMatchSecond
+        )
+        return if (CollUtil.isNotEmpty(matchedDates)) {
+            matchedDates[0]
+        } else null
+    }
+
     /**
      * 列举指定日期之后（到开始日期对应年年底）内所有匹配表达式的日期
      *
@@ -114,6 +128,30 @@ object CronPatternUtil {
         var i = start
         while (i < end) {
             if (pattern.match(i, isMatchSecond)) {
+                result.add(DateUtil.date(i))
+                if (result.size >= count) {
+                    break
+                }
+            }
+            i += step
+        }
+        return result
+    }
+
+    fun matchedDates(
+        timezone: TimeZone?,
+        pattern: CronPattern,
+        start: Long,
+        end: Long,
+        count: Int,
+        isMatchSecond: Boolean
+    ): List<Date> {
+        Assert.isTrue(start < end, "Start date is later than end !")
+        val result: MutableList<Date> = ArrayList(count)
+        val step = if (isMatchSecond) DateUnit.SECOND.millis else DateUnit.MINUTE.millis
+        var i = start
+        while (i < end) {
+            if (pattern.match(timezone, i, isMatchSecond)) {
                 result.add(DateUtil.date(i))
                 if (result.size >= count) {
                     break

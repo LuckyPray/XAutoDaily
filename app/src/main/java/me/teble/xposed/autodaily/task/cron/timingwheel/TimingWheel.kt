@@ -58,7 +58,7 @@ class TimingWheel(
     constructor(tickMs: Long, wheelSize: Int, consumer: Consumer<TimerTaskList?>) : this(
         tickMs,
         wheelSize,
-        TimeUtil.currentTimeMillis(),
+        TimeUtil.cnTimeMillis(),
         consumer
     ) {
     }

@@ -21,7 +21,6 @@ import me.teble.xposed.autodaily.ui.AppUpdateLayout
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.ConfigUpdateLayout
 import me.teble.xposed.autodaily.ui.CustomDialog
-import me.teble.xposed.autodaily.utils.TimeUtil
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -38,7 +37,6 @@ class SplashActivityHook : BaseHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
             val context = it.thisObject as Activity
             thread {
-                TimeUtil.init()
                 loadSaveConf()
                 if (ConfigUtil.checkUpdate(false)) {
                     ConfUnit.needUpdate = true

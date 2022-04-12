@@ -96,7 +96,7 @@ class TimerTaskList : Delayed {
     override fun getDelay(unit: TimeUnit): Long {
         return max(
             0,
-            unit.convert(expire.get() - TimeUtil.currentTimeMillis(), TimeUnit.MILLISECONDS)
+            unit.convert(expire.get() - TimeUtil.cnTimeMillis(), TimeUnit.MILLISECONDS)
         )
     }
 

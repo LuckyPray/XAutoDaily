@@ -59,10 +59,10 @@ object CalculationUtil {
     }
 
     val microsecondTime: Long
-        get() = TimeUtil.currentTimeMillis()
+        get() = TimeUtil.cnTimeMillis()
 
     val secondTime: Int
-        get() = (TimeUtil.currentTimeMillis() / 1000).toInt()
+        get() = (TimeUtil.cnTimeMillis() / 1000).toInt()
 
     val random: Double
         get() = Random().nextDouble()

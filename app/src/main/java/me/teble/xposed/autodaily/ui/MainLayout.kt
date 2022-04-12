@@ -62,7 +62,7 @@ fun MainLayout(navController: NavHostController) {
     LaunchedEffect(notice) {
         launch(IO) {
             val info = ConfUnit.versionInfoCache ?: fetchUpdateInfo()
-            if (TimeUtil.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
+            if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
                 fetchUpdateInfo()
             info ?: ToastUtil.send("拉取公告失败")
             notice.value = info?.notice ?: ""
@@ -219,7 +219,7 @@ fun MainLayout(navController: NavHostController) {
                         "当前配置版本：${configVersion}"
                     ),
                     onClick = {
-                        val time = TimeUtil.currentTimeMillis()
+                        val time = TimeUtil.cnTimeMillis()
                         if (time - lastClickTime.value < 15_000) {
                             ToastUtil.send("不要频繁点击哦~")
                             return@LineButton
@@ -340,7 +340,7 @@ fun BackgroundView() {
                 Button(
                     onClick = {
                         runAsync {
-                            val currentTime = TimeUtil.currentTimeMillis()
+                            val currentTime = TimeUtil.cnTimeMillis()
                             if (currentTime - lastClickTime < 5000) {
                                 ToastUtil.send("点那么快怎么不上天呢")
                                 return@runAsync

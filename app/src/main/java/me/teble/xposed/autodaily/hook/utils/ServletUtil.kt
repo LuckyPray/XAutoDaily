@@ -21,11 +21,11 @@ object ServletUtil {
             append(currentUin)
             append("_")
             append(sdf.format(Date()))
-            append(TimeUtil.currentTimeMillis() % 1000)
+            append(TimeUtil.cnTimeMillis() % 1000)
             append("_")
             append(
                 Random().apply {
-                    setSeed(TimeUtil.currentTimeMillis())
+                    setSeed(TimeUtil.cnTimeMillis())
                 }.nextInt(90000) + 10000
             )
         }

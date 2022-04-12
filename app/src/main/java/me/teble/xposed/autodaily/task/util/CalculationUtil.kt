@@ -37,11 +37,11 @@ object CalculationUtil {
     }
 
     fun getMicrosecondTime(): Long {
-        return TimeUtil.currentTimeMillis()
+        return TimeUtil.cnTimeMillis()
     }
 
     fun getSecondTime(): Int {
-        return (TimeUtil.currentTimeMillis() / 1000).toInt()
+        return (TimeUtil.cnTimeMillis() / 1000).toInt()
     }
 
     fun getRandom(): Double {

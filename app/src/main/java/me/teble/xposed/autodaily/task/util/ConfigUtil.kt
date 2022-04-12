@@ -2,7 +2,6 @@ package me.teble.xposed.autodaily.task.util
 
 import android.annotation.SuppressLint
 import android.util.Log
-import cn.hutool.core.date.DateUtil
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
@@ -265,7 +264,7 @@ object ConfigUtil {
     fun getCurrentExecTaskNum(): Int {
         var num = 0
         val conf = loadSaveConf()
-        val nowStr = Date(TimeUtil.currentTimeMillis()).format().split(' ').first()
+        val nowStr = TimeUtil.getCNDate().format().substring(0, 10)
         conf.taskGroups.forEach { taskGroup ->
             taskGroup.tasks.forEach { task ->
                 val time = task.lastExecTime ?: ""
@@ -283,7 +282,7 @@ object ConfigUtil {
             LogUtil.d("getNotice -> $text")
             val res: Result = text.parse()
             versionInfoCache = res.data
-            lastFetchTime = TimeUtil.currentTimeMillis()
+            lastFetchTime = System.currentTimeMillis()
             return res.data
         } catch (e: Exception) {
             LogUtil.e(e, "拉取公告失败：")
@@ -299,28 +298,21 @@ object ConfigUtil {
         // 获取上次执行任务时间
         val lastExecTime = parseDate(task.lastExecTime)
         // 不保证一定在有效时间内执行
-        val currentTimestamp = TimeUtil.currentTimeMillis()
-        val now = Date(currentTimestamp)
-        val sysTime = TimeUtil.currentTimeMillis()
+        val now = TimeUtil.getCNDate()
         val nextShouldExecTime =
-            parseDate(task.nextShouldExecTime) ?: let {
-                val time = CronPatternUtil.nextDateAfter(CronPattern(task.cron!!), Date(currentTimestamp + 1), true)!!
-                task.nextShouldExecTime = time.format()
-                time
+            task.nextShouldExecTime ?: let {
+                ///////////////////////////////////////////////////////////////////////////////////////
+                val time = CronPatternUtil.nextDateAfter(TimeZone.getTimeZone("GMT+8"), CronPattern(task.cron!!), Date(TimeUtil.cnTimeMillis() + 1), true)!!
+                task.nextShouldExecTime = Date(time.time - TimeUtil.offsetTime).format()
+                Date(time.time + TimeUtil.offsetTime).format()
             }
         lastExecTime ?: let {
             // 第一次执行任务，如果下次执行时间不在当天，则立即执行
-            if (!DateUtil.isSameDay(now, nextShouldExecTime)) {
+            if (task.nextShouldExecTime?.substring(0, 10) != now.format().substring(0, 10)) {
                 return true
             }
         }
-        // 因为系统时间可能存在误差，如果系统时间大于下次执行时间，但是网络时间还未到，则阻塞当前线程时间差，避免提前执行
-        if (sysTime > now.time && nextShouldExecTime > now) {
-            try {
-                Thread.sleep(sysTime - now.time)
-            } catch (e: Exception) {}
-        }
-        if (nextShouldExecTime < now) {
+        if (nextShouldExecTime < now.format()) {
             return true
         }
         return false

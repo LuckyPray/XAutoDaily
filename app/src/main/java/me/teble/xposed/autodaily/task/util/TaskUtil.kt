@@ -101,11 +101,11 @@ object TaskUtil {
         }
         // 正常cron任务，需要计算下次执行时间
         if (task.cron != null && task.cron != "basic") {
-            val currentTime = Date(TimeUtil.currentTimeMillis())
-            task.lastExecTime = currentTime.format()
+            val now = TimeUtil.getCNDate()
+            task.lastExecTime = now.format()
             val nextTime =
-                CronPatternUtil.nextDateAfter(CronPattern(task.cron), currentTime, true)!!
-            task.nextShouldExecTime = nextTime.format()
+                CronPatternUtil.nextDateAfter(TimeZone.getTimeZone("GMT+8"), CronPattern(task.cron), Date(TimeUtil.cnTimeMillis() + 1), true)!!
+            task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
             task.lastExecMsg =
                 if (reqCount == 1) {
                     if (successNum == 1) {
