@@ -40,7 +40,8 @@ object TimeUtil {
             val uc = url.openConnection() as HttpURLConnection
             uc.connectTimeout = 2000
             uc.connect()
-            uc.date
+            // 避免时间误差
+            uc.date + 500
         } catch (e: Exception) {
             LogUtil.e(e, "get network time error, will used localtime -> ${getCNTime()}:")
             ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")

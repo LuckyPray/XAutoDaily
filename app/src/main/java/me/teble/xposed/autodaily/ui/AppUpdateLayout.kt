@@ -54,7 +54,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             ) {
                 items(updateLog.size) { index ->
                     Text(
-                        text = "${index + 1}. " + updateLog[index],
+                        text = updateLog[index],
                         fontSize = 18.sp,
                         color = Color(0xFF424242),
                         modifier = Modifier.padding(horizontal = 8.dp)
