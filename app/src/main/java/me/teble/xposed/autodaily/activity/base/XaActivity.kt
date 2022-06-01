@@ -43,8 +43,8 @@ open class XaActivity : Activity(),
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mSavedStateRegistryController.performRestore(null)
-        handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        mSavedStateRegistryController.performRestore(savedInstanceState)
+        handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
         savedStateRegistry.registerSavedStateProvider(
             ACTIVITY_RESULT_TAG
@@ -60,6 +60,12 @@ open class XaActivity : Activity(),
                 mActivityResultRegistry.onRestoreInstanceState(instanceState)
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        (lifecycle as? LifecycleRegistry)?.currentState = Lifecycle.State.CREATED
+        super.onSaveInstanceState(outState)
+        mSavedStateRegistryController.performSave(outState)
     }
 
     override fun onStart() {

@@ -156,6 +156,14 @@ object EnvFormatUtil {
                 }
                 CalculationUtil.getBkn(skey as String).toString()
             }
+            "ps_bkn" -> {
+                val pskey = env["pskey"] ?: let {
+                    env["pskey"] = ticketManager.getPskey(qDomain ?: "")
+                        ?: throw RuntimeException("获取pskey失败")
+                    env["pskey"]
+                }
+                CalculationUtil.getBkn(pskey as String).toString()
+            }
             "ps_tk" -> {
                 val pskey = env["pskey"] ?: let {
                     env["pskey"] = ticketManager.getPskey(qDomain ?: "")

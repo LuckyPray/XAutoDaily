@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
 import android.annotation.SuppressLint
-import android.util.Log
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
@@ -58,8 +57,13 @@ object ConfigUtil {
             xaLibDir.mkdirs()
         }
         val soFilePath = NativeUtil.getNativeLibrary(Global.hostContext, "xa_decrypt").absolutePath
-        Log.d(TAG, "loadLib: $soFilePath")
-        System.load(soFilePath)
+        LogUtil.d("loadLib: $soFilePath")
+        try {
+            System.load(soFilePath)
+        } catch (e: Throwable) {
+            LogUtil.e(e, "加载so失败 -> $soFilePath")
+            throw e
+        }
     }
 
     private external fun decryptXAConf(encConfBytes: ByteArray): ByteArray
@@ -157,6 +161,7 @@ object ConfigUtil {
     }
 
     private fun decodeConfStr(encodeConfStr: String): String? {
+        LogUtil.d("${encodeConfStr.length} -> $encodeConfStr")
         val res = decryptXAConf(encodeConfStr.toByteArray())
         if (res.isEmpty()) {
             LogUtil.w("解密配置文件失败，请检查插件是否为最新版本")

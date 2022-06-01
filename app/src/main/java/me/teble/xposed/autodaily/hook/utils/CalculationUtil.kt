@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.hook.utils
 
-import android.util.Log
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -53,7 +53,7 @@ object CalculationUtil {
             }
             return md5.toString()
         } catch (e: NoSuchAlgorithmException) {
-            Log.d(TAG, "getCSRFToken: $e")
+            LogUtil.e(e)
         }
         return null
     }
