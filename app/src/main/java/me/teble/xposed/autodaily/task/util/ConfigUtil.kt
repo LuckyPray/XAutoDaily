@@ -317,7 +317,7 @@ object ConfigUtil {
                 return true
             }
         }
-        if (nextShouldExecTime < now.format()) {
+        if (nextShouldExecTime <= now.format()) {
             return true
         }
         return false
