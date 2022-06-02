@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.XModuleResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
+import me.teble.xposed.autodaily.hook.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.getAppVersionCode
 import me.teble.xposed.autodaily.utils.getAppVersionName
@@ -45,6 +46,7 @@ object Global {
         hostProcessName = if (strings.size > 1) strings[strings.size - 1] else ""
         LogUtil.d("hostProcessName -> ${hostProcessName.ifEmpty { "main" }}")
         initLPPFlag = true
+        ShizukuApi.init()
     }
 
     fun initContext(qContext: Context) {

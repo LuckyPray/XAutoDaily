@@ -5,7 +5,7 @@ import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedHelpers
+import de.robv.android.xposed.XposedBridge
 import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -54,7 +54,7 @@ class CoreServiceHook : BaseHook() {
             }
         }
 
-        fun runTasks(once: Boolean) {
+        fun runTasks(userExec: Boolean) {
             thread {
                 while (!Global.isInit()) {
                     LogUtil.d("等待初始化完毕")
@@ -62,12 +62,12 @@ class CoreServiceHook : BaseHook() {
                 }
                 val globalEnable = ConfUnit.globalEnable
                 if (!globalEnable) {
-                    if (once) {
-                        ToastUtil.send("未启用模块，跳过执行")
+                    if (userExec) {
+                        ToastUtil.send("未启用总开关，跳过执行")
                     }
                     return@thread
                 }
-                if (once) {
+                if (userExec) {
                     ToastUtil.send("开始执行签到")
                 } else {
                     LogUtil.d("定时执行")
@@ -165,8 +165,8 @@ class CoreServiceHook : BaseHook() {
 
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
-        XposedHelpers.findAndHookMethod(load(CoreService),
-            "onCreate", object : XC_MethodHook() {
+        XposedBridge.hookAllMethods(load(CoreService),
+            "onStartCommand", object : XC_MethodHook() {
                 override fun beforeHookedMethod(param: MethodHookParam) {
                     handler.sendEmptyMessage(START_CRON)
                 }

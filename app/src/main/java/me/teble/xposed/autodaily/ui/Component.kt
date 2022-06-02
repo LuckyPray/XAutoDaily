@@ -1,16 +1,15 @@
 package me.teble.xposed.autodaily.ui
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import android.content.pm.PackageManager
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Warning
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextIndent
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.R
+import me.teble.xposed.autodaily.hook.shizuku.ShizukuApi
+import rikka.shizuku.Shizuku
 
 @Composable
 fun VerticaLine(
@@ -389,6 +391,59 @@ fun GroupListTitle(text: String) {
                 .height(16.dp)
         )
         Text(text = text, fontSize = 16.sp)
+    }
+}
+
+private val listener: (Int, Int) -> Unit = { _, grantResult ->
+    ShizukuApi.isPermissionGranted = grantResult == PackageManager.PERMISSION_GRANTED
+}
+
+@Composable
+fun ShizukuCard() {
+    LaunchedEffect(Unit) {
+        Shizuku.addRequestPermissionResultListener(listener)
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            Shizuku.removeRequestPermissionResultListener(listener)
+        }
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+            .clickable {
+                if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
+                    Shizuku.requestPermission(1101)
+                }
+            }
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (ShizukuApi.isPermissionGranted) {
+            Icon(Icons.Outlined.CheckCircle, "Shizuku 服务正在运行")
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+                Text(
+                    text = "Shizuku 服务正在运行",
+                    fontFamily = FontFamily.Serif,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Shizuku Api Version: ${Shizuku.getVersion()}")
+            }
+        } else {
+            Icon(Icons.Outlined.Warning, "Shizuku 服务未在运行")
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+                Text(
+                    text = "Shizuku 服务未在运行",
+                    fontFamily = FontFamily.Serif,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "保活服务无法运行")
+            }
+        }
     }
 }
 
