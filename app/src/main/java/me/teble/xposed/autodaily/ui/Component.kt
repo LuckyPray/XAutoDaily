@@ -155,6 +155,7 @@ fun LineSwitch(
     modifier: Modifier = Modifier,
     checked: MutableState<Boolean>,
     title: String,
+    enabled: Boolean = true,
     desc: String? = null,
     otherInfoList: List<String>? = null,
     onChange: (Boolean) -> Unit = {},
@@ -168,6 +169,7 @@ fun LineSwitch(
             .background(Color.White)
             .combinedClickable(
                 onClick = {
+                    if (!enabled) return@combinedClickable
                     if (onClick == null) {
                         checked.value = !checked.value
                         onChange(checked.value)
@@ -215,6 +217,7 @@ fun LineSwitch(
                 Switch(
 //                    modifier = Modifier.fillMaxHeight(),
                     checked = checked.value,
+                    enabled = enabled,
                     onCheckedChange = {
                         checked.value = it
                         onChange(it)
@@ -231,6 +234,7 @@ fun LineCheckBox(
     modifier: Modifier = Modifier,
     checked: MutableState<Boolean>,
     title: String,
+    enabled: Boolean = true,
     desc: String? = null,
     otherInfoList: List<String>? = null,
     onChange: (Boolean) -> Unit = {},
@@ -244,6 +248,7 @@ fun LineCheckBox(
             .clip(RoundedCornerShape(13.dp))
             .combinedClickable(
                 onClick = {
+                    if (!enabled) return@combinedClickable
                     if (onClick == null) {
                         checked.value = !checked.value
                         onChange(checked.value)
@@ -290,6 +295,7 @@ fun LineCheckBox(
             ) {
                 Checkbox(
                     checked = checked.value,
+                    enabled = enabled,
                     onCheckedChange = {
                         checked.value = it
                         onChange(it)
@@ -421,7 +427,20 @@ fun ShizukuCard() {
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (ShizukuApi.isPermissionGranted) {
+        if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
+            Icon(Icons.Outlined.CheckCircle, "Shizuku 服务正在运行")
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+                Text(
+                    text = "Shizuku 服务正在运行（未授权）",
+                    fontFamily = FontFamily.Serif,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(text = "Shizuku Api Version: ${Shizuku.getVersion()}")
+                Text(text = "点击此卡片进行授权", color = Color.Red)
+            }
+        }
+        else if (ShizukuApi.isPermissionGranted) {
             Icon(Icons.Outlined.CheckCircle, "Shizuku 服务正在运行")
             Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
                 Text(
@@ -441,7 +460,7 @@ fun ShizukuCard() {
                     color = Color.Black
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = "保活服务无法运行")
+                Text(text = "部分功能无法运行")
             }
         }
     }

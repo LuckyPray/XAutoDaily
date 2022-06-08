@@ -11,14 +11,22 @@
         android:theme="@style/AppTheme"
         android:allowBackup="true"
         android:fullBackupOnly="true">
-<!--        <activity android:name=".activity.common.MainActivity"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
+        <activity android:name=".activity.common.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="me.teble.xposed.autodaily.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <meta-data
             android:name="xposedmodule"

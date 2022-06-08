@@ -183,4 +183,5 @@ dependencies {
 
     // shizuku
     implementation "dev.rikka.shizuku:api:12.1.0"
+    implementation("dev.rikka.shizuku:provider:12.1.0")
 }

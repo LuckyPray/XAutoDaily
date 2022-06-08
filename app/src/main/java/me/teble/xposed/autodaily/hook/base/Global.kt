@@ -46,7 +46,6 @@ object Global {
         hostProcessName = if (strings.size > 1) strings[strings.size - 1] else ""
         LogUtil.d("hostProcessName -> ${hostProcessName.ifEmpty { "main" }}")
         initLPPFlag = true
-        ShizukuApi.init()
     }
 
     fun initContext(qContext: Context) {

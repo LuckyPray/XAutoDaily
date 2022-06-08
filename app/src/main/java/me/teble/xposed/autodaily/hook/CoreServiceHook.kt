@@ -1,10 +1,12 @@
 package me.teble.xposed.autodaily.hook
 
+import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
 import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge
 import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
@@ -34,6 +36,9 @@ class CoreServiceHook : BaseHook() {
 
     companion object {
         const val TAG = "CoreService"
+
+        const val CORE_SERVICE_FLAG = "XAutoDaily:core_service_flag"
+
         private val lock = ReentrantLock()
         private val cronLock = ReentrantLock()
         const val EXEC_TASK = 1
@@ -166,11 +171,16 @@ class CoreServiceHook : BaseHook() {
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
         XposedBridge.hookAllMethods(load(CoreService),
-            "onStartCommand", object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
-                    handler.sendEmptyMessage(START_CRON)
+            "onStartCommand", object : XC_MethodReplacement() {
+            override fun replaceHookedMethod(param: MethodHookParam): Any {
+                val args = param.args
+                val intent = args[0] as Intent?
+                if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
+                    return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args)
                 }
+                handler.sendEmptyMessage(START_CRON)
+                return Unit
             }
-        )
+        })
     }
 }
