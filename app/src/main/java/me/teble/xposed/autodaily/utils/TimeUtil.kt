@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.utils
 
+import android.util.Log
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.millisecond
 import java.net.HttpURLConnection
@@ -43,8 +44,12 @@ object TimeUtil {
             // 避免时间误差
             uc.date + 500
         } catch (e: Exception) {
-            LogUtil.e(e, "get network time error, will used localtime -> ${getCNTime()}:")
-            ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")
+            try {
+                LogUtil.e(e, "get network time error, will used localtime -> ${getCNTime()}:")
+                ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")
+            } catch (ignore: Exception) {
+                Log.e(TAG, "get network time error, will used localtime -> ${getCNTime()}: \n" + Log.getStackTraceString(e))
+            }
             null
         }
     }
