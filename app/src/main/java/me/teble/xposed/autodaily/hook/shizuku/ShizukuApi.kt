@@ -23,12 +23,15 @@ object ShizukuApi {
         }
     }
 
-    fun startService(packageName: String, className: String) {
-        shizukuShell("am startservice -n $packageName/$className")
+    fun startService(packageName: String, className: String, args: Array<String>) {
+        if (!isPermissionGranted) return
+        val arg = args.joinToString(" ")
+        shizukuShell("am startservice -n $packageName/$className $arg")
     }
 
-    fun setUntrustedTouchEvents(disabled: Boolean): String {
-        return shizukuShell("settings put global block_untrusted_touches ${if(disabled) 0 else 2}")
+    fun setUntrustedTouchEvents(disabled: Boolean) {
+        if (!isPermissionGranted) return
+        shizukuShell("settings put global block_untrusted_touches ${if(disabled) 0 else 2}")
     }
 
     @Suppress("DEPRECATION")

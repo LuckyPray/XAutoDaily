@@ -21,6 +21,10 @@ import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.activity.module.colors
 import me.teble.xposed.autodaily.application.xaApp
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
+import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
+import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
+import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.hook.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.ui.*
 import kotlin.math.expm1
@@ -74,8 +78,7 @@ fun ModuleView() {
                     infoList = if (!ShizukuApi.isPermissionGranted) {
                         if (ShizukuApi.isBinderAvailable) {
                             listOf("shizuku正在运行，但是未授权，无法勾选")
-                        }
-                        else {
+                        } else {
                             listOf("shizuku没有在运行，无法勾选")
                         }
                     } else {
@@ -96,6 +99,20 @@ fun ModuleView() {
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                     otherInfoList = infoList
+                )
+            }
+            item {
+                LineButton(
+                    title = "唤醒qq测试",
+                    desc = "尝试后台唤醒qq，并且显示一个toast弹窗",
+                    onClick = {
+                        ShizukuApi.startService(PACKAGE_NAME_QQ, KernelService,
+                            arrayOf(
+                                "-e", CORE_SERVICE_FLAG, "$",
+                                "-e", CORE_SERVICE_TOAST_FLAG, "$"
+                            ))
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
         }

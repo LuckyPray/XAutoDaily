@@ -5,10 +5,9 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
-import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge
-import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
+import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
@@ -21,6 +20,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.getExtras
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -35,9 +35,10 @@ class CoreServiceHook : BaseHook() {
     override val enabled = true
 
     companion object {
-        const val TAG = "CoreService"
+        const val TAG = "CoreServiceHook"
 
         const val CORE_SERVICE_FLAG = "XAutoDaily:core_service_flag"
+        const val CORE_SERVICE_TOAST_FLAG = "XAutoDaily:core_service_toast_flag"
 
         private val lock = ReentrantLock()
         private val cronLock = ReentrantLock()
@@ -170,7 +171,7 @@ class CoreServiceHook : BaseHook() {
 
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
-        XposedBridge.hookAllMethods(load(CoreService),
+        XposedBridge.hookAllMethods(load(KernelService),
             "onStartCommand", object : XC_MethodReplacement() {
             override fun replaceHookedMethod(param: MethodHookParam): Any {
                 val args = param.args
@@ -178,8 +179,14 @@ class CoreServiceHook : BaseHook() {
                 if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
                     return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args)
                 }
-                handler.sendEmptyMessage(START_CRON)
-                return Unit
+                if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
+                    LogUtil.d("onStartCommand")
+                    LogUtil.d(intent.extras.getExtras().toString())
+                    ToastUtil.send("唤醒测试: true")
+                } else {
+                    handler.sendEmptyMessage(START_CRON)
+                }
+                return 2
             }
         })
     }
