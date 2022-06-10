@@ -113,9 +113,6 @@ fun OtherLayout(navController: NavHostController) {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             item {
-                ShizukuCard()
-            }
-            item {
                 val checked = remember { mutableStateOf(ConfUnit.showTaskToast) }
                 LineSwitch(
                     title = "签到提示",
