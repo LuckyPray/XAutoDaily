@@ -1,4 +1,4 @@
-package me.teble.xposed.autodaily.hook.shizuku
+package me.teble.xposed.autodaily.shizuku
 
 import android.content.pm.PackageManager
 import androidx.compose.runtime.getValue

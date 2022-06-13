@@ -1,4 +1,4 @@
-package me.teble.xposed.autodaily.hook.shizuku
+package me.teble.xposed.autodaily.shizuku
 
 import android.os.Environment
 import android.util.Log

@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.hook
 
-import android.app.AndroidAppHelper.currentApplication
 import android.app.Application
 import android.app.Service
 import android.content.Intent
@@ -12,7 +11,9 @@ import com.github.kyuubiran.ezxhelper.utils.emptyParam
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookBefore
-import de.robv.android.xposed.*
+import de.robv.android.xposed.IXposedHookLoadPackage
+import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QQClasses.Companion.BaseApplicationImpl
@@ -142,7 +143,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         return@hookAfter
                     }
                 }
-                val context = currentApplication()
+                val cApplication = loadPackageParam.classLoader.loadClass(BaseApplicationImpl)
+                val context: Application = cApplication.fieldValueAs(cApplication)!!
                 // 初始化全局Context
                 initContext(context)
                 LogUtil.i("qq version -> ${Global.qqTypeEnum.appName}($qqVersionCode)")

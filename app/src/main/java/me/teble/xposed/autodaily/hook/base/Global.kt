@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.res.XModuleResources
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
-import me.teble.xposed.autodaily.hook.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.getAppVersionCode
 import me.teble.xposed.autodaily.utils.getAppVersionName

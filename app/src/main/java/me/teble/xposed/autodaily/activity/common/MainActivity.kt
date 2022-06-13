@@ -32,8 +32,11 @@ import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
-import me.teble.xposed.autodaily.hook.shizuku.ShizukuApi
-import me.teble.xposed.autodaily.ui.*
+import me.teble.xposed.autodaily.shizuku.ShizukuApi
+import me.teble.xposed.autodaily.ui.ActivityView
+import me.teble.xposed.autodaily.ui.LineButton
+import me.teble.xposed.autodaily.ui.LineCheckBox
+import me.teble.xposed.autodaily.ui.LineSwitch
 import rikka.shizuku.Shizuku
 import kotlin.math.expm1
 import kotlin.math.sqrt

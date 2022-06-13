@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_TIM
-import me.teble.xposed.autodaily.hook.shizuku.ShizukuApi
+import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import rikka.shizuku.Shizuku
 
 lateinit var xaApp: MyApplication

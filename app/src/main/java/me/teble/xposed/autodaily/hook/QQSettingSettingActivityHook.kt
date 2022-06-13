@@ -19,7 +19,6 @@ import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.new
 
@@ -42,8 +41,6 @@ class QQSettingSettingActivityHook : BaseHook() {
         findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter(52) { param ->
             try {
                 val clazz: Class<*> = load(FormSimpleItem) ?: load(FormCommonSingleLineItem)!!
-                val item: View = param.thisObject.fieldValueAs(clazz)!!
-                val vg = item.parent as ViewGroup
                 val context = param.thisObject as Activity
                 val entity = clazz.new(context) as View
                 ResInjectUtil.injectRes(context.resources)

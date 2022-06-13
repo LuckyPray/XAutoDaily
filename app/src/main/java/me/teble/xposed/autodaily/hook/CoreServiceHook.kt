@@ -11,6 +11,7 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
@@ -100,6 +101,7 @@ class CoreServiceHook : BaseHook() {
             if (needExecGroups.isEmpty()) {
                 return
             }
+            XANotification.start()
             try {
                 runtimeTasks.addAll(needExecGroups)
                 var threadCount = 1
@@ -132,6 +134,8 @@ class CoreServiceHook : BaseHook() {
                         runtimeTasks.remove(it)
                     }
                 }
+                XANotification.setContent("签到执行完毕", false)
+                XANotification.stop()
             }
         }
 
