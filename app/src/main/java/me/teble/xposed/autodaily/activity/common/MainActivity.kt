@@ -1,8 +1,13 @@
 package me.teble.xposed.autodaily.activity.common
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.IBinder
+import android.os.RemoteException
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -25,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import me.teble.xposed.autodaily.BuildConfig
+import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.activity.module.colors
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
@@ -33,15 +40,85 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
+import me.teble.xposed.autodaily.shizuku.ShizukuConf
+import me.teble.xposed.autodaily.shizuku.UserService
 import me.teble.xposed.autodaily.ui.ActivityView
-import me.teble.xposed.autodaily.ui.LineButton
 import me.teble.xposed.autodaily.ui.LineCheckBox
 import me.teble.xposed.autodaily.ui.LineSwitch
+import me.teble.xposed.autodaily.utils.toJsonString
 import rikka.shizuku.Shizuku
+import java.io.File
 import kotlin.math.expm1
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
+
+    companion object {
+        var shizukuErrInfo by mutableStateOf("")
+        var shizukuDaemonRunning by mutableStateOf(peekUserService())
+
+        private val userServiceConnection = object : ServiceConnection {
+            override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+
+                if (binder != null && binder.pingBinder()) {
+                    val service: IUserService = IUserService.Stub.asInterface(binder)
+                    try {
+                        if (service.isRunning) {
+                            shizukuErrInfo = ""
+                            shizukuDaemonRunning = true
+                        }
+                    } catch (e: RemoteException) {
+                        Log.e("XALog", Log.getStackTraceString(e))
+                        shizukuErrInfo = "守护进程连接失败"
+                    }
+                } else {
+                    shizukuErrInfo = "invalid binder for $name received"
+                }
+            }
+
+            override fun onServiceDisconnected(name: ComponentName?) {
+                shizukuErrInfo = ""
+                shizukuDaemonRunning = false
+            }
+        }
+
+        private val userServiceArgs by lazy {
+            Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, UserService::class.java.name))
+                .daemon(true)
+                .processNameSuffix("service")
+                .debuggable(BuildConfig.DEBUG)
+                .version(BuildConfig.VERSION_CODE)
+        }
+
+        fun bindUserService() {
+            try {
+                Shizuku.bindUserService(userServiceArgs, userServiceConnection)
+            } catch (e: Throwable) {
+                Log.e("XALog", Log.getStackTraceString(e))
+            }
+        }
+
+        fun unbindUserService() {
+            try {
+                Shizuku.unbindUserService(userServiceArgs, userServiceConnection, true)
+                shizukuDaemonRunning = false
+            } catch (e: Throwable) {
+                Log.e("XALog", Log.getStackTraceString(e))
+            }
+        }
+
+        fun peekUserService(): Boolean {
+            runCatching {
+                Log.d("XALog", userServiceArgs.toString())
+                return Shizuku.peekUserService(userServiceArgs, userServiceConnection)
+            }.onFailure {
+                Log.e("XALog", Log.getStackTraceString(it))
+            }
+            return false
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -89,6 +166,12 @@ fun ShizukuCard() {
             .clickable {
                 if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
                     Shizuku.requestPermission(1101)
+                    return@clickable
+                }
+                if (!MainActivity.shizukuDaemonRunning) {
+                    MainActivity.bindUserService()
+                } else {
+                    MainActivity.unbindUserService()
                 }
             }
             .padding(24.dp),
@@ -116,6 +199,15 @@ fun ShizukuCard() {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "Shizuku Api Version: ${Shizuku.getVersion()}")
+                if (!MainActivity.shizukuDaemonRunning) {
+                    if (MainActivity.shizukuErrInfo.isNotEmpty()) {
+                        Text(text = "守护进程启动失败: ${MainActivity.shizukuErrInfo}", color = Color.Red)
+                    } else {
+                        Text(text = "守护进程未在运行，点击运行", color = Color.Red)
+                    }
+                } else {
+                    Text(text = "守护进程正在运行，点击停止运行", color = Color.Green)
+                }
             }
         } else {
             Icon(Icons.Outlined.Warning, "Shizuku 服务未在运行")
@@ -178,20 +270,6 @@ fun ModuleView() {
                 )
             }
             item {
-                LineButton(
-                    title = "唤醒qq测试",
-                    desc = "尝试后台唤醒qq，并且显示一个toast弹窗",
-                    onClick = {
-                        ShizukuApi.startService(PACKAGE_NAME_QQ, KernelService,
-                            arrayOf(
-                                "-e", CORE_SERVICE_FLAG, "$",
-                                "-e", CORE_SERVICE_TOAST_FLAG, "$"
-                            ))
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
                 val keepAliveChecked = remember {
                     mutableStateOf(xaApp.prefs.getBoolean("KeepAlive", false))
                 }
@@ -201,11 +279,23 @@ fun ModuleView() {
                 val timKeepAlive = remember {
                     mutableStateOf(xaApp.prefs.getBoolean("TimKeepAlive", false))
                 }
-                var installerQQ by remember {
-                    mutableStateOf(false)
-                }
-                var installerTIM by remember {
-                    mutableStateOf(false)
+                LaunchedEffect(qqKeepAlive.value, timKeepAlive.value, keepAliveChecked.value) {
+                    val confDir = File(xaApp.getExternalFilesDir(null), "conf")
+                    if (confDir.isFile) {
+                        confDir.delete()
+                    }
+                    if (!confDir.exists()) {
+                        confDir.mkdirs()
+                    }
+                    val confFile = File(confDir, "conf.json")
+                    val conf = ShizukuConf(keepAliveChecked.value,
+                        mutableMapOf<String, Boolean>().apply {
+                            put(PACKAGE_NAME_QQ, qqKeepAlive.value)
+                            put(PACKAGE_NAME_TIM, timKeepAlive.value)
+                        })
+                    val confString = conf.toJsonString()
+                    Log.d("XALog", confString)
+                    confFile.writeText(confString)
                 }
                 Column(
                     modifier = Modifier
@@ -219,19 +309,53 @@ fun ModuleView() {
                         title = "是否启用shizuku保活机制",
                         desc = "通过shizuku运行一个service，当监测到qq/tim被杀死后重新拉起进程",
                         enabled = ShizukuApi.isPermissionGranted,
+                        onChange = {
+                            keepAliveChecked.value = it
+                            xaApp.prefs.edit()
+                                .putBoolean("KeepAlive", it)
+                                .apply()
+                        },
                         otherInfoList = infoList
                     )
                     if (keepAliveChecked.value) {
                         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
                             LineCheckBox(
                                 checked = qqKeepAlive,
-                                title = "启用qq保活"
+                                title = "启用qq保活",
+                                desc = "单击此处尝试后台唤醒qq，如果模块hook生效将会显示一个气泡",
+                                onClick = {
+                                    ShizukuApi.startService(PACKAGE_NAME_QQ, KernelService,
+                                        arrayOf(
+                                            "-e", CORE_SERVICE_FLAG, "$",
+                                            "-e", CORE_SERVICE_TOAST_FLAG, "$"
+                                        ))
+                                },
+                                onChange = {
+                                    qqKeepAlive.value = it
+                                    xaApp.prefs.edit()
+                                        .putBoolean("QKeepAlive", it)
+                                        .apply()
+                                }
                             )
                         }
                         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
                             LineCheckBox(
                                 checked = timKeepAlive,
-                                title = "启用tim保活"
+                                title = "启用tim保活",
+                                desc = "单击此处尝试后台唤醒tim，如果模块hook生效将会显示一个气泡",
+                                onClick = {
+                                    ShizukuApi.startService(PACKAGE_NAME_TIM, KernelService,
+                                        arrayOf(
+                                            "-e", CORE_SERVICE_FLAG, "$",
+                                            "-e", CORE_SERVICE_TOAST_FLAG, "$"
+                                        ))
+                                },
+                                onChange = {
+                                    timKeepAlive.value = it
+                                    xaApp.prefs.edit()
+                                        .putBoolean("TimKeepAlive", it)
+                                        .apply()
+                                }
                             )
                         }
                     }

@@ -6,4 +6,5 @@ interface IUserService {
 
     void exit() = 1; // Exit method defined by user
 
+    boolean isRunning() = 2;
 }
