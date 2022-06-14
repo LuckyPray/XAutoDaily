@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="me.teble.xposed.autodaily">
 
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
+
     <application
-        android:name="me.teble.xposed.autodaily.application.MyApplication"
+        android:name=".application.MyApplication"
         android:icon="@drawable/icon_x_auto_daily_2"
         android:label="@string/app_name"
         android:roundIcon="@drawable/icon_x_auto_daily_2"
@@ -11,27 +16,32 @@
         android:theme="@style/AppTheme"
         android:allowBackup="true"
         android:fullBackupOnly="true">
-<!--        <activity android:name=".activity.common.MainActivity"-->
-<!--            android:exported="true">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.MAIN" />-->
+        <activity android:name=".activity.common.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-<!--                <category android:name="android.intent.category.LAUNCHER" />-->
-<!--            </intent-filter>-->
-<!--        </activity>-->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <provider
+            android:name="rikka.shizuku.ShizukuProvider"
+            android:authorities="me.teble.xposed.autodaily.shizuku"
+            android:enabled="true"
+            android:exported="true"
+            android:multiprocess="false"
+            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <meta-data
             android:name="xposedmodule"
             android:value="true"/>
-
         <meta-data
             android:name="xposeddescription"
             android:value="依赖于QQ执行的全自动签到插件"/>
-
         <meta-data
             android:name="xposedminversion"
             android:value="54"/>
-
         <meta-data
             android:name="xposedscope"
             android:resource="@array/xposedscope"/>

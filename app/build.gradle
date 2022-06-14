@@ -180,4 +180,8 @@ dependencies {
 
     // 导航栏
     implementation "com.google.accompanist:accompanist-insets:0.24.6-alpha"
+
+    // shizuku
+    implementation "dev.rikka.shizuku:api:12.1.0"
+    implementation("dev.rikka.shizuku:provider:12.1.0")
 }

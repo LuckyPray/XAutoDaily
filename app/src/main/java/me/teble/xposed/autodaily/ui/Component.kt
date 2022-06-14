@@ -153,6 +153,7 @@ fun LineSwitch(
     modifier: Modifier = Modifier,
     checked: MutableState<Boolean>,
     title: String,
+    enabled: Boolean = true,
     desc: String? = null,
     otherInfoList: List<String>? = null,
     onChange: (Boolean) -> Unit = {},
@@ -166,6 +167,7 @@ fun LineSwitch(
             .background(Color.White)
             .combinedClickable(
                 onClick = {
+                    if (!enabled) return@combinedClickable
                     if (onClick == null) {
                         checked.value = !checked.value
                         onChange(checked.value)
@@ -213,6 +215,7 @@ fun LineSwitch(
                 Switch(
 //                    modifier = Modifier.fillMaxHeight(),
                     checked = checked.value,
+                    enabled = enabled,
                     onCheckedChange = {
                         checked.value = it
                         onChange(it)
@@ -229,6 +232,7 @@ fun LineCheckBox(
     modifier: Modifier = Modifier,
     checked: MutableState<Boolean>,
     title: String,
+    enabled: Boolean = true,
     desc: String? = null,
     otherInfoList: List<String>? = null,
     onChange: (Boolean) -> Unit = {},
@@ -242,6 +246,7 @@ fun LineCheckBox(
             .clip(RoundedCornerShape(13.dp))
             .combinedClickable(
                 onClick = {
+                    if (!enabled) return@combinedClickable
                     if (onClick == null) {
                         checked.value = !checked.value
                         onChange(checked.value)
@@ -288,6 +293,7 @@ fun LineCheckBox(
             ) {
                 Checkbox(
                     checked = checked.value,
+                    enabled = enabled,
                     onCheckedChange = {
                         checked.value = it
                         onChange(it)
@@ -391,7 +397,6 @@ fun GroupListTitle(text: String) {
         Text(text = text, fontSize = 16.sp)
     }
 }
-
 
 @SuppressLint("UnrememberedMutableState")
 @Preview

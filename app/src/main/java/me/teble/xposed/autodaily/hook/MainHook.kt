@@ -1,7 +1,8 @@
 package me.teble.xposed.autodaily.hook
 
-import android.app.AndroidAppHelper.currentApplication
 import android.app.Application
+import android.app.Service
+import android.content.Intent
 import android.content.res.XModuleResources
 import android.text.TextUtils
 import cn.hutool.core.util.ReflectUtil.*
@@ -9,11 +10,15 @@ import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.emptyParam
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
+import me.teble.xposed.autodaily.config.QQClasses.Companion.BaseApplicationImpl
+import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
+import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.NewRuntime
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -68,6 +73,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             if (loadPackageParam.processName == loadPackageParam.packageName) {
                 init
             }
+            if (loadPackageParam.processName.endsWith("tool")) {
+                LogUtil.d("tool进程：" + loadPackageParam.processName)
+                toolsHook()
+            }
         }
     }
 
@@ -78,6 +87,33 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         EzXHelperInit.setToastTag("XAutoDaily")
         doInit()
     }
+    private val cmdClass: Class<*> by lazy {
+        loadPackageParam.classLoader.loadClass(DataMigrationService)
+    }
+    private val kernelServiceClass: Class<*> by lazy {
+        loadPackageParam.classLoader.loadClass(KernelService)
+    }
+
+    private fun toolsHook() {
+        findMethod(cmdClass) {
+            name == "onStartCommand"
+        }.hookAfter {
+            if (isInjector(cmdClass::class.java.name)) {
+                return@hookAfter
+            }
+            if (it.thisObject::class.java == cmdClass) {
+                val args = it.args
+                val context = it.thisObject as Service
+                val intent = args[0] as Intent?
+                context.startService(Intent(context, kernelServiceClass).apply {
+                    intent?.extras?.let { extra ->
+                        putExtras(extra)
+                    }
+                })
+            }
+            (it.thisObject as Service).stopSelf()
+        }
+    }
 
     private fun doInit() {
         // 初始化全局ClassLoader
@@ -85,7 +121,21 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         init(loadPackageParam)
         // 替换classloader
         replaceParentClassloader(loadPackageParam.classLoader)
-
+        val service = loadPackageParam.classLoader.loadClass(KernelService)
+        LogUtil.d(service.toString())
+        findMethod(BaseApplicationImpl) { name == "onCreate" }.hookBefore {
+            try {
+                synchronized(this) {
+                    if (isInjector(this::class.java.name)) {
+                        return@hookBefore
+                    }
+                }
+                val app = it.thisObject as Application
+                app.startService(Intent(app, service))
+            } catch (e: Throwable) {
+                LogUtil.e(e)
+            }
+        }
         findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             try {
@@ -94,7 +144,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         return@hookAfter
                     }
                 }
-                val context = currentApplication()
+                val cApplication = loadPackageParam.classLoader.loadClass(BaseApplicationImpl)
+                val context: Application = cApplication.fieldValueAs(cApplication)!!
                 // 初始化全局Context
                 initContext(context)
                 LogUtil.i("qq version -> ${Global.qqTypeEnum.appName}($qqVersionCode)")

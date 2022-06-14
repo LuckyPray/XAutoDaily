@@ -51,6 +51,12 @@ internal fun Any?.toJsonElement(): JsonElement = when (this) {
 
 internal fun Any?.toJsonString(): String = Json.encodeToString(this.toJsonElement())
 
+@OptIn(ExperimentalSerializationApi::class)
+private val json = Json {
+    explicitNulls = false
+    ignoreUnknownKeys = true
+}
+
 internal inline fun <reified T> String.parse(): T {
-    return Json.decodeFromString(this)
+    return json.decodeFromString(this)
 }

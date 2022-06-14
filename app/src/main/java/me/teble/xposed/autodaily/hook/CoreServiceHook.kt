@@ -1,15 +1,17 @@
 package me.teble.xposed.autodaily.hook
 
+import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedHelpers
-import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
+import de.robv.android.xposed.XC_MethodReplacement
+import de.robv.android.xposed.XposedBridge
+import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
@@ -19,6 +21,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.getExtras
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -33,7 +36,11 @@ class CoreServiceHook : BaseHook() {
     override val enabled = true
 
     companion object {
-        const val TAG = "CoreService"
+        const val TAG = "CoreServiceHook"
+
+        const val CORE_SERVICE_FLAG = "XAutoDaily:core_service_flag"
+        const val CORE_SERVICE_TOAST_FLAG = "XAutoDaily:core_service_toast_flag"
+
         private val lock = ReentrantLock()
         private val cronLock = ReentrantLock()
         const val EXEC_TASK = 1
@@ -54,7 +61,7 @@ class CoreServiceHook : BaseHook() {
             }
         }
 
-        fun runTasks(once: Boolean) {
+        fun runTasks(userExec: Boolean) {
             thread {
                 while (!Global.isInit()) {
                     LogUtil.d("等待初始化完毕")
@@ -62,12 +69,12 @@ class CoreServiceHook : BaseHook() {
                 }
                 val globalEnable = ConfUnit.globalEnable
                 if (!globalEnable) {
-                    if (once) {
-                        ToastUtil.send("未启用模块，跳过执行")
+                    if (userExec) {
+                        ToastUtil.send("未启用总开关，跳过执行")
                     }
                     return@thread
                 }
-                if (once) {
+                if (userExec) {
                     ToastUtil.send("开始执行签到")
                 } else {
                     LogUtil.d("定时执行")
@@ -94,6 +101,7 @@ class CoreServiceHook : BaseHook() {
             if (needExecGroups.isEmpty()) {
                 return
             }
+            XANotification.start()
             try {
                 runtimeTasks.addAll(needExecGroups)
                 var threadCount = 1
@@ -126,6 +134,8 @@ class CoreServiceHook : BaseHook() {
                         runtimeTasks.remove(it)
                     }
                 }
+                XANotification.setContent("签到执行完毕", false)
+                XANotification.stop()
             }
         }
 
@@ -165,12 +175,23 @@ class CoreServiceHook : BaseHook() {
 
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
-        XposedHelpers.findAndHookMethod(load(CoreService),
-            "onCreate", object : XC_MethodHook() {
-                override fun beforeHookedMethod(param: MethodHookParam) {
+        XposedBridge.hookAllMethods(load(KernelService),
+            "onStartCommand", object : XC_MethodReplacement() {
+            override fun replaceHookedMethod(param: MethodHookParam): Any {
+                val args = param.args
+                val intent = args[0] as Intent?
+                if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
+                    return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args)
+                }
+                if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
+                    LogUtil.d("onStartCommand")
+                    LogUtil.d(intent.extras.getExtras().toString())
+                    ToastUtil.send("唤醒测试: true")
+                } else {
                     handler.sendEmptyMessage(START_CRON)
                 }
+                return 2
             }
-        )
+        })
     }
 }
