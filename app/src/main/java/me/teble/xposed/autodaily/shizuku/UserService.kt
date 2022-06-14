@@ -6,21 +6,16 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.parse
+import java.io.BufferedReader
 import java.io.File
-import java.io.RandomAccessFile
+import java.io.InputStreamReader
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
 class UserService : IUserService.Stub() {
 
     private val sdcardPath by lazy { Environment.getExternalStorageDirectory() }
-
-    /**
-     * package -> pair<hostLockFile, daemonLockFile>
-     */
-    private val daemonFileMap = HashMap<String, Pair<RandomAccessFile, RandomAccessFile>>()
 
     init {
         Executors.newSingleThreadExecutor().execute {
@@ -35,55 +30,41 @@ class UserService : IUserService.Stub() {
             conf.alivePackages.forEach { (packageName, enable) ->
                 if (enable) {
                     enablePackage.add(packageName)
-                    lockFileInit(packageName)
-                    val daemonLockFile = daemonFileMap[packageName]!!.second
-                    daemonLockFile.channel.lock()
-                    Log.d("XALog", "package: $packageName daemonLockFile lock success!")
                 }
             }
             while (true) {
-                runCatching {
-                    enablePackage.forEach {
-                        val hostLockFile = daemonFileMap[it]!!.first
-                        val lock = hostLockFile.channel.tryLock()
-                        if (lock != null) {
-                            Log.d("XALog", "package: $it is died, try start")
-                            startService(it, KernelService,
+                enablePackage.forEach { packageName ->
+                    runCatching {
+                        if (!isAlive(packageName)) {
+                            Log.d("XALog", "package: $packageName is died, try start")
+                            startService(packageName, KernelService,
                                 arrayOf(
-                                    "-e", CORE_SERVICE_FLAG, "$",
-                                    "-e", CORE_SERVICE_TOAST_FLAG, "$"
+                                    "-e", CORE_SERVICE_FLAG, "$"
                                 ))
                         }
-                        lock.release()
+                    }.onFailure {
+                        Log.e("XALog", Log.getStackTraceString(it))
                     }
                 }
-                Thread.sleep(60_000)
+                Thread.sleep(10_000)
             }
         }
     }
 
-    private fun startService(packageName: String, className: String, args: Array<String>) {
-        val runtime = Runtime.getRuntime()
-        val arg = args.joinToString(" ")
-        val shellStr = "am startservice -n $packageName/$className $arg"
-        runtime.exec(shellStr)
+    private fun isAlive(packageName: String): Boolean {
+        return execShell("pidof $packageName").isNotEmpty()
     }
 
-    private fun lockFileInit(packageName: String) {
-        val dir = File(sdcardPath, "Android/data/$packageName/files/xa_daemon")
-        if (dir.isFile) {
-            dir.delete()
-        }
-        if (!dir.exists()) {
-            dir.mkdirs()
-        }
-        val hostLockFile = File(dir, ".init_host")
-        if (!hostLockFile.exists()) hostLockFile.createNewFile()
-        val daemonLockFile = File(dir, ".init_service")
-        if (!daemonLockFile.exists()) hostLockFile.createNewFile()
-        val fileQ = RandomAccessFile(hostLockFile, "rw")
-        val fileD = RandomAccessFile(daemonLockFile, "rw")
-        daemonFileMap[packageName] = Pair(fileQ, fileD)
+    private fun startService(packageName: String, className: String, args: Array<String>) {
+        val arg = args.joinToString(" ")
+        val shellStr = "am startservice -n $packageName/$className $arg"
+        execShell(shellStr)
+    }
+
+    private fun execShell(shell: String): String {
+        val process = Runtime.getRuntime().exec(shell)
+        val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
+        return bufferedReader.readText()
     }
 
     private fun loadConf(): ShizukuConf {

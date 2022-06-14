@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.os.Bundle
-import android.os.IBinder
-import android.os.RemoteException
+import android.os.*
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -55,7 +53,29 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         var shizukuErrInfo by mutableStateOf("")
-        var shizukuDaemonRunning by mutableStateOf(peekUserService())
+        var shizukuDaemonRunning by mutableStateOf(false)
+
+        const val PEEK_SERVICE = 1
+        const val LOOP_PEEK_SERVICE = 2
+        private val handlerThread by lazy {
+            HandlerThread("CoreServiceHookThread").apply { start() }
+        }
+        val handler = object : Handler(handlerThread.looper) {
+            override fun handleMessage(msg: Message) {
+                when (msg.what) {
+                    PEEK_SERVICE -> {
+                        peekUserService()
+                    }
+                }
+            }
+        }
+
+        private val peekServiceRunnable = object : Runnable {
+            override fun run() {
+                handler.postDelayed(this, 1000)
+                shizukuDaemonRunning = peekUserService()
+            }
+        }
 
         private val userServiceConnection = object : ServiceConnection {
             override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -90,26 +110,33 @@ class MainActivity : ComponentActivity() {
                 .version(BuildConfig.VERSION_CODE)
         }
 
-        fun bindUserService() {
+        fun rebindUserService() {
+            unbindUserService() && bindUserService()
+        }
+
+        fun bindUserService(): Boolean {
             try {
                 Shizuku.bindUserService(userServiceArgs, userServiceConnection)
+                return true
             } catch (e: Throwable) {
                 Log.e("XALog", Log.getStackTraceString(e))
             }
+            return false
         }
 
-        fun unbindUserService() {
+        fun unbindUserService(): Boolean {
             try {
                 Shizuku.unbindUserService(userServiceArgs, userServiceConnection, true)
                 shizukuDaemonRunning = false
+                return true
             } catch (e: Throwable) {
                 Log.e("XALog", Log.getStackTraceString(e))
             }
+            return false
         }
 
         fun peekUserService(): Boolean {
             runCatching {
-                Log.d("XALog", userServiceArgs.toString())
                 return Shizuku.peekUserService(userServiceArgs, userServiceConnection)
             }.onFailure {
                 Log.e("XALog", Log.getStackTraceString(it))
@@ -121,6 +148,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handler.post(peekServiceRunnable)
         setContent {
             MaterialTheme(colors = colors()) {
                 ProvideWindowInsets {
@@ -251,23 +279,25 @@ fun ModuleView() {
             item {
                 ShizukuCard()
             }
-            item {
-                val checked = remember { mutableStateOf(xaApp.prefs.getBoolean("UntrustedTouchEvents", false)) }
-                LineSwitch(
-                    title = "取消安卓12不受信触摸",
-                    desc = "安卓12后启用对toast弹窗等事件触摸不可穿透，勾选此项可关闭",
-                    checked = checked,
-                    enabled = ShizukuApi.isPermissionGranted,
-                    onChange = {
-                        ShizukuApi.setUntrustedTouchEvents(it)
-                        checked.value = it
-                        xaApp.prefs.edit()
-                            .putBoolean("UntrustedTouchEvents", it)
-                            .apply()
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    otherInfoList = infoList
-                )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                item {
+                    val checked = remember { mutableStateOf(xaApp.prefs.getBoolean("UntrustedTouchEvents", false)) }
+                    LineSwitch(
+                        title = "取消安卓12不受信触摸",
+                        desc = "安卓12后启用对toast弹窗等事件触摸不可穿透，勾选此项可关闭",
+                        checked = checked,
+                        enabled = ShizukuApi.isPermissionGranted,
+                        onChange = {
+                            ShizukuApi.setUntrustedTouchEvents(it)
+                            checked.value = it
+                            xaApp.prefs.edit()
+                                .putBoolean("UntrustedTouchEvents", it)
+                                .apply()
+                        },
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        otherInfoList = infoList
+                    )
+                }
             }
             item {
                 val keepAliveChecked = remember {

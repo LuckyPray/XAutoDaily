@@ -111,6 +111,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     }
                 })
             }
+            (it.thisObject as Service).stopSelf()
         }
     }
 
