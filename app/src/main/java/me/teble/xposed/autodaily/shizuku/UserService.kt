@@ -4,7 +4,7 @@ import android.os.Environment
 import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
+import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.parse
 import java.io.BufferedReader
@@ -37,7 +37,7 @@ class UserService : IUserService.Stub() {
                     runCatching {
                         if (!isAlive(packageName)) {
                             Log.d("XALog", "package: $packageName is died, try start")
-                            startService(packageName, KernelService,
+                            startService(packageName, DataMigrationService,
                                 arrayOf(
                                     "-e", CORE_SERVICE_FLAG, "$"
                                 ))

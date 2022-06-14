@@ -110,8 +110,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         putExtras(extra)
                     }
                 })
+                (it.thisObject as Service).stopSelf()
             }
-            (it.thisObject as Service).stopSelf()
         }
     }
 
