@@ -35,7 +35,6 @@ import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.hook.utils.isInjector
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
 
@@ -90,14 +89,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private val kernelServiceClass: Class<*> by lazy {
         loadPackageParam.classLoader.loadClass(KernelService)
     }
+    private var hookIsInit: Boolean = false
 
     private fun toolsHook() {
         findMethod(cmdClass) {
             name == "onStartCommand"
         }.hookAfter {
-            if (isInjector(cmdClass::class.java.name)) {
-                return@hookAfter
-            }
             if (it.thisObject::class.java == cmdClass) {
                 val args = it.args
                 val context = it.thisObject as Service
@@ -119,15 +116,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         // 替换classloader
         replaceParentClassloader(loadPackageParam.classLoader)
         // TODO 后续待优化 hook 逻辑
-        CoreServiceHook().coreServiceHook()
         val service = loadPackageParam.classLoader.loadClass(KernelService)
         findMethod(BaseApplicationImpl) { name == "onCreate" }.hookBefore {
             try {
-                synchronized(this) {
-                    if (isInjector(BaseApplicationImpl)) {
-                        return@hookBefore
-                    }
-                }
+                CoreServiceHook().coreServiceHook()
                 val app = it.thisObject as Application
                 app.startService(Intent(app, service))
             } catch (e: Throwable) {
@@ -137,10 +129,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         findMethod(LoadData) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             try {
-                synchronized(this) {
-                    if (isInjector(LoadData)) {
-                        return@hookAfter
-                    }
+                if (hookIsInit) {
+                    return@hookAfter
                 }
                 val context = AndroidAppHelper.currentApplication()
                 // 初始化全局Context
@@ -161,6 +151,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 //初始化hook
                 LogUtil.d("initHook")
                 initHook()
+                hookIsInit = true
             } catch (e: Throwable) {
                 LogUtil.e(e)
                 ToastUtil.send("初始化失败: " + e.stackTraceToString())

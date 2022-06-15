@@ -14,7 +14,6 @@ import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.hook.utils.isInjector
 import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.TaskGroup
@@ -181,11 +180,6 @@ class CoreServiceHook : BaseHook() {
             "onStartCommand",
             object : XC_MethodReplacement() {
                 override fun replaceHookedMethod(param: MethodHookParam): Any {
-                    synchronized(this) {
-                        if (isInjector(KernelService)) {
-                            return 2
-                        }
-                    }
                     val args = param.args
                     val service = param.thisObject as Service
                     val intent = args[0] as Intent?

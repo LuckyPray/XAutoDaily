@@ -8,6 +8,10 @@ import android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND
 import androidx.compose.ui.platform.ComposeView
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.config.QQClasses.Companion.SplashActivity
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.AUTO_EXEC
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
@@ -22,7 +26,6 @@ import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.ConfigUpdateLayout
 import me.teble.xposed.autodaily.ui.CustomDialog
 import java.util.*
-import kotlin.concurrent.thread
 
 class SplashActivityHook : BaseHook() {
 
@@ -32,33 +35,41 @@ class SplashActivityHook : BaseHook() {
     override val enabled: Boolean
         get() = true
 
+    private val scope = CoroutineScope(Dispatchers.Default)
+
     @MethodHook("SplashActivity Hook")
     private fun splashActivityHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
             val context = it.thisObject as Activity
-            thread {
-                loadSaveConf()
-                if (ConfigUtil.checkUpdate(false)) {
-                    ConfUnit.needUpdate = true
+            scope.launch {
+                withContext(Dispatchers.IO) {
+                    loadSaveConf()
+                    if (ConfigUtil.checkUpdate(false)) {
+                        ConfUnit.needUpdate = true
+                    }
                 }
-                if (ConfUnit.needUpdate) {
-                    context.openAppUpdateDialog()
-                } else if (ConfUnit.needShowUpdateLog) {
-                    context.openConfigUpdateLog()
-                    ConfUnit.needShowUpdateLog = false
+                withContext(Dispatchers.Main) {
+                    if (ConfUnit.needUpdate) {
+                        context.openAppUpdateDialog()
+                    } else if (ConfUnit.needShowUpdateLog) {
+                        context.openConfigUpdateLog()
+                        ConfUnit.needShowUpdateLog = false
+                    }
+                    handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
                 }
-                handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
             }
         }
 
         findMethod(SplashActivity) { name == "doOnStart" }.hookAfter {
             val context = it.thisObject as Activity
-            thread {
-                if (ConfUnit.needUpdate) {
-                    context.openAppUpdateDialog()
-                } else if (ConfUnit.needShowUpdateLog) {
-                    context.openConfigUpdateLog()
-                    ConfUnit.needShowUpdateLog = false
+            scope.launch {
+                withContext(Dispatchers.Main) {
+                    if (ConfUnit.needUpdate) {
+                        context.openAppUpdateDialog()
+                    } else if (ConfUnit.needShowUpdateLog) {
+                        context.openConfigUpdateLog()
+                        ConfUnit.needShowUpdateLog = false
+                    }
                 }
             }
         }
