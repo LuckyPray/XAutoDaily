@@ -6,7 +6,6 @@ interface QQClasses {
         const val AppActivity = "mqq.app.AppActivity"
         const val SplashActivity = "com.tencent.mobileqq.activity.SplashActivity"
         const val QQSettingSettingActivity = "com.tencent.mobileqq.activity.QQSettingSettingActivity"
-        const val NewRunTime = "com.tencent.mobileqq.startup.step.NewRuntime"
         const val LoadData = "com.tencent.mobileqq.startup.step.LoadData"
         const val LoadDex = "com.tencent.mobileqq.startup.step.LoadDex"
         const val LoadModule = "com.tencent.mobileqq.startup.step.LoadModule"

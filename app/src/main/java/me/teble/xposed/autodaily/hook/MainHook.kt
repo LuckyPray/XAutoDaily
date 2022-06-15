@@ -1,10 +1,10 @@
 package me.teble.xposed.autodaily.hook
 
+import android.app.AndroidAppHelper
 import android.app.Application
 import android.app.Service
 import android.content.Intent
 import android.content.res.XModuleResources
-import android.text.TextUtils
 import cn.hutool.core.util.ReflectUtil.*
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.emptyParam
@@ -13,13 +13,12 @@ import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QQClasses.Companion.BaseApplicationImpl
 import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.NewRuntime
+import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadData
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
@@ -36,11 +35,9 @@ import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.hook.utils.isInjector
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.new
-import java.lang.reflect.Method
-import kotlin.collections.set
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -56,7 +53,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         QQSettingSettingActivityHook::class.java,
         SplashActivityHook::class.java,
         ToServiceMsgHook::class.java,
-        CoreServiceHook::class.java
+//        CoreServiceHook::class.java
     )
     private lateinit var loadPackageParam: LoadPackageParam
 
@@ -121,12 +118,13 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         init(loadPackageParam)
         // 替换classloader
         replaceParentClassloader(loadPackageParam.classLoader)
+        // TODO 后续待优化 hook 逻辑
+        CoreServiceHook().coreServiceHook()
         val service = loadPackageParam.classLoader.loadClass(KernelService)
-        LogUtil.d(service.toString())
         findMethod(BaseApplicationImpl) { name == "onCreate" }.hookBefore {
             try {
                 synchronized(this) {
-                    if (isInjector(this::class.java.name)) {
+                    if (isInjector(BaseApplicationImpl)) {
                         return@hookBefore
                     }
                 }
@@ -136,16 +134,15 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 LogUtil.e(e)
             }
         }
-        findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }.hookAfter {
+        findMethod(LoadData) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             try {
                 synchronized(this) {
-                    if (isInjector(this::class.java.name)) {
+                    if (isInjector(LoadData)) {
                         return@hookAfter
                     }
                 }
-                val cApplication = loadPackageParam.classLoader.loadClass(BaseApplicationImpl)
-                val context: Application = cApplication.fieldValueAs(cApplication)!!
+                val context = AndroidAppHelper.currentApplication()
                 // 初始化全局Context
                 initContext(context)
                 LogUtil.i("qq version -> ${Global.qqTypeEnum.appName}($qqVersionCode)")
@@ -273,24 +270,5 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             }
         }
         LogUtil.i("模块加载完毕")
-    }
-
-    private fun isInjector(flag: String): Boolean {
-        try {
-            if (TextUtils.isEmpty(flag)) return false
-            val methodCache: HashMap<String, Method> =
-                XposedHelpers::class.java.fieldValueAs("methodCache")
-                    ?: return false
-            val method: Method = Application::class.java.getMethod("onCreate")
-            val key = "$flag#${method.name}"
-            if (methodCache.containsKey(key)) {
-                return true
-            }
-            methodCache[key] = method
-            return false
-        } catch (e: Throwable) {
-            e.printStackTrace()
-        }
-        return false
     }
 }

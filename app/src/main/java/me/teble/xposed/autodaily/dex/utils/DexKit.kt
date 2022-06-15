@@ -101,10 +101,10 @@ object DexKit {
             0
         )
         LogUtil.log("path -> ${applicationInfo.sourceDir}")
-        val apkFile: File = File(applicationInfo.sourceDir)
+        val apkFile = File(applicationInfo.sourceDir)
         val zipFile = ZipFile(apkFile)
-        val zipEntrys = getAllDexEntry(zipFile)
-        for (zipEntry in zipEntrys) {
+        val zipEntryList = getAllDexEntry(zipFile)
+        for (zipEntry in zipEntryList) {
             val src = getDexBytes(zipFile, zipEntry)
             // index -> string
             val strIndexMap = HashMap<Int, String>()
@@ -120,8 +120,17 @@ object DexKit {
             }
             // 该dex不存在特征串
             if (strIndexMap.isEmpty()) {
+                LogUtil.log("该dex不存在特征串")
                 continue
             }
+            var confuseFlag = false
+            resourceMap.forEach { (className, features) ->
+                val featureStrSet = strIndexMap.values.toSet()
+                if (featureStrSet.containsAll(features!!)) {
+                    confuseFlag = true
+                }
+            }
+            if (!confuseFlag) continue
 
             // start
             val classDefItems = ClassDefItem.parserClassDefItems(src)
@@ -216,7 +225,7 @@ object DexKit {
             }
         }
         LogUtil.log(
-            "search dex: ${zipEntrys.size}, search class: ${resultMap.size}, " +
+            "search dex: ${zipEntryList.size}, search class: ${resultMap.size}, " +
                 "search time:${System.currentTimeMillis() - startTime} ms"
         )
         return resultMap

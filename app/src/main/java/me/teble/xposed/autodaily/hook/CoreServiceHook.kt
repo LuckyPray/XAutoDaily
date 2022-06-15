@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.hook
 
+import android.app.Service
 import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
@@ -13,6 +14,7 @@ import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.Global
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.hook.utils.isInjector
 import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.TaskGroup
@@ -21,7 +23,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
-import me.teble.xposed.autodaily.utils.getExtras
+import me.teble.xposed.autodaily.utils.toMap
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -176,22 +178,30 @@ class CoreServiceHook : BaseHook() {
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
         XposedBridge.hookAllMethods(load(KernelService),
-            "onStartCommand", object : XC_MethodReplacement() {
-            override fun replaceHookedMethod(param: MethodHookParam): Any {
-                val args = param.args
-                val intent = args[0] as Intent?
-                if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
-                    return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args)
+            "onStartCommand",
+            object : XC_MethodReplacement() {
+                override fun replaceHookedMethod(param: MethodHookParam): Any {
+                    synchronized(this) {
+                        if (isInjector(KernelService)) {
+                            return 2
+                        }
+                    }
+                    val args = param.args
+                    val service = param.thisObject as Service
+                    val intent = args[0] as Intent?
+                    if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
+                        return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args)
+                    }
+                    if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
+                        LogUtil.d("onStartCommand")
+                        LogUtil.d(intent.extras.toMap().toString())
+                        ToastUtil.send(service, "唤醒测试: true")
+                    } else {
+                        handler.sendEmptyMessage(START_CRON)
+                    }
+                    return 2
                 }
-                if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
-                    LogUtil.d("onStartCommand")
-                    LogUtil.d(intent.extras.getExtras().toString())
-                    ToastUtil.send("唤醒测试: true")
-                } else {
-                    handler.sendEmptyMessage(START_CRON)
-                }
-                return 2
             }
-        })
+        )
     }
 }
