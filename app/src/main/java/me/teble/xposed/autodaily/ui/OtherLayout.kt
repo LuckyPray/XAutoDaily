@@ -61,8 +61,7 @@ fun OtherLayout(navController: NavHostController) {
             uri?.let {
                 runAsync {
                     val context = hostContext
-                    val contentResolver =
-                        context.contentResolver
+                    val contentResolver = context.contentResolver
                     try {
                         contentResolver.openFileDescriptor(uri, "wt").use { zipFd ->
                             zipFd?.let {
@@ -157,6 +156,7 @@ fun OtherLayout(navController: NavHostController) {
                         MainScope().launch(IO) {
                             ToastUtil.send("请选择保存位置")
                             configBackupLauncher.launch("XAutoDaily_config_${LocalDateTime.now()}.zip")
+
                         }
                     },
                     modifier = Modifier.padding(vertical = 8.dp),

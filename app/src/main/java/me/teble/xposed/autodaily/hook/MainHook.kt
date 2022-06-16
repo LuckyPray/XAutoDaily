@@ -95,17 +95,15 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         findMethod(cmdClass) {
             name == "onStartCommand"
         }.hookAfter {
-            if (it.thisObject::class.java == cmdClass) {
-                val args = it.args
-                val context = it.thisObject as Service
-                val intent = args[0] as Intent?
-                context.startService(Intent(context, kernelServiceClass).apply {
-                    intent?.extras?.let { extra ->
-                        putExtras(extra)
-                    }
-                })
-                (it.thisObject as Service).stopSelf()
-            }
+            val args = it.args
+            val context = it.thisObject as Service
+            val intent = args[0] as Intent?
+            context.startService(Intent(context, kernelServiceClass).apply {
+                intent?.extras?.let { extra ->
+                    putExtras(extra)
+                }
+            })
+            (it.thisObject as Service).stopSelf()
         }
     }
 

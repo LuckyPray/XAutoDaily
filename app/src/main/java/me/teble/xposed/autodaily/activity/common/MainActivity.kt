@@ -35,7 +35,6 @@ import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
@@ -375,7 +374,7 @@ fun ModuleView() {
                                 title = "启用tim保活",
                                 desc = "单击此处尝试后台唤醒tim，如果模块hook生效将会显示一个气泡",
                                 onClick = {
-                                    ShizukuApi.startService(PACKAGE_NAME_TIM, KernelService,
+                                    ShizukuApi.startService(PACKAGE_NAME_TIM, DataMigrationService,
                                         arrayOf(
                                             "-e", CORE_SERVICE_FLAG, "$",
                                             "-e", CORE_SERVICE_TOAST_FLAG, "$"

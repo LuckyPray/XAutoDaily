@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.shizuku
 
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -26,7 +27,10 @@ object ShizukuApi {
     fun startService(packageName: String, className: String, args: Array<String>) {
         if (!isPermissionGranted) return
         val arg = args.joinToString(" ")
-        shizukuShell("am startservice -n $packageName/$className $arg")
+        val command =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) "start-foreground-service"
+            else "startservice"
+        shizukuShell("am $command -n $packageName/$className $arg")
     }
 
     fun setUntrustedTouchEvents(disabled: Boolean) {

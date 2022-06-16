@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.shizuku
 
+import android.os.Build
 import android.os.Environment
 import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig
@@ -57,7 +58,10 @@ class UserService : IUserService.Stub() {
 
     private fun startService(packageName: String, className: String, args: Array<String>) {
         val arg = args.joinToString(" ")
-        val shellStr = "am startservice -n $packageName/$className $arg"
+        val command =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) "start-foreground-service"
+            else "startservice"
+        val shellStr = "am $command -n $packageName/$className $arg"
         execShell(shellStr)
     }
 

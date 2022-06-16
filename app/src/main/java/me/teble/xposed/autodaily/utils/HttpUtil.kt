@@ -5,5 +5,7 @@ import okhttp3.Request
 
 fun String.get(): String {
     val req = Request.Builder().url(this).build()
-    return OkHttpClient().newCall(req).execute().body?.string() ?: ""
+    return runCatching { OkHttpClient().newCall(req).execute().body?.string() }
+        .onFailure { LogUtil.e(it) }
+        .getOrNull() ?: ""
 }
