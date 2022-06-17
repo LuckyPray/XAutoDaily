@@ -99,7 +99,7 @@ fun Activity.openAppUpdateDialog() {
             }
         }
         val skipShow = ConfUnit.blockUpdateOneDay == Date().formatDate()
-        if (!dialog.isShowing && !skipShow) {
+        if (!dialog.isShowing && !isFinishing && !skipShow) {
             dialog.show()
         }
     }
@@ -127,7 +127,7 @@ fun Activity.openConfigUpdateLog() {
                 setContentView(view)
             }
         }
-        if (!dialog.isShowing) {
+        if (!dialog.isShowing && !isFinishing) {
             dialog.show()
         }
     }

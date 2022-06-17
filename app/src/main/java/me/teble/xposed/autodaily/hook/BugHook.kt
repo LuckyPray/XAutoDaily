@@ -3,16 +3,18 @@ package me.teble.xposed.autodaily.hook
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import de.robv.android.xposed.XposedBridge
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.utils.new
 
 class BugHook: BaseHook() {
 
     override val isCompatible: Boolean
-        get() = ProcUtil.isMain
+        get() = ProcUtil.isMain && hostPackageName == PACKAGE_NAME_QQ
     override val enabled: Boolean
         get() = true
 

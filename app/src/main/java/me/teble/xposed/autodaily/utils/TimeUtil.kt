@@ -48,7 +48,7 @@ object TimeUtil {
                 LogUtil.e(e, "get network time error, will used localtime -> ${getCNTime()}:")
                 ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")
             } catch (ignore: Exception) {
-                Log.e(TAG, "get network time error, will used localtime -> ${getCNTime()}: \n" + Log.getStackTraceString(e))
+                Log.e(TAG, "get network time error, will used localtime -> ${getCNTime()}: \n" + e.stackTraceToString())
             }
             null
         }

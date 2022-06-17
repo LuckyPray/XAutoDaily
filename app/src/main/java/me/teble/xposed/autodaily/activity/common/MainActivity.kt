@@ -92,7 +92,7 @@ class MainActivity : ComponentActivity() {
                             shizukuDaemonRunning = true
                         }
                     } catch (e: RemoteException) {
-                        Log.e("XALog", Log.getStackTraceString(e))
+                        Log.e("XALog", e.stackTraceToString())
                         shizukuErrInfo = "守护进程连接失败"
                     }
                 } else {
@@ -123,7 +123,7 @@ class MainActivity : ComponentActivity() {
                 Shizuku.bindUserService(userServiceArgs, userServiceConnection)
                 return true
             } catch (e: Throwable) {
-                Log.e("XALog", Log.getStackTraceString(e))
+                Log.e("XALog", e.stackTraceToString())
             }
             return false
         }
@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
                 shizukuDaemonRunning = false
                 return true
             } catch (e: Throwable) {
-                Log.e("XALog", Log.getStackTraceString(e))
+                Log.e("XALog", e.stackTraceToString())
             }
             return false
         }
@@ -143,7 +143,7 @@ class MainActivity : ComponentActivity() {
             runCatching {
                 return Shizuku.peekUserService(userServiceArgs, userServiceConnection)
             }.onFailure {
-                Log.e("XALog", Log.getStackTraceString(it))
+                Log.e("XALog", it.stackTraceToString())
             }
             return false
         }

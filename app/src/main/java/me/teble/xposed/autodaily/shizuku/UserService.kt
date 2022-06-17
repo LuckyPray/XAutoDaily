@@ -44,7 +44,7 @@ class UserService : IUserService.Stub() {
                                 ))
                         }
                     }.onFailure {
-                        Log.e("XALog", Log.getStackTraceString(it))
+                        Log.e("XALog", it.stackTraceToString())
                     }
                 }
                 Thread.sleep(10_000)

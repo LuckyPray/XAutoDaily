@@ -71,7 +71,7 @@ object FileUtil {
             }
         } catch (e: Throwable) {
             Log.w(TAG, "get log", e)
-            throw RemoteException(Log.getStackTraceString(e))
+            throw RemoteException(e.stackTraceToString())
         }
     }
 
@@ -87,7 +87,7 @@ object FileUtil {
             }
         } catch (e: Throwable) {
             Log.w(TAG, "get log", e)
-            throw RemoteException(Log.getStackTraceString(e))
+            throw RemoteException(e.stackTraceToString())
         }
     }
 

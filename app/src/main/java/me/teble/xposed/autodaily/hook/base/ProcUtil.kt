@@ -60,15 +60,15 @@ object ProcUtil {
     fun inProcess(flag: Int): Boolean = (procType and flag) != 0
 
     val isMain: Boolean = inProcess(MAIN)
-    val isMSF: Boolean = inProcess(MSF)
-    val isPEAK: Boolean = inProcess(PEAK)
-    val isTOOL: Boolean = inProcess(TOOL)
-    val isQZONE: Boolean = inProcess(QZONE)
-    val isVIDEO: Boolean = inProcess(VIDEO)
-    val isMINI: Boolean = inProcess(MINI)
-    val isPLUGIN: Boolean = inProcess(PLUGIN)
-    val isQQFAV: Boolean = inProcess(QQFAV)
-    val isTROOP: Boolean = inProcess(TROOP)
-    val isUNITY: Boolean = inProcess(UNITY)
-    val isAny: Boolean = true
+    val isMsf: Boolean = inProcess(MSF)
+    val isPeak: Boolean = inProcess(PEAK)
+    val isTool: Boolean = inProcess(TOOL)
+    val isQzone: Boolean = inProcess(QZONE)
+    val isVideo: Boolean = inProcess(VIDEO)
+    val isMini: Boolean = inProcess(MINI)
+    val isPlugin: Boolean = inProcess(PLUGIN)
+    val isQQFav: Boolean = inProcess(QQFAV)
+    val isTroop: Boolean = inProcess(TROOP)
+    val isUnity: Boolean = inProcess(UNITY)
+    val isAny: Boolean = inProcess(ANY)
 }
