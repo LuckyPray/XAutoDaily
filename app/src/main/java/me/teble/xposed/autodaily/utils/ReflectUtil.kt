@@ -1,3 +1,4 @@
+@file:JvmName("ReflectUtil")
 package me.teble.xposed.autodaily.utils
 
 import cn.hutool.core.util.ClassUtil
@@ -97,6 +98,10 @@ fun Any.invoke(
         }
         return null
     }
+}
+
+fun Any.setValue(name: String, value: Any) {
+    this.field(name)?.set(this, value)
 }
 
 @Suppress("UNCHECKED_CAST")

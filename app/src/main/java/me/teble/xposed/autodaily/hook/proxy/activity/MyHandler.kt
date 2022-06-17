@@ -3,7 +3,7 @@ package me.teble.xposed.autodaily.hook.proxy.activity
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.*
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
@@ -26,7 +26,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                     val bundle: Bundle? = intent.fieldValueAs("mExtras")
                     //设置
                     bundle?.let {
-                        it.classLoader = Global.hostClassLoader
+                        it.classLoader = hostClassLoader
                         if (intent.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
                             val rIntent = intent.getParcelableExtra<Intent>(
                                 ProxyManager.ACTIVITY_PROXY_INTENT
@@ -56,7 +56,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                                 val bundle: Bundle? = wrapper.fieldValueAs("mExtras")
                                 //设置
                                 bundle?.let {
-                                    it.classLoader = Global.hostClassLoader
+                                    it.classLoader = hostClassLoader
                                     if (wrapper.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
                                         val rIntent = wrapper.getParcelableExtra<Intent>(
                                             ProxyManager.ACTIVITY_PROXY_INTENT

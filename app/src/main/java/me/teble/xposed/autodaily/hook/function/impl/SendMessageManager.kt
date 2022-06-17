@@ -5,7 +5,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import me.teble.xposed.autodaily.config.QQClasses
 import me.teble.xposed.autodaily.config.QQClasses.Companion.ChatActivityFacade
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil

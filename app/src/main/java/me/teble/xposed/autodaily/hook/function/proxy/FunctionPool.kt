@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.hook.function.proxy
 
 import android.content.Context
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.impl.*
 import net.bytebuddy.ByteBuddy
@@ -27,7 +27,7 @@ object FunctionPool {
 
     private val functionMap = HashMap<Class<out BaseFunction>, BaseFunction>().let {
         val strategy = AndroidClassLoadingStrategy.Wrapping(
-            Global.hostContext.getDir(
+            hostContext.getDir(
                 "generated",
                 Context.MODE_PRIVATE
             )

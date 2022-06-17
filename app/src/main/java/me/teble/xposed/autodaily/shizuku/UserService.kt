@@ -86,16 +86,6 @@ class UserService : IUserService.Stub() {
         return ShizukuConf(false, HashMap())
     }
 
-    fun retry(retryNum: Int, delayTime: Long = 21, block: () -> Boolean): Boolean {
-        for (i in 1..retryNum) {
-            runCatching {
-                return block()
-            }
-            Thread.sleep(delayTime)
-        }
-        return false
-    }
-
     override fun destroy() {
         Log.i("XALog", "user service destroy")
         exitProcess(0)

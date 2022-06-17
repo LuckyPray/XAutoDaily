@@ -3,7 +3,7 @@ package me.teble.xposed.autodaily.hook.proxy.activity
 import android.content.Context
 import android.os.Bundle
 import me.teble.xposed.autodaily.activity.base.XaActivity
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.utils.LogUtil
 
 /**
@@ -29,7 +29,7 @@ open class BaseActivity : XaActivity() {
 class BaseActivityClassLoader(referencer: ClassLoader) :
     ClassLoader() {
     private val mBaseReferencer: ClassLoader = referencer
-    private val mHostReferencer: ClassLoader = Global.hostClassLoader
+    private val mHostReferencer: ClassLoader = hostClassLoader
 
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {

@@ -2,9 +2,8 @@ package me.teble.xposed.autodaily.hook.config
 
 import android.annotation.SuppressLint
 import com.tencent.mmkv.MMKV
-import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.base.Global.hostContext
-import me.teble.xposed.autodaily.hook.base.Initiator.getSimpleName
+import me.teble.xposed.autodaily.hook.base.getSimpleName
+import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.utils.NativeUtil
 import java.io.File
@@ -38,20 +37,17 @@ object Config {
     }
 
     val classCache by lazy {
-        if (!Global.isInit()) MockConfProxy()
-        else ConfProxy(MMKV.mmkvWithID("XAHooks", MMKV.MULTI_PROCESS_MODE))
+        ConfProxy(MMKV.mmkvWithID("XAHooks", MMKV.MULTI_PROCESS_MODE))
     }
 
     val xaConfig by lazy {
-        if (!Global.isInit()) MockConfProxy()
-        else ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.MULTI_PROCESS_MODE))
+        ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.MULTI_PROCESS_MODE))
     }
 
     private val confProxyMap = ConcurrentHashMap<Long, ConfProxy>(5)
 
     val accountConfig: ConfProxy
         get() {
-            if (!Global.isInit()) return MockConfProxy()
             return confProxyMap[currentUin] ?: let {
                 val currentConf =
                     ConfProxy(MMKV.mmkvWithID("XASettings-${currentUin}", MMKV.MULTI_PROCESS_MODE))

@@ -5,7 +5,7 @@ import me.teble.xposed.autodaily.config.QQClasses
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetCodeRsp
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetProfileRsp
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebRsp
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.task.model.MiniProfile
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.invoke

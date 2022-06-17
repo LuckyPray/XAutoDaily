@@ -7,7 +7,7 @@ import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.NOTICE
 import me.teble.xposed.autodaily.config.Constants.XA_API_URL
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -36,7 +36,7 @@ object ConfigUtil {
      * 配置文件下载链接：https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@1/xa_conf
      */
     private const val TAG = "PropUtil"
-    private val confDir = File(Global.hostContext.filesDir, "xa_conf")
+    private val confDir = File(hostContext.filesDir, "xa_conf")
     private val MIN_APP_VERSION_REG = Pattern.compile("minAppVersion:\\s+(\\d+)")
     private val CONFIG_VERSION_REG = Pattern.compile("version:\\s+(\\d+)")
 
@@ -49,14 +49,14 @@ object ConfigUtil {
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
     fun loadLib() {
-        val xaLibDir = File(Global.hostContext.filesDir, "xa_lib")
+        val xaLibDir = File(hostContext.filesDir, "xa_lib")
         if (xaLibDir.isFile) {
             xaLibDir.delete()
         }
         if (!xaLibDir.exists()) {
             xaLibDir.mkdirs()
         }
-        val soFilePath = NativeUtil.getNativeLibrary(Global.hostContext, "xa_decrypt").absolutePath
+        val soFilePath = NativeUtil.getNativeLibrary(hostContext, "xa_decrypt").absolutePath
         LogUtil.d("loadLib: $soFilePath")
         try {
             System.load(soFilePath)

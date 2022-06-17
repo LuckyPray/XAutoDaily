@@ -15,7 +15,8 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.FormSimpleItem
 import me.teble.xposed.autodaily.config.QQClasses.Companion.QQSettingSettingActivity
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
+import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
@@ -30,7 +31,7 @@ import me.teble.xposed.autodaily.utils.new
 class QQSettingSettingActivityHook : BaseHook() {
 
     override val isCompatible: Boolean
-        get() = hostProcessName == ""
+        get() = ProcUtil.isMain
 
     override val enabled: Boolean
         get() = true

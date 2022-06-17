@@ -51,6 +51,10 @@ import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
 
+    init {
+        System.loadLibrary("xa_native")
+    }
+
     companion object {
         var shizukuErrInfo by mutableStateOf("")
         var shizukuDaemonRunning by mutableStateOf(false)

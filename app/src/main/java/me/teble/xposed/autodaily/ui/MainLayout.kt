@@ -38,7 +38,8 @@ import me.teble.xposed.autodaily.config.Constants
 import me.teble.xposed.autodaily.config.Constants.ALIPAY_QRCODE
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostVersionCode
+import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
@@ -207,8 +208,8 @@ fun MainLayout(navController: NavHostController) {
                 LaunchedEffect(qqVersionName) {
                     moduleVersionName = BuildConfig.VERSION_NAME
                     moduleVersionCode = BuildConfig.VERSION_CODE
-                    qqVersionName = Global.qqVersionName
-                    qqVersionCode = Global.qqVersionCode
+                    qqVersionName = hostVersionName
+                    qqVersionCode = hostVersionCode
                     configVersion = ConfUnit.configVersion
                 }
                 LineButton(

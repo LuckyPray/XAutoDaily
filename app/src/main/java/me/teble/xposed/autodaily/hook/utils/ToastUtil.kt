@@ -5,7 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import me.teble.xposed.autodaily.config.Constants.NAME
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostContext
 
 object ToastUtil {
     private val TAG = "ToastUtil"
@@ -25,7 +25,7 @@ object ToastUtil {
 
     @JvmOverloads
     fun send(msg: String, longDuration: Boolean = false, must: Boolean = false) {
-        send(Global.hostContext, msg, longDuration)
+        send(hostContext, msg, longDuration)
     }
 
     @JvmOverloads

@@ -18,7 +18,7 @@ import com.google.accompanist.insets.rememberInsetsPaddingValues
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
-import me.teble.xposed.autodaily.hook.base.Global.hostContext
+import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.FileUtil

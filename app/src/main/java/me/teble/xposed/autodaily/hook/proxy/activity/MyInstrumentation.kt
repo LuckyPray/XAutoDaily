@@ -15,7 +15,7 @@ import android.view.MotionEvent
 import androidx.annotation.RequiresApi
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.MainHook
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.moduleClassLoader
 import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil.injectRes
 
 class MyInstrumentation(private val mBase: Instrumentation) : Instrumentation() {
@@ -25,7 +25,7 @@ class MyInstrumentation(private val mBase: Instrumentation) : Instrumentation() 
             return mBase.newActivity(cl, className, intent)
         } catch (e: Exception) {
             if (className!!.startsWith(BuildConfig.APPLICATION_ID)) {
-                return Global.moduleClassLoader.loadClass(className)
+                return moduleClassLoader.loadClass(className)
                     .newInstance() as Activity
             }
             throw e

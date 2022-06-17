@@ -2,7 +2,7 @@ package me.teble.xposed.autodaily.hook.function.impl
 
 import com.tencent.mobileqq.mp.mobileqq_mp
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
-import me.teble.xposed.autodaily.hook.base.Initiator
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
@@ -16,9 +16,9 @@ open class PublicAccountManager : BaseFunction(
     TAG = "PublicAccountManager"
 ) {
     override fun init() {
-        Initiator.load(StQWebReq)
+        load(StQWebReq)
             ?: throw RuntimeException("类加载失败 -> ${StQWebReq}")
-        Initiator.load("cooperation.qzone.PlatformInfor")
+        load("cooperation.qzone.PlatformInfor")
             ?: throw RuntimeException("类加载失败 -> PlatformInfor")
     }
 

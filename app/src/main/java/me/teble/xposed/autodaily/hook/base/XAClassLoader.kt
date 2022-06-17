@@ -1,5 +1,8 @@
 package me.teble.xposed.autodaily.hook.base
 
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.field
+import me.teble.xposed.autodaily.utils.fieldValue
 import java.net.URL
 
 class XAClassLoader(
@@ -35,8 +38,8 @@ class XAClassLoader(
         )
 
         fun switchHostClass(name: String): Boolean {
-//            TODO 缓存实现，策略还没想好
-//             TODO 使用前缀树进行加速匹配
+            // TODO 缓存实现，策略还没想好
+            // TODO 使用前缀树进行加速匹配
             for (pack in hostPackages) {
                 if (name.startsWith(pack)) {
                     return true
@@ -45,4 +48,16 @@ class XAClassLoader(
             return false
         }
     }
+}
+
+fun injectClassLoader(hostClassLoader: ClassLoader) {
+    val fParent = ClassLoader::class.java.field("parent")!!
+    val mClassloader = moduleClassLoader
+    val parentClassloader = mClassloader.fieldValue("parent") as ClassLoader
+    runCatching {
+        if (XAClassLoader::class.java != parentClassloader.javaClass) {
+            LogUtil.d("replace parent classloader")
+            fParent.set(mClassloader, XAClassLoader(hostClassLoader, parentClassloader))
+        }
+    }.onFailure { LogUtil.e(it) }
 }

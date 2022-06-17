@@ -5,7 +5,8 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.dex.struct.*
 import me.teble.xposed.autodaily.dex.utils.ByteUtils.readInt
 import me.teble.xposed.autodaily.dex.utils.ByteUtils.readShort
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import java.io.BufferedInputStream
@@ -96,8 +97,8 @@ object DexKit {
         val resultMap = mutableMapOf<String, LinkedList<String>>().apply {
             resourceMap.keys.forEach { this[it] = LinkedList() }
         }
-        val applicationInfo = Global.hostContext.packageManager.getApplicationInfo(
-            Global.hostPackageName,
+        val applicationInfo = hostContext.packageManager.getApplicationInfo(
+            hostPackageName,
             0
         )
         LogUtil.log("path -> ${applicationInfo.sourceDir}")

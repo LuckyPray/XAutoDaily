@@ -5,7 +5,7 @@ import me.teble.xposed.autodaily.config.QQClasses.Companion.GetLoginCodeRequest
 import me.teble.xposed.autodaily.config.QQClasses.Companion.MiniAppGetLoginCodeServlet
 import me.teble.xposed.autodaily.config.QQClasses.Companion.MsfService
 import me.teble.xposed.autodaily.hook.FromServiceMsgHook
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin

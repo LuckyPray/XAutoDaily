@@ -3,8 +3,8 @@ package me.teble.xposed.autodaily.hook.utils
 import com.tencent.mobileqq.pb.ByteStringMicro
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.config.QQClasses.Companion.OIDBSSOPkg
-import me.teble.xposed.autodaily.hook.base.Global.qqVersionName
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.hostVersionName
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.invoke
@@ -20,7 +20,7 @@ object OidbUtil {
         pkg?.fieldValue("uint32_command")?.invoke("set", 0xEB7)
         pkg?.fieldValue("uint32_service_type")?.invoke("set", isSign.int)
         pkg?.fieldValue("uint32_result")?.invoke("set", 0)
-        pkg?.fieldValue("str_client_version")?.invoke("set", "android $qqVersionName")
+        pkg?.fieldValue("str_client_version")?.invoke("set", "android $hostVersionName")
         val bytes = ByteStringMicro.copyFrom(reqBody.invoke("toByteArray") as ByteArray?)
         pkg?.fieldValue("bytes_bodybuffer")?.invoke("set", bytes)
         val toServiceMsg = ToServiceMsg("mobileqq.service", "$currentUin", cmd)

@@ -3,7 +3,7 @@ package me.teble.xposed.autodaily.utils
 import android.content.Context
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.io.IoUtil
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.moduleClassLoader
 import java.io.BufferedInputStream
 import java.io.File
 
@@ -30,7 +30,7 @@ object NativeUtil {
         val soPath = getLibFilePath(libName)
         val soFile = File(soDir, libName)
         val libStream =
-            BufferedInputStream(Global.moduleClassLoader.getResourceAsStream(soPath))
+            BufferedInputStream(moduleClassLoader.getResourceAsStream(soPath))
         val tmpSoFile = File(soDir, "$libName.tmp")
         try {
             FileUtil.writeFromStream(libStream, tmpSoFile)

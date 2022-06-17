@@ -8,10 +8,12 @@ import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
 import de.robv.android.xposed.XC_MethodReplacement
 import de.robv.android.xposed.XposedBridge
+import kotlinx.coroutines.*
 import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.load
+import me.teble.xposed.autodaily.hook.base.moduleLoadSuccess
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.CronUtil
@@ -43,7 +45,7 @@ class CoreServiceHook : BaseHook() {
         const val CORE_SERVICE_TOAST_FLAG = "XAutoDaily:core_service_toast_flag"
 
         private val lock = ReentrantLock()
-        private val cronLock = ReentrantLock()
+        val scope = CoroutineScope(Dispatchers.Default)
         const val EXEC_TASK = 1
         const val AUTO_EXEC = 2
         const val START_CRON = 3
@@ -63,17 +65,17 @@ class CoreServiceHook : BaseHook() {
         }
 
         fun runTasks(userExec: Boolean) {
-            thread {
-                while (!Global.isInit()) {
+            scope.launch(Dispatchers.IO) {
+                while (!moduleLoadSuccess) {
                     LogUtil.d("等待初始化完毕")
-                    Thread.sleep(500)
+                    delay(500)
                 }
                 val globalEnable = ConfUnit.globalEnable
                 if (!globalEnable) {
                     if (userExec) {
                         ToastUtil.send("未启用总开关，跳过执行")
                     }
-                    return@thread
+                    return@launch
                 }
                 if (userExec) {
                     ToastUtil.send("开始执行签到")
@@ -84,7 +86,7 @@ class CoreServiceHook : BaseHook() {
             }
         }
 
-        private fun executorTask(conf: TaskProperties) {
+        private suspend fun executorTask(conf: TaskProperties) {
             val executeTime = System.currentTimeMillis()
             val needExecGroups = mutableListOf<TaskGroup>()
             lock.withLock {
@@ -136,6 +138,9 @@ class CoreServiceHook : BaseHook() {
                     }
                 }
                 XANotification.setContent("签到执行完毕", false)
+                withContext(Dispatchers.IO) {
+                    delay(5000)
+                }
                 XANotification.stop()
             }
         }

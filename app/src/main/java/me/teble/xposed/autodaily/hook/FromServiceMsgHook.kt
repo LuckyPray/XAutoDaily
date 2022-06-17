@@ -6,7 +6,7 @@ import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.hook.utils.ServiceMsgParseUtil
 import me.teble.xposed.autodaily.task.model.VoterInfo
 import me.teble.xposed.autodaily.utils.fieldValue
@@ -15,7 +15,7 @@ import mqq.app.MainService
 class FromServiceMsgHook : BaseHook() {
 
     override val isCompatible: Boolean
-        get() = Global.hostProcessName == ""
+        get() = ProcUtil.isMain
 
     override val enabled: Boolean
         get() = true

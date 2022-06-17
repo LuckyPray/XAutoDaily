@@ -17,7 +17,7 @@ import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.AUTO_EXEC
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.task.util.formatDate
@@ -30,7 +30,7 @@ import java.util.*
 class SplashActivityHook : BaseHook() {
 
     override val isCompatible: Boolean
-        get() = Global.hostProcessName == ""
+        get() = ProcUtil.isMain
 
     override val enabled: Boolean
         get() = true

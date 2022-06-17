@@ -2,7 +2,7 @@ package me.teble.xposed.autodaily.hook.utils
 
 import com.tencent.mobileqq.pb.ByteStringMicro
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
-import me.teble.xposed.autodaily.hook.base.Initiator
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.fieldValue
@@ -32,7 +32,7 @@ object ServletUtil {
     }
 
     fun encodeReq(seq: Long, reqBuf: ByteArray): ByteArray {
-        val webReq = Initiator.load(StQWebReq)?.new()
+        val webReq = load(StQWebReq)?.new()
         webReq?.fieldValue("Seq")?.invoke("set", seq)
         webReq?.fieldValue("qua")?.invoke("set", VersionUtil.qua)
         webReq?.fieldValue("deviceInfo")?.invoke("set", deviceInfo)
@@ -43,7 +43,7 @@ object ServletUtil {
     }
 
     private val deviceInfo by lazy {
-        val cPlatformInfor = Initiator.load("cooperation.qzone.PlatformInfor")
+        val cPlatformInfor = load("cooperation.qzone.PlatformInfor")
         val platformInfor = cPlatformInfor?.fieldValue(cPlatformInfor)!!
         var info = ""
         platformInfor::class.java.methods.forEach {

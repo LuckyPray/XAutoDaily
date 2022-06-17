@@ -1,8 +1,6 @@
 package me.teble.xposed.autodaily.hook.base
 
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
-import me.teble.xposed.autodaily.hook.base.Global.hostPackageName
-import me.teble.xposed.autodaily.hook.base.Global.hostProcessName
 import me.teble.xposed.autodaily.utils.LogUtil
 
 abstract class BaseHook : IBaseHook {
@@ -13,15 +11,14 @@ abstract class BaseHook : IBaseHook {
             if (!this.isCompatible || !enabled) {
                 return@lazy
             }
-            val packageName = hostPackageName
             logd("满足执行条件，正在加载hook")
-            logd("current process name: ${hostProcessName.ifEmpty { "main" }}")
-            invokeHookClassMethod(this, packageName, hostProcessName)
+            logd("current process: ${ProcUtil.procName}")
+            invokeHookClassMethod(this)
         }
         return init
     }
 
-    private fun invokeHookClassMethod(impl: BaseHook, packageName: String, processName: String) {
+    private fun invokeHookClassMethod(impl: BaseHook) {
         val methods = impl.javaClass.declaredMethods
         for (method in methods) {
             if (!method.isAnnotationPresent(MethodHook::class.java)) {
@@ -41,9 +38,9 @@ abstract class BaseHook : IBaseHook {
     private val settingValue: Any?
         get() = null
 
-    protected fun load(className: String): Class<*>? {
-        return Initiator.load(className)
-    }
+//    protected fun load(className: String): Class<*>? {
+//        return Initiator.load(className)
+//    }
 
     protected fun logd(msg: String) {
         LogUtil.d(msg)

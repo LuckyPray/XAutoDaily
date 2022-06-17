@@ -2,8 +2,8 @@ package me.teble.xposed.autodaily.hook.proxy.activity
 
 import android.content.res.Resources
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.hook.base.Global.hostContext
-import me.teble.xposed.autodaily.hook.base.Global.modulePath
+import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.base.modulePath
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invoke
 

@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat
 import com.github.kyuubiran.ezxhelper.utils.loadClass
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.QQClasses.Companion.SplashActivity
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostContext
 
 object XANotification {
 
@@ -20,7 +20,7 @@ object XANotification {
     private const val CHANNEL_ID = "me.teble.xposed.autodaily.XA_FOREST_NOTIFY_CHANNEL"
 
     private val notificationManager by lazy {
-        Global.hostContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        hostContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
     private lateinit var mNotification: Notification
 
@@ -29,10 +29,11 @@ object XANotification {
     private var isStart = false
 
     fun start() {
-        initNotification(Global.hostContext)
+        initNotification(hostContext)
         if (isStart) {
             return
         }
+        isStart = true
         notificationManager.notify(NOTIFICATION_ID, mNotification)
     }
 
@@ -72,7 +73,7 @@ object XANotification {
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
             val notificationChannel = NotificationChannel(CHANNEL_ID, "XAutoDaily签到提醒",
-                NotificationManager.IMPORTANCE_DEFAULT).apply {
+                NotificationManager.IMPORTANCE_LOW).apply {
                 enableLights(false)
                 enableVibration(false)
                 setShowBadge(false)
@@ -82,7 +83,7 @@ object XANotification {
         } else {
             @Suppress("DEPRECATION")
             builder = NotificationCompat.Builder(context)
-                .setPriority(Notification.PRIORITY_DEFAULT)
+                .setPriority(Notification.PRIORITY_LOW)
         }
         builder = builder.setContentTitle("XAutoDaily")
             .setSmallIcon(R.drawable.icon_x_auto_daily_2)

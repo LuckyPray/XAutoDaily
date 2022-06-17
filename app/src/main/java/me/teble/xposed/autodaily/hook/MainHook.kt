@@ -1,10 +1,10 @@
 package me.teble.xposed.autodaily.hook
 
-import android.app.AndroidAppHelper
 import android.app.Application
 import android.app.Service
 import android.content.Intent
 import android.content.res.XModuleResources
+import android.util.Log
 import cn.hutool.core.util.ReflectUtil.*
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.emptyParam
@@ -15,19 +15,14 @@ import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.config.QQClasses.Companion.BaseApplicationImpl
 import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadData
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
-import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.base.Global.hostClassLoader
-import me.teble.xposed.autodaily.hook.base.Global.init
-import me.teble.xposed.autodaily.hook.base.Global.initContext
-import me.teble.xposed.autodaily.hook.base.Global.qqVersionCode
-import me.teble.xposed.autodaily.hook.base.Initiator
-import me.teble.xposed.autodaily.hook.base.XAClassLoader
+import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
+import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
@@ -42,6 +37,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
         private const val TAG = "MainHook"
+        lateinit var loadPackageParam: LoadPackageParam
     }
 
 //    private lateinit var subHookClasses: Set<String>
@@ -52,19 +48,55 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         QQSettingSettingActivityHook::class.java,
         SplashActivityHook::class.java,
         ToServiceMsgHook::class.java,
-//        CoreServiceHook::class.java
+        BugHook::class.java,
+//        CoreServiceHook::class.java,
     )
-    private lateinit var loadPackageParam: LoadPackageParam
+    private lateinit var mLoadPackageParam: LoadPackageParam
+    private lateinit var mStartupParam: IXposedHookZygoteInit.StartupParam
 
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
-        Global.modulePath = startupParam.modulePath
-        Global.moduleRes = XModuleResources.createInstance(Global.modulePath, null)
+        mStartupParam = startupParam
+        modulePath = startupParam.modulePath
+        moduleRes = XModuleResources.createInstance(modulePath, null)
         EzXHelperInit.initZygote(startupParam)
     }
 
     override fun handleLoadPackage(loadPackageParam: LoadPackageParam) {
-        this.loadPackageParam = loadPackageParam
+        mLoadPackageParam = loadPackageParam
+        val packageName = loadPackageParam.packageName
+        when {
+            packageName == PACKAGE_NAME_SELF -> {
+                ModuleHook.hookSelf()
+            }
+            QQTypeEnum.contain(packageName) -> {
+                EzXHelperInit.initHandleLoadPackage(mLoadPackageParam)
+                EzXHelperInit.setLogTag("XALog")
+                EzXHelperInit.setToastTag("XALog")
+            }
+        }
+
         if (QQTypeEnum.contain(loadPackageParam.packageName)) {
+            hostPackageName = loadPackageParam.packageName
+            hostProcessName = loadPackageParam.processName
+
+            findMethod(loadPackageParam.classLoader.loadClass(BaseApplicationImpl)) {
+                name == "onCreate"
+            }.hookBefore {
+                if (hostInit) return@hookBefore
+                runCatching {
+                    hostApp = it.thisObject as Application
+                    EzXHelperInit.initAppContext(hostApp)
+                    hostClassLoader = hostApp.classLoader
+                    if (ProcUtil.procType == ProcUtil.MAIN) {
+                        LogUtil.i("qq version -> ${hostAppName}($hostVersionCode)")
+                        LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
+                        CoreServiceHook().coreServiceHook()
+                        hostApp.startService(Intent(hostApp, load(KernelService)).apply {
+                            putExtra(CORE_SERVICE_FLAG, "$")
+                        })
+                    }
+                }.onFailure { Log.e("XALog", Log.getStackTraceString(it)) }
+            }
             // TODO 分进程处理
             if (loadPackageParam.processName == loadPackageParam.packageName) {
                 init
@@ -77,17 +109,14 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     val init by lazy {
-        LogUtil.d("current process: ${loadPackageParam.processName}")
-        EzXHelperInit.initHandleLoadPackage(loadPackageParam)
-        EzXHelperInit.setLogTag("XAutoDaily")
-        EzXHelperInit.setToastTag("XAutoDaily")
+        LogUtil.d("current process: ${mLoadPackageParam.processName}")
         doInit()
     }
     private val cmdClass: Class<*> by lazy {
-        loadPackageParam.classLoader.loadClass(DataMigrationService)
+        mLoadPackageParam.classLoader.loadClass(DataMigrationService)
     }
     private val kernelServiceClass: Class<*> by lazy {
-        loadPackageParam.classLoader.loadClass(KernelService)
+        mLoadPackageParam.classLoader.loadClass(KernelService)
     }
     private var hookIsInit: Boolean = false
 
@@ -108,39 +137,20 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun doInit() {
-        // 初始化全局ClassLoader
-        Initiator.init(loadPackageParam.classLoader)
-        init(loadPackageParam)
         // 替换classloader
-        replaceParentClassloader(loadPackageParam.classLoader)
+        replaceParentClassloader(mLoadPackageParam.classLoader)
         // TODO 后续待优化 hook 逻辑
-        val service = loadPackageParam.classLoader.loadClass(KernelService)
-        findMethod(BaseApplicationImpl) { name == "onCreate" }.hookBefore {
-            try {
-                CoreServiceHook().coreServiceHook()
-                val app = it.thisObject as Application
-                app.startService(Intent(app, service))
-            } catch (e: Throwable) {
-                LogUtil.e(e)
-            }
-        }
         findMethod(LoadData) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             try {
                 if (hookIsInit) {
                     return@hookAfter
                 }
-                val context = AndroidAppHelper.currentApplication()
-                // 初始化全局Context
-                initContext(context)
-                LogUtil.i("qq version -> ${Global.qqTypeEnum.appName}($qqVersionCode)")
-                LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
-                EzXHelperInit.initAppContext(context)
                 // MMKV
                 Config.init()
                 //加载资源注入
                 LogUtil.d("injectRes")
-                ResInjectUtil.injectRes(context.resources)
+                ResInjectUtil.injectRes(hostContext.resources)
                 LogUtil.d("init ActivityProxyManager")
                 ProxyManager.init
                 // dex相关
@@ -149,6 +159,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 //初始化hook
                 LogUtil.d("initHook")
                 initHook()
+                moduleLoadSuccess = true
                 hookIsInit = true
             } catch (e: Throwable) {
                 LogUtil.e(e)
@@ -193,9 +204,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 LogUtil.d("need locate -> ${it.key}")
             }
             // 加入没有被搜索过的类
-            if (!cache.contains("${it.key}#${qqVersionCode}")) {
+            if (!cache.contains("${it.key}#${hostVersionCode}")) {
                 needLocateClasses.add(it.key)
-                LogUtil.d("cache not found: ${it.key}#${qqVersionCode}")
+                LogUtil.d("cache not found: ${it.key}#${hostVersionCode}")
             }
         }
         // 尝试获取，成功则加入新版缓存
@@ -204,7 +215,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             try {
                 val cls = hostClassLoader.loadClass(classSimpleName)
                 LogUtil.d("尝试获取类成功 -> ${cls.canonicalName}")
-                cache.putString("$classSimpleName#${qqVersionCode}", classSimpleName)
+                cache.putString("$classSimpleName#${hostVersionCode}", classSimpleName)
                 return@removeIf true
             } catch (e: Exception) {
                 return@removeIf false
@@ -223,12 +234,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         locateRes.forEach {
             if (it.value.size == 1) {
                 LogUtil.i("locate info: ${it.key} -> ${it.value[0]}")
-                cache.putString("${it.key}#${qqVersionCode}", it.value[0])
+                cache.putString("${it.key}#${hostVersionCode}", it.value[0])
                 locateNum++
             } else {
                 LogUtil.w("locate not instance class: ${it.key} -> ${it.value}")
                 // 保存为空字符串，表示已经搜索过，下次不再搜索
-                cache.putString("${it.key}#${qqVersionCode}", "")
+                cache.putString("${it.key}#${hostVersionCode}", "")
             }
         }
         cache.putStringSet("confuseClasses", confuseInfoKeys)

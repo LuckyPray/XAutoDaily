@@ -2,7 +2,7 @@ package me.teble.xposed.autodaily.hook.proxy.activity
 
 import android.content.Intent
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.lang.reflect.InvocationHandler
@@ -31,7 +31,7 @@ class IActivityManagerHandler(private val mOrigin: Any) : InvocationHandler {
                         foundFirstIntentOfArgs(args)?.let { pair ->
                             val component = pair.second.component
                             component?.let {
-                                if (it.packageName == Global.hostPackageName
+                                if (it.packageName == hostPackageName
                                     && it.className.startsWith(BuildConfig.APPLICATION_ID)
                                 ) {
                                     LogUtil.d("开始替换")

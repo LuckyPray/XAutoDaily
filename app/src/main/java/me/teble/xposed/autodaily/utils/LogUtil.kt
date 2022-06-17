@@ -2,14 +2,15 @@ package me.teble.xposed.autodaily.utils
 
 import android.util.Log
 import de.robv.android.xposed.XposedBridge
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.hook.base.hostInit
 import java.lang.Integer.min
 import java.time.LocalDateTime
 
 object LogUtil {
     private const val tagName = "XALog"
     private const val maxLength = 2000
-    private val pid by lazy { android.os.Process.myPid() }
+    private val pid by lazy { ProcUtil.mPid }
 
     private fun doLog(
         f: (String, String) -> Unit,
@@ -30,7 +31,7 @@ object LogUtil {
             }
         } else {
             f(tagName, str)
-            if (Global.isInit()) {
+            if (hostInit) {
                 FileUtil.appendLog("${LocalDateTime.now()} $pid $tagName: $str\n")
             }
             if (toXposed) {

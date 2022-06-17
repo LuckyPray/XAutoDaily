@@ -5,7 +5,7 @@ import com.tencent.common.app.BaseApplicationImpl
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.config.QQClasses.Companion.MsfServiceSdk
 import me.teble.xposed.autodaily.hook.ModuleInitException
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.invoke

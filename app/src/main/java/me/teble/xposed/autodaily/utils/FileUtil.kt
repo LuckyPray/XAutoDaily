@@ -9,7 +9,7 @@ import android.os.RemoteException
 import android.provider.MediaStore
 import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig.*
-import me.teble.xposed.autodaily.hook.base.Global.hostContext
+import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config
 import java.io.*
 import java.time.LocalDateTime

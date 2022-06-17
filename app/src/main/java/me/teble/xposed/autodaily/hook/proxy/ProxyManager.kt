@@ -3,8 +3,8 @@ package me.teble.xposed.autodaily.hook.proxy
 import android.app.Instrumentation
 import android.os.Handler
 import de.robv.android.xposed.XposedBridge
-import me.teble.xposed.autodaily.hook.base.Global
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.load
+import me.teble.xposed.autodaily.hook.base.moduleClassLoader
 import me.teble.xposed.autodaily.hook.proxy.activity.IActivityManagerHandler
 import me.teble.xposed.autodaily.hook.proxy.activity.MyHandler
 import me.teble.xposed.autodaily.hook.proxy.activity.MyInstrumentation
@@ -59,7 +59,7 @@ object ProxyManager {
         val activityManager = mInstance?.invoke("get")!!
         fmInstance?.set(
             mInstance, Proxy.newProxyInstance(
-                Global.moduleClassLoader,
+                moduleClassLoader,
                 arrayOf(load("android.app.IActivityManager")),
                 IActivityManagerHandler(activityManager)
             )
@@ -74,7 +74,7 @@ object ProxyManager {
         val activityTaskManager = mInstance?.invoke("get")!!
         fmInstance?.set(
             mInstance, Proxy.newProxyInstance(
-                Global.moduleClassLoader,
+                moduleClassLoader,
                 arrayOf(load("android.app.IActivityTaskManager")),
                 IActivityManagerHandler(activityTaskManager)
             )

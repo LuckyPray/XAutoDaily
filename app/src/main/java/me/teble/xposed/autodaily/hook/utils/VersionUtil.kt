@@ -1,12 +1,10 @@
 package me.teble.xposed.autodaily.hook.utils
 
-import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
-import me.teble.xposed.autodaily.hook.base.Global
+import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.utils.fieldValueAs
-import me.teble.xposed.autodaily.utils.getAppVersionName
 
 object VersionUtil {
-    val qqVersionName: String = getAppVersionName(Global.hostContext, PACKAGE_NAME_QQ)
+    val qqVersionName: String = hostVersionName
 
     val qqBuildNum: String = QApplicationUtil.application.fieldValueAs("buildNum")!!
 

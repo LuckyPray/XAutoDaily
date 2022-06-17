@@ -2,8 +2,8 @@ package me.teble.xposed.autodaily.hook.utils
 
 import me.teble.xposed.autodaily.config.QQClasses.Companion.ReqBody
 import me.teble.xposed.autodaily.config.QQClasses.Companion.StSignInWriteReq
-import me.teble.xposed.autodaily.hook.base.Global.qqVersionName
-import me.teble.xposed.autodaily.hook.base.Initiator.load
+import me.teble.xposed.autodaily.hook.base.hostVersionName
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValue
@@ -19,7 +19,7 @@ object GroupSignInUtil {
         val writeReq = load(StSignInWriteReq)!!.new()
         writeReq.fieldValue("groupId")?.invoke("set", groupUin)
         writeReq.fieldValue("uid")?.invoke("set", "$currentUin")
-        writeReq.fieldValue("clientVersion")?.invoke("set", qqVersionName)
+        writeReq.fieldValue("clientVersion")?.invoke("set", hostVersionName)
         reqBody.fieldValue("signInWriteReq")?.invoke("set", writeReq)
         val toServiceMsg = OidbUtil.makeOIDBPkg("OidbSvc.0xeb7", reqBody, true)
 //        toServiceMsg.appSeq = 2333333

@@ -1,15 +1,19 @@
 package me.teble.xposed.autodaily.hook.enums
 
-import me.teble.xposed.autodaily.config.Constants
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ_INTERNATIONAL
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ_LITE
+import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_TIM
 
 enum class QQTypeEnum(
     val packageName: String,
     val appName: String
 ) {
-    QQ(Constants.PACKAGE_NAME_QQ, "QQ"),
-    TIM(Constants.PACKAGE_NAME_TIM, "TIM"),
-    INTERNATIONAL(Constants.PACKAGE_NAME_QQ_INTERNATIONAL, "QQ国际版"),
-    LITE(Constants.PACKAGE_NAME_QQ_LITE, "QQ极速版");
+    QQ(PACKAGE_NAME_QQ, "QQ"),
+    TIM(PACKAGE_NAME_TIM, "TIM"),
+    INTERNATIONAL(PACKAGE_NAME_QQ_INTERNATIONAL, "QQ国际版"),
+    LITE(PACKAGE_NAME_QQ_LITE, "QQ极速版"),
+    ;
 
     companion object {
         fun valueOfPackage(packageName: String): QQTypeEnum {
