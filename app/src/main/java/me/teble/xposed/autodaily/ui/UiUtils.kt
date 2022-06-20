@@ -36,19 +36,16 @@ fun Int.toDp(): Dp {
 
 @SuppressLint("PrivateApi")
 fun Context.getStatusBarHeightPx(): Int {
-    val res by lazy {
-        try {
-            val c = Class.forName("com.android.internal.R\$dimen")
-            val obj = c.newInstance()
-            val field: Field = c.getField("status_bar_height")
-            val x: Int = field.get(obj)!!.toString().toInt()
-            return@lazy this.resources.getDimensionPixelSize(x)
-        } catch (e: Exception) {
-            val resId = this.resources.getIdentifier("status_bar_height", "dimen", "android")
-            return@lazy this.resources.getDimensionPixelOffset(resId)
-        }
+    return try {
+        val c = Class.forName("com.android.internal.R\$dimen")
+        val obj = c.newInstance()
+        val field: Field = c.getField("status_bar_height")
+        val x: Int = field.get(obj)!!.toString().toInt()
+        this.resources.getDimensionPixelSize(x)
+    } catch (e: Exception) {
+        val resId = this.resources.getIdentifier("status_bar_height", "dimen", "android")
+        this.resources.getDimensionPixelOffset(resId)
     }
-    return res
 }
 
 fun Context.getActivity(): Activity? {

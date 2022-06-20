@@ -59,6 +59,7 @@ fun AppBar(title: String) {
         backgroundColor = Color(0xFF409EFF),
         modifier = Modifier
             .background(Color(0xFF409EFF))
+            .statusBarsPadding()
             .padding(
                 top = LocalContext.current
                     .getStatusBarHeightPx()

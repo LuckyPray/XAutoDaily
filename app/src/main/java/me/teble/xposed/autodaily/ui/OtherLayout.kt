@@ -4,8 +4,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -13,8 +12,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
@@ -107,7 +104,7 @@ fun OtherLayout(navController: NavHostController) {
             modifier = Modifier
                 .padding(top = 13.dp)
                 .padding(horizontal = 13.dp),
-            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            contentPadding = WindowInsets.Companion.navigationBars.asPaddingValues(),
             // 绘制间隔
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

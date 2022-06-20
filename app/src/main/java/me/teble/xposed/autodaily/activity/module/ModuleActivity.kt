@@ -15,7 +15,6 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
 import androidx.savedstate.ViewTreeSavedStateRegistryOwner
-import com.google.accompanist.insets.ProvideWindowInsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -51,14 +50,12 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
             )
             this.setContent {
                 MaterialTheme(colors = colors()) {
-                    ProvideWindowInsets {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White)
-                        ) {
-                            XAutoDailyApp()
-                        }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                    ) {
+                        XAutoDailyApp()
                     }
                 }
 

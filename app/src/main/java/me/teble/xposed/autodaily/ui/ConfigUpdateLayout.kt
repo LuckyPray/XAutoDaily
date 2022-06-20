@@ -16,8 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.activity.module.ModuleActivity
 import me.teble.xposed.autodaily.task.model.UpdateInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
@@ -50,7 +48,7 @@ fun ConfigUpdateLayout(dialog: CustomDialog) {
                 modifier = Modifier
                     .padding(top = 13.dp)
                     .padding(horizontal = 13.dp),
-                contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+                contentPadding = WindowInsets.Companion.navigationBars.asPaddingValues(),
                 // 绘制间隔
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {

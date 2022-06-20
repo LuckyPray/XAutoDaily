@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
 import androidx.compose.runtime.*
@@ -10,8 +9,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
@@ -31,7 +28,7 @@ fun SignLayout(navController: NavHostController) {
             modifier = Modifier
                 .padding(top = 13.dp)
                 .padding(horizontal = 13.dp),
-            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            contentPadding = WindowInsets.Companion.navigationBars.asPaddingValues(),
             // 绘制间隔
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

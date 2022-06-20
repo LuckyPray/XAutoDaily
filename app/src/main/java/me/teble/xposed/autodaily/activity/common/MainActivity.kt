@@ -25,9 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.ProvideWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.activity.module.colors
@@ -51,9 +48,9 @@ import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
 
-    init {
-        System.loadLibrary("xa_native")
-    }
+//    init {
+//        System.loadLibrary("xa_native")
+//    }
 
     companion object {
         var shizukuErrInfo by mutableStateOf("")
@@ -155,14 +152,12 @@ class MainActivity : ComponentActivity() {
         handler.post(peekServiceRunnable)
         setContent {
             MaterialTheme(colors = colors()) {
-                ProvideWindowInsets {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                    ) {
-                        ModuleView()
-                    }
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White)
+                ) {
+                    ModuleView()
                 }
             }
         }
@@ -276,7 +271,7 @@ fun ModuleView() {
             modifier = Modifier
                 .padding(top = 13.dp)
                 .padding(horizontal = 13.dp),
-            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            contentPadding = WindowInsets.Companion.navigationBars.asPaddingValues(),
             // 绘制间隔
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

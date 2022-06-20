@@ -96,6 +96,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     if (ProcUtil.procType == ProcUtil.MAIN) {
                         LogUtil.i("qq version -> ${hostAppName}($hostVersionCode)")
                         LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
+                        LogUtil.d("init ActivityProxyManager")
+                        ProxyManager.init
                         CoreServiceHook().coreServiceHook()
                         asyncHook()
                     }
@@ -138,8 +140,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             //加载资源注入
             LogUtil.d("injectRes")
             ResInjectUtil.injectRes(hostContext.resources)
-            LogUtil.d("init ActivityProxyManager")
-            ProxyManager.init
             // dex相关
             LogUtil.d("doDexInit")
             doDexInit()

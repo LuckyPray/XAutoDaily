@@ -27,8 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -96,7 +94,8 @@ fun MainLayout(navController: NavHostController) {
             modifier = Modifier
                 .padding(top = 13.dp)
                 .padding(horizontal = 13.dp),
-            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+            contentPadding = WindowInsets.Companion.navigationBars.asPaddingValues(),
+//            contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
             // 绘制间隔
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {

@@ -25,8 +25,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.rememberInsetsPaddingValues
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.Friend
@@ -130,7 +128,7 @@ fun EditEnvLayout(
                 modifier = Modifier
                     .padding(top = 13.dp)
                     .padding(horizontal = 13.dp),
-                contentPadding = rememberInsetsPaddingValues(LocalWindowInsets.current.navigationBars),
+                contentPadding = WindowInsets.Companion.navigationBars.asPaddingValues(),
                 verticalArrangement = Arrangement.spacedBy(15.dp)
             ) {
                 envList.forEach { env ->
