@@ -11,6 +11,8 @@ import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig.*
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config
+import me.teble.xposed.autodaily.task.util.parseDateTime
+import me.teble.xposed.autodaily.task.util.timestamp
 import java.io.*
 import java.time.LocalDateTime
 import java.util.zip.Deflater
@@ -36,6 +38,7 @@ object FileUtil {
     }
 
     private const val maxSingleLogSize = 4 * 1024 * 1024
+    private const val logKeepDays = 15
 
     private val logFile: File
         get() {
@@ -49,9 +52,24 @@ object FileUtil {
             if (file.length() > maxSingleLogSize) {
                 file.renameTo(File(logDir, "log_${LocalDateTime.now()}.log"))
                 file.createNewFile()
+                clearLog(logKeepDays)
             }
             return file
         }
+
+    private fun clearLog(keepDays: Int) {
+        val currTime = LocalDateTime.now()
+        logDir.listFiles()?.forEach { file ->
+            if (file.isFile && file.name.startsWith("log_") && file.name.endsWith(".log")) {
+                val timeStr = file.name.substring(4, file.name.length - 4)
+                parseDateTime(timeStr)?.let {
+                    if (currTime.timestamp - it.timestamp > keepDays * 24 * 3600) {
+                        file.delete()
+                    }
+                }
+            }
+        }
+    }
 
     @JvmStatic
     fun appendLog(log: String) {

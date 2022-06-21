@@ -16,7 +16,6 @@ import androidx.annotation.RequiresApi
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.MainHook
 import me.teble.xposed.autodaily.hook.base.moduleClassLoader
-import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil.injectRes
 
 class MyInstrumentation(private val mBase: Instrumentation) : Instrumentation() {
 

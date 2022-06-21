@@ -13,30 +13,21 @@ import java.lang.reflect.Method
  * @description
  */
 
-fun Any.getMethods(): Array<Method> {
-    return ReflectUtil.getMethods(if (this is Class<*>) this else this::class.java)
+fun Any.getMethods(withSuper: Boolean = true): Array<Method> {
+    val clazz = if (this is Class<*>) this else this::class.java
+    return ReflectUtil.getMethodsDirectly(clazz, withSuper, false)
 }
 
-fun Any.getFields(): Array<Field>? {
-    return ReflectUtil.getFields(if (this is Class<*>) this else this::class.java)
-}
-
-fun Any.fieldValue(
-    fieldType: Class<*>
-): Any? {
-    ReflectUtil.getFields(if (this is Class<*>) this else this::class.java).forEach {
-        if (it.type == fieldType) {
-//            LogUtil.log("${it.type}: ${it.name} -> ${ReflectUtil.getFieldValue(this, it)}")
-            return ReflectUtil.getFieldValue(this, it)
-        }
-    }
-    return null
+fun Any.getFields(withSuper: Boolean = true): Array<Field> {
+    val clazz = if (this is Class<*>) this else this::class.java
+    return ReflectUtil.getFieldsDirectly(clazz, withSuper)
 }
 
 fun Any.field(
-    fieldType: Class<*>
+    fieldType: Class<*>,
+    withSuper: Boolean = true
 ): Field? {
-    ReflectUtil.getFields(if (this is Class<*>) this else this::class.java).forEach {
+    this.getFields(withSuper).forEach {
         if (it.type == fieldType) {
             it.isAccessible = true
             return it
@@ -46,9 +37,10 @@ fun Any.field(
 }
 
 fun Any.field(
-    fieldName: String
+    fieldName: String,
+    withSuper: Boolean = true
 ): Field? {
-    ReflectUtil.getFields(if (this is Class<*>) this else this::class.java).forEach {
+    this.getFields(withSuper).forEach {
         if (it.name == fieldName) {
             it.isAccessible = true
             return it
@@ -58,21 +50,48 @@ fun Any.field(
 }
 
 fun Any.fieldValue(
-    name: String
-): Any? = ReflectUtil.getFieldValue(this, name)
+    fieldType: Class<*>,
+    withSuper: Boolean = true
+): Any? {
+    this.getFields(withSuper).forEach {
+        if (it.type == fieldType) {
+            return ReflectUtil.getFieldValue(this, it)
+        }
+    }
+    return null
+}
+
+fun Any.fieldValue(
+    name: String,
+    withSuper: Boolean = true
+): Any? {
+    this.getFields(withSuper).forEach {
+        if (it.name == name) {
+            return ReflectUtil.getFieldValue(this, it)
+        }
+    }
+    return null
+}
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Any.fieldValueAs(fieldType: Class<*>): T? = this.fieldValue(fieldType) as T?
+fun <T> Any.fieldValueAs(
+    fieldType: Class<*>,
+    withSuper: Boolean = true
+): T? = this.fieldValue(fieldType, withSuper) as T?
 
 @Suppress("UNCHECKED_CAST")
-fun <T> Any.fieldValueAs(name: String): T? = this.fieldValue(name) as T?
+fun <T> Any.fieldValueAs(
+    name: String,
+    withSuper: Boolean = true
+): T? = this.fieldValue(name, withSuper) as T?
 
 fun <T> Any.invoke(
     name: String,
     returnType: Class<T>,
-    vararg args: Any?
+    vararg args: Any?,
+    withSuper: Boolean = true
 ): T? {
-    ReflectUtil.getMethods(if (this is Class<*>) this else this.javaClass).let { arrayOfMethods ->
+    this.getMethods(withSuper).let { arrayOfMethods ->
         arrayOfMethods.forEach {
             if (it.name == name && it.returnType == returnType
                 && isAllAssignableFrom(ClassUtil.getClasses(*args), it.parameterTypes)
@@ -86,9 +105,10 @@ fun <T> Any.invoke(
 
 fun Any.invoke(
     name: String,
-    vararg args: Any?
+    vararg args: Any?,
+    withSuper: Boolean = true
 ): Any? {
-    ReflectUtil.getMethods(if (this is Class<*>) this else this.javaClass).let { arrayOfMethods ->
+    this.getMethods(withSuper).let { arrayOfMethods ->
         arrayOfMethods.forEach {
             if (it.name == name
                 && isAllAssignableFrom(it.parameterTypes, ClassUtil.getClasses(*args))
@@ -100,14 +120,20 @@ fun Any.invoke(
     }
 }
 
+@Suppress("UNCHECKED_CAST")
+fun <T> Any.invokeAs(
+    name: String,
+    vararg args: Any?,
+    withSuper: Boolean = true
+): T? = this.invoke(name, *args, withSuper = withSuper) as T?
+
+fun <T> Class<T>.new(
+    vararg args: Any?
+): T = ReflectUtil.newInstance(this, *args)
+
 fun Any.setValue(name: String, value: Any) {
     this.field(name)?.set(this, value)
 }
-
-@Suppress("UNCHECKED_CAST")
-fun <T> Any.invokeAs(name: String, vararg args: Any?): T? = this.invoke(name, *args) as T?
-
-fun <T> Class<T>.new(vararg args: Any?): T = ReflectUtil.newInstance(this, *args)
 
 fun Any.printAllField() {
     val obj = this

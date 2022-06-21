@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.compose.foundation.ExperimentalFoundationApi
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
@@ -17,7 +19,7 @@ import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
+import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invoke
@@ -44,7 +46,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                 val clazz: Class<*> = load(FormSimpleItem) ?: load(FormCommonSingleLineItem)!!
                 val context = param.thisObject as Activity
                 val entity = clazz.new(context) as View
-                ResInjectUtil.injectRes(context.resources)
+                injectRes(context.resources)
                 entity.invoke("setLeftText", context.getString(R.string.app_name))
                 entity.invoke("setRightText", BuildConfig.VERSION_NAME)
                 entity.setOnClickListener {
@@ -60,20 +62,14 @@ class QQSettingSettingActivityHook : BaseHook() {
                 }
                 val id: Int = context.resources
                     .getIdentifier("account_switch", "id", context.packageName)
-                val viewGroup = context.findViewById<View>(id).parent
+                val viewGroup: ViewGroup = context.findViewById<View>(id).parent as ViewGroup
                 try {
                     (viewGroup.parent as ViewGroup).addView(
-                        entity, 0, ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
+                        entity, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                     )
-                } catch (e: Exception) {
-                    (viewGroup as ViewGroup).addView(
-                        entity, 0, ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
+                } catch (e: Throwable) {
+                    viewGroup.addView(
+                        entity, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                     )
                 }
             } catch (e: Throwable) {

@@ -53,7 +53,7 @@ class XAClassLoader(
 fun injectClassLoader(hostClassLoader: ClassLoader) {
     val fParent = ClassLoader::class.java.field("parent")!!
     val mClassloader = moduleClassLoader
-    val parentClassloader = mClassloader.fieldValue("parent") as ClassLoader
+    val parentClassloader = mClassloader.fieldValue("parent", true) as ClassLoader
     runCatching {
         if (XAClassLoader::class.java != parentClassloader.javaClass) {
             LogUtil.d("replace parent classloader")

@@ -12,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap
 object Config {
 
     private const val TAG = "Config"
+    var isInit = false
+        private set
     val mmkvDir by lazy {
         val dir = File(hostContext.filesDir, "xa_mmkv")
         if (dir.isFile) {
@@ -34,6 +36,7 @@ object Config {
             System.load(soFile.absolutePath)
             MMKV.initialize(hostContext, soFile.absolutePath) {}
         }
+        isInit = true
     }
 
     val classCache by lazy {

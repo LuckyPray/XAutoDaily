@@ -4,6 +4,8 @@ import android.util.Log
 import de.robv.android.xposed.XposedBridge
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.hook.base.hostInit
+import me.teble.xposed.autodaily.hook.config.Config
+import me.teble.xposed.autodaily.ui.ConfUnit
 import java.lang.Integer.min
 import java.time.LocalDateTime
 
@@ -11,12 +13,13 @@ object LogUtil {
     private const val tagName = "XALog"
     private const val maxLength = 2000
     private val pid by lazy { ProcUtil.mPid }
+    private val logToXposed by lazy { ConfUnit.logToXposed }
+    private val toXposed: Boolean get() = Config.isInit && logToXposed
 
     private fun doLog(
         f: (String, String) -> Unit,
         msg: String?,
         e: Throwable?,
-        toXposed: Boolean = false
     ) {
         val str = buildString {
             msg?.let { append(it) }
@@ -26,16 +29,17 @@ object LogUtil {
             var i = 0
             while (i < str.length) {
                 val sub = str.substring(i, min(i + maxLength, str.length))
-                doLog(f, sub, null, toXposed)
+                doLog(f, sub, null)
                 i += maxLength
             }
         } else {
-            f(tagName, str)
             if (hostInit) {
                 FileUtil.appendLog("${LocalDateTime.now()} $pid $tagName: $str\n")
             }
             if (toXposed) {
                 XposedBridge.log("$tagName : $str")
+            } else {
+                f(tagName, str)
             }
         }
     }

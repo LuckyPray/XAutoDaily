@@ -133,6 +133,30 @@ fun OtherLayout(navController: NavHostController) {
                 )
             }
             item {
+                val checked = remember { mutableStateOf(ConfUnit.enableTaskNotification) }
+                LineSwitch(
+                    title = "启用签到通知",
+                    desc = "是否启用签到通知，任务执行时通知提醒，结束后自动销毁",
+                    checked = checked,
+                    onChange = {
+                        ConfUnit.enableTaskNotification = it
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+            item {
+                val checked = remember { mutableStateOf(ConfUnit.logToXposed) }
+                LineSwitch(
+                    title = "日志输出至xposed",
+                    desc = "是否将日志信息输出至框架日志中(默认方式为输出至logcat)，重启生效",
+                    checked = checked,
+                    onChange = {
+                        ConfUnit.logToXposed = it
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+            item {
                 LineButton(
                     title = "日志导出",
                     desc = "保存日志文件打包导出至内部存储",

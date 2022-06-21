@@ -10,13 +10,14 @@ import java.io.File
 object NativeUtil {
     const val TAG = "NativeUtil"
 
-    private fun is64Bit(): Boolean {
-        val clazz = Class.forName("dalvik.system.VMRuntime")
-        return clazz.new().invoke("is64Bit") as Boolean
-    }
+    private val is64Bit: Boolean
+        get() {
+            val clazz = Class.forName("dalvik.system.VMRuntime")
+            return clazz.new().invoke("is64Bit") as Boolean
+        }
 
     private fun getLibFilePath(name: String): String {
-        return if (is64Bit()) "lib/arm64-v8a/lib${name}.so" else "lib/armeabi-v7a/lib$name.so"
+        return if (is64Bit) "lib/arm64-v8a/lib${name}.so" else "lib/armeabi-v7a/lib$name.so"
     }
 
     fun getNativeLibrary(context: Context, libName: String): File {

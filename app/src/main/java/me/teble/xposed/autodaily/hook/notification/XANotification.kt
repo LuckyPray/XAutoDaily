@@ -13,6 +13,7 @@ import com.github.kyuubiran.ezxhelper.utils.loadClass
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.QQClasses.Companion.SplashActivity
 import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.ui.ConfUnit
 
 object XANotification {
 
@@ -27,20 +28,20 @@ object XANotification {
     @SuppressLint("StaticFieldLeak")
     private lateinit var builder: NotificationCompat.Builder
     private var isStart = false
+    private val enabled get() = ConfUnit.enableTaskNotification
 
     fun start() {
+        if (isStart || !enabled) return
+
         initNotification(hostContext)
-        if (isStart) {
-            return
-        }
         isStart = true
         notificationManager.notify(NOTIFICATION_ID, mNotification)
     }
 
     fun setContent(content: String, onGoing: Boolean = true, bigText: Boolean = false) {
-        if (!isStart) {
-            start()
-        }
+        if (!enabled) return
+        if (!isStart) start()
+
         mNotification = builder.apply {
             if (bigText) {
                 val bigTextStyle = NotificationCompat.BigTextStyle()
@@ -56,17 +57,15 @@ object XANotification {
     }
 
     fun stop() {
-        if (!isStart) {
-            return
-        }
+        if (!isStart) return
+
         notificationManager.cancel(NOTIFICATION_ID)
         isStart = false
     }
 
     private fun initNotification(context: Context) {
-        if (XANotification::mNotification.isInitialized) {
-            return
-        }
+        if (XANotification::mNotification.isInitialized) return
+
         val intent = Intent(context, loadClass(SplashActivity))
         val activity = PendingIntent.getActivity(context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)

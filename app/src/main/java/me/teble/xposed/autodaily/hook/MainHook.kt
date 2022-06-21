@@ -30,7 +30,7 @@ import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
-import me.teble.xposed.autodaily.hook.proxy.activity.ResInjectUtil
+import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
@@ -92,6 +92,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     hostApp = it.thisObject as Application
                     EzXHelperInit.initAppContext(hostApp)
                     hostClassLoader = hostApp.classLoader
+                    // MMKV
+                    Config.init()
                     injectClassLoader(hostClassLoader)
                     if (ProcUtil.procType == ProcUtil.MAIN) {
                         LogUtil.i("qq version -> ${hostAppName}($hostVersionCode)")
@@ -108,7 +110,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 doInit()
             }
             if (loadPackageParam.processName.endsWith("tool")) {
-                LogUtil.d("tool进程：" + loadPackageParam.processName)
+                Log.d("XALog","tool进程：" + loadPackageParam.processName)
                 toolsHook()
             }
         }
@@ -135,11 +137,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun asyncHook() {
         runAsync {
-            // MMKV
-            Config.init()
             //加载资源注入
             LogUtil.d("injectRes")
-            ResInjectUtil.injectRes(hostContext.resources)
+            injectRes(hostContext.resources)
             // dex相关
             LogUtil.d("doDexInit")
             doDexInit()
