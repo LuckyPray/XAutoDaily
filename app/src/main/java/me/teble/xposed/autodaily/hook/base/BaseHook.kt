@@ -11,8 +11,8 @@ abstract class BaseHook : IBaseHook {
             if (!this.isCompatible || !enabled) {
                 return@lazy
             }
-            logd("满足执行条件，正在加载hook")
-            logd("current process: ${ProcUtil.procName}")
+            LogUtil.i("满足执行条件，正在加载hook")
+            LogUtil.i("current process: ${ProcUtil.procName}")
             invokeHookClassMethod(this)
         }
         return init
@@ -28,25 +28,10 @@ abstract class BaseHook : IBaseHook {
             try {
                 method.isAccessible = true
                 method.invoke(impl)
-                logd("加载 [${methodHook.desc}] 功能完成！")
+                LogUtil.i("加载 [${methodHook.desc}] 功能完成！")
             } catch (e: Exception) {
                 LogUtil.e(e, "加载 [${methodHook.desc}] 功能失败: ")
             }
         }
-    }
-
-    private val settingValue: Any?
-        get() = null
-
-//    protected fun load(className: String): Class<*>? {
-//        return Initiator.load(className)
-//    }
-
-    protected fun logd(msg: String) {
-        LogUtil.d(msg)
-    }
-
-    protected fun logi(msg: String) {
-        LogUtil.i(msg)
     }
 }

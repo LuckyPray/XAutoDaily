@@ -13,8 +13,8 @@ object LogUtil {
     private const val tagName = "XALog"
     private const val maxLength = 2000
     private val pid by lazy { ProcUtil.mPid }
-    private val logToXposed by lazy { ConfUnit.logToXposed }
-    private val toXposed: Boolean get() = Config.isInit && logToXposed
+    private val toXposed: Boolean get() = Config.isInit && ConfUnit.logToXposed
+    private val enableDebug get() = Config.isInit && ConfUnit.enableDebugLog
 
     private fun doLog(
         f: (String, String) -> Unit,
@@ -51,7 +51,7 @@ object LogUtil {
 
     @JvmStatic
     fun d(msg: String) {
-        doLog(Log::d, msg, null)
+        if (enableDebug) doLog(Log::d, msg, null)
     }
 
     @JvmStatic

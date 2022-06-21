@@ -10,9 +10,6 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 class IActivityManagerHandler(private val mOrigin: Any) : InvocationHandler {
-    companion object {
-        const val TAG = "IActivityManagerHandler"
-    }
 
     private fun foundFirstIntentOfArgs(args: Array<Any>): Pair<Int, Intent>? {
         for (i in args.indices) {

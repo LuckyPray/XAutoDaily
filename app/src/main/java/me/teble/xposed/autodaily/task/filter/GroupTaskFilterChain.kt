@@ -61,7 +61,8 @@ class GroupTaskFilterChain(
                     }
                 }
                 if (errCount >= 3 && date == currentDate) {
-                    LogUtil.d("任务${task.id}今日执行错误次数超过3次，跳过执行")
+                    // TODO 判定存在问题
+                    LogUtil.i("任务${task.id}今日执行错误次数超过3次，跳过执行")
                     continue
                 }
                 try {

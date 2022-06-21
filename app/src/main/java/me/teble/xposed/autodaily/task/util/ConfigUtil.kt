@@ -35,7 +35,7 @@ object ConfigUtil {
      *
      * 配置文件下载链接：https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@1/xa_conf
      */
-    private const val TAG = "PropUtil"
+
     private val confDir = File(hostContext.filesDir, "xa_conf")
     private val MIN_APP_VERSION_REG = Pattern.compile("minAppVersion:\\s+(\\d+)")
     private val CONFIG_VERSION_REG = Pattern.compile("version:\\s+(\\d+)")
@@ -57,7 +57,7 @@ object ConfigUtil {
             xaLibDir.mkdirs()
         }
         val soFilePath = NativeUtil.getNativeLibrary(hostContext, "xa_decrypt").absolutePath
-        LogUtil.d("loadLib: $soFilePath")
+        LogUtil.i("loadLib: $soFilePath")
         try {
             System.load(soFilePath)
         } catch (e: Throwable) {
@@ -214,7 +214,7 @@ object ConfigUtil {
         if (conf == null) {
             conf = defaultConf
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
-            LogUtil.d("defaultConf version -> ${defaultConf.version}")
+            LogUtil.i("defaultConf version -> ${defaultConf.version}")
             saveConfFile(encodeConfig, defaultConf.version)
             ConfUnit.needShowUpdateLog = true
         } else {

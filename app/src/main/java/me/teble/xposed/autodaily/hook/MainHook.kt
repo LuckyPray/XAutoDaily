@@ -39,7 +39,6 @@ import java.util.concurrent.CompletableFuture.runAsync
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     companion object {
-        private const val TAG = "MainHook"
 //        private val scope = CoroutineScope(Dispatchers.Default)
     }
 

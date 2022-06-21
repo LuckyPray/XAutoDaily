@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.utils
 
-import android.util.Log
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.millisecond
 import java.net.HttpURLConnection
@@ -12,7 +11,6 @@ import java.time.ZonedDateTime
 import java.util.*
 
 object TimeUtil {
-    private const val TAG = "TimeUtil"
 
     private var timeDiff: Long? = null
 
@@ -48,7 +46,7 @@ object TimeUtil {
                 LogUtil.e(e, "get network time error, will used localtime -> ${getCNTime()}:")
                 ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")
             } catch (ignore: Exception) {
-                Log.e(TAG, "get network time error, will used localtime -> ${getCNTime()}: \n" + e.stackTraceToString())
+                LogUtil.e(e,"get network time error, will used localtime -> ${getCNTime()}:")
             }
             null
         }

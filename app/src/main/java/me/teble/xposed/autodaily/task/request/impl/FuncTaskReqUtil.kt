@@ -15,7 +15,6 @@ import me.teble.xposed.autodaily.utils.toJsonString
 import java.lang.Integer.min
 
 object FuncTaskReqUtil : ITaskReqUtil {
-    private const val TAG = "FuncTaskReq"
 
     override fun create(task: Task, env: MutableMap<String, Any>): List<TaskRequest> {
         return mutableListOf<TaskRequest>().apply {

@@ -8,9 +8,11 @@ object Const {
     const val ENABLE = "enable"
     const val USED_THREAD_POOL = "used_thread_pool"
     const val SHOW_TASK_TOAST = "do_not_show_task_toast"
+    const val SIGN_STAY_AWAKE = "sign_stay_awake"
     const val TASK_EXCEPTION_COUNT = "task_exception_count"
     const val ENABLE_TASK_NOTIFICATION = "enable_task_notification"
     const val LOG_TO_XPOSED = "log_to_xposed"
+    const val ENABLE_DEBUG_LOG = "enable_debug_log"
 
     // -------------------------------------------------- //
     const val MOST_RECENT_EXEC_TIME = "most_recent_exec_time"

@@ -7,6 +7,7 @@ import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
+import me.teble.xposed.autodaily.task.util.Const.ENABLE_DEBUG_LOG
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_TASK_NOTIFICATION
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
@@ -16,6 +17,7 @@ import me.teble.xposed.autodaily.task.util.Const.LOG_TO_XPOSED
 import me.teble.xposed.autodaily.task.util.Const.NEED_SHOW_LOG
 import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
+import me.teble.xposed.autodaily.task.util.Const.SIGN_STAY_AWAKE
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
 
@@ -40,12 +42,18 @@ object ConfUnit {
     var showTaskToast: Boolean
         get() = xaConfig.getBoolean(SHOW_TASK_TOAST, true)
         set(value) = xaConfig.putBoolean(SHOW_TASK_TOAST, value)
+    var stayAwake: Boolean
+        get() = xaConfig.getBoolean(SIGN_STAY_AWAKE, true)
+        set(value) = xaConfig.putBoolean(SIGN_STAY_AWAKE, value)
     var enableTaskNotification: Boolean
         get() = xaConfig.getBoolean(ENABLE_TASK_NOTIFICATION, false)
         set(value) = xaConfig.putBoolean(ENABLE_TASK_NOTIFICATION, value)
     var logToXposed: Boolean
         get() = xaConfig.getBoolean(LOG_TO_XPOSED, false)
         set(value) = xaConfig.putBoolean(LOG_TO_XPOSED, value)
+    var enableDebugLog: Boolean
+        get() = xaConfig.getBoolean(ENABLE_DEBUG_LOG, false)
+        set(value) = xaConfig.putBoolean(ENABLE_DEBUG_LOG, value)
 
     // -------------------------------------------------- //
     var globalEnable: Boolean

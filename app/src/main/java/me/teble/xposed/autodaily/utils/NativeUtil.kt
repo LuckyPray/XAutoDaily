@@ -8,7 +8,6 @@ import java.io.BufferedInputStream
 import java.io.File
 
 object NativeUtil {
-    const val TAG = "NativeUtil"
 
     private val is64Bit: Boolean
         get() {
@@ -36,18 +35,18 @@ object NativeUtil {
         try {
             FileUtil.writeFromStream(libStream, tmpSoFile)
             if (!soFile.exists()) {
-                LogUtil.d("so文件不存在，正在尝试加载")
+                LogUtil.i("so文件不存在，正在尝试加载")
                 tmpSoFile.renameTo(soFile)
             } else {
                 val oldStream = FileUtil.getInputStream(soFile)
                 val newStream = FileUtil.getInputStream(tmpSoFile)
                 if (!IoUtil.contentEquals(oldStream, newStream)) {
-                    LogUtil.d("so文件版本存在更新，正在重新加载")
+                    LogUtil.i("so文件版本存在更新，正在重新加载")
                     soFile.delete()
                     tmpSoFile.renameTo(soFile)
                 }
             }
-            LogUtil.d("加载so文件成功 -> ${soFile.path}")
+            LogUtil.i("加载so文件成功 -> ${soFile.path}")
             return soFile
         } catch (e: Exception) {
             LogUtil.e(e)

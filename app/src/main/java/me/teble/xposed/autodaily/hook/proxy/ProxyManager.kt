@@ -13,7 +13,7 @@ import me.teble.xposed.autodaily.utils.*
 import java.lang.reflect.Proxy
 
 object ProxyManager {
-    const val TAG = "ProxyManager"
+
     const val STUB_DEFAULT_QQ_ACTIVITY = "com.tencent.mobileqq.activity.photo.CameraPreviewActivity"
     const val STUB_DEFAULT_QQ_SERVICE = "com.tencent.mobileqq.emosm.web.MessengerService"
     const val ACTIVITY_PROXY_INTENT = "xautodaily_proxy_intent"

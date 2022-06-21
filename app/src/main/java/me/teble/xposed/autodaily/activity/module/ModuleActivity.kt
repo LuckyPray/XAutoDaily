@@ -25,9 +25,6 @@ import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
 import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
 class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
-    companion object {
-        const val TAG = "ModuleActivity"
-    }
 
     override fun onDestroy() {
         super.onDestroy()

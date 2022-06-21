@@ -7,7 +7,7 @@ import java.security.NoSuchAlgorithmException
 import java.util.*
 
 object CalculationUtil {
-    private const val TAG = "CalculationUtil"
+
     private const val CSRF_TOKEN_END_STR = "tencentQQVIP123443safde&!%^%1282"
 
     private fun getBkn(sKey: String): Int {

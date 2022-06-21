@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap
 
 object Config {
 
-    private const val TAG = "Config"
     var isInit = false
         private set
     val mmkvDir by lazy {

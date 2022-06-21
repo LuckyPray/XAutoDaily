@@ -5,14 +5,18 @@ import android.content.Intent
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
+import android.os.PowerManager
+import android.os.PowerManager.PARTIAL_WAKE_LOCK
 import cn.hutool.core.thread.ThreadUtil
-import de.robv.android.xposed.XC_MethodReplacement
+import com.github.kyuubiran.ezxhelper.utils.findMethod
+import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.*
+import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.base.moduleLoadSuccess
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -39,12 +43,13 @@ class CoreServiceHook : BaseHook() {
     override val enabled = true
 
     companion object {
-        const val TAG = "CoreServiceHook"
 
         const val CORE_SERVICE_FLAG = "XAutoDaily:core_service_flag"
         const val CORE_SERVICE_TOAST_FLAG = "XAutoDaily:core_service_toast_flag"
 
         private val lock = ReentrantLock()
+        lateinit var wakeLock: PowerManager.WakeLock
+        val wakeLockInit get() = Companion::wakeLock.isInitialized
         val scope = CoroutineScope(Dispatchers.Default)
         const val EXEC_TASK = 1
         const val AUTO_EXEC = 2
@@ -80,7 +85,7 @@ class CoreServiceHook : BaseHook() {
                 if (userExec) {
                     ToastUtil.send("开始执行签到")
                 } else {
-                    LogUtil.d("定时执行")
+                    LogUtil.i("定时执行")
                 }
                 executorTask(ConfigUtil.loadSaveConf())
             }
@@ -105,6 +110,7 @@ class CoreServiceHook : BaseHook() {
                 return
             }
             XANotification.start()
+            wakeLock.acquire(20 * 60 * 1000L)
             try {
                 runtimeTasks.addAll(needExecGroups)
                 var threadCount = 1
@@ -142,6 +148,7 @@ class CoreServiceHook : BaseHook() {
                     delay(5000)
                 }
                 XANotification.stop()
+                wakeLock.release()
             }
         }
 
@@ -159,8 +166,8 @@ class CoreServiceHook : BaseHook() {
                 LogUtil.e(e, "CronUtil.start error: ")
                 ToastUtil.send("任务调度器启动失败，详情请查看日志")
             }
-            LogUtil.d("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
-            LogUtil.d("任务调度器启动成功")
+            LogUtil.i("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
+            LogUtil.i("任务调度器启动成功")
             CronUtil.schedule(
                 "task_timer",
                 "0 */10 * * * *"
@@ -181,26 +188,34 @@ class CoreServiceHook : BaseHook() {
 
     @MethodHook("代理 service hook")
     fun coreServiceHook() {
-        XposedBridge.hookAllMethods(load(KernelService),
-            "onStartCommand",
-            object : XC_MethodReplacement() {
-                override fun replaceHookedMethod(param: MethodHookParam): Any {
-                    val args = param.args
-                    val service = param.thisObject as Service
-                    val intent = args[0] as Intent?
-                    if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
-                        return XposedBridge.invokeOriginalMethod(param.method, param.thisObject, param.args)
-                    }
-                    if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
-                        LogUtil.d("onStartCommand")
-                        LogUtil.d(intent.extras.toMap().toString())
-                        ToastUtil.send(service, "唤醒测试: true")
-                    } else {
-                        handler.sendEmptyMessage(START_CRON)
-                    }
-                    return 2
-                }
+        findMethod(CoreService) {
+            name == "onCreate"
+        }.hookAfter {
+            if (wakeLockInit) {
+                return@hookAfter
             }
-        )
+            val service = it.thisObject as Service
+            val pm = service.getSystemService(Service.POWER_SERVICE) as PowerManager
+            wakeLock = pm.newWakeLock(PARTIAL_WAKE_LOCK, service::class.java.name)
+        }
+
+        findMethod(KernelService) {
+            name == "onStartCommand"
+        }.hookReplace {
+            val args = it.args
+            val service = it.thisObject as Service
+            val intent = args[0] as Intent?
+            if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
+                return@hookReplace XposedBridge.invokeOriginalMethod(it.method, it.thisObject, it.args)
+            }
+            if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
+                LogUtil.d("onStartCommand")
+                LogUtil.d(intent.extras.toMap().toString())
+                ToastUtil.send(service, "唤醒测试: true")
+            } else {
+                handler.sendEmptyMessage(START_CRON)
+            }
+            return@hookReplace 2
+        }
     }
 }

@@ -19,8 +19,6 @@ import java.util.zip.ZipFile
 
 object DexKit {
 
-    private const val TAG = "DexKit"
-
     private fun getAllDexEntry(zipFile: ZipFile): List<ZipEntry> {
         val zip: Enumeration<out ZipEntry> = zipFile.entries()
         val list = ArrayList<ZipEntry>()

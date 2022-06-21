@@ -9,14 +9,14 @@ import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.ticketManager
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.VersionUtil
 import me.teble.xposed.autodaily.task.model.MiniProfile
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.toJsonString
 import java.util.*
 import java.util.regex.Pattern
 import java.util.regex.Pattern.DOTALL
 
 object EnvFormatUtil {
-
-    private const val TAG = "EnvFormatUtil"
 
     private val ARG_REG = Pattern.compile("(\\\$\\{.*?\\}|\\\$[a-zA-Z0-9\\_]+)", DOTALL)
     private val FUN_REG = Pattern.compile("\\(.*\\)")
@@ -36,19 +36,19 @@ object EnvFormatUtil {
     fun formatList(evalStr: String, qDomain: String?, env: MutableMap<String, Any>): List<String> {
         val values = mutableListOf<Any>()
         val args = ReUtil.findAllGroup1(ARG_REG, evalStr).apply {
-//            LogUtil.d(TAG, "regex find result -> ${this.toJsonString()}")
+            LogUtil.d("regex find result -> ${this.toJsonString()}")
             forEachIndexed { index, s ->
                 val start = if (s.startsWith("\${")) 2 else 1
                 val end = if (s.endsWith("}")) s.length - 1 else s.length
                 val name = s.substring(start, end)
-//                LogUtil.d(TAG, "name -> $name")
+                LogUtil.d("name -> $name")
                 this[index] = name
                 values.add(getFormatArgValue(name, qDomain, env))
             }
         }
-//        LogUtil.d(TAG, "evalString -> $evalStr")
-//        LogUtil.d(TAG, "formatArgs -> ${args.toJsonString()}")
-//        LogUtil.d(TAG, "formatValues -> ${values.toJsonString()}")
+        LogUtil.d("evalString -> $evalStr")
+        LogUtil.d("formatArgs -> ${args.toJsonString()}")
+        LogUtil.d("formatValues -> ${values.toJsonString()}")
         val formatStr = ReUtil.replaceAll(evalStr, ARG_REG, "%s")
         val resList: List<String>
         if (args.isEmpty()) {
@@ -81,7 +81,7 @@ object EnvFormatUtil {
                 }
             }
         }
-//        LogUtil.d(TAG, "format -> $resList")
+        LogUtil.d("format -> $resList")
         return resList
     }
 

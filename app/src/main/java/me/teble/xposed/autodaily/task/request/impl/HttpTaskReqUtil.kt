@@ -25,7 +25,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 object HttpTaskReqUtil : ITaskReqUtil {
-    private const val TAG = "HttpTaskReqUtil"
+
     private val  client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(20, TimeUnit.SECONDS)

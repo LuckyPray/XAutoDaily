@@ -1,12 +1,11 @@
 package me.teble.xposed.autodaily.hook
 
-import de.robv.android.xposed.XC_MethodReplacement
-import de.robv.android.xposed.XposedHelpers
+import com.github.kyuubiran.ezxhelper.utils.findMethod
+import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QQClasses.Companion.QLog
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.utils.LogUtil
 
 class QLogHook : BaseHook() {
@@ -40,43 +39,33 @@ class QLogHook : BaseHook() {
     }
 
     @MethodHook("QLog 日志等级 hook")
-    public fun enableLog() {
-        XposedHelpers.findAndHookMethod(
-            load(QLog),
-            "isColorLevel",
-            XC_MethodReplacement.returnConstant(true)
-        )
+    fun enableLog() {
+        findMethod(QLog) { name == "isColorLevel" }.hookReplace { true }
     }
 
     @MethodHook("QLog Info 日志打印")
-    public fun hookInfo() {
-        XposedHelpers.findAndHookMethod(load(QLog),
-            "i",
-            String::class.java, Int::class.java, String::class.java, Throwable::class.java,
-            object : XC_MethodReplacement() {
-                override fun replaceHookedMethod(p0: MethodHookParam): Any {
-                    if (qTagFilter.isEmpty() || containsTag(p0.args[0] as String?)) {
-                        LogUtil.i("QTag: ${p0.args[0]}, msg: ${p0.args[2]}")
-                    }
-                    return Unit
-                }
+    fun hookInfo() {
+        findMethod(QLog) {
+            name == "i"
+                && parameterTypes.contentEquals(arrayOf(String::class.java, Int::class.java, String::class.java, Throwable::class.java))
+        }.hookReplace {
+            if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
+                LogUtil.i("QTag: ${it.args[0]}, msg: ${it.args[2]}")
             }
-        )
+            return@hookReplace Unit
+        }
     }
 
     @MethodHook("QLog Debug 日志打印")
-    public fun hookDebug() {
-        XposedHelpers.findAndHookMethod(load(QLog),
-            "d",
-            String::class.java, Int::class.java, String::class.java, Throwable::class.java,
-            object : XC_MethodReplacement() {
-                override fun replaceHookedMethod(p0: MethodHookParam): Any {
-                    if (qTagFilter.isEmpty() || p0.args[0] in qTagFilter) {
-                        LogUtil.d("QTag: ${p0.args[0]}, msg: ${p0.args[2]}")
-                    }
-                    return Unit
-                }
+    fun hookDebug() {
+        findMethod(QLog) {
+            name == "d"
+                && parameterTypes.contentEquals(arrayOf(String::class.java, Int::class.java, String::class.java, Throwable::class.java))
+        }.hookReplace {
+            if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
+                LogUtil.i("QTag: ${it.args[0]}, msg: ${it.args[2]}")
             }
-        )
+            return@hookReplace Unit
+        }
     }
 }

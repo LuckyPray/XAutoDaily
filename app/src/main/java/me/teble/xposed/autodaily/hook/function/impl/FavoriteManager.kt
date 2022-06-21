@@ -18,7 +18,7 @@ open class FavoriteManager : BaseFunction(
     override fun init() {}
 
     open fun favorite(targetUin: Long, count: Int = 20) {
-        LogUtil.d("favorite -> $targetUin count: $count")
+        LogUtil.i("favorite -> $targetUin count: $count")
         val toServiceMsg: ToServiceMsg = ToServiceMsg(
             "mobileqq.service",
             "$currentUin", "VisitorSvc.ReqFavorite"
@@ -37,7 +37,7 @@ open class FavoriteManager : BaseFunction(
     }
 
     open fun syncGetVoterList(page: Int, pageSize: Int): List<VoterInfo>? {
-        LogUtil.d("正在获取点赞列表 page: $page, pageSize: $pageSize")
+        LogUtil.i("正在获取点赞列表 page: $page, pageSize: $pageSize")
         val startTime = System.currentTimeMillis()
         val id = "syncGetVoterList"
         FromServiceMsgHook.resMap[id] = null
@@ -56,12 +56,12 @@ open class FavoriteManager : BaseFunction(
     }
 
     open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo>? {
-        LogUtil.d("正在获取前${maxPage}页的点赞列表")
+        LogUtil.i("正在获取前${maxPage}页的点赞列表")
         val beginOfYesterday = DateUtil.beginOfDay(Date(TimeUtil.cnTimeMillis())).time / 1000 - 24 * 60 * 60
         val mutableList = mutableListOf<VoterInfo>()
         for (i in 1..maxPage) {
             val list = syncGetVoterList(i, 30)
-            LogUtil.d("i: $i, list -> $list")
+            LogUtil.i("i: $i, list -> $list")
             list?.let {
                 if (it.isEmpty()) {
                     return mutableList

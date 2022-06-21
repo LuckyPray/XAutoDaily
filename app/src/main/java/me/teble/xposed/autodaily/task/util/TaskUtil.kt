@@ -28,7 +28,6 @@ import me.teble.xposed.autodaily.utils.toJsonString
 import java.util.*
 
 object TaskUtil {
-    private const val TAG = "TaskUtil"
 
     fun execute(
         reqType: ReqType,
@@ -36,7 +35,7 @@ object TaskUtil {
         relayMap: Map<String, Task>,
         env: MutableMap<String, Any>
     ): Boolean {
-        LogUtil.d("开始执行任务：${task.id}")
+        LogUtil.i("开始执行任务：${task.id}")
         val relays: List<Task> = task.relay?.let {
             mutableListOf<Task>().apply {
                 it.split("|").forEach {
@@ -77,7 +76,7 @@ object TaskUtil {
         for (cnt in 0 until repeatNum) {
             // 执行依赖任务
             relays.forEach {
-                LogUtil.d("开始执行依赖任务列表: ${task.relay}")
+                LogUtil.i("开始执行依赖任务列表: ${task.relay}")
                 // 依赖任务失败，退出执行
                 if (!execute(reqType, it, relayMap, env)) {
                     // TODO 多次失败，任务禁用
@@ -174,7 +173,7 @@ object TaskUtil {
         callback.replaces?.forEach {
             resultMsg = ReUtil.replaceAll(resultMsg, it.match, it.replacement)
         }
-        LogUtil.d(
+        LogUtil.i(
             """handleCallback -> 
             |   success: $success
             |   msg: $resultMsg

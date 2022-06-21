@@ -8,7 +8,7 @@ import me.teble.xposed.autodaily.config.Constants.NAME
 import me.teble.xposed.autodaily.hook.base.hostContext
 
 object ToastUtil {
-    private val TAG = "ToastUtil"
+
     private val handler by lazy {
         Handler(Looper.getMainLooper())
     }

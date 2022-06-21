@@ -7,7 +7,6 @@ import android.os.Environment
 import android.os.ParcelFileDescriptor
 import android.os.RemoteException
 import android.provider.MediaStore
-import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig.*
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config
@@ -23,8 +22,6 @@ import cn.hutool.core.io.FileUtil as HFileUtil
 
 
 object FileUtil {
-
-    private const val TAG = "XALog"
 
     private val logDir by lazy {
         val dir = File(hostContext.filesDir, "xa_log")
@@ -88,7 +85,7 @@ object FileUtil {
                 zipAddDir(os, logDir, logDir)
             }
         } catch (e: Throwable) {
-            Log.w(TAG, "get log", e)
+            LogUtil.e(e, "get log")
             throw RemoteException(e.stackTraceToString())
         }
     }
@@ -104,8 +101,8 @@ object FileUtil {
                 zipAddDir(os, logDir, logDir)
             }
         } catch (e: Throwable) {
-            Log.w(TAG, "get log", e)
-            throw RemoteException(e.stackTraceToString())
+            LogUtil.e(e, "get log")
+            throw RemoteException(e.message)
         }
     }
 
@@ -117,7 +114,7 @@ object FileUtil {
                 os.putNextEntry(ZipEntry(relativePath))
                 os.closeEntry()
             } catch (e: IOException) {
-                Log.w(TAG, relativePath, e)
+                LogUtil.e(e, relativePath)
             }
         } else if (file.exists()) {
             try {
@@ -127,7 +124,7 @@ object FileUtil {
                     os.closeEntry()
                 }
             } catch (e: IOException) {
-                Log.w(TAG, relativePath, e)
+                LogUtil.e(e, relativePath)
             }
         }
     }
@@ -141,7 +138,7 @@ object FileUtil {
                 os.putNextEntry(ZipEntry(relativePath))
                 os.closeEntry()
             } catch (e: IOException) {
-                Log.w(TAG, relativePath, e)
+                LogUtil.e(e, relativePath)
             }
         }
         dir.listFiles()?.forEach { zipAddFile(os, it, baseDir) }

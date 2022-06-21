@@ -35,7 +35,6 @@ open class XaActivity : Activity(),
     ContextAware {
 
     companion object {
-        private const val TAG = "XALog"
         private const val ACTIVITY_RESULT_TAG = "android:support:activity-result"
     }
 

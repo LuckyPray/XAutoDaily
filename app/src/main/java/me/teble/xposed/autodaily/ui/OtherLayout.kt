@@ -148,10 +148,22 @@ fun OtherLayout(navController: NavHostController) {
                 val checked = remember { mutableStateOf(ConfUnit.logToXposed) }
                 LineSwitch(
                     title = "日志输出至xposed",
-                    desc = "是否将日志信息输出至框架日志中(默认方式为输出至logcat)，重启生效",
+                    desc = "是否将日志信息输出至框架日志中(默认方式为输出至logcat)",
                     checked = checked,
                     onChange = {
                         ConfUnit.logToXposed = it
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+            item {
+                val checked = remember { mutableStateOf(ConfUnit.enableDebugLog) }
+                LineSwitch(
+                    title = "是否输出调试日志",
+                    desc = "仅供调试使用",
+                    checked = checked,
+                    onChange = {
+                        ConfUnit.enableDebugLog = it
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )

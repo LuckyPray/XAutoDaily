@@ -13,7 +13,6 @@ import mqq.app.AppRuntime
 import java.lang.reflect.Field
 
 object QApplicationUtil {
-    private const val TAG = "QApplicationUtils"
 
     val application: BaseApplicationImpl =
         BaseApplicationImpl::class.java.fieldValueAs(BaseApplicationImpl::class.java)

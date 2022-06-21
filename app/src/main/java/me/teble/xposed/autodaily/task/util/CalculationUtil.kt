@@ -5,7 +5,6 @@ import java.util.*
 
 object CalculationUtil {
 
-    private const val TAG: String = "CalculationUtil"
     private const val CSRF_TOKEN_END_STR = "tencentQQVIP123443safde&!%^%1282"
 
     fun getBkn(sKey: String): Int {
