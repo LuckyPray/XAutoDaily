@@ -79,24 +79,22 @@ class SplashActivityHook : BaseHook() {
 @Suppress("DEPRECATION")
 fun Activity.openAppUpdateDialog() {
     this.runOnUiThread {
-        val dialog by lazy {
-            CustomDialog(this).apply {
-                val dialog = this
-                val windowManager: WindowManager = this@openAppUpdateDialog.windowManager
-                val display: Display = windowManager.defaultDisplay
-                val lp = window?.attributes
-                lp?.width = (display.width * 0.8).toInt()
-                lp?.height = (display.height * 0.6).toInt()
-                lp?.dimAmount = 0.42f
-                window?.addFlags(FLAG_BLUR_BEHIND)
-                window?.addFlags(FLAG_DIM_BEHIND)
-                val view = ComposeView(context).apply {
-                    setContent {
-                        AppUpdateLayout(dialog)
-                    }
+        val dialog = CustomDialog(this).apply {
+            val dialog = this
+            val windowManager: WindowManager = this@openAppUpdateDialog.windowManager
+            val display: Display = windowManager.defaultDisplay
+            val lp = window?.attributes
+            lp?.width = (display.width * 0.8).toInt()
+            lp?.height = (display.height * 0.6).toInt()
+            lp?.dimAmount = 0.42f
+            window?.addFlags(FLAG_BLUR_BEHIND)
+            window?.addFlags(FLAG_DIM_BEHIND)
+            val view = ComposeView(context).apply {
+                setContent {
+                    AppUpdateLayout(dialog)
                 }
-                setContentView(view)
             }
+            setContentView(view)
         }
         val skipShow = ConfUnit.blockUpdateOneDay == Date().formatDate()
         if (!dialog.isShowing && !isFinishing && !skipShow) {
@@ -108,24 +106,22 @@ fun Activity.openAppUpdateDialog() {
 @Suppress("DEPRECATION")
 fun Activity.openConfigUpdateLog() {
     this.runOnUiThread {
-        val dialog by lazy {
-            CustomDialog(this).apply {
-                val dialog = this
-                val windowManager: WindowManager = this@openConfigUpdateLog.windowManager
-                val display: Display = windowManager.defaultDisplay
-                val lp = window?.attributes
-                lp?.width = (display.width * 0.8).toInt()
-                lp?.height = (display.height * 0.6).toInt()
-                lp?.dimAmount = 0.42f
-                window?.addFlags(FLAG_BLUR_BEHIND)
-                window?.addFlags(FLAG_DIM_BEHIND)
-                val view = ComposeView(context).apply {
-                    setContent {
-                        ConfigUpdateLayout(dialog)
-                    }
+        val dialog = CustomDialog(this).apply {
+            val dialog = this
+            val windowManager: WindowManager = this@openConfigUpdateLog.windowManager
+            val display: Display = windowManager.defaultDisplay
+            val lp = window?.attributes
+            lp?.width = (display.width * 0.8).toInt()
+            lp?.height = (display.height * 0.6).toInt()
+            lp?.dimAmount = 0.42f
+            window?.addFlags(FLAG_BLUR_BEHIND)
+            window?.addFlags(FLAG_DIM_BEHIND)
+            val view = ComposeView(context).apply {
+                setContent {
+                    ConfigUpdateLayout(dialog)
                 }
-                setContentView(view)
             }
+            setContentView(view)
         }
         if (!dialog.isShowing && !isFinishing) {
             dialog.show()

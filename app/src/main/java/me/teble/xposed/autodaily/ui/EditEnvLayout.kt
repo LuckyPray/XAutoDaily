@@ -199,6 +199,15 @@ fun EditEnvLayout(
                                             "string" -> {
                                                 limitErr = it.length > env.limit
                                             }
+                                            "randString" -> {
+                                                var flag = false
+                                                it.split("|").forEach {
+                                                    if (it.length > env.limit) {
+                                                        flag = true
+                                                    }
+                                                }
+                                                limitErr = flag
+                                            }
                                             "num" -> {
                                                 limitErr = if (it.isNotEmpty()) {
                                                     if (it.isDigitsOnly()) {
@@ -226,7 +235,7 @@ fun EditEnvLayout(
                             )
                             if (limitErr && env.limit > 0) {
                                 Text(
-                                    text = "变量长度/大小限制为${env.limit}",
+                                    text = "变量长度/大小/单段文字限制为${env.limit}",
                                     color = Color(0xFFFF4A4A),
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(8.dp)

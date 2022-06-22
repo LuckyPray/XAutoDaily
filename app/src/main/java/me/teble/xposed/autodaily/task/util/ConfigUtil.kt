@@ -306,8 +306,13 @@ object ConfigUtil {
         val now = TimeUtil.getCNDate()
         val nextShouldExecTime =
             task.nextShouldExecTime ?: let {
+                val realCron = TaskUtil.getRealCron(task)
                 ///////////////////////////////////////////////////////////////////////////////////////
-                val time = CronPatternUtil.nextDateAfter(TimeZone.getTimeZone("GMT+8"), CronPattern(task.cron!!), Date(TimeUtil.cnTimeMillis() + 1), true)!!
+                val time = CronPatternUtil.nextDateAfter(
+                    TimeZone.getTimeZone("GMT+8"),
+                    CronPattern(realCron),
+                    Date(TimeUtil.cnTimeMillis() + 1),
+                    true)!!
                 task.nextShouldExecTime = Date(time.time - TimeUtil.offsetTime).format()
                 Date(time.time + TimeUtil.offsetTime).format()
             }

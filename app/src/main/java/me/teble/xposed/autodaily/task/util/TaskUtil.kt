@@ -43,31 +43,7 @@ object TaskUtil {
                 }
             }
         } ?: emptyList()
-        // 将用户自定义变量的值放进环境变量
-        task.envs?.forEach {
-            val confValue = getConfEnv(task.id, it.name)
-            // 变量默认值为空表示强制要求用户填写，否则抛出异常
-            if (it.default.isEmpty()) {
-                if (confValue == null || confValue.isEmpty()) {
-                    ToastUtil.send("任务【${task.id}】的变量${it.name}不能为空", true)
-                    throw RuntimeException("任务【${task.id}】的变量${it.name}不能为空")
-                }
-            }
-            when (it.type) {
-                "num" -> {
-                    env[it.name] = confValue ?: it.default
-                }
-                "string" -> {
-                    env[it.name] = confValue ?: it.default
-                }
-                "list", "friend", "group" -> {
-                    val value = confValue ?: it.default
-                    env[it.name] = value.split(",").toMutableList()
-                }
-                else -> throw RuntimeException("未处理的变量类型：${it.type}")
-            }
-            LogUtil.d("开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
-        }
+        generateEnv(task, env)
         val repeatNum = format(task.repeat, null, env).toInt()
         LogUtil.d("重复请求次数 -> $repeatNum")
         var successNum = 0
@@ -102,8 +78,12 @@ object TaskUtil {
         if (task.cron != null && task.cron != "basic") {
             val now = TimeUtil.getCNDate()
             task.lastExecTime = now.format()
-            val nextTime =
-                CronPatternUtil.nextDateAfter(TimeZone.getTimeZone("GMT+8"), CronPattern(task.cron), Date(TimeUtil.cnTimeMillis() + 1), true)!!
+            val realCron = format(task.cron, null, env)
+            val nextTime = CronPatternUtil.nextDateAfter(
+                TimeZone.getTimeZone("GMT+8"),
+                CronPattern(realCron),
+                Date(TimeUtil.cnTimeMillis() + 1),
+                true)!!
             task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
             task.lastExecMsg =
                 if (reqCount == 1) {
@@ -227,6 +207,50 @@ object TaskUtil {
             }
             env.remove("this")
         }
+    }
+
+    private fun generateEnv(task: Task, env: MutableMap<String, Any>) {
+        // 将用户自定义变量的值放进环境变量
+        task.envs?.forEach {
+            val confValue = getConfEnv(task.id, it.name)
+            // 变量默认值为空表示强制要求用户填写，否则抛出异常
+            if (it.default.isEmpty()) {
+                if (confValue == null || confValue.isEmpty()) {
+                    ToastUtil.send("任务【${task.id}】的变量${it.name}不能为空", true)
+                    throw RuntimeException("任务【${task.id}】的变量${it.name}不能为空")
+                }
+            }
+            when (it.type) {
+                "num" -> {
+                    env[it.name] = confValue ?: it.default
+                }
+                "string" -> {
+                    env[it.name] = confValue ?: it.default
+                }
+                "randString" -> {
+                    env[it.name] = (confValue ?: it.default).split("|").random()
+                }
+                "list", "friend", "group" -> {
+                    val value = confValue ?: it.default
+                    env[it.name] = value.split(",").toMutableList()
+                }
+                else -> throw RuntimeException("未处理的变量类型：${it.type}")
+            }
+            LogUtil.d("开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
+        }
+    }
+
+    fun getRealCron(task: Task): String {
+        val env = mutableMapOf<String, Any>()
+        task.envs?.forEach {
+            val confValue = getConfEnv(task.id, it.name)
+            when(it.name) {
+                "hour", "minute" -> {
+                    env[it.name] = confValue ?: it.default
+                }
+            }
+        }
+        return format(task.cron!!, null, env)
     }
 
     private fun getConfEnv(taskId: String, key: String): String? {
