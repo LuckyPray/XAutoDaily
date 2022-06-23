@@ -18,8 +18,8 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.config.QQClasses.Companion.BaseApplicationImpl
+import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.KernelService
 import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadData
 import me.teble.xposed.autodaily.config.QQClasses.Companion.NewRuntime
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
@@ -91,10 +91,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     hostApp = it.thisObject as Application
                     EzXHelperInit.initAppContext(hostApp)
                     hostClassLoader = hostApp.classLoader
-                    // MMKV
-                    Config.init()
-                    injectClassLoader(hostClassLoader)
                     if (ProcUtil.procType == ProcUtil.MAIN) {
+                        // MMKV
+                        Config.init()
+                        injectClassLoader(hostClassLoader)
                         LogUtil.i("qq version -> ${hostAppName}($hostVersionCode)")
                         LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
                         LogUtil.d("init ActivityProxyManager")
@@ -109,23 +109,24 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 doInit()
             }
             if (loadPackageParam.processName.endsWith("tool")) {
-                Log.d("XALog","tool进程：" + loadPackageParam.processName)
+                Log.d("XALog", "tool进程：" + loadPackageParam.processName)
                 toolsHook()
             }
         }
     }
+
     private var hookIsInit: Boolean = false
 
     private fun toolsHook() {
         val cmdClass: Class<*> by lazy { load(DataMigrationService)!! }
-        val kernelServiceClass: Class<*> by lazy { load(KernelService)!! }
+        val coreServiceClass: Class<*> by lazy { load(CoreService)!! }
         findMethod(cmdClass) {
             name == "onStartCommand"
         }.hookAfter {
             val args = it.args
             val context = it.thisObject as Service
             val intent = args[0] as Intent?
-            context.startService(Intent(context, kernelServiceClass).apply {
+            context.startService(Intent(context, coreServiceClass).apply {
                 intent?.extras?.let { extra ->
                     putExtras(extra)
                 }
@@ -146,7 +147,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             LogUtil.d("initHook")
             initHook()
             moduleLoadSuccess = true
-            hostApp.startService(Intent(hostApp, load(KernelService)).apply {
+            hostApp.startService(Intent(hostApp, load(CoreService)).apply {
                 putExtra(CORE_SERVICE_FLAG, "$")
             })
         }
