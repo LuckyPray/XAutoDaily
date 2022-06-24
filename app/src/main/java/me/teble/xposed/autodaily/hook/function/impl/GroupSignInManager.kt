@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
-import me.teble.xposed.autodaily.config.QQClasses.Companion.TroopClockInHandler
+import me.teble.xposed.autodaily.config.TroopClockInHandler
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appInterface

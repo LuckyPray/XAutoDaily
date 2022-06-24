@@ -18,6 +18,7 @@ class EncodedField {
     }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: IntArray?): EncodedField {
             val encodedField = EncodedField()
             encodedField.filedIdxDiff = ByteUtils.readUleb128(src, index)

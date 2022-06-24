@@ -1,10 +1,9 @@
 package me.teble.xposed.autodaily.hook.utils
 
 import com.tencent.qphone.base.remote.FromServiceMsg
-import me.teble.xposed.autodaily.config.QQClasses
-import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetCodeRsp
-import me.teble.xposed.autodaily.config.QQClasses.Companion.StGetProfileRsp
-import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebRsp
+import me.teble.xposed.autodaily.config.StGetCodeRsp
+import me.teble.xposed.autodaily.config.StGetProfileRsp
+import me.teble.xposed.autodaily.config.StQWebRsp
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.task.model.MiniProfile
 import me.teble.xposed.autodaily.utils.fieldValue
@@ -12,7 +11,7 @@ import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 
-object ServiceMsgParseUtil : QQClasses {
+object ServiceMsgParseUtil {
 
     fun parseLoginCode(fromServiceMsg: FromServiceMsg): String? {
         val res = load(StQWebRsp)?.new()

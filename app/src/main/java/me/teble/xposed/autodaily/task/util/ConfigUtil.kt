@@ -5,8 +5,8 @@ import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.config.Constants.NOTICE
-import me.teble.xposed.autodaily.config.Constants.XA_API_URL
+import me.teble.xposed.autodaily.config.NOTICE
+import me.teble.xposed.autodaily.config.XA_API_URL
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig

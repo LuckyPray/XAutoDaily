@@ -5,7 +5,7 @@ import android.os.Environment
 import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
+import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.parse
 import java.io.BufferedReader

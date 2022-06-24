@@ -15,13 +15,7 @@ import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
-import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_SELF
-import me.teble.xposed.autodaily.config.QQClasses.Companion.BaseApplicationImpl
-import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
-import me.teble.xposed.autodaily.config.QQClasses.Companion.LoadData
-import me.teble.xposed.autodaily.config.QQClasses.Companion.NewRuntime
+import me.teble.xposed.autodaily.config.*
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.hook.base.*

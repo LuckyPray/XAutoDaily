@@ -2,7 +2,7 @@ package me.teble.xposed.autodaily.hook.utils
 
 import com.tencent.mobileqq.pb.ByteStringMicro
 import com.tencent.qphone.base.remote.ToServiceMsg
-import me.teble.xposed.autodaily.config.QQClasses.Companion.OIDBSSOPkg
+import me.teble.xposed.autodaily.config.OIDBSSOPkg
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin

@@ -16,7 +16,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.config.Constants
+import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
+import me.teble.xposed.autodaily.config.PAN_URL
 import me.teble.xposed.autodaily.task.util.formatDate
 import java.util.*
 
@@ -78,7 +79,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             TextButton(onClick = {
                 context.startActivity(Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(Constants.PAN_URL)
+                    data = Uri.parse(PAN_URL)
                 })
             }) {
                 Text(text = "蓝奏云")
@@ -86,7 +87,7 @@ fun AppUpdateLayout(dialog: CustomDialog) {
             TextButton(onClick = {
                 context.startActivity(Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(Constants.GITHUB_RELEASE_URL)
+                    data = Uri.parse(GITHUB_RELEASE_URL)
                 })
             }) {
                 Text(text = "Github")

@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.hook.utils
 
 import com.tencent.mobileqq.pb.ByteStringMicro
-import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
+import me.teble.xposed.autodaily.config.StQWebReq
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.utils.TimeUtil

@@ -3,8 +3,9 @@ package me.teble.xposed.autodaily.hook.function.impl
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-import me.teble.xposed.autodaily.config.QQClasses
-import me.teble.xposed.autodaily.config.QQClasses.Companion.ChatActivityFacade
+import me.teble.xposed.autodaily.config.BaseSessionInfo
+import me.teble.xposed.autodaily.config.ChatActivityFacade
+import me.teble.xposed.autodaily.config.SessionInfo
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
@@ -17,10 +18,13 @@ open class SendMessageManager : BaseFunction(
 ) {
     private lateinit var sendMsgMethod: Method
     private lateinit var cSendMsgParams: Class<*>
+    private lateinit var cSessionInfo: Class<*>
 
     override fun init() {
         val facade = load(ChatActivityFacade)
             ?: throw RuntimeException("类加载失败 -> $ChatActivityFacade")
+        cSessionInfo = load(SessionInfo)
+            ?: throw RuntimeException("类加载失败 -> $SessionInfo")
         for (mi in facade.declaredMethods) {
             if (mi.returnType != LongArray::class.java) continue
             val argt = mi.parameterTypes
@@ -29,8 +33,8 @@ open class SendMessageManager : BaseFunction(
                 && argt[3] == String::class.java
                 && argt[4] == ArrayList::class.java
             ) {
-                if (argt[2] == load(QQClasses.SessionInfo)
-                    || argt[2] == load(QQClasses.BaseSessionInfo)
+                if (argt[2] == cSessionInfo
+                    || argt[2] == load(BaseSessionInfo)
                 ) {
                     sendMsgMethod = mi
                     sendMsgMethod.isAccessible = true
@@ -54,8 +58,7 @@ open class SendMessageManager : BaseFunction(
         parcel.writeBundle(null)
         parcel.setDataPosition(0)
 
-        val clSessionInfo = load(QQClasses.SessionInfo)!!
-        val ret = clSessionInfo.new(parcel)
+        val ret = cSessionInfo.new(parcel)
         parcel.recycle()
         return ret as Parcelable
     }

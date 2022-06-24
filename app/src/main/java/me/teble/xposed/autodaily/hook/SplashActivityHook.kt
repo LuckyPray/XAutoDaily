@@ -12,7 +12,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.teble.xposed.autodaily.config.QQClasses.Companion.SplashActivity
+import me.teble.xposed.autodaily.config.SplashActivity
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.AUTO_EXEC
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook

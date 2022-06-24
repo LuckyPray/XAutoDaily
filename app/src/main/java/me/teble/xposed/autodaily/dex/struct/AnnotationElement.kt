@@ -7,6 +7,7 @@ class AnnotationElement {
     lateinit var encodeValue: EncodeValue
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: IntArray): AnnotationElement {
             val annotationElement = AnnotationElement()
             annotationElement.nameIds = ByteUtils.readUleb128(src, index)

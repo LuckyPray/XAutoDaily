@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
 import com.tencent.mobileqq.mp.mobileqq_mp
-import me.teble.xposed.autodaily.config.QQClasses.Companion.StQWebReq
+import me.teble.xposed.autodaily.config.StQWebReq
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil

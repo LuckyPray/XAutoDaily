@@ -58,10 +58,6 @@ open class TicketManager : BaseFunction(
         return ticketManager.getPt4Token(uin, domain)
     }
 
-    open fun pt4Token(domain: String): String? {
-        return ticketManager.getPt4Token(uin, domain)
-    }
-
     open fun getPskey(domain: String): String? {
         return ticketManager.getPskey(uin, domain)
     }

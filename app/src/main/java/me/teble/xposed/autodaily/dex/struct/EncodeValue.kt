@@ -41,6 +41,7 @@ class EncodeValue {
         }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: IntArray): EncodeValue {
             val encodeValue = EncodeValue()
             val b: Int = (ByteUtils.readByte(src, index))

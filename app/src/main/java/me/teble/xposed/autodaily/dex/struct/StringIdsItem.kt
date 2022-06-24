@@ -16,6 +16,7 @@ class StringIdsItem {
     }
 
     companion object {
+        @JvmStatic
         fun parserStringIdsItems(src: ByteArray?): List<StringIdsItem> {
             val headerType = HeaderType.parser(src)
             val idsSize = headerType.stringIdsSize

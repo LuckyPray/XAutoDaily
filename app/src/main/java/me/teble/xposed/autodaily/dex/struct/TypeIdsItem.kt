@@ -15,12 +15,14 @@ class TypeIdsItem {
     }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: Int): TypeIdsItem {
             val item = TypeIdsItem()
             item.descriptorIdx = ByteUtils.readInt(src, index)
             return item
         }
 
+        @JvmStatic
         fun parserAndGet(src: ByteArray?, index: Int): TypeIdsItem {
             val headerType = HeaderType.parser(src)
             val size = headerType.typeIdsSize

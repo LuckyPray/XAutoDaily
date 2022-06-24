@@ -179,6 +179,7 @@ class HeaderType {
     }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?): HeaderType {
             val headerType = HeaderType()
             headerType.magicMask = ByteUtils.copyByte(src, 0, 4)

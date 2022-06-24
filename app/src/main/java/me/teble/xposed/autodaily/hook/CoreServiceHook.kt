@@ -13,7 +13,7 @@ import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import kotlinx.coroutines.*
-import me.teble.xposed.autodaily.config.QQClasses.Companion.CoreService
+import me.teble.xposed.autodaily.config.CoreService
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.load

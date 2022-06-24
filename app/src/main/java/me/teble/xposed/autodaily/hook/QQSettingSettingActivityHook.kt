@@ -12,9 +12,9 @@ import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.activity.module.ModuleActivity
-import me.teble.xposed.autodaily.config.QQClasses.Companion.FormCommonSingleLineItem
-import me.teble.xposed.autodaily.config.QQClasses.Companion.FormSimpleItem
-import me.teble.xposed.autodaily.config.QQClasses.Companion.QQSettingSettingActivity
+import me.teble.xposed.autodaily.config.FormCommonSingleLineItem
+import me.teble.xposed.autodaily.config.FormSimpleItem
+import me.teble.xposed.autodaily.config.QQSettingSettingActivity
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil

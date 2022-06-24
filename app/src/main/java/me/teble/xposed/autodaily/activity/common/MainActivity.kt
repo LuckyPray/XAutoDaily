@@ -29,9 +29,9 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.activity.module.colors
 import me.teble.xposed.autodaily.application.xaApp
-import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_QQ
-import me.teble.xposed.autodaily.config.Constants.PACKAGE_NAME_TIM
-import me.teble.xposed.autodaily.config.QQClasses.Companion.DataMigrationService
+import me.teble.xposed.autodaily.config.DataMigrationService
+import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
+import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.shizuku.ShizukuApi

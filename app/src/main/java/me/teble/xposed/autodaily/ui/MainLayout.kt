@@ -32,8 +32,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.config.Constants
-import me.teble.xposed.autodaily.config.Constants.ALIPAY_QRCODE
+import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
+import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
+import me.teble.xposed.autodaily.config.PAN_URL
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.base.hostVersionCode
@@ -74,13 +75,13 @@ fun MainLayout(navController: NavHostController) {
             onGithub = {
                 navController.context.startActivity(Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(Constants.GITHUB_RELEASE_URL)
+                    data = Uri.parse(GITHUB_RELEASE_URL)
                 })
             },
             onLanzou = {
                 navController.context.startActivity(Intent().apply {
                     action = Intent.ACTION_VIEW
-                    data = Uri.parse(Constants.PAN_URL)
+                    data = Uri.parse(PAN_URL)
                 })
             },
             onDismiss = {

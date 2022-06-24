@@ -24,6 +24,7 @@ class EncodeArray {
         }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: IntArray): EncodeArray {
             val encodeArray = EncodeArray()
             encodeArray.size = ByteUtils.readUleb128(src, index)

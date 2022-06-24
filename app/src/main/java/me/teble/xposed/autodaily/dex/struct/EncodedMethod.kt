@@ -21,6 +21,7 @@ class EncodedMethod {
     }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: IntArray?): EncodedMethod {
             val encodedMethod = EncodedMethod()
             encodedMethod.methodIdxDiff = ByteUtils.readUleb128(src, index)

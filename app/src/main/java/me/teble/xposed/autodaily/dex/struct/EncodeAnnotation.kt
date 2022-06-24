@@ -25,6 +25,7 @@ class EncodeAnnotation {
         }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: IntArray): EncodeAnnotation {
             val encodeAnnotation = EncodeAnnotation()
             encodeAnnotation.typeIds = ByteUtils.readUleb128(src, index)

@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
 import android.content.Intent
-import me.teble.xposed.autodaily.config.QQClasses.Companion.GetProfileRequest
-import me.teble.xposed.autodaily.config.QQClasses.Companion.MiniAppGetProfileServlet
-import me.teble.xposed.autodaily.config.QQClasses.Companion.MsfService
+import me.teble.xposed.autodaily.config.GetProfileRequest
+import me.teble.xposed.autodaily.config.MiniAppGetProfileServlet
+import me.teble.xposed.autodaily.config.MsfService
 import me.teble.xposed.autodaily.hook.FromServiceMsgHook
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction

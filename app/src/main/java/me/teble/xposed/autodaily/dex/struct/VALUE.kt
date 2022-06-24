@@ -23,6 +23,7 @@ enum class VALUE(
     VALUE_BOOLEAN(0x1f);
 
     companion object {
+        @JvmStatic
         fun valueOf(type: Int): VALUE {
             for (value in values()) {
                 if (type == value.type) {

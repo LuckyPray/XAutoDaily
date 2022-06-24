@@ -56,6 +56,7 @@ class ClassDataItem {
         }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: Int): ClassDataItem {
             val item = ClassDataItem()
             val idx = intArrayOf(index)

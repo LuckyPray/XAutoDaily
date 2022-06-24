@@ -3,7 +3,7 @@ package me.teble.xposed.autodaily.hook
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.config.QQClasses.Companion.QLog
+import me.teble.xposed.autodaily.config.QLog
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.utils.LogUtil

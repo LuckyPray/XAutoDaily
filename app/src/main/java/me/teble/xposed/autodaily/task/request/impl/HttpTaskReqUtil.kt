@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import me.teble.xposed.autodaily.config.Constants
+import me.teble.xposed.autodaily.config.qqUserAgent
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.task.model.Task
@@ -111,7 +111,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                     it.lowercase() == "user-agent"
                 } ?: false
                 if (!existsUserAgent) {
-                    addHeader("user-agent", Constants.qqUserAgent)
+                    addHeader("user-agent", qqUserAgent)
                 }
                 req.cookie?.let {
                     addHeader("Cookie", it)

@@ -11,7 +11,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.github.kyuubiran.ezxhelper.utils.loadClass
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.config.QQClasses.Companion.SplashActivity
+import me.teble.xposed.autodaily.config.SplashActivity
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.ui.ConfUnit
 

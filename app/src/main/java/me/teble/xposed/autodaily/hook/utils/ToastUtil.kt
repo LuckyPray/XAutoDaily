@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
-import me.teble.xposed.autodaily.config.Constants.NAME
+import me.teble.xposed.autodaily.config.NAME
 import me.teble.xposed.autodaily.hook.base.hostContext
 
 object ToastUtil {

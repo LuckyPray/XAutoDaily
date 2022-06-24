@@ -33,6 +33,7 @@ class CodeItem {
     }
 
     companion object {
+        @JvmStatic
         fun parser(src: ByteArray?, index: Int): CodeItem {
             val codeItem = CodeItem()
             if (index == 0) {
