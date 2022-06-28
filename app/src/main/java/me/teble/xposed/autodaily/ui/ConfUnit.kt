@@ -20,6 +20,9 @@ import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
 import me.teble.xposed.autodaily.task.util.Const.SIGN_STAY_AWAKE
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
+import me.teble.xposed.autodaily.task.util.formatDate
+import me.teble.xposed.autodaily.utils.TimeUtil
+import java.util.*
 
 object ConfUnit {
     var needUpdate: Boolean = false
@@ -81,6 +84,20 @@ var Task.lastExecMsg: String?
 var Task.taskExceptionFlag: String?
     get() = accountConfig.getString("${this.id}#${TASK_EXCEPTION_COUNT}")
     set(value) = accountConfig.putString("${this.id}#${TASK_EXCEPTION_COUNT}", value)
+
+val Task.errCount: Int get() {
+        this.taskExceptionFlag.let {
+            it?.let {
+                try {
+                    val arr = it.split("|")
+                    if (arr[0] == Date(TimeUtil.localTimeMillis()).formatDate()) {
+                        return arr[1].toInt()
+                    }
+                } catch (e: Throwable) {}
+            }
+        }
+        return 0
+    }
 
 fun Task.getVariable(name: String, default: String): String
     = accountConfig.getString("${this.id}#${ENV_VARIABLE}#${name}", default)

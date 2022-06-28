@@ -11,10 +11,8 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.toJsonString
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import java.io.IOException
@@ -27,8 +25,13 @@ import java.util.concurrent.TimeUnit
 object HttpTaskReqUtil : ITaskReqUtil {
 
     private val  client = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(20, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectionPool(ConnectionPool(32, 5, TimeUnit.SECONDS))
+        .dispatcher(Dispatcher().apply {
+            maxRequestsPerHost = 10
+        })
         .build()
 
     object METHOD {

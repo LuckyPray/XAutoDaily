@@ -223,45 +223,5 @@ class CoreServiceHook : BaseHook() {
                 return
             }
         })
-//        findMethod(Service::class.java) {
-//            name == "onStartCommand"
-//        }.hookAfter {
-//            if (it.thisObject::class.java != cCoreService || wakeLockInit) {
-//                return@hookAfter
-//            }
-//            val args = it.args
-//            val service = it.thisObject as Service
-//            val intent = args[0] as Intent?
-//            if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
-//                return@hookAfter
-//            }
-//            if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
-//                LogUtil.d("onStartCommand")
-//                LogUtil.d(intent.extras.toMap().toString())
-//                ToastUtil.send(service, "唤醒测试: true")
-//            } else {
-//                handler.sendEmptyMessage(START_CRON)
-//            }
-//            return@hookAfter
-//        }
-
-//        findMethod(KernelService) {
-//            name == "onStartCommand"
-//        }.hookReplace {
-//            val args = it.args
-//            val service = it.thisObject as Service
-//            val intent = args[0] as Intent?
-//            if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
-//                return@hookReplace XposedBridge.invokeOriginalMethod(it.method, it.thisObject, it.args)
-//            }
-//            if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
-//                LogUtil.d("onStartCommand")
-//                LogUtil.d(intent.extras.toMap().toString())
-//                ToastUtil.send(service, "唤醒测试: true")
-//            } else {
-//                handler.sendEmptyMessage(START_CRON)
-//            }
-//            return@hookReplace 2
-//        }
     }
 }
