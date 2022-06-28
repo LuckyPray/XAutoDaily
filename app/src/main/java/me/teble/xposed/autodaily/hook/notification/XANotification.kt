@@ -17,8 +17,9 @@ import me.teble.xposed.autodaily.ui.ConfUnit
 
 object XANotification {
 
-    private const val NOTIFICATION_ID = 1101
+    private const val NOTIFICATION_ID = 0
     private const val CHANNEL_ID = "me.teble.xposed.autodaily.XA_FOREST_NOTIFY_CHANNEL"
+    private var atomicId = 1
 
     private val notificationManager by lazy {
         hostContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -35,10 +36,9 @@ object XANotification {
 
         initNotification(hostContext)
         isStart = true
-        notificationManager.notify(NOTIFICATION_ID, mNotification)
     }
 
-    fun setContent(content: String, onGoing: Boolean = true, bigText: Boolean = false) {
+    fun setContent(content: String, onGoing: Boolean = true, bigText: Boolean = false, isTask: Boolean = true) {
         if (!enabled) return
         if (!isStart) start()
 
@@ -53,13 +53,19 @@ object XANotification {
             }
             setOngoing(onGoing)
         }.build()
-        notificationManager.notify(NOTIFICATION_ID, mNotification)
+        notificationManager.notify(if (isTask) atomicId++ else NOTIFICATION_ID, mNotification)
     }
 
     fun stop() {
         if (!isStart) return
 
         notificationManager.cancel(NOTIFICATION_ID)
+        isStart = false
+    }
+
+    fun cancelAll() {
+        if (!isStart) return
+        notificationManager.cancelAll()
         isStart = false
     }
 

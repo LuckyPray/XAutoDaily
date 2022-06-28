@@ -143,7 +143,7 @@ class CoreServiceHook : BaseHook() {
                         runtimeTasks.remove(it)
                     }
                 }
-                XANotification.setContent("签到执行完毕", false)
+                XANotification.setContent("签到执行完毕", onGoing = false, isTask = true)
                 withContext(Dispatchers.IO) {
                     delay(5000)
                 }

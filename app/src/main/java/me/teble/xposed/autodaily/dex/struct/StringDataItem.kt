@@ -27,7 +27,6 @@ class StringDataItem {
         fun parser(src: ByteArray?, index: Int): StringDataItem {
             val item = StringDataItem()
             val idx = intArrayOf(index)
-            //        System.out.println(bytesToHexString(copyByte(src, index[0], 4)));
             item.size = ByteUtils.readUleb128(src, idx)
             item.dataBytes = ByteUtils.readByteString(src, idx)
             item.data = String(item.dataBytes)

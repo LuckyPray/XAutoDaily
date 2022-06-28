@@ -70,7 +70,7 @@ class SplashActivityHook : BaseHook() {
     }
 }
 
-lateinit var appUpdateDialog: AlertDialog
+private lateinit var appUpdateDialog: AlertDialog
 
 suspend fun Activity.openAppUpdateDialog() {
     withContext(Dispatchers.IO) {
@@ -116,7 +116,7 @@ suspend fun Activity.openAppUpdateDialog() {
     }
 }
 
-lateinit var configUpdateDialog: AlertDialog
+private lateinit var configUpdateDialog: AlertDialog
 
 suspend fun Activity.openConfigUpdateLog() {
     withContext(Dispatchers.IO) {

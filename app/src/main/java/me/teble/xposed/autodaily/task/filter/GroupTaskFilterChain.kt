@@ -57,7 +57,7 @@ class GroupTaskFilterChain(
                     continue
                 }
                 try {
-                    // 进行异常计数，超过一定次数，当天不再执行该任务
+                    XANotification.setContent("正在执行任务${task.id}")
                     TaskUtil.execute(reqType, task, relayTaskMap, env.toMutableMap())
                 } catch (e: SocketTimeoutException) {
                     LogUtil.e(e, "执行任务${task.id}异常: ")
