@@ -206,7 +206,6 @@ class CoreServiceHook : BaseHook() {
                 if (param.thisObject::class.java != cCoreService) {
                     return
                 }
-                LogUtil.d("CoreService onStartCommand")
                 val args = param.args
                 val service = param.thisObject as Service
                 val intent = args[0] as Intent?

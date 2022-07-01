@@ -53,7 +53,7 @@ object XANotification {
             }
             setOngoing(onGoing)
         }.build()
-        notificationManager.notify(if (isTask) atomicId++ else NOTIFICATION_ID, mNotification)
+        notificationManager.notify(if (!isTask) atomicId++ else NOTIFICATION_ID, mNotification)
     }
 
     fun stop() {
