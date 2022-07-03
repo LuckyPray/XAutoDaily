@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.utils
 
 import android.util.Log
 import de.robv.android.xposed.XposedBridge
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.hook.base.hostInit
 import me.teble.xposed.autodaily.hook.config.Config
@@ -14,7 +15,7 @@ object LogUtil {
     private const val maxLength = 2000
     private val pid by lazy { ProcUtil.mPid }
     private val toXposed: Boolean get() = Config.isInit && ConfUnit.logToXposed
-    private val enableDebug get() = Config.isInit && ConfUnit.enableDebugLog
+    private val enableDebug get() = BuildConfig.DEBUG || Config.isInit && ConfUnit.enableDebugLog
 
     private fun doLog(
         f: (String, String) -> Unit,

@@ -101,6 +101,9 @@
 -keep class net.bytebuddy.** {
     *;
 }
+-keep class me.teble.xposed.autodaily.shizuku.UserService {
+    *;
+}
 
 
 ##########################################################################################################

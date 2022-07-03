@@ -87,7 +87,11 @@ class CoreServiceHook : BaseHook() {
                 } else {
                     LogUtil.i("定时执行")
                 }
-                executorTask(ConfigUtil.loadSaveConf())
+                runCatching {
+                    executorTask(ConfigUtil.loadSaveConf())
+                }.onFailure {
+                    LogUtil.e(it)
+                }
             }
         }
 
@@ -111,7 +115,13 @@ class CoreServiceHook : BaseHook() {
             }
             try {
                 XANotification.start()
-                wakeLock.acquire(20 * 60 * 1000L)
+                if (wakeLockInit) {
+                    // 未知原因，CoreService没有正常hook上
+                    wakeLock.acquire(20 * 60 * 1000L)
+                } else {
+                    // 补偿启动定时器
+                    handler.sendEmptyMessage(START_CRON)
+                }
                 runtimeTasks.addAll(needExecGroups)
                 var threadCount = 1
                 if (ConfUnit.usedThreadPool) {
@@ -148,7 +158,9 @@ class CoreServiceHook : BaseHook() {
                     delay(5000)
                 }
                 XANotification.stop()
-                wakeLock.release()
+                if (wakeLockInit && wakeLock.isHeld) {
+                    wakeLock.release()
+                }
             }
         }
 
@@ -199,28 +211,29 @@ class CoreServiceHook : BaseHook() {
             val service = it.thisObject as Service
             val pm = service.getSystemService(Service.POWER_SERVICE) as PowerManager
             wakeLock = pm.newWakeLock(PARTIAL_WAKE_LOCK, service::class.java.name)
+            wakeLock.setReferenceCounted(false)
         }
         XposedBridge.hookAllMethods(Service::class.java, "onStartCommand",
-        object : XC_MethodHook() {
-            override fun afterHookedMethod(param: MethodHookParam) {
-                if (param.thisObject::class.java != cCoreService) {
+            object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam) {
+                    if (param.thisObject::class.java != cCoreService) {
+                        return
+                    }
+                    val args = param.args
+                    val service = param.thisObject as Service
+                    val intent = args[0] as Intent?
+                    if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
+                        return
+                    }
+                    if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
+                        LogUtil.d("onStartCommand")
+                        LogUtil.d(intent.extras.toMap().toString())
+                        ToastUtil.send(service, "唤醒测试: true")
+                    } else {
+                        handler.sendEmptyMessage(START_CRON)
+                    }
                     return
                 }
-                val args = param.args
-                val service = param.thisObject as Service
-                val intent = args[0] as Intent?
-                if (intent?.hasExtra(CORE_SERVICE_FLAG) != true) {
-                    return
-                }
-                if (intent.hasExtra(CORE_SERVICE_TOAST_FLAG)) {
-                    LogUtil.d("onStartCommand")
-                    LogUtil.d(intent.extras.toMap().toString())
-                    ToastUtil.send(service, "唤醒测试: true")
-                } else {
-                    handler.sendEmptyMessage(START_CRON)
-                }
-                return
-            }
-        })
+            })
     }
 }

@@ -161,7 +161,7 @@ object ConfigUtil {
     }
 
     private fun decodeConfStr(encodeConfStr: String): String? {
-        LogUtil.d("${encodeConfStr.length} -> $encodeConfStr")
+        LogUtil.d("conf length -> ${encodeConfStr.length}")
         val res = decryptXAConf(encodeConfStr.toByteArray())
         if (res.isEmpty()) {
             LogUtil.w("解密配置文件失败，请检查插件是否为最新版本")

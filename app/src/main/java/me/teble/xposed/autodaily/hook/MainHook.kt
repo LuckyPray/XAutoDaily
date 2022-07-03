@@ -1,10 +1,12 @@
 package me.teble.xposed.autodaily.hook
 
-import android.app.Application
-import android.app.Service
+import android.app.*
+import android.content.Context
 import android.content.Intent
 import android.content.res.XModuleResources
+import android.os.Build
 import android.util.Log
+import androidx.core.app.NotificationCompat
 import cn.hutool.core.util.ReflectUtil.*
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.emptyParam
@@ -15,6 +17,7 @@ import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
+import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.*
 import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
@@ -120,6 +123,35 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val args = it.args
             val context = it.thisObject as Service
             val intent = args[0] as Intent?
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                var builder: NotificationCompat.Builder
+                val channelId = "me.teble.xposed.autodaily.XA_TOOLS_FOREST_NOTIFY_CHANNEL"
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
+                    val notificationChannel = NotificationChannel(
+                        channelId, "XAutoDaily",
+                        NotificationManager.IMPORTANCE_LOW).apply {
+                        enableLights(false)
+                        enableVibration(false)
+                        setShowBadge(false)
+                    }
+                    notificationManager.createNotificationChannel(notificationChannel)
+                    builder = NotificationCompat.Builder(context,
+                        channelId
+                    )
+                } else {
+                    @Suppress("DEPRECATION")
+                    builder = NotificationCompat.Builder(context)
+                        .setPriority(Notification.PRIORITY_LOW)
+                }
+                builder = builder.setContentTitle("XAutoDaily")
+                    .setSmallIcon(R.drawable.icon_x_auto_daily_2)
+                    .setOngoing(false)
+                    .setShowWhen(true)
+                val notification = builder.setContentText("正在唤醒主进程").build()
+                context.startForeground(1, notification)
+                notificationManager.cancelAll()
+            }
             context.startService(Intent(context, coreServiceClass).apply {
                 intent?.extras?.let { extra ->
                     putExtras(extra)
@@ -141,9 +173,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             LogUtil.d("initHook")
             initHook()
             moduleLoadSuccess = true
-            hostApp.startService(Intent(hostApp, load(CoreService)).apply {
-                putExtra(CORE_SERVICE_FLAG, "$")
-            })
+            runCatching {
+                hostApp.startService(Intent(hostApp, load(CoreService)).apply {
+                    putExtra(CORE_SERVICE_FLAG, "$")
+                })
+            }.onFailure { LogUtil.e(it, "start CoreService failed") }
         }
     }
 
