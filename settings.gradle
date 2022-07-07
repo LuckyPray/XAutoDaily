@@ -1,5 +1,8 @@
 include ':app'
 include ':mmkv'
+include ':stub'
+
 project(':mmkv').projectDir = new File(settingsDir, "xa_mmkv" + File.separator + "Android")
+project(':stub').projectDir = new File(settingsDir, "stub")
 
 rootProject.name = "XAutoDaily"
