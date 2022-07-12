@@ -26,6 +26,7 @@ import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.errCount
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.toMap
@@ -101,7 +102,7 @@ class CoreServiceHook : BaseHook() {
             lock.withLock {
                 for (group in conf.taskGroups) {
                     for (task in group.tasks) {
-                        if (ConfigUtil.checkExecuteTask(task)) {
+                        if (ConfigUtil.checkExecuteTask(task) && task.errCount < 3) {
                             if (!runtimeTasks.contains(group)) {
                                 needExecGroups.add(group)
                             }

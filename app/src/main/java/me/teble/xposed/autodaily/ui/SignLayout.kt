@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Divider
@@ -15,14 +16,26 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.EditEnv
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 
+@SuppressLint("MutableCollectionMutableState")
 @Composable
 fun SignLayout(navController: NavHostController) {
     ActivityView(title = "签到设置") {
         var conf by remember {
             mutableStateOf(TaskProperties(0, 0, emptyList(), emptyList()))
         }
-        LaunchedEffect(conf) {
+        val errorMap by remember {
+            mutableStateOf(mutableMapOf<String, String>())
+        }
+        LaunchedEffect(Unit) {
             conf = ConfigUtil.loadSaveConf()
+            conf.taskGroups.forEach { taskGroup ->
+                taskGroup.tasks.forEach {
+                    // TODO 后续优化成 本次登陆||当天暂停 执行
+                    if (it.errCount >= 3) {
+                        errorMap[it.id] = "任务执行失败次数超过3次，今日暂停执行，可长按重置执行记录"
+                    }
+                }
+            }
         }
         LazyColumn(
             modifier = Modifier
@@ -77,6 +90,9 @@ fun SignLayout(navController: NavHostController) {
                                 otherInfoList = (mutableListOf<String>().apply {
                                     if (!checked.value) {
                                         return@apply
+                                    }
+                                    if (errorMap.containsKey(task.id)) {
+                                        add(errorMap[task.id]!!)
                                     }
                                     add("上次: $lastExecTime, 响应: $lastExecMsg")
                                     add("下次: $nextShouldExecTime")

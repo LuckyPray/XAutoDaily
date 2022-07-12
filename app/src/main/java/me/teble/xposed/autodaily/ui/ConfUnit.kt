@@ -88,12 +88,12 @@ var Task.taskExceptionFlag: String?
 val Task.errCount: Int get() {
         this.taskExceptionFlag.let {
             it?.let {
-                try {
+                runCatching {
                     val arr = it.split("|")
                     if (arr[0] == Date(TimeUtil.localTimeMillis()).formatDate()) {
                         return arr[1].toInt()
                     }
-                } catch (e: Throwable) {}
+                }
             }
         }
         return 0

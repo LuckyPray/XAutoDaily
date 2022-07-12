@@ -7,7 +7,6 @@ import android.content.res.XModuleResources
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import cn.hutool.core.util.ReflectUtil.*
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.emptyParam
 import com.github.kyuubiran.ezxhelper.utils.findMethod
@@ -34,10 +33,6 @@ import me.teble.xposed.autodaily.utils.new
 import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
-
-    companion object {
-//        private val scope = CoroutineScope(Dispatchers.Default)
-    }
 
 //    private lateinit var subHookClasses: Set<String>
 
@@ -279,20 +274,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         cache.putStringSet("confuseClasses", confuseInfoKeys)
         ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个，耗时${useTime}ms")
         dexIsInit = false
-    }
-
-    private fun replaceParentClassloader(qClassloader: ClassLoader) {
-        val fParent = getField(ClassLoader::class.java, "parent")
-        val mClassloader = MainHook::class.java.classLoader
-        val parentClassloader = getFieldValue(mClassloader, "parent") as ClassLoader
-        try {
-            if (XAClassLoader::class.java != parentClassloader.javaClass) {
-                LogUtil.d("replace parent classloader")
-                setFieldValue(mClassloader, fParent, XAClassLoader(qClassloader, parentClassloader))
-            }
-        } catch (e: Exception) {
-            LogUtil.e(e)
-        }
     }
 
     private fun initHook() {

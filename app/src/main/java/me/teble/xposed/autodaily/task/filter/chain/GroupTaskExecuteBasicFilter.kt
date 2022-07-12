@@ -21,7 +21,12 @@ class GroupTaskExecuteBasicFilter: GroupTaskFilter(
         val type = ReqType.getType(groupTask.type.split("|")[0])
         groupTask.preTasks.forEach {
             if (it.cron == "basic") {
-                executeBasicTask(type, it, relayTaskMap, env)
+                try {
+                    executeBasicTask(type, it, relayTaskMap, env)
+                } catch (e: Throwable) {
+                    LogUtil.e(e, "执行basic任务失败，跳过本次执行")
+                    return
+                }
             }
         }
         chain.doFilter(relayTaskMap, taskList, env)
