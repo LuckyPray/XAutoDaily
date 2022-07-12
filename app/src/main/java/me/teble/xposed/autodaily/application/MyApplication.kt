@@ -21,7 +21,7 @@ import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import rikka.shizuku.Shizuku
 
 lateinit var xaApp: MyApplication
-
+val xaAppIsInit get() = ::xaApp.isInitialized
 lateinit var context: Context
 
 @SuppressLint("MutableCollectionMutableState")

@@ -1,6 +1,8 @@
 package me.teble.xposed.autodaily.ui
 
 import android.annotation.SuppressLint
+import android.content.ComponentName
+import android.content.pm.PackageManager.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -8,9 +10,9 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,6 +28,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.R
+import me.teble.xposed.autodaily.activity.common.MainActivity
+import me.teble.xposed.autodaily.application.xaApp
+import me.teble.xposed.autodaily.application.xaAppIsInit
 
 @Composable
 fun VerticaLine(
@@ -50,15 +55,64 @@ fun VerticaLine(
 
 @Composable
 fun AppBar(title: String) {
+    var appInit by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        appInit = xaAppIsInit
+    }
     TopAppBar(
         elevation = 0.dp,
         title = {
             Text(title, color = Color.White)
         },
+        actions = {
+            if (appInit) {
+                var showMenu by remember { mutableStateOf(false) }
+                var hiddenAppIcon by remember { mutableStateOf(false) }
+                LaunchedEffect(Unit) {
+                    hiddenAppIcon = xaApp.prefs.getBoolean("hidden_app_icon", false)
+                }
+                LaunchedEffect(hiddenAppIcon) {
+                    xaApp.packageManager.setComponentEnabledSetting(
+                        ComponentName(xaApp, MainActivity::class.java.name + "Alias"),
+                        if (hiddenAppIcon) COMPONENT_ENABLED_STATE_DISABLED else COMPONENT_ENABLED_STATE_ENABLED,
+                        DONT_KILL_APP
+                    )
+                    xaApp.prefs.edit()
+                        .putBoolean("hidden_app_icon", hiddenAppIcon)
+                        .apply()
+                }
+                IconButton(onClick = {
+                    showMenu = !showMenu
+                }) {
+                    Icon(Icons.Filled.MoreVert, "menu")
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = !showMenu }
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            hiddenAppIcon = !hiddenAppIcon
+                        }) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(text = "隐藏桌面图标")
+                                Checkbox(
+                                    checked = hiddenAppIcon,
+                                    onCheckedChange = {
+                                        hiddenAppIcon = it
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        },
         backgroundColor = Color(0xFF409EFF),
         modifier = Modifier
             .background(Color(0xFF409EFF))
-            .statusBarsPadding()
+            .statusBarsPadding(),
     )
 }
 
