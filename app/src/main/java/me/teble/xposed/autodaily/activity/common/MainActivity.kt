@@ -48,10 +48,6 @@ import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
 
-//    init {
-//        System.loadLibrary("xa_native")
-//    }
-
     companion object {
         var shizukuErrInfo by mutableStateOf("")
         var shizukuDaemonRunning by mutableStateOf(false)
@@ -83,6 +79,7 @@ class MainActivity : ComponentActivity() {
 
                 if (binder != null && binder.pingBinder()) {
                     val service: IUserService = IUserService.Stub.asInterface(binder)
+                    ShizukuApi.initBinder(binder)
                     try {
                         if (service.isRunning) {
                             shizukuErrInfo = ""

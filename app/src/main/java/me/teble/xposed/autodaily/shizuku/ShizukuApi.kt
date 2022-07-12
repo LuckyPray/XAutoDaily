@@ -2,16 +2,29 @@ package me.teble.xposed.autodaily.shizuku
 
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.IBinder
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import me.teble.xposed.autodaily.IUserService
+import me.teble.xposed.autodaily.application.xaApp
 import rikka.shizuku.Shizuku
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 object ShizukuApi {
     var isBinderAvailable = false
     var isPermissionGranted by mutableStateOf(false)
+    private lateinit var service: IUserService
+
+    fun initBinder(binder: IBinder) {
+        if (isBinderAvailable) return
+        service = IUserService.Stub.asInterface(binder)
+        binder.linkToDeath({
+            isBinderAvailable = false
+            Log.w("XALog", "UserService binderDied")
+        }, 0)
+    }
 
     fun init() {
         Shizuku.addBinderReceivedListenerSticky {
@@ -35,16 +48,14 @@ object ShizukuApi {
 
     fun setUntrustedTouchEvents(disabled: Boolean) {
         if (!isPermissionGranted) return
-        shizukuShell("settings put global block_untrusted_touches ${if(disabled) 0 else 2}")
+        shizukuShell("settings put global block_untrusted_touches ${if (disabled) 0 else 2}")
     }
 
-    @Suppress("DEPRECATION")
     private fun shizukuShell(shellStr: String): String {
-        val inputStream =  Shizuku.newProcess(mutableListOf<String>().apply {
-            addAll(shellStr.split(" "))
-        }.toTypedArray(), arrayOf(), "/").inputStream
-        val inputStreamReader = InputStreamReader(inputStream)
-        val bufferReader = BufferedReader(inputStreamReader)
-        return bufferReader.readText()
+        if (isBinderAvailable && ShizukuApi::service.isInitialized) {
+            return service.execShell(shellStr)
+        }
+        Toast.makeText(xaApp, "Shizuku is not available", Toast.LENGTH_SHORT).show()
+        return ""
     }
 }

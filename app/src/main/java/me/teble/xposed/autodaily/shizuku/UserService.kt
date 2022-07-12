@@ -65,12 +65,6 @@ class UserService : IUserService.Stub() {
         execShell(shellStr)
     }
 
-    private fun execShell(shell: String): String {
-        val process = Runtime.getRuntime().exec(shell)
-        val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
-        return bufferedReader.readText()
-    }
-
     private fun loadConf(): ShizukuConf {
         val confDir = File(sdcardPath, "Android/data/${BuildConfig.APPLICATION_ID}/files/conf")
         if (confDir.isFile) {
@@ -93,6 +87,12 @@ class UserService : IUserService.Stub() {
 
     override fun exit() {
         destroy()
+    }
+
+    override fun execShell(shell: String): String {
+        val process = Runtime.getRuntime().exec(shell)
+        val bufferedReader = BufferedReader(InputStreamReader(process.inputStream))
+        return bufferedReader.readText()
     }
 
     override fun isRunning(): Boolean {
