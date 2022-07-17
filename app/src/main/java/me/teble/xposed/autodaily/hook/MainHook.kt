@@ -177,7 +177,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun doInit() {
-        val encumberStep = if (hostPackageName == PACKAGE_NAME_QQ) NewRuntime else LoadData
+        val encumberStep = LoadData
         findMethod(encumberStep) { returnType == Boolean::class.java && emptyParam }.hookAfter {
             // 防止hook多次被执行
             runCatching {
@@ -254,7 +254,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
         dexIsInit = true
         LogUtil.log("needLocateClasses -> $needLocateClasses")
-        ToastUtil.send("正在尝试定位QQ混淆类", true)
+        ToastUtil.send("正在尝试定位QQ混淆类，可能需要等待一段时间", true)
         val info = needLocateClasses.associateWith { confuseInfo[it] }
         val startTime = System.currentTimeMillis()
         val locateRes = locateClasses(info)

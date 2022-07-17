@@ -65,6 +65,9 @@ object Config {
         "Lcooperation/qzone/PlatformInfor;" to setOf(
             "52b7f2",
             "qimei",
+        ),
+        "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf(
+            "TroopClockInHandler"
         )
     )
     const val hooksVersion = 1

@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.hook.function.impl
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
-import me.teble.xposed.autodaily.config.BaseSessionInfo
 import me.teble.xposed.autodaily.config.ChatActivityFacade
 import me.teble.xposed.autodaily.config.SessionInfo
 import me.teble.xposed.autodaily.hook.base.load
@@ -33,15 +32,12 @@ open class SendMessageManager : BaseFunction(
                 && argt[3] == String::class.java
                 && argt[4] == ArrayList::class.java
             ) {
-                if (argt[2] == cSessionInfo
-                    || argt[2] == load(BaseSessionInfo)
-                ) {
-                    sendMsgMethod = mi
-                    sendMsgMethod.isAccessible = true
-                    cSendMsgParams = argt[5]
-                    LogUtil.d("MessageManager: method -> $sendMsgMethod")
-                    return
-                }
+                // argt[2] is BaseSessionInfo or SessionInfo
+                sendMsgMethod = mi
+                sendMsgMethod.isAccessible = true
+                cSendMsgParams = argt[5]
+                LogUtil.d("MessageManager: method -> $sendMsgMethod")
+                return
             }
         }
         throw RuntimeException("没有找到发送消息的方法")

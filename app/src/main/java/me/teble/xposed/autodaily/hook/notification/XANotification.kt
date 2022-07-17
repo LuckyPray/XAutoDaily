@@ -39,7 +39,7 @@ object XANotification {
     }
 
     fun setContent(content: String, onGoing: Boolean = true, bigText: Boolean = false, isTask: Boolean = true) {
-        if (!enabled) return
+        if (isTask && !enabled) return
         if (!isStart) start()
 
         mNotification = builder.apply {
@@ -54,6 +54,10 @@ object XANotification {
             setOngoing(onGoing)
         }.build()
         notificationManager.notify(if (!isTask) atomicId++ else NOTIFICATION_ID, mNotification)
+    }
+
+    fun notify(content: String) {
+        setContent(content, onGoing = false, bigText = false, isTask = false);
     }
 
     fun stop() {
