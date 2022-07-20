@@ -109,7 +109,8 @@ suspend fun Activity.openAppUpdateDialog() {
             if (!isInitialized) {
                 appUpdateDialog = builder!!.create()
             }
-            if (!appUpdateDialog.isShowing && !isFinishing) {
+            if (!appUpdateDialog.isShowing && !isFinishing
+                && ConfUnit.blockUpdateOneDay != Date().formatDate()) {
                 appUpdateDialog.show()
             }
         }
