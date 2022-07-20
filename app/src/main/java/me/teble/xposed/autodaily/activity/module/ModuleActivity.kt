@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.activity.module
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
@@ -31,6 +33,7 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
         this.cancel()
     }
 
+    @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
         this.window.setStatusBarTranslation()
         this.window.setNavigationBarTranslation()
@@ -47,12 +50,14 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
             )
             this.setContent {
                 MaterialTheme(colors = colors()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.White)
-                    ) {
-                        XAutoDailyApp()
+                    Scaffold {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                        ) {
+                            XAutoDailyApp()
+                        }
                     }
                 }
 

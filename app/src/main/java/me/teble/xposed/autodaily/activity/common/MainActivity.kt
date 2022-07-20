@@ -6,6 +6,7 @@ import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -27,6 +28,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
+import me.teble.xposed.autodaily.activity.common.MainActivity.Companion.bindUserService
+import me.teble.xposed.autodaily.activity.common.MainActivity.Companion.startPeekRunnable
 import me.teble.xposed.autodaily.activity.module.colors
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
@@ -67,10 +70,15 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        private val peekServiceRunnable = object : Runnable {
+        val peekServiceRunnable = object : Runnable {
             override fun run() {
-                handler.postDelayed(this, 1000)
                 shizukuDaemonRunning = peekUserService()
+                if (shizukuDaemonRunning) {
+                    bindUserService()
+                    ShizukuApi.init()
+                    return
+                }
+                handler.postDelayed(this, 1000)
             }
         }
 
@@ -106,6 +114,10 @@ class MainActivity : ComponentActivity() {
                 .processNameSuffix("service")
                 .debuggable(BuildConfig.DEBUG)
                 .version(BuildConfig.VERSION_CODE)
+        }
+
+        fun startPeekRunnable() {
+            handler.post(peekServiceRunnable)
         }
 
         fun rebindUserService() {
@@ -193,7 +205,9 @@ fun ShizukuCard() {
                     return@clickable
                 }
                 if (!MainActivity.shizukuDaemonRunning) {
-                    MainActivity.bindUserService()
+                    bindUserService()
+                    startPeekRunnable()
+                    Toast.makeText(xaApp, "正在启动守护进程，请稍后", Toast.LENGTH_SHORT).show()
                 } else {
                     MainActivity.unbindUserService()
                 }
