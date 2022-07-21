@@ -18,8 +18,9 @@ object ShizukuApi {
     private lateinit var service: IUserService
 
     fun initBinder(binder: IBinder) {
-        if (isBinderAvailable) return
+        if (isBinderAvailable && ShizukuApi::service.isInitialized) return
         service = IUserService.Stub.asInterface(binder)
+        isBinderAvailable = true
         binder.linkToDeath({
             isBinderAvailable = false
             Log.w("XALog", "UserService binderDied")
