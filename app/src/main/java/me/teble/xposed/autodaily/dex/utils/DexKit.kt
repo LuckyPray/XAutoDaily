@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.dex.utils
 
+import android.os.Process
 import com.hankcs.algorithm.AhoCorasickDoubleArrayTrie
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.dex.struct.*
@@ -132,6 +133,11 @@ object DexKit {
         resourceMap: Map<String, Set<String>?>,
         resultMap: MutableMap<String, LinkedList<String>>
     ) {
+
+        kotlin.runCatching {
+            Process.setThreadPriority(-19);
+        }
+
         // index -> string
         val strIndexMap = HashMap<Int, String>()
         val stringIdsItems = StringIdsItem.parserStringIdsItems(src).apply {
