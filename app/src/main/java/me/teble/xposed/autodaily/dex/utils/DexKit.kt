@@ -14,6 +14,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.net.URL
 import java.util.*
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
@@ -103,131 +104,153 @@ object DexKit {
         val apkFile = File(applicationInfo.sourceDir)
         val zipFile = ZipFile(apkFile)
         val zipEntryList = getAllDexEntry(zipFile)
-        for (zipEntry in zipEntryList) {
-            val src = getDexBytes(zipFile, zipEntry)
-            // index -> string
-            val strIndexMap = HashMap<Int, String>()
-            val stringIdsItems = StringIdsItem.parserStringIdsItems(src).apply {
-                for (i in this.indices) {
-                    val idsItem = this[i]
-                    val dataItem = StringDataItem.parser(src, idsItem.stringDataOff)
-                    acdat.parseText(
-                        dataItem.data,
-                        AhoCorasickDoubleArrayTrie.IHit { _, _, value -> strIndexMap[i] = value }
-                    )
-                }
-            }
-            // 该dex不存在特征串
-            if (strIndexMap.isEmpty()) {
-                LogUtil.log("该dex不存在特征串")
-                continue
-            }
-            var confuseFlag = false
-            resourceMap.forEach { (className, features) ->
-                val featureStrSet = strIndexMap.values.toSet()
-                if (featureStrSet.containsAll(features!!)) {
-                    confuseFlag = true
-                }
-            }
-            if (!confuseFlag) continue
 
-            // start
-            val classDefItems = ClassDefItem.parserClassDefItems(src)
-            for (i in classDefItems.indices) {
-                val classDefItem = classDefItems[i]
-                val idsSet = mutableSetOf<Int>()
-                val klass = StringDataItem.parser(
+        val jobs = zipEntryList.map {
+            val src = getDexBytes(zipFile, it)
+
+            runAsync {
+                locateClassInDex(
                     src,
-                    stringIdsItems[TypeIdsItem.parserAndGet(
-                        src,
-                        classDefItem.classIdx
-                    ).descriptorIdx].stringDataOff
-                ).data
-                if (classDefItem.staticValueOff != 0) {
-                    val encodeArray =
-                        EncodeArray.parser(src, IntArray(1) { classDefItem.staticValueOff })
-                    idsSet.addAll(encodeArray.strIdSet)
+                    acdat,
+                    resourceMap,
+                    resultMap
+                )
+            }
+        }
+        jobs.forEach { it.join() }
+
+        LogUtil.log(
+            "search dex: ${zipEntryList.size}, search class: ${resultMap.size}, " +
+                "search time:${System.currentTimeMillis() - startTime} ms"
+        )
+        return resultMap
+    }
+
+    private fun locateClassInDex(
+        src: ByteArray,
+        acdat: AhoCorasickDoubleArrayTrie<String>,
+        resourceMap: Map<String, Set<String>?>,
+        resultMap: MutableMap<String, LinkedList<String>>
+    ) {
+        // index -> string
+        val strIndexMap = HashMap<Int, String>()
+        val stringIdsItems = StringIdsItem.parserStringIdsItems(src).apply {
+            for (i in this.indices) {
+                val idsItem = this[i]
+                val dataItem = StringDataItem.parser(src, idsItem.stringDataOff)
+                acdat.parseText(
+                    dataItem.data,
+                    AhoCorasickDoubleArrayTrie.IHit { _, _, value -> strIndexMap[i] = value }
+                )
+            }
+        }
+        // 该dex不存在特征串
+        if (strIndexMap.isEmpty()) {
+            LogUtil.log("该dex不存在特征串")
+            return
+        }
+        var confuseFlag = false
+        resourceMap.forEach { (className, features) ->
+            val featureStrSet = strIndexMap.values.toSet()
+            if (featureStrSet.containsAll(features!!)) {
+                confuseFlag = true
+            }
+        }
+        if (!confuseFlag) return
+
+        // start
+        val classDefItems = ClassDefItem.parserClassDefItems(src)
+        for (i in classDefItems.indices) {
+            val classDefItem = classDefItems[i]
+            val idsSet = mutableSetOf<Int>()
+            val klass = StringDataItem.parser(
+                src,
+                stringIdsItems[TypeIdsItem.parserAndGet(
+                    src,
+                    classDefItem.classIdx
+                ).descriptorIdx].stringDataOff
+            ).data
+            if (classDefItem.staticValueOff != 0) {
+                val encodeArray =
+                    EncodeArray.parser(src, IntArray(1) { classDefItem.staticValueOff })
+                idsSet.addAll(encodeArray.strIdSet)
+            }
+            if (classDefItem.classDataOff != 0) {
+                val dataItem = ClassDataItem.parser(src, classDefItem.classDataOff)
+                for (j in dataItem.directMethods.indices) {
+                    val encodedMethod = dataItem.directMethods[j]
+                    val codeItem = CodeItem.parser(src, encodedMethod!!.codeOff)
+                    var index = 0
+                    while (index < codeItem.insns.size) {
+                        val op: Int = codeItem.insns[index].toInt() and 0xff
+                        if (op == 0x00 && index + 1 < codeItem.insns.size && (codeItem.insns[index + 1] in 1..3)) {
+                            val short = readShort(codeItem.insns, index + 2)
+                            when (codeItem.insns[index + 1].toInt()) {
+                                1 -> {
+                                    index += (short * 2 + 4) * 2
+                                }
+                                2 -> {
+                                    index += (short * 4 + 2) * 2
+                                }
+                                3 -> {
+                                    index += ((short * readInt(
+                                        codeItem.insns,
+                                        index + 4
+                                    ) + 1) / 2 + 4) * 2
+                                }
+                            }
+                            continue
+                        }
+                        if (op == 0x1a) {
+                            idsSet.add(readShort(codeItem.insns, index + 2))
+                        } else if (op == 0x1b) {
+                            idsSet.add(readInt(codeItem.insns, index + 2))
+                        }
+                        index += OpCodeFormatUtils.getOpSize(op)
+                    }
                 }
-                if (classDefItem.classDataOff != 0) {
-                    val dataItem = ClassDataItem.parser(src, classDefItem.classDataOff)
-                    for (j in dataItem.directMethods.indices) {
-                        val encodedMethod = dataItem.directMethods[j]
-                        val codeItem = CodeItem.parser(src, encodedMethod!!.codeOff)
-                        var index = 0
-                        while (index < codeItem.insns.size) {
-                            val op: Int = codeItem.insns[index].toInt() and 0xff
-                            if (op == 0x00 && index + 1 < codeItem.insns.size && (codeItem.insns[index + 1] in 1..3)) {
-                                val short = readShort(codeItem.insns, index + 2)
-                                when (codeItem.insns[index + 1].toInt()) {
-                                    1 -> {
-                                        index += (short * 2 + 4) * 2
-                                    }
-                                    2 -> {
-                                        index += (short * 4 + 2) * 2
-                                    }
-                                    3 -> {
-                                        index += ((short * readInt(
-                                            codeItem.insns,
-                                            index + 4
-                                        ) + 1) / 2 + 4) * 2
-                                    }
+                for (encodedMethod in dataItem.virtualMethods) {
+                    val codeItem = CodeItem.parser(src, encodedMethod!!.codeOff)
+                    var index = 0
+                    while (index < codeItem.insns.size) {
+                        val op: Int = codeItem.insns[index].toInt() and 0xff
+                        if (op == 0x00 && index + 1 < codeItem.insns.size && (codeItem.insns[index + 1] in 1..3)) {
+                            val short = readShort(codeItem.insns, index + 2)
+                            when (codeItem.insns[index + 1].toInt()) {
+                                1 -> {
+                                    index += (short * 2 + 4) * 2
                                 }
-                                continue
-                            }
-                            if (op == 0x1a) {
-                                idsSet.add(readShort(codeItem.insns, index + 2))
-                            } else if (op == 0x1b) {
-                                idsSet.add(readInt(codeItem.insns, index + 2))
-                            }
-                            index += OpCodeFormatUtils.getOpSize(op)
-                        }
-                    }
-                    for (encodedMethod in dataItem.virtualMethods) {
-                        val codeItem = CodeItem.parser(src, encodedMethod!!.codeOff)
-                        var index = 0
-                        while (index < codeItem.insns.size) {
-                            val op: Int = codeItem.insns[index].toInt() and 0xff
-                            if (op == 0x00 && index + 1 < codeItem.insns.size && (codeItem.insns[index + 1] in 1..3)) {
-                                val short = readShort(codeItem.insns, index + 2)
-                                when (codeItem.insns[index + 1].toInt()) {
-                                    1 -> {
-                                        index += (short * 2 + 4) * 2
-                                    }
-                                    2 -> {
-                                        index += (short * 4 + 2) * 2
-                                    }
-                                    3 -> {
-                                        index += ((short * readInt(
-                                            codeItem.insns,
-                                            index + 4
-                                        ) + 1) / 2 + 4) * 2
-                                    }
+                                2 -> {
+                                    index += (short * 4 + 2) * 2
                                 }
-                                continue
+                                3 -> {
+                                    index += ((short * readInt(
+                                        codeItem.insns,
+                                        index + 4
+                                    ) + 1) / 2 + 4) * 2
+                                }
                             }
-                            if (op == 0x1a) {
-                                idsSet.add(readShort(codeItem.insns, index + 2))
-                            } else if (op == 0x1b) {
-                                idsSet.add(readInt(codeItem.insns, index + 2))
-                            }
-                            index += OpCodeFormatUtils.getOpSize(op)
+                            continue
                         }
+                        if (op == 0x1a) {
+                            idsSet.add(readShort(codeItem.insns, index + 2))
+                        } else if (op == 0x1b) {
+                            idsSet.add(readInt(codeItem.insns, index + 2))
+                        }
+                        index += OpCodeFormatUtils.getOpSize(op)
                     }
-                    val strSet = idsSet.mapNotNull { strIndexMap[it] }
-                    resourceMap.entries.forEach { entry ->
-                        val set = entry.value ?: emptySet()
-                        if (set.size == (set intersect strSet).size) {
+                }
+                val strSet = idsSet.mapNotNull { strIndexMap[it] }
+                resourceMap.entries.forEach { entry ->
+                    val set = entry.value ?: emptySet()
+                    if (set.size == (set intersect strSet).size) {
+                        synchronized(resultMap) {
                             resultMap[entry.key]?.push(klass)
                         }
                     }
                 }
             }
         }
-        LogUtil.log(
-            "search dex: ${zipEntryList.size}, search class: ${resultMap.size}, " +
-                "search time:${System.currentTimeMillis() - startTime} ms"
-        )
-        return resultMap
     }
 
     private fun getSignName(cls: Class<*>): String {
