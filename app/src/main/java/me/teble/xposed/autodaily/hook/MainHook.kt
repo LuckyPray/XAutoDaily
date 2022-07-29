@@ -164,6 +164,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             // dex相关
             LogUtil.d("doDexInit")
             doDexInit()
+//            runCatching {
+//                ConfigUtil.findDex(hostClassLoader)
+//            }.onFailure { Log.e("XALog", it.stackTraceToString()) }
             //初始化hook
             LogUtil.d("initHook")
             initHook()
