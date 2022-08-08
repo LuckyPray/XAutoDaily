@@ -2,7 +2,7 @@
 #include <iostream>
 #include "log.h"
 #include "v2sign.cpp"
-#include "DexKit.cpp"
+#include "dex_kit.h"
 #include <map>
 #include <zlib.h>
 #include <sys/mman.h>
@@ -244,32 +244,28 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_findDex(
     hostApkPath = filePathStr.substr(5, filePathStr.size() - 26);
     LOGD("host apk path -> %s", hostApkPath.c_str());
     env->ReleaseStringUTFChars(file, cStr);
+    map<string_view, set<string_view>> obfuscate = {
+            {"Lcom/tencent/mobileqq/activity/ChatActivityFacade;",               {"reSendEmo"}},
+            {"Lcooperation/qzone/PlatformInfor;",                                {"52b7f2", "qimei"}},
+            {"Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;", {"TroopClockInHandler"}},
+            {"test",                                                             {"mark_uin_upload"}},
+    };
 
-    auto map = MemMap(hostApkPath);
-    if (!map.ok()) {
-        return;
-    }
-    auto zip_file = ZipFile::Open(map);
-    vector<tuple<const void *, size_t>> dex_images;
-    vector<MemMap> mmaps;
-//    mmaps.emplace_back(std::move(map));
-    if (zip_file) {
-        for (int idx = 1;; ++idx) {
-            auto entry_name = "classes" + (idx == 1 ? std::string() : std::to_string(idx)) + ".dex";
-            auto entry = zip_file->Find(entry_name);
-            if (!entry) {
-                break;
-            }
-            auto dex_image = entry->uncompress();
-            if (!dex_image.ok()) {
-                LOGW("failed to uncompress %s", entry_name.data());
-                continue;
-            }
-            dex_images.emplace_back(dex_image.addr(), dex_image.len());
-            mmaps.emplace_back(std::move(dex_image));
+    auto now = std::chrono::system_clock::now();
+    auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
+
+    dexkit::DexKit dexKit(hostApkPath);
+    auto res = dexKit.LocationClasses(obfuscate);
+    for (auto &[key, value]: res) {
+        LOGI("%s -> \n", key.data());
+        for (auto &v: value) {
+            LOGI("\t%s\n", v.data());
         }
     }
-    findDex(dex_images);
+
+    auto now1 = std::chrono::system_clock::now();
+    auto now_ms1 = std::chrono::duration_cast<std::chrono::milliseconds>(now1.time_since_epoch());
+    LOGI("used time: %lld ms", now_ms1.count() - now_ms.count());
 }
 
 }
