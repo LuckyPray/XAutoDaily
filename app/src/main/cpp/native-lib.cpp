@@ -250,11 +250,11 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_findDex(
             {"Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;", {"TroopClockInHandler"}},
             {"test",                                                             {"mark_uin_upload"}},
     };
+    dexkit::DexKit dexKit(hostApkPath);
 
     auto now = std::chrono::system_clock::now();
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
 
-    dexkit::DexKit dexKit(hostApkPath);
     auto res = dexKit.LocationClasses(obfuscate);
     for (auto &[key, value]: res) {
         LOGI("%s -> \n", key.data());
