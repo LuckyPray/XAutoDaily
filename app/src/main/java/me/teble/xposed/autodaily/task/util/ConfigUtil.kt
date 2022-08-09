@@ -73,7 +73,7 @@ object ConfigUtil {
 
     external fun getMd5Hex(value: String): String
 
-    external fun findDex(classLoader: ClassLoader)
+    external fun findDex(classLoader: ClassLoader, string: String): String
 
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
         hostClassLoader

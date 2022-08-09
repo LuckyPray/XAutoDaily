@@ -19,7 +19,6 @@ import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
-import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
@@ -42,9 +41,9 @@ class SplashActivityHook : BaseHook() {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     loadSaveConf()
-                    if (ConfigUtil.checkUpdate(false)) {
-                        ConfUnit.needUpdate = true
-                    }
+//                    if (ConfigUtil.checkUpdate(false)) {
+//                        ConfUnit.needUpdate = true
+//                    }
                 }
                 if (ConfUnit.needUpdate) {
                     context.openAppUpdateDialog()

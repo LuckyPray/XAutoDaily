@@ -18,7 +18,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.*
-import me.teble.xposed.autodaily.dex.utils.DexKit.locateClasses
 import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
@@ -28,6 +27,7 @@ import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
 import java.util.concurrent.CompletableFuture.runAsync
@@ -164,9 +164,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             // dex相关
             LogUtil.d("doDexInit")
             doDexInit()
-//            runCatching {
-//                ConfigUtil.findDex(hostClassLoader)
-//            }.onFailure { Log.e("XALog", it.stackTraceToString()) }
             //初始化hook
             LogUtil.d("initHook")
             initHook()
@@ -202,17 +199,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private fun doDexInit() {
         val cache = Config.classCache
         // dex解析
-        // module dex
-//        if (cache.getInt("moduleVersion", 0) < BuildConfig.VERSION_CODE || BuildConfig.DEBUG) {
-//            LogUtil.d(TAG, "模块版本更新/Debug版本，重新定位Hook子类")
-//            subHookClasses =
-//                findSubClasses(MainHook::class.java.classLoader!!, BaseHook::class.java).toSet()
-//            cache.putStringSet("subHookClasses", subHookClasses)
-//            cache.putInt("moduleVersion", BuildConfig.VERSION_CODE)
-//        } else {
-//            LogUtil.d(TAG, "缓存生效，跳过hook子类解析")
-//            subHookClasses = cache.getStringSet("subHookClasses") ?: emptySet()
-//        }
         // qq dex
         val confuseInfoKeys = confuseInfo.keys
         val needLocateClasses = mutableSetOf<String>()
@@ -257,25 +243,40 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
         dexIsInit = true
         LogUtil.log("needLocateClasses -> $needLocateClasses")
-        ToastUtil.send("正在尝试定位QQ混淆类，可能需要等待一段时间", true)
+        ToastUtil.send("正在尝试定位QQ混淆类，可能需要等待一段时间", false)
         val info = needLocateClasses.associateWith { confuseInfo[it] }
-        val startTime = System.currentTimeMillis()
-        val locateRes = locateClasses(info)
-        val useTime = System.currentTimeMillis() - startTime
         var locateNum = 0
-        locateRes.forEach {
-            if (it.value.size == 1) {
-                LogUtil.i("locate info: ${it.key} -> ${it.value[0]}")
-                cache.putString("${it.key}#${hostVersionCode}", it.value[0])
+        val locateStr = buildString {
+            info.forEach { k, v ->
+                append(k)
+                append("\t")
+                v!!.forEachIndexed { index, s ->
+                    if (index > 0) {
+                        append("\t")
+                    }
+                    append(s);
+                }
+                append("\n")
+            }
+        }
+        LogUtil.d(locateStr)
+        val resStr = ConfigUtil.findDex(hostClassLoader, locateStr)
+        LogUtil.d("res -> $resStr")
+        resStr.split("\n").forEach {
+            val tokens = it.split("\t")
+            val key = tokens.first()
+            if (tokens.size == 2 && tokens[1].isNotEmpty()) {
+                LogUtil.i("locate info: $key -> ${tokens[1]}")
+                cache.putString("$key#${hostVersionCode}", tokens[1])
                 locateNum++
             } else {
-                LogUtil.w("locate not instance class: ${it.key} -> ${it.value}")
+                LogUtil.w("locate not instance class: $tokens")
                 // 保存为空字符串，表示已经搜索过，下次不再搜索
-                cache.putString("${it.key}#${hostVersionCode}", "")
+                cache.putString("${key}#${hostVersionCode}", "")
             }
         }
         cache.putStringSet("confuseClasses", confuseInfoKeys)
-        ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个，耗时${useTime}ms")
+        ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个")
         dexIsInit = false
     }
 
