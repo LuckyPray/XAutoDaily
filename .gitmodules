@@ -6,4 +6,4 @@
 	url = https://github.com/LuckyPray/qq-stub.git
 [submodule "app/src/main/cpp/DexKit"]
 	path = app/src/main/cpp/DexKit
-	url = git@github.com:LuckyPray/DexKit.git
+	url = https://github.com/LuckyPray/DexKit.git
