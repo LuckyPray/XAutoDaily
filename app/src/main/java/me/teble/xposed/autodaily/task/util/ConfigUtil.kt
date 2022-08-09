@@ -7,6 +7,7 @@ import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.NOTICE
 import me.teble.xposed.autodaily.config.XA_API_URL
+import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
@@ -72,7 +73,10 @@ object ConfigUtil {
 
     external fun getMd5Hex(value: String): String
 
+    external fun findDex(classLoader: ClassLoader, string: String): String
+
     fun checkConfigUpdate(currentConfigVersion: Int): String? {
+        hostClassLoader
         try {
             ToastUtil.send("正在检测更新")
             LogUtil.i("正在检测更新")

@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.4.1)
 project(xa_native)
 
 set(CMAKE_CXX_STANDARD 17)
+#add_definitions(-std=c++20)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -14,6 +15,7 @@ set(CMAKE_CXX_STANDARD 17)
 # Gradle automatically packages shared libraries with your APK.
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../xa_mmkv/Android mmkv)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DexKit)
 
 add_library( # Sets the name of the library.
         xa_native
@@ -81,6 +83,7 @@ find_library( # Sets the name of the path variable.
 target_link_libraries( # Specifies the target library.
         xa_native
         mmkv
+        dex_kit_static
         # Links the target library to the log library
         # included in the NDK.
         ${log-lib}
