@@ -13,27 +13,28 @@ import me.teble.xposed.autodaily.application.xaApp
 import rikka.shizuku.Shizuku
 
 object ShizukuApi {
-    var isBinderAvailable = false
+    var binderAvailable = false
+    var serviceBinderAvailable = false
     var isPermissionGranted by mutableStateOf(false)
     private lateinit var service: IUserService
 
     fun initBinder(binder: IBinder) {
-        if (isBinderAvailable && ShizukuApi::service.isInitialized) return
+        if (serviceBinderAvailable && ShizukuApi::service.isInitialized) return
         service = IUserService.Stub.asInterface(binder)
-        isBinderAvailable = true
+        serviceBinderAvailable = true
         binder.linkToDeath({
-            isBinderAvailable = false
+            serviceBinderAvailable = false
             Log.w("XALog", "UserService binderDied")
         }, 0)
     }
 
     fun init() {
         Shizuku.addBinderReceivedListenerSticky {
-            isBinderAvailable = true
+            binderAvailable = true
             isPermissionGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         }
         Shizuku.addBinderDeadListener {
-            isBinderAvailable = false
+            binderAvailable = false
             isPermissionGranted = false
         }
     }
@@ -53,7 +54,7 @@ object ShizukuApi {
     }
 
     private fun shizukuShell(shellStr: String): String {
-        if (isBinderAvailable && ShizukuApi::service.isInitialized) {
+        if (serviceBinderAvailable && ShizukuApi::service.isInitialized) {
             return service.execShell(shellStr)
         }
         Toast.makeText(xaApp, "Shizuku is not available", Toast.LENGTH_SHORT).show()

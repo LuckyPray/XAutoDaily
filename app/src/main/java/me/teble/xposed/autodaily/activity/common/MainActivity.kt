@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.activity.common
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.os.*
 import android.util.Log
 import android.widget.Toast
@@ -75,10 +74,9 @@ class MainActivity : ComponentActivity() {
                 shizukuDaemonRunning = peekUserService()
                 if (shizukuDaemonRunning) {
                     bindUserService()
-                    ShizukuApi.init()
                     return
                 }
-                handler.postDelayed(this, 1000)
+                handler.postDelayed(this, 500)
             }
         }
 
@@ -180,27 +178,15 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private val listener: (Int, Int) -> Unit = { _, grantResult ->
-    ShizukuApi.isPermissionGranted = grantResult == PackageManager.PERMISSION_GRANTED
-}
-
 @Composable
 fun ShizukuCard() {
-    LaunchedEffect(Unit) {
-        Shizuku.addRequestPermissionResultListener(listener)
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            Shizuku.removeRequestPermissionResultListener(listener)
-        }
-    }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = Color.White, shape = RoundedCornerShape(6.dp))
             .clickable {
-                if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
+                if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
                     Shizuku.requestPermission(1101)
                     return@clickable
                 }
@@ -215,7 +201,7 @@ fun ShizukuCard() {
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (ShizukuApi.isBinderAvailable && !ShizukuApi.isPermissionGranted) {
+        if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
             Icon(Icons.Outlined.CheckCircle, "Shizuku 服务正在运行")
             Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
                 Text(
@@ -269,7 +255,7 @@ fun ModuleView() {
         var infoList by remember { mutableStateOf(listOf<String>()) }
         LaunchedEffect(ShizukuApi.isPermissionGranted) {
             infoList = if (!ShizukuApi.isPermissionGranted) {
-                if (ShizukuApi.isBinderAvailable) {
+                if (ShizukuApi.binderAvailable) {
                     listOf("shizuku正在运行，但是未授权，无法勾选")
                 } else {
                     listOf("shizuku没有在运行，无法勾选")
