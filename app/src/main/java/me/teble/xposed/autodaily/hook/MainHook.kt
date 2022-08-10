@@ -263,6 +263,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val resStr = ConfigUtil.findDex(hostClassLoader, locateStr)
         LogUtil.d("res -> $resStr")
         resStr.split("\n").forEach {
+            if (it.isEmpty()) return@forEach
             val tokens = it.split("\t")
             val key = tokens.first()
             if (tokens.size == 2 && tokens[1].isNotEmpty()) {
@@ -274,6 +275,15 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 // 保存为空字符串，表示已经搜索过，下次不再搜索
                 cache.putString("${key}#${hostVersionCode}", "")
             }
+            if (needLocateClasses.contains(key)) {
+                needLocateClasses.remove(key)
+            } else {
+                LogUtil.w("class: $key not contain in need locate classes")
+            }
+        }
+        needLocateClasses.forEach {
+            // 未在dex搜索到相应的类，下次不再搜索
+            cache.putString("${it}#${hostVersionCode}", "")
         }
         cache.putStringSet("confuseClasses", confuseInfoKeys)
         ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个")
