@@ -60,14 +60,14 @@ object Config {
 
     private val obfuscate = mapOf(
         "Lcom/tencent/mobileqq/activity/ChatActivityFacade;" to setOf(
-            "reSendEmo",
+            "^reSendEmo",
         ),
         "Lcooperation/qzone/PlatformInfor;" to setOf(
-            "52b7f2",
-            "qimei",
+            "^52b7f2$",
+            "^qimei",
         ),
         "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf(
-            "TroopClockInHandler"
+            "^TroopClockInHandler$"
         )
     )
     const val hooksVersion = 1

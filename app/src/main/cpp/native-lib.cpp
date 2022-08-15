@@ -1,16 +1,9 @@
 #include <jni.h>
-#include <iostream>
-#include "log.h"
-#include "v2sign.cpp"
-#include "dex_kit.h"
 #include <map>
-#include <zlib.h>
-#include <sys/mman.h>
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <list>
 #include <sstream>
+#include "log.h"
+#include "v2sign.h"
+#include "dex_kit.h"
 //
 // Created by teble on 2020/2/10.
 //
@@ -65,11 +58,10 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_findDex(
     const char *obfuscate_str = env->GetStringUTFChars(input_str, nullptr);
     std::string inputStr(obfuscate_str);
 
-//    map<string_view, set<string_view>> obfuscate1 = {
-//            {"Lcom/tencent/mobileqq/activity/ChatActivityFacade;",               {"reSendEmo"}},
-//            {"Lcooperation/qzone/PlatformInfor;",                                {"52b7f2", "qimei"}},
-//            {"Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;", {"TroopClockInHandler"}},
-//            {"test",                                                             {"mark_uin_upload"}},
+//    map<string_view, set<string_view>> obfuscate = {
+//            {"Lcom/tencent/mobileqq/activity/ChatActivityFacade;",               {"^reSendEmo"}},
+//            {"Lcooperation/qzone/PlatformInfor;",                                {"^52b7f2$", "qimei"}},
+//            {"Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;", {"^TroopClockInHandler$"}},
 //    };
 
     map<string, set<string>> obfuscate;
@@ -90,8 +82,7 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_findDex(
     auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
 
     std::string result;
-    LOGI("find: %s", inputStr.c_str());
-    auto res = dexKit.LocationClasses(obfuscate);
+    auto res = dexKit.LocationClasses(obfuscate, true);
     for (auto &[key, value]: res) {
         result += key;
         result += "\t";
