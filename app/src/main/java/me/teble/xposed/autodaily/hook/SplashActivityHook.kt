@@ -40,7 +40,8 @@ class SplashActivityHook : BaseHook() {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     loadSaveConf()
-                    ConfUnit.versionInfoCache ?: let {
+                    if (ConfUnit.versionInfoCache == null
+                        || System.currentTimeMillis() - ConfUnit.lastFetchTime > 3 * 60 * 60_000L) {
                         ConfigUtil.fetchUpdateInfo()
                     }
                 }
