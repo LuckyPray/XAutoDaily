@@ -21,13 +21,13 @@ android {
         //noinspection OldTargetApi
         targetSdkVersion 31
         versionCode mVersionCode
-        versionName "3.0.4"
+        versionName "3.0.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         externalNativeBuild {
             cmake {
-                cppFlags "-std=c++14"
+                cppFlags "-std=c++20"
                 // 静态库内置签名验证
                 if (performSigning) {
                     // release 签名

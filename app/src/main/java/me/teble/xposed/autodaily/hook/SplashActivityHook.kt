@@ -19,10 +19,9 @@ import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
-import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
-import java.util.*
 
 class SplashActivityHook : BaseHook() {
 
@@ -41,9 +40,9 @@ class SplashActivityHook : BaseHook() {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     loadSaveConf()
-//                    if (ConfigUtil.checkUpdate(false)) {
-//                        ConfUnit.needUpdate = true
-//                    }
+                    ConfUnit.versionInfoCache ?: let {
+                        ConfigUtil.fetchUpdateInfo()
+                    }
                 }
                 if (ConfUnit.needUpdate) {
                     context.openAppUpdateDialog()
@@ -87,8 +86,8 @@ suspend fun Activity.openAppUpdateDialog() {
                     }
                 }.toTypedArray()
                 setItems(updateLog, null)
-                setNeutralButton("今日不再提醒") { _, _ ->
-                    ConfUnit.blockUpdateOneDay = Date().formatDate()
+                setNeutralButton("本次更新不再提示") { _, _ ->
+                    ConfUnit.skipUpdateVersion = "${ConfUnit.versionInfoCache?.appVersion}"
                 }
                 setNegativeButton("蓝奏云") { _, _ ->
                     context.startActivity(Intent().apply {
@@ -109,7 +108,7 @@ suspend fun Activity.openAppUpdateDialog() {
                 appUpdateDialog = builder!!.create()
             }
             if (!appUpdateDialog.isShowing && !isFinishing
-                && ConfUnit.blockUpdateOneDay != Date().formatDate()) {
+                && ConfUnit.skipUpdateVersion != "${ConfUnit.versionInfoCache?.appVersion}") {
                 appUpdateDialog.show()
             }
         }

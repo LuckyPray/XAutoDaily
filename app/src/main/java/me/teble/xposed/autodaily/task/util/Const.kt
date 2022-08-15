@@ -3,7 +3,10 @@ package me.teble.xposed.autodaily.task.util
 object Const {
     const val CONFIG_VERSION = "config_version"
     const val NEED_SHOW_LOG = "need_show_log"
+    const val VERSION_INFO_CACHE = "version_info_cache"
+    const val LAST_FETCH_TIME = "last_fetch_time"
     const val BLOCK_UPDATE_ONE_DAY = "block_update_one_day"
+    const val BLOCK_UPDATE_VERSION = "block_update_version"
     const val GLOBAL_ENABLE = "global_enable"
     const val ENABLE = "enable"
     const val USED_THREAD_POOL = "used_thread_pool"

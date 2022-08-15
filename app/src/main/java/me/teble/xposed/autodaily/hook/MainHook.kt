@@ -30,7 +30,6 @@ import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
-import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -92,7 +91,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         LogUtil.d("init ActivityProxyManager")
                         ProxyManager.init
                         CoreServiceHook().coreServiceHook()
-                        asyncHook()
                     }
                 }.onFailure { Log.e("XALog", it.stackTraceToString()) }
             }
@@ -156,26 +154,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
-    private fun asyncHook() {
-        runAsync {
-            //加载资源注入
-            LogUtil.d("injectRes")
-            injectRes(hostContext.resources)
-            // dex相关
-            LogUtil.d("doDexInit")
-            doDexInit()
-            //初始化hook
-            LogUtil.d("initHook")
-            initHook()
-            moduleLoadSuccess = true
-            runCatching {
-                hostApp.startService(Intent(hostApp, load(CoreService)).apply {
-                    putExtra(CORE_SERVICE_FLAG, "$")
-                })
-            }.onFailure { LogUtil.e(it, "start CoreService failed") }
-        }
-    }
-
     private fun doInit() {
         val encumberStep = LoadData
         findMethod(encumberStep) { returnType == Boolean::class.java && emptyParam }.hookAfter {
@@ -185,10 +163,21 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     return@hookAfter
                 }
                 hookIsInit = true
-                // 等待hook执行完毕
-                while (!moduleLoadSuccess) {
-                    Thread.sleep(200)
-                }
+                //加载资源注入
+                LogUtil.d("injectRes")
+                injectRes(hostContext.resources)
+                // dex相关
+                LogUtil.d("doDexInit")
+                doDexInit()
+                //初始化hook
+                LogUtil.d("initHook")
+                initHook()
+                moduleLoadSuccess = true
+                runCatching {
+                    hostApp.startService(Intent(hostApp, load(CoreService)).apply {
+                        putExtra(CORE_SERVICE_FLAG, "$")
+                    })
+                }.onFailure { LogUtil.e(it, "start CoreService failed") }
             }.onFailure {
                 LogUtil.e(it)
                 ToastUtil.send("初始化失败: " + it.stackTraceToString())
@@ -243,11 +232,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
         dexIsInit = true
         LogUtil.log("needLocateClasses -> $needLocateClasses")
-        ToastUtil.send("正在尝试定位QQ混淆类，可能需要等待一段时间", false)
+        val startTime = System.currentTimeMillis()
         val info = needLocateClasses.associateWith { confuseInfo[it] }
         var locateNum = 0
         val locateStr = buildString {
-            info.forEach { k, v ->
+            info.forEach { (k, v) ->
                 append(k)
                 append("\t")
                 v!!.forEachIndexed { index, s ->
@@ -275,18 +264,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 // 保存为空字符串，表示已经搜索过，下次不再搜索
                 cache.putString("${key}#${hostVersionCode}", "")
             }
-            if (needLocateClasses.contains(key)) {
-                needLocateClasses.remove(key)
-            } else {
-                LogUtil.w("class: $key not contain in need locate classes")
-            }
         }
-        needLocateClasses.forEach {
-            // 未在dex搜索到相应的类，下次不再搜索
-            cache.putString("${it}#${hostVersionCode}", "")
-        }
+        val usedTime = System.currentTimeMillis() - startTime
         cache.putStringSet("confuseClasses", confuseInfoKeys)
-        ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个")
+        ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个，耗时${usedTime}ms")
         dexIsInit = false
     }
 
