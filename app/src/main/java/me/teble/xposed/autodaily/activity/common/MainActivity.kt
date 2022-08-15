@@ -193,7 +193,9 @@ fun ShizukuCard() {
                 if (!MainActivity.shizukuDaemonRunning) {
                     bindUserService()
                     startPeekRunnable()
-                    Toast.makeText(xaApp, "正在启动守护进程，请稍后", Toast.LENGTH_SHORT).show()
+                    Toast
+                        .makeText(xaApp, "正在启动守护进程，请稍后", Toast.LENGTH_SHORT)
+                        .show()
                 } else {
                     MainActivity.unbindUserService()
                 }
@@ -290,7 +292,9 @@ fun ModuleView() {
                                 .putBoolean("UntrustedTouchEvents", it)
                                 .apply()
                         },
-                        modifier = Modifier.padding(vertical = 8.dp),
+                        modifier = Modifier
+                            .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+                            .padding(horizontal = 10.dp, vertical = 4.dp),
                         otherInfoList = infoList
                     )
                 }
