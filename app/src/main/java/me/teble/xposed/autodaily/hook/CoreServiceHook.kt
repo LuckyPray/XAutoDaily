@@ -142,7 +142,9 @@ class CoreServiceHook : BaseHook() {
                     )
                 }
                 threadPool.shutdown()
-                while (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) {
+                while (!withContext(Dispatchers.IO) {
+                        threadPool.awaitTermination(1, TimeUnit.SECONDS)
+                    }) {
                     if (System.currentTimeMillis() - executeTime > 20 * 60 * 1000) {
                         // 关闭运行时间超过20分钟的任务
                         threadPool.shutdownNow()

@@ -185,6 +185,10 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     return@hookAfter
                 }
                 hookIsInit = true
+                // 等待hook执行完毕
+                while (!moduleLoadSuccess) {
+                    Thread.sleep(100)
+                }
             }.onFailure {
                 LogUtil.e(it)
                 ToastUtil.send("初始化失败: " + it.stackTraceToString())
