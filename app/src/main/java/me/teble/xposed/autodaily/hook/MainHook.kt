@@ -30,6 +30,7 @@ import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
+import java.util.concurrent.CompletableFuture
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -91,6 +92,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         LogUtil.d("init ActivityProxyManager")
                         ProxyManager.init
                         CoreServiceHook().coreServiceHook()
+                        asyncHook()
                     }
                 }.onFailure { Log.e("XALog", it.stackTraceToString()) }
             }
@@ -154,6 +156,26 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
+    private fun asyncHook() {
+        CompletableFuture.runAsync {
+            //加载资源注入
+            LogUtil.d("injectRes")
+            injectRes(hostContext.resources)
+            // dex相关
+            LogUtil.d("doDexInit")
+            doDexInit()
+            //初始化hook
+            LogUtil.d("initHook")
+            initHook()
+            moduleLoadSuccess = true
+            runCatching {
+                hostApp.startService(Intent(hostApp, load(CoreService)).apply {
+                    putExtra(CORE_SERVICE_FLAG, "$")
+                })
+            }.onFailure { LogUtil.e(it, "start CoreService failed") }
+        }
+    }
+
     private fun doInit() {
         val encumberStep = LoadData
         findMethod(encumberStep) { returnType == Boolean::class.java && emptyParam }.hookAfter {
@@ -163,21 +185,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     return@hookAfter
                 }
                 hookIsInit = true
-                //加载资源注入
-                LogUtil.d("injectRes")
-                injectRes(hostContext.resources)
-                // dex相关
-                LogUtil.d("doDexInit")
-                doDexInit()
-                //初始化hook
-                LogUtil.d("initHook")
-                initHook()
-                moduleLoadSuccess = true
-                runCatching {
-                    hostApp.startService(Intent(hostApp, load(CoreService)).apply {
-                        putExtra(CORE_SERVICE_FLAG, "$")
-                    })
-                }.onFailure { LogUtil.e(it, "start CoreService failed") }
             }.onFailure {
                 LogUtil.e(it)
                 ToastUtil.send("初始化失败: " + it.stackTraceToString())
