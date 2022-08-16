@@ -147,7 +147,7 @@ object TaskExecutor {
         }
     }
 
-    private fun startCorn() {
+    fun startCorn() {
         val scheduler = CronUtil.scheduler
         if (scheduler.isStarted) {
             return

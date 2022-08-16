@@ -32,6 +32,7 @@ import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
@@ -170,6 +171,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             LogUtil.d("initHook")
             initHook()
             moduleLoadSuccess = true
+            TaskExecutor.startCorn()
         }
     }
 
