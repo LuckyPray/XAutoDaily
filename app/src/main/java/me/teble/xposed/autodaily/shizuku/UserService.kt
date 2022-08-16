@@ -6,17 +6,24 @@ import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.config.DataMigrationService
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
+import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.parse
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
+import java.io.RandomAccessFile
+import java.nio.channels.FileLock
 import java.util.concurrent.Executors
 import kotlin.system.exitProcess
 
 class UserService : IUserService.Stub() {
 
     private val sdcardPath by lazy { Environment.getExternalStorageDirectory() }
+
+    /**
+     * package -> daemonLock
+     */
+    private val daemonFileLockMap = HashMap<String, FileLock>()
 
     init {
         Executors.newSingleThreadExecutor().execute {
@@ -31,6 +38,11 @@ class UserService : IUserService.Stub() {
             conf.alivePackages.forEach { (packageName, enable) ->
                 if (enable) {
                     enablePackage.add(packageName)
+                    val file = getDaemonLockFile(packageName)
+                    val fileD = RandomAccessFile(file, "rw")
+                    val lock = fileD.channel.lock()
+                    daemonFileLockMap[packageName] = lock
+                    Log.d("XALog", "package: $packageName daemonLockFile lock success!")
                 }
             }
             while (true) {
@@ -54,6 +66,19 @@ class UserService : IUserService.Stub() {
 
     private fun isAlive(packageName: String): Boolean {
         return execShell("pidof $packageName").isNotEmpty()
+    }
+
+    private fun getDaemonLockFile(packageName: String): File {
+        val dir = File(sdcardPath, "Android/data/$packageName/files/xa_daemon")
+        if (dir.isFile) {
+            dir.delete()
+        }
+        if (!dir.exists()) {
+            dir.mkdirs()
+        }
+        val daemonLockFile = File(dir, ".init_service")
+        if (!daemonLockFile.exists()) daemonLockFile.createNewFile()
+        return daemonLockFile
     }
 
     private fun startService(packageName: String, className: String, args: Array<String>) {
@@ -82,6 +107,13 @@ class UserService : IUserService.Stub() {
 
     override fun destroy() {
         Log.i("XALog", "user service destroy")
+        daemonFileLockMap.forEach { (packageName, lock) ->
+            runCatching {
+                lock.release()
+                getDaemonLockFile(packageName).delete()
+                Log.d("XALog", "package: $packageName daemonLockFile delete success!")
+            }
+        }
         exitProcess(0)
     }
 

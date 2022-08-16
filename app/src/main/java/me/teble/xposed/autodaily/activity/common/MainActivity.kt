@@ -34,14 +34,14 @@ import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.ShizukuConf
 import me.teble.xposed.autodaily.shizuku.UserService
 import me.teble.xposed.autodaily.ui.ActivityView
 import me.teble.xposed.autodaily.ui.LineCheckBox
 import me.teble.xposed.autodaily.ui.LineSwitch
+import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
+import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.toJsonString
 import rikka.shizuku.Shizuku
 import java.io.File

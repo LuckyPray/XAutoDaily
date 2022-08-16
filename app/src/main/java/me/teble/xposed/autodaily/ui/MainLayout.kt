@@ -35,8 +35,6 @@ import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
 import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
 import me.teble.xposed.autodaily.config.PAN_URL
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.EXEC_TASK
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.base.hostVersionCode
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -48,6 +46,8 @@ import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
 import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TaskExecutor.EXEC_TASK
+import me.teble.xposed.autodaily.utils.TaskExecutor.handler
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.openUrl
 import java.util.concurrent.CompletableFuture.runAsync
@@ -243,7 +243,7 @@ fun MainLayout(navController: NavHostController) {
             item {
                 LineButton(
                     title = "请吃作者辣条",
-                    desc = "本模块完全免费开源，一切开发旨在学习，请勿用于非法用途。习欢本模块的可以捐赠支持我，谢谢~~",
+                    desc = "本模块完全免费开源，一切开发旨在学习，请勿用于非法用途。喜欢本模块的可以捐赠支持我，谢谢~~",
                     onClick = {
                         ToastUtil.send("正在跳转，请稍后")
                         val context = navController.context

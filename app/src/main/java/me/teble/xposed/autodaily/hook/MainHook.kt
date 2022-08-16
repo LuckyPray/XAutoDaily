@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.res.XModuleResources
 import android.os.Build
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.emptyParam
@@ -17,8 +18,10 @@ import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.config.*
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.CORE_SERVICE_FLAG
+import me.teble.xposed.autodaily.config.BaseApplicationImpl
+import me.teble.xposed.autodaily.config.DataMigrationService
+import me.teble.xposed.autodaily.config.NewRuntime
+import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
@@ -29,8 +32,10 @@ import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
+import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -43,7 +48,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         SplashActivityHook::class.java,
         ToServiceMsgHook::class.java,
         BugHook::class.java,
-//        CoreServiceHook::class.java,
     )
     private lateinit var mLoadPackageParam: LoadPackageParam
     private lateinit var mStartupParam: IXposedHookZygoteInit.StartupParam
@@ -91,7 +95,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
                         LogUtil.d("init ActivityProxyManager")
                         ProxyManager.init
-                        CoreServiceHook().coreServiceHook()
                         asyncHook()
                     }
                 }.onFailure { Log.e("XALog", it.stackTraceToString()) }
@@ -111,7 +114,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun toolsHook() {
         val cmdClass: Class<*> by lazy { load(DataMigrationService)!! }
-        val coreServiceClass: Class<*> by lazy { load(CoreService)!! }
         findMethod(cmdClass) {
             name == "onStartCommand"
         }.hookAfter {
@@ -147,18 +149,18 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 context.startForeground(1, notification)
                 notificationManager.cancelAll()
             }
-            context.startService(Intent(context, coreServiceClass).apply {
-                intent?.extras?.let { extra ->
-                    putExtras(extra)
-                }
-            })
-            (it.thisObject as Service).stopSelf()
+            if (intent?.extras?.containsKey(CORE_SERVICE_TOAST_FLAG) == true) {
+                Toast.makeText(context, "唤醒测试: true", Toast.LENGTH_SHORT).show()
+            }
+            if (intent?.extras?.containsKey(CORE_SERVICE_FLAG) == true) {
+                (it.thisObject as Service).stopSelf()
+            }
         }
     }
 
     private fun asyncHook() {
-        CompletableFuture.runAsync {
-            //加载资源注入
+        runAsync {
+            // 加载资源注入
             LogUtil.d("injectRes")
             injectRes(hostContext.resources)
             // dex相关
@@ -168,18 +170,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             LogUtil.d("initHook")
             initHook()
             moduleLoadSuccess = true
-            runCatching {
-                hostApp.startService(Intent(hostApp, load(CoreService)).apply {
-                    putExtra(CORE_SERVICE_FLAG, "$")
-                })
-            }.onFailure { LogUtil.e(it, "start CoreService failed") }
         }
     }
 
     private fun doInit() {
-        val encumberStep = LoadData
+        val encumberStep = NewRuntime
         findMethod(encumberStep) { returnType == Boolean::class.java && emptyParam }.hookAfter {
-            // 防止hook多次被执行
             runCatching {
                 if (hookIsInit) {
                     return@hookAfter

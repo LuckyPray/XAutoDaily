@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.hook
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import com.github.kyuubiran.ezxhelper.utils.findMethod
@@ -10,18 +11,24 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.teble.xposed.autodaily.activity.common.MainActivity
 import me.teble.xposed.autodaily.activity.module.ModuleActivity
 import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
+import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.config.PAN_URL
 import me.teble.xposed.autodaily.config.SplashActivity
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.AUTO_EXEC
-import me.teble.xposed.autodaily.hook.CoreServiceHook.Companion.handler
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TaskExecutor.AUTO_EXEC
+import me.teble.xposed.autodaily.utils.TaskExecutor.handler
+import java.io.File
+import java.io.RandomAccessFile
+import java.nio.channels.FileLock
 
 class SplashActivityHook : BaseHook() {
 
@@ -50,6 +57,20 @@ class SplashActivityHook : BaseHook() {
                 } else if (ConfUnit.needShowUpdateLog) {
                     context.openConfigUpdateLog()
                     ConfUnit.needShowUpdateLog = false
+                }
+                withContext(Dispatchers.IO) {
+                    val daemonDir = context.getExternalFilesDir("xa_daemon")
+                    val file = File(daemonDir, ".init_service")
+                    if (file.exists()) {
+                        val accessFile = RandomAccessFile(file, "rw")
+                        runCatching {
+                            val lock = accessFile.channel.tryLock()
+                            LogUtil.d("获取文件锁成功，守护进程未在运行？")
+                            context.openJumpModuleDialog(lock, file)
+                        }.onFailure {
+                            LogUtil.d("获取文件锁失败，守护进程正在运行")
+                        }
+                    }
                 }
                 handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
             }
@@ -134,6 +155,41 @@ suspend fun Activity.openConfigUpdateLog() {
                 setNegativeButton("确定") { _, _ -> }
                 setPositiveButton("前往配置") { _, _ ->
                     val intent = Intent(context, ModuleActivity::class.java)
+                    context.startActivity(intent)
+                }
+            }
+        }
+        withContext(Dispatchers.Main) {
+            if (!isInitialized) {
+                configUpdateDialog = builder!!.create()
+            }
+            if (!configUpdateDialog.isShowing && !isFinishing) {
+                configUpdateDialog.show()
+            }
+        }
+    }
+}
+
+
+private lateinit var jumpModuleDialog: AlertDialog
+suspend fun Activity.openJumpModuleDialog(lock: FileLock, file: File) {
+    withContext(Dispatchers.IO) {
+        var builder: AlertDialog.Builder? = null
+        val isInitialized = ::jumpModuleDialog.isInitialized
+        if (!isInitialized) {
+            builder = AlertDialog.Builder(this@openJumpModuleDialog, 5).apply {
+                setTitle("守护进程提示")
+                setMessage("检测到守护进程异常退出，是否前往模块启动？")
+                setNegativeButton("我不需要") { _, _ ->
+                    runCatching {
+                        lock.release()
+                        file.delete()
+                    }
+                }
+                setPositiveButton("前往模块") { _, _ ->
+                    val intent = Intent().apply {
+                        component = ComponentName(PACKAGE_NAME_SELF, MainActivity::class.java.name)
+                    }
                     context.startActivity(intent)
                 }
             }
