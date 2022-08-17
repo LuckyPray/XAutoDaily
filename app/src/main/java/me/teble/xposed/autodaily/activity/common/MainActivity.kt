@@ -144,10 +144,10 @@ class MainActivity : ComponentActivity() {
         }
 
         fun peekUserService(): Boolean {
-            runCatching {
+            try {
                 return Shizuku.peekUserService(userServiceArgs, userServiceConnection)
-            }.onFailure {
-                Log.e("XALog", it.stackTraceToString())
+            } catch (e: Throwable) {
+                Log.e("XALog", e.stackTraceToString())
             }
             return false
         }

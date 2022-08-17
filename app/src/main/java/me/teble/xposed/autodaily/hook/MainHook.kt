@@ -98,7 +98,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         ProxyManager.init
                         asyncHook()
                     }
-                }.onFailure { Log.e("XALog", it.stackTraceToString()) }
+                }.onFailure {
+                    moduleLoadInit = true
+                    ToastUtil.send(it.stackTraceToString(), true)
+                    Log.e("XALog", it.stackTraceToString())
+                }
             }
             // TODO 分进程处理
             if (loadPackageParam.processName == loadPackageParam.packageName) {
@@ -170,7 +174,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             //初始化hook
             LogUtil.d("initHook")
             initHook()
-            moduleLoadSuccess = true
+            moduleLoadInit = true
             TaskExecutor.startCorn()
         }
     }
@@ -184,7 +188,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
                 hookIsInit = true
                 // 等待hook执行完毕
-                while (!moduleLoadSuccess) {
+                while (!moduleLoadInit) {
                     Thread.sleep(100)
                 }
             }.onFailure {

@@ -8,4 +8,4 @@ lateinit var modulePath: String
 lateinit var moduleRes: XModuleResources
 
 val moduleClassLoader: ClassLoader = MainHook::class.java.classLoader!!
-var moduleLoadSuccess = false
+var moduleLoadInit = false

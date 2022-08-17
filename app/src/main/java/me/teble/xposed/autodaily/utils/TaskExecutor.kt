@@ -6,7 +6,7 @@ import android.os.Message
 import android.os.PowerManager
 import cn.hutool.core.thread.ThreadUtil
 import kotlinx.coroutines.*
-import me.teble.xposed.autodaily.hook.base.moduleLoadSuccess
+import me.teble.xposed.autodaily.hook.base.moduleLoadInit
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.CronUtil
@@ -52,7 +52,7 @@ object TaskExecutor {
 
     fun runTasks(userExec: Boolean) {
         scope.launch(Dispatchers.IO) {
-            while (!moduleLoadSuccess) {
+            while (!moduleLoadInit) {
                 LogUtil.d("等待初始化完毕")
                 delay(500)
             }
