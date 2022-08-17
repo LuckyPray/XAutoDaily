@@ -63,12 +63,10 @@ class SplashActivityHook : BaseHook() {
                     val file = File(daemonDir, ".init_service")
                     if (file.exists()) {
                         val accessFile = RandomAccessFile(file, "rw")
-                        runCatching {
-                            val lock = accessFile.channel.tryLock()
+                        val lock = accessFile.channel.tryLock()
+                        lock?.let {
                             LogUtil.d("获取文件锁成功，守护进程未在运行？")
                             context.openJumpModuleDialog(lock, file)
-                        }.onFailure {
-                            LogUtil.d("获取文件锁失败，守护进程正在运行")
                         }
                     }
                 }
