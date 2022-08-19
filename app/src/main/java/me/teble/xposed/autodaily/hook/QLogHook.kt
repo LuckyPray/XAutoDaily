@@ -1,12 +1,12 @@
 package me.teble.xposed.autodaily.hook
 
+import android.util.Log
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QLog
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
-import me.teble.xposed.autodaily.utils.LogUtil
 
 class QLogHook : BaseHook() {
 
@@ -17,11 +17,18 @@ class QLogHook : BaseHook() {
         get() = false
 
     private val qTagFilter = setOf<String>(
-        "PublicAccountManager",
-        "reportsendMenuEventequest",
-        "PublicAccountManager-Click:",
-        "PublicAccountManager-Event:",
-        "PublicAccountManager-Location:",
+//        "PublicAccountManager",
+//        "reportsendMenuEventequest",
+//        "PublicAccountManager-Click:",
+//        "PublicAccountManager-Event:",
+//        "PublicAccountManager-Location:",
+        "VisitorsActivity",
+        "MobileQQServiceBase",
+        "FaceInfo",
+        "MsgRespHandler",
+        "CardHandler",
+        "MsgRespHandleReporter",
+        "mqq"
     )
 
     private fun containsTag(tag: String?): Boolean {
@@ -50,7 +57,7 @@ class QLogHook : BaseHook() {
                 && parameterTypes.contentEquals(arrayOf(String::class.java, Int::class.java, String::class.java, Throwable::class.java))
         }.hookReplace {
             if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
-                LogUtil.i("QTag: ${it.args[0]}, msg: ${it.args[2]}")
+                Log.i("XALog", "QTag: ${it.args[0]}, msg: ${it.args[2]}")
             }
             return@hookReplace Unit
         }
@@ -63,7 +70,7 @@ class QLogHook : BaseHook() {
                 && parameterTypes.contentEquals(arrayOf(String::class.java, Int::class.java, String::class.java, Throwable::class.java))
         }.hookReplace {
             if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
-                LogUtil.i("QTag: ${it.args[0]}, msg: ${it.args[2]}")
+                Log.i("XALog", "QTag: ${it.args[0]}, msg: ${it.args[2]}")
             }
             return@hookReplace Unit
         }
