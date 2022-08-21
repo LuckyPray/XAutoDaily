@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.hook.servlets
 
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appRuntime
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.invoke
 import mqq.app.Servlet
@@ -25,6 +26,7 @@ object ServletPool {
             servlet.invoke("onCreate")
             managedServlet[servlet::class.java.name] = servlet
             servletMap[servlet::class.java] = servlet
+            LogUtil.d("inject servlet: $servletClass")
         }
     }
 

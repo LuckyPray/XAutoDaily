@@ -32,6 +32,8 @@ object FuncTaskReqUtil : ITaskReqUtil {
         LogUtil.d("paramMap -> $paramMap")
         val manager: BaseFunction
         LogUtil.d("--------$url-------")
+        var message = ""
+        var resultCode = 200
         when {
             url.startsWith("xa://FavoriteManager/favoriteAllYesterdayVoter") -> {
                 LogUtil.d("--------favoriteAllYesterdayVoter-------")
@@ -39,8 +41,7 @@ object FuncTaskReqUtil : ITaskReqUtil {
                 LogUtil.d("maxPage: $maxPage")
                 manager = favoriteManager
                 val res = favoriteManager.getAllYesterdayVoter(maxPage)
-                LogUtil.d("昨日点赞列表人数: ${res?.size}")
-                res ?: throw RuntimeException("获取点赞列表失败")
+                LogUtil.d("昨日点赞列表人数: ${res.size}")
                 var favoriteCnt = 0
                 res.forEach {
                     LogUtil.d(it.toString())
@@ -48,15 +49,20 @@ object FuncTaskReqUtil : ITaskReqUtil {
                     val uin = it.uin
                     if (it.availableCnt > 0) {
                         Thread.sleep(1000)
-                        favoriteManager.favorite(uin, min(cnt.toInt(), 20))
-                        favoriteCnt++
+                        if (favoriteManager.syncFavorite(uin, min(cnt.toInt(), 20))) {
+                            favoriteCnt++
+                        }
                     }
                 }
+                message = "点赞成功: ${favoriteCnt}个, 失败: ${res.size - favoriteCnt}个"
             }
             url.startsWith("xa://FavoriteManager/favorite") -> {
                 val uin = paramMap["uin"]!!.toLong()
                 manager = favoriteManager
-                favoriteManager.favorite(uin, 20)
+                if (!favoriteManager.syncFavorite(uin, 20)) {
+                    message = "执行失败"
+                    resultCode = -1
+                }
             }
             url.startsWith("xa://SendMessageManager/sendMessage/friend") -> {
                 val uin = paramMap["uin"]!!
@@ -84,7 +90,7 @@ object FuncTaskReqUtil : ITaskReqUtil {
         if (!manager.isInit) {
             return TaskResponse(null, "功能版本不适配，详情请看日志", 201)
         }
-        return TaskResponse(null, "执行成功", 200)
+        return TaskResponse(null, if (message.isNotEmpty()) "执行成功" else message, resultCode)
     }
 
     private fun splitParam(url: String): Map<String, String> {

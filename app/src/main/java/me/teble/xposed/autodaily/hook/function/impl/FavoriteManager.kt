@@ -1,30 +1,63 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
 import cn.hutool.core.date.DateUtil
+import cn.hutool.core.lang.reflect.MethodHandleUtil
+import com.github.kyuubiran.ezxhelper.utils.isPublic
 import com.tencent.qphone.base.remote.ToServiceMsg
-import me.teble.xposed.autodaily.hook.FromServiceMsgHook
+import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
-import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
+import me.teble.xposed.autodaily.hook.servlets.FavoriteServlet
+import me.teble.xposed.autodaily.hook.servlets.ServletPool.favoriteServlet
+import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appInterface
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.task.model.VoterInfo
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.*
+import java.lang.reflect.Method
 import java.util.*
 
 open class FavoriteManager : BaseFunction(
     TAG = "FavoriteManager"
 ) {
 
-    override fun init() {}
+    lateinit var mRealHandleReq: Method
+    lateinit var mqqService: Any
+    override fun init() {
+        val cBaseService = load("com.tencent.mobileqq.service.MobileQQServiceBase")!!
+        cBaseService.getMethods(false).forEach {
+            if (it.returnType == Void.TYPE && it.isPublic) {
+                val paramTypes = it.parameterTypes
+                if (paramTypes.size >= 2
+                    && paramTypes.first() == ToServiceMsg::class.java
+                    && paramTypes.last() == Class::class.java) {
+                    mRealHandleReq = it
+                    LogUtil.d(it.toString())
+                }
+            }
+        }
+        appInterface.getFields(false).forEach {
+            if (cBaseService.isAssignableFrom(it.type)) {
+                LogUtil.d(it.name)
+                it.isAccessible = true
+                mqqService = it.get(appInterface)!!
+            }
+        }
+    }
 
-    open fun favorite(targetUin: Long, count: Int = 20) {
-        LogUtil.i("favorite -> $targetUin count: $count")
+    private fun sendReq(toServiceMsg: ToServiceMsg) {
+        if (mRealHandleReq.parameterTypes.size == 2) {
+            MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandleReq, toServiceMsg, FavoriteServlet::class.java)
+        } else {
+            MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandleReq, toServiceMsg, null, FavoriteServlet::class.java)
+        }
+    }
+
+    private fun favorite(targetUin: Long, count: Int = 20): Int {
         val toServiceMsg: ToServiceMsg = ToServiceMsg(
             "mobileqq.service",
             "$currentUin", "VisitorSvc.ReqFavorite"
         ).apply {
-            appSeq = -1
-            timeout = 9999L
+            appSeq = favoriteServlet.generateSeq()
+            timeout = 1000L
             extraData.putLong("selfUin", currentUin)
             extraData.putLong("targetUin", targetUin)
             extraData.putByteArray("vCookies", null)
@@ -33,29 +66,53 @@ open class FavoriteManager : BaseFunction(
             extraData.putInt("iCount", count)
             extraData.putInt("from", 0)
         }
-        QApplicationUtil.appInterface.sendToService(toServiceMsg)
+        sendReq(toServiceMsg)
+        return toServiceMsg.appSeq
+    }
+
+    open fun syncFavorite(targetUin: Long, count: Int = 20): Boolean {
+        LogUtil.i("favorite -> $targetUin count: $count")
+        val seq = favorite(targetUin, count)
+        val startTime = System.currentTimeMillis()
+        while (System.currentTimeMillis() - startTime < 10_000) {
+            Thread.sleep(120)
+            val fromServiceMsg = favoriteServlet.getReceiveAndRemove(seq) ?: continue
+            return fromServiceMsg.resultCode == 1000
+        }
+        LogUtil.i("执行点赞 $targetUin count: $count 超时")
+        return false
     }
 
     open fun syncGetVoterList(page: Int, pageSize: Int): List<VoterInfo>? {
         LogUtil.i("正在获取点赞列表 page: $page, pageSize: $pageSize")
+        val seq = getVoterList(page, pageSize)
         val startTime = System.currentTimeMillis()
-        val id = "syncGetVoterList"
-        FromServiceMsgHook.resMap[id] = null
-        getVoterList(page, pageSize)
         while (System.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
-            @Suppress("UNCHECKED_CAST")
-            val tmp = FromServiceMsgHook.resMap[id] as List<VoterInfo>?
-            tmp?.let {
-                FromServiceMsgHook.resMap.remove(id)
-                return it
+            val fromServiceMsg = favoriteServlet.getReceiveAndRemove(seq) ?: continue
+            val v = fromServiceMsg.getAttribute("result")
+            val list = v?.fieldValue("vVoterInfos") as List<*>?
+            LogUtil.d("list -> $list")
+            return mutableListOf<VoterInfo>().apply {
+                list?.forEach {
+                    val lTime = it?.fieldValue("lTime") as Int
+                    val lEctID = it.fieldValue("lEctID") as Long
+                    val bTodayVotedCnt = it.fieldValue("bTodayVotedCnt") as Short
+                    val bVoteCnt = it.fieldValue("bVoteCnt") as Short
+                    val bAvailableCnt = it.fieldValue("bAvailableCnt") as Short
+                    add(
+                        VoterInfo(
+                            lEctID, lTime, bVoteCnt, bTodayVotedCnt, bAvailableCnt
+                        )
+                    )
+                }
             }
         }
-        LogUtil.i("尝试小程序登录，获取点赞列表超时")
+        LogUtil.i("获取点赞列表超时")
         return null
     }
 
-    open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo>? {
+    open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo> {
         LogUtil.i("正在获取前${maxPage}页的点赞列表")
         val beginOfYesterday = DateUtil.beginOfDay(Date(TimeUtil.cnTimeMillis())).time / 1000 - 24 * 60 * 60
         val mutableList = mutableListOf<VoterInfo>()
@@ -77,19 +134,20 @@ open class FavoriteManager : BaseFunction(
         return mutableList
     }
 
-    private fun getVoterList(page: Int, pageSize: Int) {
+    private fun getVoterList(page: Int, pageSize: Int): Int {
         val toServiceMsg = ToServiceMsg(
             "mobileqq.service",
             "$currentUin", "VisitorSvc.ReqGetVoterList"
         ).apply {
-            appSeq = -1
-            timeout = 9999L
+            appSeq = favoriteServlet.generateSeq()
+            timeout = 10000L
             extraData.putLong("selfUin", currentUin)
             extraData.putLong("targetUin", currentUin)
             extraData.putLong("nextMid", (page - 1L) * pageSize)
             extraData.putInt("pageSize", pageSize)
         }
-        QApplicationUtil.appInterface.sendToService(toServiceMsg)
+        sendReq(toServiceMsg)
+        return toServiceMsg.appSeq
     }
 
 }

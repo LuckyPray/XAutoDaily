@@ -68,7 +68,10 @@ object Config {
         ),
         "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf(
             "^TroopClockInHandler$"
-        )
+        ),
+        "Lcom/tencent/mobileqq/service/MobileQQServiceBase;" to setOf(
+            "^PB cmd: req cmd:", "^MobileQQServiceBase$"
+        ),
     )
     const val hooksVersion = 1
     val confuseInfo = mutableMapOf<String, Set<String>>().apply {
