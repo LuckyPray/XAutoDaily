@@ -3,6 +3,8 @@ package me.teble.xposed.autodaily.hook.function.impl
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.lang.reflect.MethodHandleUtil
 import com.github.kyuubiran.ezxhelper.utils.isPublic
+import com.github.kyuubiran.ezxhelper.utils.paramCount
+import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
@@ -19,7 +21,8 @@ open class FavoriteManager : BaseFunction(
     TAG = "FavoriteManager"
 ) {
 
-    lateinit var mRealHandleReq: Method
+    lateinit var mRealHandlerReq: Method
+    lateinit var mHandlerResponse: Method
     lateinit var mqqService: Any
     override fun init() {
         val cBaseService = load("com.tencent.mobileqq.service.MobileQQServiceBase")!!
@@ -29,7 +32,18 @@ open class FavoriteManager : BaseFunction(
                 if (paramTypes.size >= 2
                     && paramTypes.first() == ToServiceMsg::class.java
                     && paramTypes.last() == Class::class.java) {
-                    mRealHandleReq = it
+                    mRealHandlerReq = it
+                    LogUtil.d(it.toString())
+                }
+            }
+        }
+        cBaseService.getMethods(false).forEach {
+            if (it.returnType == Void.TYPE && it.isPublic && it.paramCount == 4) {
+                val paramTypes = it.parameterTypes
+                if (paramTypes[0] == Boolean::class.java
+                    && paramTypes[1] == ToServiceMsg::class.java
+                    && paramTypes[2] == FromServiceMsg::class.java) {
+                    mHandlerResponse = it
                     LogUtil.d(it.toString())
                 }
             }
@@ -41,14 +55,27 @@ open class FavoriteManager : BaseFunction(
                 mqqService = it.get(appInterface)!!
             }
         }
+        if (!this::mRealHandlerReq.isInitialized) {
+            throw RuntimeException("初始化失败 -> mRealHandlerReq")
+        }
+        if (!this::mHandlerResponse.isInitialized) {
+            throw RuntimeException("初始化失败 -> mHandlerResponse")
+        }
+        if (!this::mqqService.isInitialized) {
+            throw RuntimeException("初始化失败 -> mqqService")
+        }
     }
 
     private fun sendReq(toServiceMsg: ToServiceMsg) {
-        if (mRealHandleReq.parameterTypes.size == 2) {
-            MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandleReq, toServiceMsg, FavoriteServlet::class.java)
+        if (mRealHandlerReq.parameterTypes.size == 2) {
+            MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandlerReq, toServiceMsg, FavoriteServlet::class.java)
         } else {
-            MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandleReq, toServiceMsg, null, FavoriteServlet::class.java)
+            MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandlerReq, toServiceMsg, null, FavoriteServlet::class.java)
         }
+    }
+
+    private fun decodeResponse(toServiceMsg: ToServiceMsg, fromServiceMsg: FromServiceMsg) {
+        MethodHandleUtil.invokeSpecial<Unit>(mqqService, mHandlerResponse, fromServiceMsg.isSuccess, toServiceMsg, fromServiceMsg, null)
     }
 
     private fun favorite(targetUin: Long, count: Int = 20): Int {
@@ -77,7 +104,7 @@ open class FavoriteManager : BaseFunction(
         while (System.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             val fromServiceMsg = favoriteServlet.getReceiveAndRemove(seq) ?: continue
-            return fromServiceMsg.resultCode == 1000
+            return fromServiceMsg.isSuccess
         }
         LogUtil.i("执行点赞 $targetUin count: $count 超时")
         return false
@@ -90,6 +117,8 @@ open class FavoriteManager : BaseFunction(
         while (System.currentTimeMillis() - startTime < 10_000) {
             Thread.sleep(120)
             val fromServiceMsg = favoriteServlet.getReceiveAndRemove(seq) ?: continue
+            val toServiceMsg = fromServiceMsg.attributes[FromServiceMsg::class.java.simpleName] as ToServiceMsg
+            decodeResponse(toServiceMsg, fromServiceMsg)
             val v = fromServiceMsg.getAttribute("result")
             val list = v?.fieldValue("vVoterInfos") as List<*>?
             LogUtil.d("list -> $list")

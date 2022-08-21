@@ -26,7 +26,7 @@ class BugHook : BaseHook() {
     override val isCompatible: Boolean
         get() = ProcUtil.isMain && hostPackageName == PACKAGE_NAME_QQ
     override val enabled: Boolean
-        get() = true
+        get() = false
 
 
     @MethodHook("fuck No value for gdt_report_list")
