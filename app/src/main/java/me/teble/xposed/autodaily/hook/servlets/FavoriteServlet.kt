@@ -29,16 +29,14 @@ class FavoriteServlet : MSFServlet() {
     }
 
     override fun onReceive(intent: Intent, fromServiceMsg: FromServiceMsg) {
-        val toServiceMsg: ToServiceMsg? =
-            intent.getParcelableExtra(ToServiceMsg::class.java.simpleName)
+        val toServiceMsg: ToServiceMsg =
+            intent.getParcelableExtra(ToServiceMsg::class.java.simpleName)!!
         fromServiceMsg.attributes[FromServiceMsg::class.java.simpleName] = toServiceMsg
         LogUtil.d(toServiceMsg.toString())
-        LogUtil.d(toServiceMsg?.extraData.toMap().toString())
+        LogUtil.d(toServiceMsg.extraData.toMap().toString())
         LogUtil.d("FavoriteServlet -> onReceive: $fromServiceMsg")
         LogUtil.d(fromServiceMsg.extraData.toMap().toString())
-        toServiceMsg?.let {
-            seqReceiveMap[toServiceMsg.appSeq] = fromServiceMsg
-        }
+        seqReceiveMap[toServiceMsg.appSeq] = fromServiceMsg
     }
 
     override fun onSend(intent: Intent, packet: Packet) {
