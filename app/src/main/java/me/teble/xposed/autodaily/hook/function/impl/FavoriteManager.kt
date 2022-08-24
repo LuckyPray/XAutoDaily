@@ -107,7 +107,7 @@ open class FavoriteManager : BaseFunction(
             return fromServiceMsg.isSuccess
         }
         LogUtil.i("执行点赞 $targetUin count: $count 超时")
-        return false
+        throw RuntimeException("执行点赞 $targetUin count: $count 超时")
     }
 
     open fun syncGetVoterList(page: Int, pageSize: Int): List<VoterInfo>? {
@@ -137,8 +137,8 @@ open class FavoriteManager : BaseFunction(
                 }
             }
         }
-        LogUtil.i("获取点赞列表超时")
-        return null
+        LogUtil.w("获取点赞列表超时")
+        throw RuntimeException("获取点赞列表超时")
     }
 
     open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo> {
