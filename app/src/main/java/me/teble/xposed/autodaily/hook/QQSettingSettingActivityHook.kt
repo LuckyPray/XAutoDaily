@@ -58,6 +58,48 @@ class QQSettingSettingActivityHook : BaseHook() {
                     }
                 }
                 entity.setOnLongClickListener {
+//                    val cBaseService = load("com.tencent.mobileqq.service.MobileQQServiceBase")!!
+//                    lateinit var mRealHandleReq: Method
+//                    cBaseService.getMethods(false).forEach {
+//                        if (it.returnType == Void.TYPE && it.isPublic) {
+//                            val paramTypes = it.parameterTypes
+//                            if (paramTypes.size >= 2
+//                                && paramTypes.first() == ToServiceMsg::class.java
+//                                && paramTypes.last() == Class::class.java) {
+//                                mRealHandleReq = it
+//                                LogUtil.d(it.toString())
+//                            }
+//                        }
+//                    }
+//                    val toServiceMsg: ToServiceMsg = ToServiceMsg(
+//                        "mobileqq.service",
+//                        "${QApplicationUtil.currentUin}", "VisitorSvc.ReqFavorite"
+//                    ).apply {
+//                        appSeq = 1234
+//                        timeout = 10000L
+//                        extraData.putLong("selfUin", QApplicationUtil.currentUin)
+//                        extraData.putLong("targetUin", qq)
+//                        extraData.putByteArray("vCookies", null)
+//                        // 好友1，陌生人66 陌生人能突破非会员10次上限
+//                        extraData.putInt("favoriteSource", 66)
+//                        extraData.putInt("iCount", 1)
+//                        extraData.putInt("from", 0)
+//                    }
+//                    kotlin.runCatching {
+//
+//                        appInterface.getFields(false).forEach {
+//                            if (cBaseService.isAssignableFrom(it.type)) {
+//                                LogUtil.d(it.name)
+//                                it.isAccessible = true
+//                                val mqqService = it.get(appInterface)!!
+//                                if (mRealHandleReq.parameterTypes.size == 2) {
+//                                    MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandleReq, toServiceMsg, FavoriteServlet::class.java)
+//                                } else {
+//                                    MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandleReq, toServiceMsg, null, FavoriteServlet::class.java)
+//                                }
+//                            }
+//                        }
+//                    }.onFailure { LogUtil.e(it) }
                     true
                 }
                 val id: Int = context.resources

@@ -79,10 +79,7 @@ fun SignLayout(navController: NavHostController) {
                                 },
                                 longPress = {
                                     ToastUtil.send("正在重置上次执行时间")
-                                    task.lastExecTime = null
-                                    task.lastExecMsg = null
-                                    task.nextShouldExecTime = null
-                                    task.taskExceptionFlag = null
+                                    task.reset()
                                     lastExecTime = "从未执行"
                                     lastExecMsg = ""
                                     nextShouldExecTime = "从未执行"

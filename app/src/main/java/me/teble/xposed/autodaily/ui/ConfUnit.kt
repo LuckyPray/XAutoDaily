@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui
 
+import kotlinx.serialization.Serializable
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.Task
@@ -21,6 +22,7 @@ import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
 import me.teble.xposed.autodaily.task.util.Const.SIGN_STAY_AWAKE
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
+import me.teble.xposed.autodaily.task.util.Const.TASK_EXEC_STATUS
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
 import me.teble.xposed.autodaily.task.util.Const.VERSION_INFO_CACHE
 import me.teble.xposed.autodaily.task.util.formatDate
@@ -107,7 +109,25 @@ var Task.taskExceptionFlag: String?
     get() = accountConfig.getString("${this.id}#${TASK_EXCEPTION_COUNT}")
     set(value) = accountConfig.putString("${this.id}#${TASK_EXCEPTION_COUNT}", value)
 
-val Task.errCount: Int get() {
+var Task.taskExecStatus: TaskStatus
+    get() {
+        val str = accountConfig.getString("${this.id}#${TASK_EXEC_STATUS}") ?: ""
+        return TaskStatus.valueOf(str)
+    }
+    set(value) {
+        accountConfig.putString("${this.id}#${TASK_EXEC_STATUS}", value.toString())
+    }
+
+fun Task.reset() {
+    this.lastExecTime = null
+    this.lastExecMsg = null
+    this.nextShouldExecTime = null
+    this.taskExceptionFlag = null
+    this.taskExecStatus = TaskStatus()
+}
+
+val Task.errCount: Int
+    get() {
         this.taskExceptionFlag.let {
             it?.let {
                 runCatching {
@@ -121,8 +141,32 @@ val Task.errCount: Int get() {
         return 0
     }
 
-fun Task.getVariable(name: String, default: String): String
-    = accountConfig.getString("${this.id}#${ENV_VARIABLE}#${name}", default)
+fun Task.getVariable(
+    name: String, default: String
+): String = accountConfig.getString("${this.id}#${ENV_VARIABLE}#${name}", default)
 
-fun Task.setVariable(name: String, value: String?)
-    = accountConfig.putString("${this.id}#${ENV_VARIABLE}#${name}", value)
+fun Task.setVariable(
+    name: String, value: String?
+) = accountConfig.putString("${this.id}#${ENV_VARIABLE}#${name}", value)
+
+@Serializable
+data class TaskStatus(
+    var successCount: Int,
+    var reqCount: Int,
+    var lastExecDate: String,
+) {
+    constructor() : this(0, 0, "")
+
+    override fun toString(): String {
+        return "${successCount}|${reqCount}|${lastExecDate}"
+    }
+
+    companion object {
+        fun valueOf(str: String): TaskStatus {
+            runCatching {
+                val arr = str.split("|")
+                return TaskStatus(arr[0].toInt(), arr[1].toInt(), arr[2])
+            }.getOrElse { return TaskStatus(0, 0, "") }
+        }
+    }
+}

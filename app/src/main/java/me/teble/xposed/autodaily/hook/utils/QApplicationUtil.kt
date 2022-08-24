@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.hook.utils
 
 import com.tencent.common.app.AppInterface
 import com.tencent.common.app.BaseApplicationImpl
+import com.tencent.mobileqq.app.QQAppInterface
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.config.MsfServiceSdk
 import me.teble.xposed.autodaily.hook.base.hostApp
@@ -15,8 +16,8 @@ object QApplicationUtil {
 
     val application = hostApp as BaseApplicationImpl
     private val fAppRuntime: Field by lazy {  application.field(AppRuntime::class.java)!! }
-    val appRuntime: AppRuntime get() = fAppRuntime.get(application) as AppRuntime
-    val appInterface: AppInterface = appRuntime as AppInterface
+    val appRuntime: AppRuntime get() = application.waitAppRuntime(null)
+    val appInterface: AppInterface = appRuntime as QQAppInterface
     val currentUin: Long inline get() = appRuntime.longAccountUin
     private val msf: Any get() = load(MsfServiceSdk)!!.invoke("get")!!
 

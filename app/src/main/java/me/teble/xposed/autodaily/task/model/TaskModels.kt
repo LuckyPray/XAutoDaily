@@ -62,7 +62,11 @@ data class Task(
     val domain: String?,
     // 请求回调
     val callback: TaskCallback
-)
+) {
+    val isRelayTask = cron == null
+    val isBasic = cron == "basic"
+    val isCronTask = !isRelayTask && !isBasic
+}
 @Serializable
 data class TaskEnv(
     // 变量名

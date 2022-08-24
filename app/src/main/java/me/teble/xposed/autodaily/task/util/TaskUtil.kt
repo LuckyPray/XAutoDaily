@@ -17,10 +17,7 @@ import me.teble.xposed.autodaily.task.request.model.TaskResponse
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.format
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.formatList
-import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.lastExecMsg
-import me.teble.xposed.autodaily.ui.lastExecTime
-import me.teble.xposed.autodaily.ui.nextShouldExecTime
+import me.teble.xposed.autodaily.ui.*
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.parse
@@ -46,9 +43,14 @@ object TaskUtil {
         generateEnv(task, env)
         val repeatNum = format(task.repeat, null, env).toInt()
         LogUtil.d("重复请求次数 -> $repeatNum")
-        var successNum = 0
-        var reqCount = 0
+        val currDateStr = TimeUtil.getCNDate().formatDate()
         var lastMsg = "任务没有执行"
+        var status = task.taskExecStatus
+        if (status.lastExecDate != currDateStr) {
+            status = TaskStatus(0, 0, currDateStr)
+        } else {
+            LogUtil.i("检测到任务中断，可能是执行过程中异常退出导致，从上次位置（index: ${status.reqCount}）执行继续执行")
+        }
         for (cnt in 0 until repeatNum) {
             // 执行依赖任务
             relays.forEach {
@@ -61,16 +63,24 @@ object TaskUtil {
             }
             val taskReqUtil = ReqFactory.getReq(reqType)
             val requests = taskReqUtil.create(task, env)
-            reqCount += requests.size
-            requests.forEachIndexed { _, it ->
+            val startRepeatNum = status.reqCount / requests.size
+            if (cnt < startRepeatNum) {
+                continue
+            }
+            val startIdx = if (task.isBasic || task.isRelayTask) 0 else status.reqCount % requests.size
+            for (i in startIdx until requests.size) {
                 Thread.sleep((task.delay * 1000).toLong())
-                val response = taskReqUtil.executor(it)
+                val response = taskReqUtil.executor(requests[i])
                 val result = handleCallback(response, task, env)
                 lastMsg = result.msg
                 if (result.success) {
-                    successNum++
+                    status.successCount++
                 } else {
                     LogUtil.i("任务【${task.id}】执行失败: $lastMsg")
+                }
+                status.reqCount++
+                if (task.isCronTask) {
+                    task.taskExecStatus = status
                 }
             }
         }
@@ -86,8 +96,8 @@ object TaskUtil {
                 true)!!
             task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
             task.lastExecMsg =
-                if (reqCount == 1) {
-                    if (successNum == 1) {
+                if (status.reqCount == 1) {
+                    if (status.successCount == 1) {
                         if (ConfUnit.showTaskToast) {
                             ToastUtil.send("任务【${task.id}】 $lastMsg")
                         }
@@ -100,16 +110,16 @@ object TaskUtil {
                     }
                 } else {
                     LogUtil.i(
-                        "任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个"
+                        "任务【${task.id}】执行完毕，成功${status.successCount}个，失败${status.reqCount - status.successCount}个"
                     )
                     if (ConfUnit.showTaskToast) {
-                        ToastUtil.send("任务【${task.id}】执行完毕，成功${successNum}个，失败${reqCount - successNum}个")
+                        ToastUtil.send("任务【${task.id}】执行完毕，成功${status.successCount}个，失败${status.reqCount - status.successCount}个")
                     }
-                    "执行成功${successNum}个，失败${reqCount - successNum}个"
+                    "执行成功${status.successCount}个，失败${status.reqCount - status.successCount}个"
                 }
         }
         // 未配置断言器允许失败，防止不重要的依赖任务中断任务流程
-        return task.callback.assert == null || successNum > 0
+        return task.callback.assert == null || status.successCount > 0
     }
 
     private fun handleCallback(

@@ -29,6 +29,7 @@ import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
+import me.teble.xposed.autodaily.hook.servlets.ServletPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.utils.LogUtil
@@ -180,8 +181,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun doInit() {
-        val encumberStep = NewRuntime
-        findMethod(encumberStep) { returnType == Boolean::class.java && emptyParam }.hookAfter {
+        val mNewRuntime = findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }
+        mNewRuntime.hookAfter {
             runCatching {
                 if (hookIsInit) {
                     return@hookAfter
@@ -195,6 +196,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 LogUtil.e(it)
                 ToastUtil.send("初始化失败: " + it.stackTraceToString())
             }
+        }
+        mNewRuntime.hookBefore {
+            runCatching {
+                ServletPool.injectServlet()
+            }.onFailure { LogUtil.e(it) }
         }
     }
 
