@@ -6,6 +6,7 @@ import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import com.tencent.qphone.base.remote.ToServiceMsg
+import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
@@ -56,7 +57,7 @@ class BugHook : BaseHook() {
             }.hookAfter {
                 val toServiceMsg = it.args[0] as? ToServiceMsg ?: return@hookAfter
                 val servlet = it.args[1] as? MSFServlet ?: return@hookAfter
-                if (toServiceMsg.serviceCmd.startsWith("VisitorSvc")) {
+                if (toServiceMsg.serviceCmd.startsWith("OidbSvc.0xeb7")) {
                     LogUtil.d("sendMessageToMSF: " + servlet::class.java.name)
                     LogUtil.d(toServiceMsg.appSeq.toString())
                     LogUtil.d(toServiceMsg.serviceCmd)
@@ -76,7 +77,7 @@ class BugHook : BaseHook() {
                       newIntent.component?.className == FavoriteServlet::class.java.name) {
                     val toServiceMsg = newIntent.getParcelableExtra<ToServiceMsg>("ToServiceMsg")
                     toServiceMsg?.let {
-                        if (it.serviceCmd.startsWith("VisitorSvc")) {
+                        if (it.serviceCmd.startsWith("OidbSvc.0xeb7")) {
                             LogUtil.d("startServlet: " + it.serviceCmd)
                             LogUtil.d(it.toString())
                             LogUtil.d(it.extraData.toMap().toString())
@@ -85,6 +86,16 @@ class BugHook : BaseHook() {
                     }
                 }
             }
+        }
+
+        kotlin.runCatching {
+            XposedBridge.hookAllConstructors(load("Lcom/tencent/mobileqq/troop/d/b/a;"),
+                object : XC_MethodHook() {
+                override fun afterHookedMethod(param: MethodHookParam?) {
+                    LogUtil.d("Lcom/tencent/mobileqq/troop/d/b/a;-><init>")
+                    LogUtil.printStackTrace()
+                }
+            })
         }
     }
 }
