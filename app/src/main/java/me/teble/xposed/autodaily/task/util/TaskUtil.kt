@@ -47,7 +47,7 @@ object TaskUtil {
         var lastMsg = "任务没有执行"
         var status = task.taskExecStatus
         if (status.lastExecDate != currDateStr) {
-            status = TaskStatus(0, 0, 0, currDateStr)
+            status = TaskStatus(0, 0, currDateStr)
         } else {
             LogUtil.i("检测到任务中断，可能是执行过程中异常退出导致，从上次位置（index: ${status.reqCount}）执行继续执行")
         }
@@ -63,8 +63,11 @@ object TaskUtil {
             }
             val taskReqUtil = ReqFactory.getReq(reqType)
             val requests = taskReqUtil.create(task, env)
-            status.reqCount += requests.size
-            val startIdx = if (task.isBasic || task.isRelayTask) 0 else status.lastExecIdx
+            val startRepeatNum = status.reqCount / requests.size
+            if (cnt < startRepeatNum) {
+                continue
+            }
+            val startIdx = if (task.isBasic || task.isRelayTask) 0 else status.reqCount % requests.size
             for (i in startIdx until requests.size) {
                 Thread.sleep((task.delay * 1000).toLong())
                 val response = taskReqUtil.executor(requests[i])
@@ -75,7 +78,7 @@ object TaskUtil {
                 } else {
                     LogUtil.i("任务【${task.id}】执行失败: $lastMsg")
                 }
-                status.lastExecIdx++
+                status.reqCount++
                 if (task.isCronTask) {
                     task.taskExecStatus = status
                 }

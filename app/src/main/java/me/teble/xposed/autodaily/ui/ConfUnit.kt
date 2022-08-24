@@ -151,23 +151,22 @@ fun Task.setVariable(
 
 @Serializable
 data class TaskStatus(
-    var lastExecIdx: Int,
     var successCount: Int,
     var reqCount: Int,
     var lastExecDate: String,
 ) {
-    constructor() : this(0, 0, 0, "")
+    constructor() : this(0, 0, "")
 
     override fun toString(): String {
-        return "${lastExecIdx}|${successCount}|${reqCount}|${lastExecDate}"
+        return "${successCount}|${reqCount}|${lastExecDate}"
     }
 
     companion object {
         fun valueOf(str: String): TaskStatus {
             runCatching {
                 val arr = str.split("|")
-                return TaskStatus(arr[0].toInt(), arr[1].toInt(), arr[2].toInt(), arr[3])
-            }.getOrElse { return TaskStatus(0, 0, 0, "") }
+                return TaskStatus(arr[0].toInt(), arr[1].toInt(), arr[2])
+            }.getOrElse { return TaskStatus(0, 0, "") }
         }
     }
 }

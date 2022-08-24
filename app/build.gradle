@@ -21,7 +21,7 @@ android {
         //noinspection OldTargetApi
         targetSdkVersion 31
         versionCode mVersionCode
-        versionName "3.0.5"
+        versionName "3.0.6"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
