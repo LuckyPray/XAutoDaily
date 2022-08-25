@@ -31,7 +31,7 @@ fun SignLayout(navController: NavHostController) {
             conf.taskGroups.forEach { taskGroup ->
                 taskGroup.tasks.forEach {
                     // TODO 后续优化成 本次登陆||当天暂停 执行
-                    if (it.errCount >= 3) {
+                    if (it.errInfo.count >= 3) {
                         errorMap[it.id] = "任务执行失败次数超过3次，今日暂停执行，可长按重置执行记录"
                     }
                 }

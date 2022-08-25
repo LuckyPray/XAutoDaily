@@ -15,7 +15,7 @@ import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.errCount
+import me.teble.xposed.autodaily.ui.errInfo
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -82,7 +82,7 @@ object TaskExecutor {
         lock.withLock {
             for (group in conf.taskGroups) {
                 for (task in group.tasks) {
-                    if (ConfigUtil.checkExecuteTask(task) && task.errCount < 3) {
+                    if (ConfigUtil.checkExecuteTask(task) && task.errInfo.count < 3) {
                         if (!runtimeTasks.contains(group)) {
                             needExecGroups.add(group)
                         }

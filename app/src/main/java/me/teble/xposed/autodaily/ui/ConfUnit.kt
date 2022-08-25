@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui
 
 import kotlinx.serialization.Serializable
-import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.Task
@@ -27,11 +26,8 @@ import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXEC_STATUS
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
 import me.teble.xposed.autodaily.task.util.Const.VERSION_INFO_CACHE
-import me.teble.xposed.autodaily.task.util.formatDate
-import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.parse
 import me.teble.xposed.autodaily.utils.toJsonString
-import java.util.*
 
 object ConfUnit {
     var needUpdate: Boolean = false
@@ -110,41 +106,27 @@ var Task.lastExecMsg: String?
     get() = accountConfig.getString("${this.id}#${LAST_EXEC_MSG}")
     set(value) = accountConfig.putString("${this.id}#${LAST_EXEC_MSG}", value)
 
-var Task.taskExceptionFlag: String?
-    get() = accountConfig.getString("${this.id}#${TASK_EXCEPTION_COUNT}")
-    set(value) = accountConfig.putString("${this.id}#${TASK_EXCEPTION_COUNT}", value)
+var Task.errInfo: TaskErrorInfo
+    get() {
+        val str = accountConfig.getString("${this.id}#${TASK_EXCEPTION_COUNT}") ?: ""
+        return TaskErrorInfo.valueOf(str)
+    }
+    set(value) = accountConfig.putString("${this.id}#${TASK_EXCEPTION_COUNT}", value.toString())
 
 var Task.taskExecStatus: TaskStatus
     get() {
         val str = accountConfig.getString("${this.id}#${TASK_EXEC_STATUS}") ?: ""
         return TaskStatus.valueOf(str)
     }
-    set(value) {
-        accountConfig.putString("${this.id}#${TASK_EXEC_STATUS}", value.toString())
-    }
+    set(value) = accountConfig.putString("${this.id}#${TASK_EXEC_STATUS}", value.toString())
 
 fun Task.reset() {
     this.lastExecTime = null
     this.lastExecMsg = null
     this.nextShouldExecTime = null
-    this.taskExceptionFlag = null
+    this.errInfo = TaskErrorInfo()
     this.taskExecStatus = TaskStatus()
 }
-
-val Task.errCount: Int
-    get() {
-        this.taskExceptionFlag.let {
-            it?.let {
-                runCatching {
-                    val arr = it.split("|")
-                    if (arr[0] == Date(TimeUtil.localTimeMillis()).formatDate()) {
-                        return arr[1].toInt()
-                    }
-                }
-            }
-        }
-        return 0
-    }
 
 fun Task.getVariable(
     name: String, default: String
@@ -172,6 +154,25 @@ data class TaskStatus(
                 val arr = str.split("|")
                 return TaskStatus(arr[0].toInt(), arr[1].toInt(), arr[2])
             }.getOrElse { return TaskStatus(0, 0, "") }
+        }
+    }
+}
+
+@Serializable
+data class TaskErrorInfo(
+    var dateStr: String = "",
+    var count: Int = 0
+) {
+
+    override fun toString(): String {
+        return "${dateStr}|${count}"
+    }
+    companion object {
+        fun valueOf(str: String): TaskErrorInfo {
+            runCatching {
+                val split = str.split("|")
+                return TaskErrorInfo(split[0], split[1].toInt())
+            }.getOrElse { return TaskErrorInfo() }
         }
     }
 }

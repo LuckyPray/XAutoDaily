@@ -5,7 +5,7 @@ import me.teble.xposed.autodaily.task.filter.GroupTaskFilter
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.util.ConfigUtil
-import me.teble.xposed.autodaily.ui.errCount
+import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 
 class GroupTaskCheckExecuteFilter : GroupTaskFilter(
@@ -20,7 +20,7 @@ class GroupTaskCheckExecuteFilter : GroupTaskFilter(
     ) {
         val taskGroup = (chain as GroupTaskFilterChain).taskGroup
         taskGroup.tasks.forEach {
-            if (ConfigUtil.checkExecuteTask(it) && it.errCount < 3) {
+            if (ConfigUtil.checkExecuteTask(it) && it.errInfo.count < 3) {
                 LogUtil.d("task -> ${it.id} 将被执行")
                 taskList.add(it)
             }

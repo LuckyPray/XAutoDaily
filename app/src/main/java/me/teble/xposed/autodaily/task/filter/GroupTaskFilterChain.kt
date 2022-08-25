@@ -10,8 +10,7 @@ import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.request.enum.ReqType
 import me.teble.xposed.autodaily.task.util.TaskUtil
 import me.teble.xposed.autodaily.task.util.formatDate
-import me.teble.xposed.autodaily.ui.errCount
-import me.teble.xposed.autodaily.ui.taskExceptionFlag
+import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.net.SocketTimeoutException
@@ -51,8 +50,8 @@ class GroupTaskFilterChain(
         } else {
             val reqType = ReqType.getType(taskGroup.type.split("|").first())
             for (task in taskList) {
-                var errCount = task.errCount
-                if (errCount >= 3) {
+                var taskException = task.errInfo
+                if (taskException.count >= 3) {
                     LogUtil.i("任务${task.id}今日执行错误次数超过3次，跳过执行")
                     continue
                 }
@@ -63,8 +62,9 @@ class GroupTaskFilterChain(
                     LogUtil.e(e, "执行任务${task.id}异常: ")
                 } catch (e: Throwable) {
                     LogUtil.e(e, "执行任务${task.id}异常: ")
-                    val currentDate = Date(TimeUtil.localTimeMillis()).formatDate()
-                    task.taskExceptionFlag = "$currentDate|${++errCount}"
+                    taskException.count++
+                    taskException.dateStr = Date(TimeUtil.localTimeMillis()).formatDate()
+                    task.errInfo = taskException
                 }
             }
         }
