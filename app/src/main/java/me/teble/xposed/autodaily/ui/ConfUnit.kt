@@ -33,7 +33,7 @@ import me.teble.xposed.autodaily.utils.toJsonString
 object ConfUnit {
     val needUpdate: Boolean get() {
         versionInfoCache?.let {
-            if (it.appVersion < BuildConfig.VERSION_CODE) {
+            if (BuildConfig.VERSION_CODE < it.appVersion) {
                 return true
             }
         }
