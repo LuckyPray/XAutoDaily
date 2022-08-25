@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui
 
 import kotlinx.serialization.Serializable
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.Task
@@ -30,7 +31,14 @@ import me.teble.xposed.autodaily.utils.parse
 import me.teble.xposed.autodaily.utils.toJsonString
 
 object ConfUnit {
-    var needUpdate: Boolean = false
+    val needUpdate: Boolean get() {
+        versionInfoCache?.let {
+            if (it.appVersion < BuildConfig.VERSION_CODE) {
+                return true
+            }
+        }
+        return false
+    }
 
     // -------------------------------------------------- //
     var configVersion: Int

@@ -173,9 +173,7 @@ object TaskExecutor {
             "check_update_task",
             "0 0 9/3 * * *"
         ) {
-            if (ConfigUtil.checkUpdate(false)) {
-                ConfUnit.needUpdate = true
-            }
+            ConfigUtil.checkUpdate(false)
         }
         LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
     }
