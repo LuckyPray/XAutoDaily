@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui
 
 import kotlinx.serialization.Serializable
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.Task
@@ -17,6 +18,7 @@ import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_MSG
 import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.LAST_FETCH_TIME
 import me.teble.xposed.autodaily.task.util.Const.LOG_TO_XPOSED
+import me.teble.xposed.autodaily.task.util.Const.LastModuleVersion
 import me.teble.xposed.autodaily.task.util.Const.NEED_SHOW_LOG
 import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
@@ -51,6 +53,9 @@ object ConfUnit {
         set(value) {
             xaConfig.putString(VERSION_INFO_CACHE, value.toJsonString())
         }
+    var lastModuleVersion: Int
+        get() = xaConfig.getInt(LastModuleVersion, 0)
+        set(value) = xaConfig.putInt(LastModuleVersion, value)
     var lastFetchTime: Long
         get() = xaConfig.getLong(LAST_FETCH_TIME, 0)
         set(value) = xaConfig.putLong(LAST_FETCH_TIME, value)

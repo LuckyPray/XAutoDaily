@@ -104,6 +104,10 @@
 -keep class me.teble.xposed.autodaily.shizuku.UserService {
     *;
 }
+# servlet混淆
+-keep class me.teble.xposed.autodaily.hook.servlets.** {
+    *;
+}
 
 
 ##########################################################################################################

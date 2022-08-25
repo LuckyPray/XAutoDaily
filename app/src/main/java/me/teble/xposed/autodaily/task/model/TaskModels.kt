@@ -63,6 +63,8 @@ data class Task(
     // 请求回调
     val callback: TaskCallback
 ) {
+    constructor(id: String): this(id, "", null, null, null, "1", 0, "", "", null, null, null,
+        TaskCallback(null, null, null, null, null, null))
     val isRelayTask = cron == null
     val isBasic = cron == "basic"
     val isCronTask = !isRelayTask && !isBasic

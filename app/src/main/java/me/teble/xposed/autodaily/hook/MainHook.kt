@@ -31,7 +31,11 @@ import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.servlets.ServletPool
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.errCount
+import me.teble.xposed.autodaily.ui.reset
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
@@ -180,6 +184,20 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
+    private fun onStart() {
+        if (ConfUnit.lastModuleVersion < 22082510) {
+            if (Task("好友点赞").errCount > 2) {
+                LogUtil.i("版本更新，自动重置好友点赞任务")
+                Task("好友点赞").reset()
+            }
+            if (Task("资料卡回赞").errCount > 2) {
+                LogUtil.i("版本更新，自动重置资料卡回赞任务")
+                Task("资料卡回赞").reset()
+            }
+        }
+        ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
+    }
+
     private fun doInit() {
         val mNewRuntime = findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }
         mNewRuntime.hookAfter {
@@ -187,6 +205,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 if (hookIsInit) {
                     return@hookAfter
                 }
+                // 启动前数据迁移/初始化
+                onStart()
                 hookIsInit = true
                 // 等待hook执行完毕
                 while (!moduleLoadInit) {
