@@ -10,13 +10,8 @@ const val PACKAGE_NAME_TIM = "com.tencent.tim"
 const val PACKAGE_NAME_QQ_LITE = "com.tencent.qqlite"
 const val PACKAGE_NAME_QQ_INTERNATIONAL = "com.tencent.mobileqqi"
 const val PACKAGE_NAME_SELF = BuildConfig.APPLICATION_ID
-const val NTSC_URL = "http://www.ntsc.ac.cn"
-const val DAILY_LOG_FILE = "daily.log"
-const val REQUESTS_LOG_FILE = "requests.log"
-const val DEBUG_LOG_FILE = "debug.log"
 const val PAN_URL = "https://teble.lanzoui.com/b00t9lw3a"
-const val GITHUB_RELEASE_URL = "https://github.com/teble/XAutoDaily/releases"
-const val PACKAGE_NAME_ALIPAY = "com.eg.android.AlipayGphone"
+const val GITHUB_RELEASE_URL = "https://github.com/LuckyPray/XAutoDaily/releases"
 const val ALIPAY_QRCODE = "tsx060790flcdxvkynija2e"
 
 //    String TEST_API_URL = BuildConfig.TEST_API_URL;
