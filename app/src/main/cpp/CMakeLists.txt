@@ -14,7 +14,7 @@ set(CMAKE_CXX_STANDARD 17)
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../../../../xa_mmkv/Android mmkv)
+add_subdirectory(../../../../mmkv mmkv)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DexKit)
 
 add_library( # Sets the name of the library.
