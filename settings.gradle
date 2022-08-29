@@ -1,6 +1,6 @@
 rootProject.name = "XAutoDaily"
 include(
         ":app",
-        ":mmkv",
+        ':mmkv',
         ":stub",
 )
