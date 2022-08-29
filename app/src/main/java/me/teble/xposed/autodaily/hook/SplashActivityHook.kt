@@ -136,13 +136,11 @@ suspend fun Activity.openConfigUpdateLog() {
     withContext(Dispatchers.IO) {
         var builder: AlertDialog.Builder? = null
         val conf = loadSaveConf()
-        LogUtil.d("open Update Dialog: conf version -> ${conf.version}")
         if (conf.version != configVer) {
             configVer = conf.version
             builder = AlertDialog.Builder(this@openConfigUpdateLog, 5).apply {
                 setTitle("配置更新日志")
                 val updateLog = buildList {
-                    LogUtil.d("last -> ${conf.updateLogs.last()}")
                     conf.updateLogs.forEach {
                         add("v${it.version}:\n${it.desc}")
                     }

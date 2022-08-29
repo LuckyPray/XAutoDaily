@@ -8,13 +8,14 @@ import com.github.kyuubiran.ezxhelper.utils.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.NOTICE
 import me.teble.xposed.autodaily.config.XA_API_URL
-import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.base.hostContext
-import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
-import me.teble.xposed.autodaily.task.model.*
+import me.teble.xposed.autodaily.task.model.Result
+import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.task.model.TaskProperties
+import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit.lastFetchTime
 import me.teble.xposed.autodaily.ui.ConfUnit.versionInfoCache
@@ -72,36 +73,6 @@ object ConfigUtil {
     external fun getMd5Hex(value: String): String
 
     external fun findDex(classLoader: ClassLoader, string: String): String
-
-    fun checkConfigUpdate(currentConfigVersion: Int): String? {
-        hostClassLoader
-        try {
-            ToastUtil.send("正在检测更新")
-            LogUtil.i("正在检测更新")
-            val res = "https://data.jsdelivr.com/v1/package/gh/teble/XAutoDaily-Conf".get()
-            val packageData: PackageData = res.parse()
-            if (packageData.versions.isNotEmpty() && currentConfigVersion < packageData.versions[0].toInt()) {
-                return packageData.versions[0]
-            }
-        } catch (e: Exception) {
-            LogUtil.e(e)
-        }
-        return null
-    }
-
-    fun updateCdnConfig(newConfVersion: Int): Boolean {
-        val encRes = "https://cdn.jsdelivr.net/gh/teble/XAutoDaily-Conf@${newConfVersion}/xa_conf".get()
-        val res = decodeConfStr(encRes)
-        val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
-        if (minAppVersion > BuildConfig.VERSION_CODE) {
-            ToastUtil.send("插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置", true)
-            LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${newConfVersion}版本的配置")
-            return false
-        }
-        saveConfFile(encRes, newConfVersion)
-        ToastUtil.send("配置文件更新完毕，如有选项更新，请前往配置目录进行勾选")
-        return true
-    }
 
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchUpdateInfo()
@@ -206,7 +177,6 @@ object ConfigUtil {
     }
 
     fun loadSaveConf(): TaskProperties {
-        Log.d("loadSaveConf" + _conf?.version)
         if (_conf != null) {
             return _conf as TaskProperties
         }
@@ -259,17 +229,13 @@ object ConfigUtil {
         return null
     }
 
-    fun readMinVersion(confStr: String): Int {
+    private fun readMinVersion(confStr: String): Int {
         var minAppVersion = 0
         val str = ReUtil.getGroup1(MIN_APP_VERSION_REG, confStr)
         if (str.isNotEmpty()) {
             minAppVersion = str.toInt()
         }
         return minAppVersion
-    }
-
-    fun changeSignButton(key: String, boolean: Boolean) {
-        accountConfig.putBoolean(key, boolean)
     }
 
     fun getCurrentExecTaskNum(): Int {
