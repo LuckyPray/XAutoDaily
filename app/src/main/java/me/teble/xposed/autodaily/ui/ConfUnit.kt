@@ -8,7 +8,6 @@ import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_VERSION
-import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_DEBUG_LOG
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_TASK_NOTIFICATION
@@ -41,9 +40,6 @@ object ConfUnit {
     }
 
     // -------------------------------------------------- //
-    var configVersion: Int
-        get() = xaConfig.getInt(CONFIG_VERSION, 1)
-        set(value) = xaConfig.putInt(CONFIG_VERSION, value)
     var versionInfoCache: VersionInfo?
         get() {
             val str = xaConfig.getString(VERSION_INFO_CACHE, "")
@@ -78,9 +74,6 @@ object ConfUnit {
     var showTaskToast: Boolean
         get() = xaConfig.getBoolean(SHOW_TASK_TOAST, true)
         set(value) = xaConfig.putBoolean(SHOW_TASK_TOAST, value)
-    var stayAwake: Boolean
-        get() = xaConfig.getBoolean(SIGN_STAY_AWAKE, true)
-        set(value) = xaConfig.putBoolean(SIGN_STAY_AWAKE, value)
     var enableTaskNotification: Boolean
         get() = xaConfig.getBoolean(ENABLE_TASK_NOTIFICATION, false)
         set(value) = xaConfig.putBoolean(ENABLE_TASK_NOTIFICATION, value)

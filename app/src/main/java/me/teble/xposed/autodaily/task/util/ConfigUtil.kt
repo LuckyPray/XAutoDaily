@@ -4,20 +4,18 @@ import android.annotation.SuppressLint
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
+import com.github.kyuubiran.ezxhelper.utils.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.NOTICE
 import me.teble.xposed.autodaily.config.XA_API_URL
 import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
-import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.*
-import me.teble.xposed.autodaily.task.util.Const.CONFIG_VERSION
 import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.ConfUnit.configVersion
 import me.teble.xposed.autodaily.ui.ConfUnit.lastFetchTime
 import me.teble.xposed.autodaily.ui.ConfUnit.versionInfoCache
 import me.teble.xposed.autodaily.ui.enable
@@ -108,7 +106,7 @@ object ConfigUtil {
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchUpdateInfo()
         info?.let {
-            val currConfVer = configVersion
+            val currConfVer = loadSaveConf().version
             if (BuildConfig.VERSION_CODE < info.appVersion) {
                 if (showToast) {
                     ToastUtil.send("插件版本存在更新")
@@ -138,6 +136,10 @@ object ConfigUtil {
         try {
             val encRes = confUrl.get()
             val res = decodeConfStr(encRes)
+            res ?: let {
+                LogUtil.w("配置文件获取失败")
+                return false
+            }
             val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
             val confVersion = ReUtil.getGroup1(CONFIG_VERSION_REG, res).toInt()
             if (minAppVersion > BuildConfig.VERSION_CODE) {
@@ -147,7 +149,7 @@ object ConfigUtil {
                 LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
                 return false
             }
-            if (confVersion <= configVersion) {
+            if (confVersion <= loadSaveConf().version) {
                 if (showToast) {
                     ToastUtil.send("当前配置已是最新，无需更新")
                 }
@@ -187,8 +189,6 @@ object ConfigUtil {
                 propertiesFile.createNewFile()
             }
             FileUtil.writeUtf8String(encConfStr, propertiesFile)
-            ConfUnit.configVersion = configVersion
-            xaConfig.putInt(CONFIG_VERSION, configVersion)
             return true
         } catch (e: Exception) {
             LogUtil.e(e)
@@ -197,6 +197,7 @@ object ConfigUtil {
         } finally {
             // clear cache
             _conf = null
+            Log.d("clear conf cache")
         }
     }
 
@@ -205,6 +206,7 @@ object ConfigUtil {
     }
 
     fun loadSaveConf(): TaskProperties {
+        Log.d("loadSaveConf" + _conf?.version)
         if (_conf != null) {
             return _conf as TaskProperties
         }

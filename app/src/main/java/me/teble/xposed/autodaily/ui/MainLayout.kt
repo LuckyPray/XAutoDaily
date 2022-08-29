@@ -41,6 +41,7 @@ import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
+import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
@@ -210,7 +211,7 @@ fun MainLayout(navController: NavHostController) {
                     moduleVersionCode = BuildConfig.VERSION_CODE
                     qqVersionName = hostVersionName
                     qqVersionCode = hostVersionCode
-                    configVersion = ConfUnit.configVersion
+                    configVersion = loadSaveConf().version
                 }
                 LineButton(
                     title = "检测更新",
@@ -234,7 +235,7 @@ fun MainLayout(navController: NavHostController) {
                                 updateDialogText.value =
                                     ConfUnit.versionInfoCache?.updateLog?.joinToString("\n") ?: ""
                             }
-                            configVersion = ConfUnit.configVersion
+                            configVersion = loadSaveConf().version
                         }
                     },
                     modifier = Modifier.padding(vertical = 8.dp),

@@ -46,19 +46,6 @@ class SplashActivityHook : BaseHook() {
             val context = it.thisObject as Activity
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    loadSaveConf()
-                    if (ConfUnit.versionInfoCache == null
-                        || System.currentTimeMillis() - ConfUnit.lastFetchTime > 3 * 60 * 60_000L) {
-                        ConfigUtil.fetchUpdateInfo()
-                    }
-                }
-                if (ConfUnit.needUpdate) {
-                    context.openAppUpdateDialog()
-                } else if (ConfUnit.needShowUpdateLog) {
-                    context.openConfigUpdateLog()
-                    ConfUnit.needShowUpdateLog = false
-                }
-                withContext(Dispatchers.IO) {
                     val daemonDir = context.getExternalFilesDir("xa_daemon")
                     val file = File(daemonDir, ".init_service")
                     if (file.exists()) {
@@ -77,6 +64,13 @@ class SplashActivityHook : BaseHook() {
         findMethod(SplashActivity) { name == "doOnStart" }.hookAfter {
             val context = it.thisObject as Activity
             scope.launch {
+                withContext(Dispatchers.IO) {
+                    loadSaveConf()
+                    if (ConfUnit.versionInfoCache == null
+                        || System.currentTimeMillis() - ConfUnit.lastFetchTime > 3 * 60 * 60_000L) {
+                        ConfigUtil.fetchUpdateInfo()
+                    }
+                }
                 if (ConfUnit.needUpdate) {
                     context.openAppUpdateDialog()
                 } else if (ConfUnit.needShowUpdateLog) {
@@ -136,16 +130,20 @@ suspend fun Activity.openAppUpdateDialog() {
 }
 
 private lateinit var configUpdateDialog: AlertDialog
+private var configVer = 0
 
 suspend fun Activity.openConfigUpdateLog() {
     withContext(Dispatchers.IO) {
         var builder: AlertDialog.Builder? = null
-        val isInitialized = ::configUpdateDialog.isInitialized
-        if (!isInitialized) {
+        val conf = loadSaveConf()
+        LogUtil.d("open Update Dialog: conf version -> ${conf.version}")
+        if (conf.version != configVer) {
+            configVer = conf.version
             builder = AlertDialog.Builder(this@openConfigUpdateLog, 5).apply {
                 setTitle("配置更新日志")
                 val updateLog = buildList {
-                    loadSaveConf().updateLogs.forEach {
+                    LogUtil.d("last -> ${conf.updateLogs.last()}")
+                    conf.updateLogs.forEach {
                         add("v${it.version}:\n${it.desc}")
                     }
                 }.reversed().toTypedArray()
@@ -158,8 +156,8 @@ suspend fun Activity.openConfigUpdateLog() {
             }
         }
         withContext(Dispatchers.Main) {
-            if (!isInitialized) {
-                configUpdateDialog = builder!!.create()
+            builder?.let {
+                configUpdateDialog = it.create()
             }
             if (!configUpdateDialog.isShowing && !isFinishing) {
                 configUpdateDialog.show()
