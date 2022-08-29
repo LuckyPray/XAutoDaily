@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.utils
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
-import android.os.PowerManager
 import cn.hutool.core.thread.ThreadUtil
 import kotlinx.coroutines.*
 import me.teble.xposed.autodaily.hook.base.moduleLoadInit
@@ -29,8 +28,6 @@ object TaskExecutor {
     const val CORE_SERVICE_TOAST_FLAG = "XAutoDaily:core_service_toast_flag"
 
     private val lock = ReentrantLock()
-    lateinit var wakeLock: PowerManager.WakeLock
-    private val wakeLockInit get() = TaskExecutor::wakeLock.isInitialized
     private val scope = CoroutineScope(Dispatchers.Default)
     const val EXEC_TASK = 1
     const val AUTO_EXEC = 2
@@ -96,13 +93,6 @@ object TaskExecutor {
         }
         try {
             XANotification.start()
-            if (wakeLockInit) {
-                // 未知原因，CoreService没有正常hook上
-                wakeLock.acquire(20 * 60 * 1000L)
-            } else {
-                // 补偿启动定时器
-                handler.sendEmptyMessage(START_CRON)
-            }
             runtimeTasks.addAll(needExecGroups)
             var threadCount = 1
             if (ConfUnit.usedThreadPool) {
@@ -141,9 +131,6 @@ object TaskExecutor {
                 delay(5000)
             }
             XANotification.stop()
-            if (wakeLockInit && wakeLock.isHeld) {
-                wakeLock.release()
-            }
         }
     }
 
