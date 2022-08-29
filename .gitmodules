@@ -4,3 +4,6 @@
 [submodule "app/src/main/cpp/DexKit"]
 	path = app/src/main/cpp/DexKit
 	url = https://github.com/LuckyPray/DexKit.git
+[submodule "mmkv/MMKV"]
+	path = mmkv/MMKV
+	url = https://github.com/Tencent/MMKV.git
