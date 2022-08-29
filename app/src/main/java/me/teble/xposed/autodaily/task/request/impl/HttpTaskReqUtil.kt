@@ -25,9 +25,9 @@ import java.util.concurrent.TimeUnit
 object HttpTaskReqUtil : ITaskReqUtil {
 
     private val  client = OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(60, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .connectionPool(ConnectionPool(32, 5, TimeUnit.SECONDS))
         .dispatcher(Dispatcher().apply {
             maxRequestsPerHost = 10
