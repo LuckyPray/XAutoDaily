@@ -18,6 +18,7 @@ object Const {
     const val ENABLE_TASK_NOTIFICATION = "enable_task_notification"
     const val LOG_TO_XPOSED = "log_to_xposed"
     const val ENABLE_DEBUG_LOG = "enable_debug_log"
+    const val RETRY_COUNT = "retry_count"
 
     // -------------------------------------------------- //
     const val MOST_RECENT_EXEC_TIME = "most_recent_exec_time"

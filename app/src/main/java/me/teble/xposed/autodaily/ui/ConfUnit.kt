@@ -20,8 +20,8 @@ import me.teble.xposed.autodaily.task.util.Const.LOG_TO_XPOSED
 import me.teble.xposed.autodaily.task.util.Const.LastModuleVersion
 import me.teble.xposed.autodaily.task.util.Const.NEED_SHOW_LOG
 import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
+import me.teble.xposed.autodaily.task.util.Const.RETRY_COUNT
 import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
-import me.teble.xposed.autodaily.task.util.Const.SIGN_STAY_AWAKE
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXEC_STATUS
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
@@ -120,6 +120,10 @@ var Task.taskExecStatus: TaskStatus
         return TaskStatus.valueOf(str)
     }
     set(value) = accountConfig.putString("${this.id}#${TASK_EXEC_STATUS}", value.toString())
+
+var Task.retryCount: Int
+    get() = accountConfig.getInt("${this.id}#${RETRY_COUNT}", 0)
+    set(value) = accountConfig.putInt("${this.id}#${RETRY_COUNT}", value)
 
 fun Task.reset() {
     this.lastExecTime = null

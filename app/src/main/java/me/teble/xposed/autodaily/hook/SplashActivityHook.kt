@@ -22,10 +22,14 @@ import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
+import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.errInfo
+import me.teble.xposed.autodaily.ui.retryCount
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor.AUTO_EXEC
 import me.teble.xposed.autodaily.utils.TaskExecutor.handler
+import me.teble.xposed.autodaily.utils.TimeUtil
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.channels.FileLock
@@ -54,6 +58,23 @@ class SplashActivityHook : BaseHook() {
                         lock?.let {
                             LogUtil.d("获取文件锁成功，守护进程未在运行？")
                             context.openJumpModuleDialog(lock, file)
+                        }
+                    }
+                    val conf = loadSaveConf()
+                    val currDateStr = TimeUtil.getCNDate().formatDate()
+                    conf.taskGroups.forEach { group ->
+                        group.tasks.forEach { task ->
+                            val errInfo = task.errInfo
+                            if (errInfo.dateStr != currDateStr) {
+                                if (task.retryCount != 0) {
+                                    task.retryCount = 0
+                                }
+                            } else {
+                                if (errInfo.count >= 3 && task.retryCount < 3) {
+                                    errInfo.count = 0
+                                    task.retryCount++
+                                }
+                            }
                         }
                     }
                 }

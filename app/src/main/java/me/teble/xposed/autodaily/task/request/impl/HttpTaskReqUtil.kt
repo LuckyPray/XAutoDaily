@@ -51,7 +51,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
         val res = mutableListOf<TaskRequest>().apply {
             val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
             LogUtil.d("urls -> ${evalUrls.toJsonString()}")
-            evalUrls.forEach { url ->
+            evalUrls.forEachIndexed { index, url ->
                 env["req_url"] = url
                 val headers = mutableMapOf<String, String>()
                 task.reqHeaders?.entries?.forEach {
