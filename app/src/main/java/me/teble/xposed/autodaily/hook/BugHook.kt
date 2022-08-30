@@ -8,6 +8,7 @@ import com.github.kyuubiran.ezxhelper.utils.hookReplace
 import com.tencent.qphone.base.remote.ToServiceMsg
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
@@ -27,7 +28,7 @@ class BugHook : BaseHook() {
     override val isCompatible: Boolean
         get() = ProcUtil.isMain && hostPackageName == PACKAGE_NAME_QQ
     override val enabled: Boolean
-        get() = false
+        get() = BuildConfig.DEBUG
 
 
     @MethodHook("fuck No value for gdt_report_list")
@@ -74,7 +75,7 @@ class BugHook : BaseHook() {
             }.hookAfter {
                 val newIntent = it.args[0] as NewIntent
                 if (newIntent.component?.className == "com.tencent.mobileqq.x.a" ||
-                      newIntent.component?.className == FavoriteServlet::class.java.name) {
+                    newIntent.component?.className == FavoriteServlet::class.java.name) {
                     val toServiceMsg = newIntent.getParcelableExtra<ToServiceMsg>("ToServiceMsg")
                     toServiceMsg?.let {
                         if (it.serviceCmd.startsWith("OidbSvc.0xeb7")) {
@@ -91,11 +92,20 @@ class BugHook : BaseHook() {
         kotlin.runCatching {
             XposedBridge.hookAllConstructors(load("Lcom/tencent/mobileqq/troop/d/b/a;"),
                 object : XC_MethodHook() {
-                override fun afterHookedMethod(param: MethodHookParam?) {
-                    LogUtil.d("Lcom/tencent/mobileqq/troop/d/b/a;-><init>")
-                    LogUtil.printStackTrace()
-                }
-            })
+                    override fun afterHookedMethod(param: MethodHookParam?) {
+                        LogUtil.d("Lcom/tencent/mobileqq/troop/d/b/a;-><init>")
+                        LogUtil.printStackTrace()
+                    }
+                })
         }
+
+        val cls = load("Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;")!!
+        XposedBridge.hookAllConstructors(cls, object : XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam?) {
+                LogUtil.d("TroopClockInHandler -> init")
+                LogUtil.printStackTrace()
+            }
+        })
+
     }
 }
