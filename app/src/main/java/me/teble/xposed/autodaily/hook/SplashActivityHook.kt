@@ -24,6 +24,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.TaskErrorInfo
 import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.ui.retryCount
 import me.teble.xposed.autodaily.utils.LogUtil
@@ -69,11 +70,10 @@ class SplashActivityHook : BaseHook() {
                                 if (task.retryCount != 0) {
                                     task.retryCount = 0
                                 }
-                            } else {
-                                if (errInfo.count >= 3 && task.retryCount < 3) {
-                                    errInfo.count = 0
-                                    task.retryCount++
-                                }
+                            } else if (errInfo.count >= 3 && task.retryCount < 3) {
+                                task.errInfo = TaskErrorInfo()
+                                task.retryCount++
+                                LogUtil.d("重置task: ${task.id} retryCount: ${task.retryCount}")
                             }
                         }
                     }
