@@ -2,30 +2,38 @@ package me.teble.xposed.autodaily.hook.utils
 
 import com.tencent.mobileqq.pb.ByteStringMicro
 import com.tencent.qphone.base.remote.ToServiceMsg
-import me.teble.xposed.autodaily.config.OIDBSSOPkg
 import me.teble.xposed.autodaily.hook.base.hostVersionName
-import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
-import me.teble.xposed.autodaily.utils.fieldValue
-import me.teble.xposed.autodaily.utils.invoke
-import me.teble.xposed.autodaily.utils.new
+import mqq.observer.BusinessObserver
+import tencent.im.oidb.oidb_sso.OIDBSSOPkg
+
 
 object OidbUtil {
 
     val Boolean.int
         get() = if (this) 1 else 0
+    fun makeOIDBPkg(cmdString: String, cmdFlag: Int, serviceType: Int, bodyBuffer: ByteArray): ToServiceMsg {
+        return makeOIDBPkg(cmdString, cmdFlag, serviceType, bodyBuffer, 30000L)
+    }
 
-    fun makeOIDBPkg(cmd: String, reqBody: Any, isSign: Boolean): ToServiceMsg {
-        val pkg = load(OIDBSSOPkg)?.new()
-        pkg?.fieldValue("uint32_command")?.invoke("set", 0xEB7)
-        pkg?.fieldValue("uint32_service_type")?.invoke("set", isSign.int)
-        pkg?.fieldValue("uint32_result")?.invoke("set", 0)
-        pkg?.fieldValue("str_client_version")?.invoke("set", "android $hostVersionName")
-        val bytes = ByteStringMicro.copyFrom(reqBody.invoke("toByteArray") as ByteArray?)
-        pkg?.fieldValue("bytes_bodybuffer")?.invoke("set", bytes)
-        val toServiceMsg = ToServiceMsg("mobileqq.service", "$currentUin", cmd)
-        toServiceMsg.putWupBuffer(pkg?.invoke("toByteArray") as ByteArray?)
-        toServiceMsg.timeout = 30000L
-        return toServiceMsg
+    fun makeOIDBPkg(cmdString: String, cmdFlag: Int, serviceType: Int, bodyBuffer: ByteArray, timeout: Long): ToServiceMsg {
+        return makeOIDBPkg(cmdString, cmdFlag, serviceType, bodyBuffer, timeout, null, false)
+    }
+
+    fun makeOIDBPkg(cmdString: String, cmdFlag: Int, serviceType: Int, bodyBuffer: ByteArray, timeout: Long, businessObserver: BusinessObserver?, z: Boolean): ToServiceMsg {
+        val oIDBSSOPkg = OIDBSSOPkg()
+        oIDBSSOPkg.uint32_command.set(cmdFlag)
+        oIDBSSOPkg.uint32_service_type.set(serviceType)
+        oIDBSSOPkg.uint32_result.set(0)
+        oIDBSSOPkg.str_client_version.set("android $hostVersionName")
+        oIDBSSOPkg.bytes_bodybuffer.set(ByteStringMicro.copyFrom(bodyBuffer))
+        val createToServiceMsg: ToServiceMsg = createToServiceMsg(cmdString)
+        createToServiceMsg.putWupBuffer(oIDBSSOPkg.toByteArray())
+        createToServiceMsg.timeout = timeout
+//        addBusinessObserver(createToServiceMsg, businessObserver, z)
+        return createToServiceMsg
+    }
+    fun createToServiceMsg(str: String?): ToServiceMsg {
+        return ToServiceMsg("mobileqq.service", "$currentUin", str)
     }
 }

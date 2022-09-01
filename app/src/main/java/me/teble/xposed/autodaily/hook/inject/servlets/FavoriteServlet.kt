@@ -1,4 +1,4 @@
-package me.teble.xposed.autodaily.hook.servlets
+package me.teble.xposed.autodaily.hook.inject.servlets
 
 import android.content.Intent
 import com.tencent.qphone.base.remote.FromServiceMsg

@@ -1,5 +1,6 @@
-package me.teble.xposed.autodaily.hook.servlets
+package me.teble.xposed.autodaily.hook.inject
 
+import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appRuntime
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs

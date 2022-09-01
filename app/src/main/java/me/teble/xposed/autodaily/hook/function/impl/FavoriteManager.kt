@@ -8,8 +8,8 @@ import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.function.BaseFunction
-import me.teble.xposed.autodaily.hook.servlets.FavoriteServlet
-import me.teble.xposed.autodaily.hook.servlets.ServletPool.favoriteServlet
+import me.teble.xposed.autodaily.hook.inject.ServletPool.favoriteServlet
+import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appInterface
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.task.model.VoterInfo

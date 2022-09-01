@@ -15,7 +15,7 @@ import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.servlets.FavoriteServlet
+import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
 import me.teble.xposed.autodaily.utils.toMap
