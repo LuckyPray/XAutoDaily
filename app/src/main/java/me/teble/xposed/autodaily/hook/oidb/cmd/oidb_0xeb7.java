@@ -25,9 +25,7 @@ public final class oidb_0xeb7 {
     public static final class Ret extends MessageMicro<Ret> {
         static final MessageMicro.FieldMap __fieldMap__ = MessageMicro.initFieldMap(new int[]{8, 18}, new String[]{"code", "msg"}, new Object[]{0, ""}, Ret.class);
         public final PBEnumField code = PBField.initEnum(0);
-
-        /* renamed from: msg  reason: collision with root package name */
-        public final PBStringField f72972msg = PBField.initString("");
+        public final PBStringField cmd = PBField.initString("");
     }
 
     /* compiled from: P */

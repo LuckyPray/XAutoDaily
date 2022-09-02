@@ -34,7 +34,8 @@ class XAClassLoader(
             "com.tencent.qphone.base.",
             "com.tencent.widget.",
             "mqq.",
-            "oicq."
+            "oicq.",
+            "tencent.im",
         )
 
         fun switchHostClass(name: String): Boolean {

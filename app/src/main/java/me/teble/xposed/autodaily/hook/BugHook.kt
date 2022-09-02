@@ -16,6 +16,7 @@ import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
+import me.teble.xposed.autodaily.hook.inject.servlets.TroopClockInServlet
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
 import me.teble.xposed.autodaily.utils.toMap
@@ -63,6 +64,7 @@ class BugHook : BaseHook() {
                     LogUtil.d(toServiceMsg.appSeq.toString())
                     LogUtil.d(toServiceMsg.serviceCmd)
                     LogUtil.d(toServiceMsg.toString())
+                    LogUtil.d("buf size: ${toServiceMsg.wupBuffer.size}")
                     LogUtil.d(toServiceMsg.extraData.toMap().toString())
                     LogUtil.printStackTrace()
                 }
@@ -75,28 +77,20 @@ class BugHook : BaseHook() {
             }.hookAfter {
                 val newIntent = it.args[0] as NewIntent
                 if (newIntent.component?.className == "com.tencent.mobileqq.x.a" ||
-                    newIntent.component?.className == FavoriteServlet::class.java.name) {
+                    newIntent.component?.className == FavoriteServlet::class.java.name ||
+                    newIntent.component?.className == TroopClockInServlet::class.java.name) {
                     val toServiceMsg = newIntent.getParcelableExtra<ToServiceMsg>("ToServiceMsg")
                     toServiceMsg?.let {
                         if (it.serviceCmd.startsWith("OidbSvc.0xeb7")) {
                             LogUtil.d("startServlet: " + it.serviceCmd)
                             LogUtil.d(it.toString())
+                            LogUtil.d(it.wupBuffer.size.toString())
                             LogUtil.d(it.extraData.toMap().toString())
                             LogUtil.printStackTrace()
                         }
                     }
                 }
             }
-        }
-
-        kotlin.runCatching {
-            XposedBridge.hookAllConstructors(load("Lcom/tencent/mobileqq/troop/d/b/a;"),
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam?) {
-                        LogUtil.d("Lcom/tencent/mobileqq/troop/d/b/a;-><init>")
-                        LogUtil.printStackTrace()
-                    }
-                })
         }
 
         val cls = load("Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;")!!
@@ -106,6 +100,42 @@ class BugHook : BaseHook() {
                 LogUtil.printStackTrace()
             }
         })
+//
+//        findMethod(load("Lcom/tencent/mobileqq/troop/d/b/a;")!!) {
+//            name == "W4"
+//        }.hookAfter {
+//            LogUtil.d("onResp: " + it.args.last().toString())
+//            val toServiceMsg = it.args[0] as ToServiceMsg
+//            val req = oidb_0xeb7.ReqBody().mergeFrom(toServiceMsg.wupBuffer)
+//            LogUtil.d("""
+//                ${req.signInStatusReq}
+//                ${req.signInStatusReq.uid.get()}
+//                ${req.signInStatusReq.groupId.get()}
+//                ${req.signInStatusReq.scene.get()}
+//                ${req.signInStatusReq.clientVersion.get()}
+//                -------------
+//                ${req.signInWriteReq}
+//                ${req.signInWriteReq.uid.get()}
+//                ${req.signInWriteReq.groupId.get()}
+//                ${req.signInWriteReq.clientVersion.get()}
+//            """.trimIndent())
+//            LogUtil.printStackTrace()
+//        }
 
+//        findMethod(load("Lcom/tencent/mobileqq/troop/d/b/a;")!!) {
+//            name == "sendPbReq"
+//        }.hookAfter {
+//        }
+
+        XposedBridge.hookAllMethods(load("Lcom/tencent/mobileqq/troop/handler/c;"),
+        "sendPbReq", object: XC_MethodHook() {
+            override fun afterHookedMethod(param: MethodHookParam) {
+                val toServiceMsg = param.args[0] as ToServiceMsg
+                if (toServiceMsg.serviceCmd == "OidbSvc.0xeb7") {
+                    LogUtil.d("cmd: ${toServiceMsg.serviceCmd}, sendPbReq: " + toServiceMsg.wupBuffer.size)
+                    LogUtil.printStackTrace()
+                }
+            }
+        })
     }
 }

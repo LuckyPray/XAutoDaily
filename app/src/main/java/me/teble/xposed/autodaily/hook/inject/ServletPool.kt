@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.hook.inject
 
 import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
+import me.teble.xposed.autodaily.hook.inject.servlets.TroopClockInServlet
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appRuntime
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.fieldValueAs
@@ -13,6 +14,7 @@ object ServletPool {
 
     private val servletArray = arrayOf<Class<out Servlet>>(
         FavoriteServlet::class.java,
+        TroopClockInServlet::class.java,
     )
 
     private val servletMap = ConcurrentHashMap<Class<out Servlet>, Servlet>()
@@ -38,5 +40,6 @@ object ServletPool {
     }
 
     val favoriteServlet: FavoriteServlet by lazy { getServlet(FavoriteServlet::class.java) }
+    val troopClockInServlet: TroopClockInServlet by lazy { getServlet(TroopClockInServlet::class.java) }
 }
 

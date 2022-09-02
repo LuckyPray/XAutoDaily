@@ -79,7 +79,7 @@ object FuncTaskReqUtil : ITaskReqUtil {
             url.startsWith("xa://GroupSignInManager/signIn") -> {
                 val groupUin = paramMap["uin"]!!
                 manager = groupSignInManager
-                groupSignInManager.signIn(groupUin)
+                groupSignInManager.syncSignIn(groupUin)
             }
             url.startsWith("xa://PublicAccountManager/vipPublicAccountSignIn") -> {
                 manager = publicAccountManager
