@@ -61,6 +61,7 @@ class SplashActivityHook : BaseHook() {
                             context.openJumpModuleDialog(lock, file)
                         }
                     }
+                    ConfUnit.versionInfoCache ?: ConfigUtil.checkUpdate(false)
                     val conf = loadSaveConf()
                     val currDateStr = TimeUtil.getCNDate().formatDate()
                     conf.taskGroups.forEach { group ->
