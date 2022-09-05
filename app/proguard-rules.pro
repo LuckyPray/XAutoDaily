@@ -105,7 +105,11 @@
     *;
 }
 # servlet混淆
--keep class me.teble.xposed.autodaily.hook.servlets.** {
+-keep class me.teble.xposed.autodaily.hook.inject.** {
+    *;
+}
+# oidb协议包
+-keep class me.teble.xposed.autodaily.hook.oidb.** {
     *;
 }
 

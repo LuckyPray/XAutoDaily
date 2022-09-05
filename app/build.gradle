@@ -61,8 +61,8 @@ android {
 
     buildTypes {
         release {
-            shrinkResources false
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (performSigning) {
                 signingConfig signingConfigs.release
@@ -80,7 +80,7 @@ android {
         alpha {
             initWith release
             shrinkResources false
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (performSigning) {
                 signingConfig signingConfigs.release
@@ -90,8 +90,8 @@ android {
         }
         rc {
             initWith release
-            shrinkResources false
-            minifyEnabled false
+            shrinkResources true
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (performSigning) {
                 signingConfig signingConfigs.release
