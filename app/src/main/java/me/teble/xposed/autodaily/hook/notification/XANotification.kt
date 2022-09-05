@@ -14,12 +14,13 @@ import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.SplashActivity
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.ui.ConfUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 object XANotification {
 
     private const val NOTIFICATION_ID = 0
     private const val CHANNEL_ID = "me.teble.xposed.autodaily.XA_FOREST_NOTIFY_CHANNEL"
-    private var atomicId = 1
+    private val atomicId = AtomicInteger(1)
 
     private val notificationManager by lazy {
         hostContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -32,7 +33,7 @@ object XANotification {
     private val enabled get() = ConfUnit.enableTaskNotification
 
     fun start() {
-        if (isStart || !enabled) return
+        if (isStart) return
 
         initNotification(hostContext)
         isStart = true
@@ -52,8 +53,9 @@ object XANotification {
                 setContentText(content)
             }
             setOngoing(onGoing)
+            setWhen(System.currentTimeMillis())
         }.build()
-        notificationManager.notify(if (!isTask) atomicId++ else NOTIFICATION_ID, mNotification)
+        notificationManager.notify(if (!isTask) atomicId.getAndAdd(1) else NOTIFICATION_ID, mNotification)
     }
 
     fun notify(content: String) {
@@ -86,6 +88,7 @@ object XANotification {
                 enableLights(false)
                 enableVibration(false)
                 setShowBadge(false)
+                setSound(null, null)
             }
             notificationManager.createNotificationChannel(notificationChannel)
             builder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -93,6 +96,7 @@ object XANotification {
             @Suppress("DEPRECATION")
             builder = NotificationCompat.Builder(context)
                 .setPriority(Notification.PRIORITY_LOW)
+                .setSound(null)
         }
         builder = builder.setContentTitle("XAutoDaily")
             .setSmallIcon(R.drawable.icon_x_auto_daily_2)

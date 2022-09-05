@@ -145,6 +145,18 @@ fun OtherLayout(navController: NavHostController) {
                 )
             }
             item {
+                val checked = remember { mutableStateOf(ConfUnit.enableTaskNotification) }
+                LineSwitch(
+                    title = "任务异常通知",
+                    desc = "当任务执行异常时提示用户，一次性通知",
+                    checked = checked,
+                    onChange = {
+                        ConfUnit.enableTaskExceptionNotification = it
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+            item {
                 val checked = remember { mutableStateOf(ConfUnit.logToXposed) }
                 LineSwitch(
                     title = "日志输出至xposed",

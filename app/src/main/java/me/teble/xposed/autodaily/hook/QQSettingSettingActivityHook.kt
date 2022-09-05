@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.hook
 
 import android.app.Activity
 import android.content.Intent
+import android.content.res.Resources
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
@@ -72,6 +73,8 @@ class QQSettingSettingActivityHook : BaseHook() {
                         entity, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                     )
                 }
+            } catch (e: Resources.NotFoundException) {
+                ToastUtil.send("是否更新模块后未重启QQ?")
             } catch (e: Throwable) {
                 LogUtil.e(e)
                 ToastUtil.send("创建入口失败")

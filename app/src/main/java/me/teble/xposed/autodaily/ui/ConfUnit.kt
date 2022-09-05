@@ -10,6 +10,7 @@ import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_VERSION
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_DEBUG_LOG
+import me.teble.xposed.autodaily.task.util.Const.ENABLE_TASK_EXCEPTION_NOTIFICATION
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_TASK_NOTIFICATION
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.task.util.Const.GLOBAL_ENABLE
@@ -77,6 +78,9 @@ object ConfUnit {
     var enableTaskNotification: Boolean
         get() = xaConfig.getBoolean(ENABLE_TASK_NOTIFICATION, false)
         set(value) = xaConfig.putBoolean(ENABLE_TASK_NOTIFICATION, value)
+    var enableTaskExceptionNotification: Boolean
+        get() = xaConfig.getBoolean(ENABLE_TASK_EXCEPTION_NOTIFICATION, true)
+        set(value) = xaConfig.putBoolean(ENABLE_TASK_EXCEPTION_NOTIFICATION, value)
     var logToXposed: Boolean
         get() = xaConfig.getBoolean(LOG_TO_XPOSED, false)
         set(value) = xaConfig.putBoolean(LOG_TO_XPOSED, value)

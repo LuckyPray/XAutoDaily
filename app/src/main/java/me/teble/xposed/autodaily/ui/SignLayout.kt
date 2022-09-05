@@ -26,13 +26,14 @@ fun SignLayout(navController: NavHostController) {
         val errorMap by remember {
             mutableStateOf(mutableMapOf<String, String>())
         }
-        LaunchedEffect(Unit) {
+        LaunchedEffect(errorMap) {
             conf = ConfigUtil.loadSaveConf()
             conf.taskGroups.forEach { taskGroup ->
                 taskGroup.tasks.forEach {
-                    // TODO 后续优化成 本次登陆||当天暂停 执行
-                    if (it.errInfo.count >= 3) {
-                        errorMap[it.id] = "任务执行失败次数超过3次，今日暂停执行，可长按重置执行记录"
+                    if (it.retryCount >= 3) {
+                        errorMap[it.id] = "任务执行失败次数过多，今日暂停执行，可能存在功能不兼容"
+                    } else if (it.errInfo.count >= 3) {
+                        errorMap[it.id] = "任务执行失败次数超过3次，本次启动暂停执行，可长按重置执行记录"
                     }
                 }
             }
@@ -83,6 +84,9 @@ fun SignLayout(navController: NavHostController) {
                                     lastExecTime = "从未执行"
                                     lastExecMsg = ""
                                     nextShouldExecTime = "从未执行"
+                                    if (errorMap.containsKey(task.id)) {
+                                        errorMap.remove(task.id)
+                                    }
                                 },
                                 otherInfoList = (mutableListOf<String>().apply {
                                     if (!checked.value) {

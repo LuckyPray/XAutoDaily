@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.hook.function.impl
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import mqq.manager.TicketManager
-import kotlin.math.max
 
 open class TicketManager : BaseFunction(
     TAG = "TicketManager"
@@ -93,11 +92,10 @@ open class TicketManager : BaseFunction(
         if (p_skey != null) {
             cookiesMap["p_skey"] = p_skey
         }
-        val cookies = StringBuilder()
-        for ((key, value) in cookiesMap) {
-            cookies.append(key).append('=').append(value).append("; ")
-        }
-        cookies.setLength(max(cookies.length - 1, 0))
-        return cookies.toString()
+        return buildString {
+            cookiesMap.forEach { k, v ->
+                append("$k=$v; ")
+            }
+        }.removeSuffix("; ")
     }
 }

@@ -16,6 +16,7 @@ object Const {
     const val TASK_EXCEPTION_COUNT = "task_exception_count"
     const val TASK_EXEC_STATUS = "task_exec_status"
     const val ENABLE_TASK_NOTIFICATION = "enable_task_notification"
+    const val ENABLE_TASK_EXCEPTION_NOTIFICATION = "enable_task_exception_notification"
     const val LOG_TO_XPOSED = "log_to_xposed"
     const val ENABLE_DEBUG_LOG = "enable_debug_log"
     const val RETRY_COUNT = "retry_count"

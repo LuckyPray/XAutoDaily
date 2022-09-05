@@ -31,19 +31,13 @@ import me.teble.xposed.autodaily.hook.inject.ServletPool
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.util.ConfigUtil
-import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.errInfo
-import me.teble.xposed.autodaily.ui.reset
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
-import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.new
-import java.util.*
 import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -188,19 +182,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun onStart() {
-        if (ConfUnit.lastModuleVersion < 22082510) {
-            val currentDate = Date(TimeUtil.localTimeMillis()).formatDate()
-            val ex1 = Task("好友点赞").errInfo
-            if (ex1.dateStr == currentDate && ex1.count > 2) {
-                LogUtil.i("版本更新，自动重置好友点赞任务")
-                Task("好友点赞").reset()
-            }
-            val ex2 = Task("资料卡回赞").errInfo
-            if (ex2.dateStr == currentDate && ex2.count > 2) {
-                LogUtil.i("版本更新，自动重置资料卡回赞任务")
-                Task("资料卡回赞").reset()
-            }
-        }
         ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
     }
 

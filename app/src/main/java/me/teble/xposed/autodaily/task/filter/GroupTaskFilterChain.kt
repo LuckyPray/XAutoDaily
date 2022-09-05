@@ -10,6 +10,7 @@ import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.request.enum.ReqType
 import me.teble.xposed.autodaily.task.util.TaskUtil
 import me.teble.xposed.autodaily.task.util.formatDate
+import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
@@ -50,9 +51,9 @@ class GroupTaskFilterChain(
         } else {
             val reqType = ReqType.getType(taskGroup.type.split("|").first())
             for (task in taskList) {
-                var taskException = task.errInfo
+                val taskException = task.errInfo
                 if (taskException.count >= 3) {
-                    LogUtil.i("任务${task.id}今日执行错误次数超过3次，跳过执行")
+                    LogUtil.i("任务${task.id}执行错误次数超过3次，本次启动暂停执行")
                     continue
                 }
                 try {
@@ -65,6 +66,9 @@ class GroupTaskFilterChain(
                     taskException.count++
                     taskException.dateStr = Date(TimeUtil.localTimeMillis()).formatDate()
                     task.errInfo = taskException
+                    if (taskException.count >= 3 && ConfUnit.enableTaskExceptionNotification) {
+                        XANotification.notify("任务${task.id}执行异常，本次启动跳过执行")
+                    }
                 }
             }
         }
