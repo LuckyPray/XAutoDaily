@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.activity.common
 import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.os.*
 import android.util.Log
 import android.widget.Toast
@@ -45,6 +46,7 @@ import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.toJsonString
 import rikka.shizuku.Shizuku
 import java.io.File
+import java.util.concurrent.CompletableFuture.runAsync
 import kotlin.math.expm1
 import kotlin.math.sqrt
 
@@ -188,6 +190,12 @@ fun ShizukuCard() {
             .clickable {
                 if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
                     Shizuku.requestPermission(1101)
+                    runAsync {
+                        while (!ShizukuApi.isPermissionGranted) {
+                            Thread.sleep(500)
+                            ShizukuApi.isPermissionGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                        }
+                    }
                     return@clickable
                 }
                 if (!MainActivity.shizukuDaemonRunning) {
@@ -353,6 +361,7 @@ fun ModuleView() {
                                 checked = qqKeepAlive,
                                 title = "启用qq保活",
                                 desc = "单击此处尝试后台唤醒qq，如果模块hook生效将会显示一个气泡",
+                                enabled = ShizukuApi.isPermissionGranted,
                                 onClick = {
                                     ShizukuApi.startService(PACKAGE_NAME_QQ, DataMigrationService,
                                         arrayOf(
@@ -373,6 +382,7 @@ fun ModuleView() {
                                 checked = timKeepAlive,
                                 title = "启用tim保活",
                                 desc = "单击此处尝试后台唤醒tim，如果模块hook生效将会显示一个气泡",
+                                enabled = ShizukuApi.isPermissionGranted,
                                 onClick = {
                                     ShizukuApi.startService(PACKAGE_NAME_TIM, DataMigrationService,
                                         arrayOf(
