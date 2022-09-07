@@ -4,18 +4,8 @@ import android.annotation.SuppressLint
 import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
-import com.google.protobuf.gradle.*
 import java.nio.file.Paths
 import org.gradle.internal.os.OperatingSystem
-
-// https://github.com/google/protobuf-gradle-plugin/issues/540#issuecomment-1001053066
-fun com.android.build.api.dsl.AndroidSourceSet.proto(action: SourceDirectorySet.() -> Unit) {
-    (this as? ExtensionAware)
-        ?.extensions
-        ?.getByName("proto")
-        ?.let { it as? SourceDirectorySet }
-        ?.apply(action)
-}
 
 fun findInPath(executable: String): String? {
     val pathEnv = System.getenv("PATH")
@@ -31,7 +21,6 @@ plugins {
     id("com.android.application")
     id("kotlin-android")
     id("kotlinx-serialization")
-    id("com.google.protobuf")
 }
 
 val releaseStoreFile: String? by rootProject
@@ -61,7 +50,8 @@ android {
             cmake {
                 targets("xa_native")
                 abiFilters("armeabi-v7a", "arm64-v8a")
-                arguments("-DANDROID_STL=c++_static")
+//                arguments("-DANDROID_STL=c++_static")
+                arguments("-DANDROID_STL=none")
                 val flags = arrayOf(
                     "-Wall",
 //                    "-Werror",
@@ -70,13 +60,14 @@ android {
                     "-fno-rtti",
                     "-fvisibility=hidden",
                     "-fvisibility-inlines-hidden",
-//                    "-fno-exceptions",
+                    "-fno-exceptions",
                     "-fno-stack-protector",
                     "-fomit-frame-pointer",
                     "-Wno-builtin-macro-redefined",
                     "-Wno-unused-value",
                     "-Wno-unused-variable",
                     "-D__FILE__=__FILE_NAME__",
+                    "-Dthrow='abort();'",
 //                    if (performSigning) {
 //                        // release 签名
 //                        "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
@@ -210,13 +201,13 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_1_8)
-        targetCompatibility(JavaVersion.VERSION_1_8)
+        sourceCompatibility(JavaVersion.VERSION_11)
+        targetCompatibility(JavaVersion.VERSION_11)
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
         freeCompilerArgs = listOf(
             "-Xuse-k2",
             "-Xno-param-assertions",
@@ -224,15 +215,6 @@ android {
             "-Xno-receiver-assertions",
             "-opt-in=kotlin.RequiresOptIn",
         )
-    }
-
-    sourceSets {
-        named("main") {
-            proto {
-                srcDir("src/main/proto")
-                include("**/*.proto")
-            }
-        }
     }
 
     packagingOptions {
@@ -263,27 +245,6 @@ android {
         cmake {
             path("src/main/cpp/CMakeLists.txt")
             version = "3.22.1+"
-        }
-    }
-}
-
-protobuf {
-    protoc {
-        artifact = "com.google.protobuf:protoc:3.21.2"
-    }
-
-    generatedFilesBaseDir = "$projectDir/src/generated"
-
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                id("java") {
-                    option("lite")
-                }
-                id("kotlin") {
-                    option("lite")
-                }
-            }
         }
     }
 }
@@ -335,7 +296,7 @@ dependencies {
 
     implementation("com.google.protobuf:protobuf-kotlin-lite:3.21.2")
     compileOnly("com.google.protobuf:protoc:3.21.2")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.2.2")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
 
     // jetpack compose
     implementation("androidx.activity:activity-compose:1.4.0")
@@ -354,6 +315,7 @@ dependencies {
     // shizuku
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
+    implementation("dev.rikka.ndk.thirdparty:cxx:1.2.0")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

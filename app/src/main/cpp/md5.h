@@ -8,7 +8,6 @@
 #include <bitset>
 #include <iostream>
 #include <vector>
-using namespace std;
 
 /* Parameters of MD5. */
 #define S11 7
@@ -67,30 +66,29 @@ typedef unsigned int bit32;
 
 class MD5 {
 public:
-    explicit MD5(string str);
+    explicit MD5(std::string str);
     MD5();
 
     void init();
-    static void showBinmsg(const vector<bool>& binmsg);
 
-    string getDigest();
+    std::string getDigest();
 
     void padding();
     void sort_little_endian();
     void appendLength();
     void transform(int beginIndex);
     void decode(int beginIndex, bit32* x);
-    static bit32 convertToBit32(const vector<bool>& a);
+    static bit32 convertToBit32(const std::vector<bool>& a);
 
-    string to_str() const;
+    std::string to_str() const;
 
 private:
-    string input_msg;
-    vector<bool> bin_msg;
+    std::string input_msg;
+    std::vector<bool> bin_msg;
 
     // b is the length of the original msg
     int b{};
-    vector<bool> bin_b;
+    std::vector<bool> bin_b;
 
     bit32 A{}, B{}, C{}, D{};
 };

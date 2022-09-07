@@ -8,14 +8,13 @@
 
 MD5::MD5() = default;
 
-MD5::MD5(string  str) : input_msg(std::move(str)) {}
+MD5::MD5(std::string  str) : input_msg(std::move(str)) {}
 
 void MD5::init() {
     // init the binary message
     bin_msg.clear();
     for (char i : input_msg) {
-        auto temp = bitset<8>(i);
-        // cout << temp << "  " << input_msg[i] << endl;
+        auto temp = std::bitset<8>(i);
         for (int j = 7; j >= 0; --j) {
             bin_msg.push_back(temp[j]);
         }
@@ -24,22 +23,13 @@ void MD5::init() {
     // calculate the binary b
     bin_b.clear();
     b = (int) bin_msg.size();
-    bitset<64> tempb(bin_msg.size());
-    // cout << "tempb: " << tempb << endl;
+    std::bitset<64> tempb(bin_msg.size());
     for (int i = 63; i >= 0; --i) {
         bin_b.push_back(tempb[i]);
     }
 }
 
-void MD5::showBinmsg(const vector<bool>& msg) {
-    for (bool i : msg) {
-        cout << i;
-    }
-    cout << endl;
-    cout << msg.size();
-}
-
-string MD5::getDigest() {
+std::string MD5::getDigest() {
     init();
     // Step 1. Append Padding Bits
     padding();
@@ -56,12 +46,6 @@ string MD5::getDigest() {
         transform(i);
     }
 
-    // cout << "basic transform" << endl
-    //      << "A:" << bitset<32>(A) << endl
-    //      << "B:" << bitset<32>(B) << endl
-    //      << "C:" << bitset<32>(C) << endl
-    //      << "D:" << bitset<32>(D) << endl;
-
     // Step 5. Output
     return to_str();
 }
@@ -73,10 +57,9 @@ void MD5::padding() {
     } else {
         diff = 960 - b % 512;
     }
-    // cout << b << endl << diff << endl;
 
     bin_msg.push_back(true);
-    vector<bool> pad(diff - 1, false);
+    std::vector<bool> pad(diff - 1, false);
     bin_msg.insert(bin_msg.end(), pad.begin(), pad.end());
     sort_little_endian();
 }
@@ -88,10 +71,10 @@ void MD5::sort_little_endian() {
     // after the sort:      00000100 00000011 00000010 00000001
     int wordnums = (int) bin_msg.size() / 32;
 
-    vector<bool> ret;
+    std::vector<bool> ret;
 
     for (int i = 0; i < wordnums; ++i) {
-        vector<bool> word(bin_msg.begin() + i * 32,
+        std::vector<bool> word(bin_msg.begin() + i * 32,
                           bin_msg.begin() + (i + 1) * 32);
         ret.insert(ret.end(), word.begin() + 24, word.end());
         ret.insert(ret.end(), word.begin() + 16, word.begin() + 24);
@@ -111,31 +94,20 @@ void MD5::appendLength() {
 void MD5::decode(int beginIndex, bit32* x) {
     // prepare each 512 bits part in the x[16], and use the x[] for the
     // transform
-    vector<bool>::const_iterator st = bin_msg.begin() + beginIndex;
-    vector<bool>::const_iterator ed = bin_msg.begin() + beginIndex + 512;
-    vector<bool> cv(st, ed);
-
-    // cout << cv.size() << endl;
-    // for (int i = 0; i < 512; ++i) {
-    //     if (i % 32 == 0) cout << endl;
-    //     cout << cv[i];
-    // }
+    std::vector<bool>::const_iterator st = bin_msg.begin() + beginIndex;
+    std::vector<bool>::const_iterator ed = bin_msg.begin() + beginIndex + 512;
+    std::vector<bool> cv(st, ed);
 
     for (int i = 0; i < 16; ++i) {
-        vector<bool>::const_iterator first = cv.begin() + 32 * i;
-        vector<bool>::const_iterator last = cv.begin() + 32 * (i + 1);
-        vector<bool> newvec(first, last);
+        std::vector<bool>::const_iterator first = cv.begin() + 32 * i;
+        std::vector<bool>::const_iterator last = cv.begin() + 32 * (i + 1);
+        std::vector<bool> newvec(first, last);
 
         x[i] = convertToBit32(newvec);
     }
-
-    // for (int i = 0; i < 16; ++i) {
-    //     if (i % 4 == 0) cout << endl;
-    //     cout << bitset<32>(x[i]) << " ";
-    // }
 }
 
-bit32 MD5::convertToBit32(const vector<bool>& a) {
+bit32 MD5::convertToBit32(const std::vector<bool>& a) {
     // convert a 32 bits long vector<bool> to bit32(int) type
     int partlen = 32;
     bit32 res = 0;
@@ -229,7 +201,7 @@ void MD5::transform(int beginIndex) {
     D = D + DD;
 }
 
-string MD5::to_str() const {
+std::string MD5::to_str() const {
     // Output in Big-Endian
     // For a value 0x6789abcd
     // Output as    "cdab8967"
@@ -239,7 +211,7 @@ string MD5::to_str() const {
     input[2] = C;
     input[3] = D;
 
-    string ret;
+    std::string ret;
     char buffer[4];
 
     for (unsigned int i : input) {
