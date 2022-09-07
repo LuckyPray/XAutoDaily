@@ -13,6 +13,7 @@ if (performSigning) {
 android {
     compileSdkVersion 31
     buildToolsVersion "32.0.0"
+    ndkVersion = "25.0.8775105"
 //    ndkVersion '23.1.7779620'
 
     defaultConfig {
@@ -37,6 +38,9 @@ android {
                     cppFlags.add("-DMODULE_SIGNATURE=CB49EE96102F0D9C331AB59A5921AA42")
                 }
                 arguments "-DANDROID_TOOLCHAIN=clang"
+                          "-DCMAKE_BUILD_TYPE=Release"
+                          "-DCMAKE_CXX_FLAGS_RELEASE=-Oz -DNDEBUG"
+                          "-DCMAKE_C_FLAGS_RELEASE=-Oz -DNDEBUG"
 //                        "-DANDROID_STL=c++_shared"
 //                        "-DANDROID_CPP_FEATURES=rtti exceptions"
             }
