@@ -67,9 +67,10 @@ class SplashActivityHook : BaseHook() {
                     conf.taskGroups.forEach { group ->
                         group.tasks.forEach { task ->
                             val errInfo = task.errInfo
-                            if (errInfo.dateStr != currDateStr) {
+                            if (errInfo.dateStr.isNotEmpty() && errInfo.dateStr != currDateStr) {
                                 if (task.retryCount != 0) {
                                     task.retryCount = 0
+                                    task.errInfo = TaskErrorInfo()
                                 }
                             } else if (errInfo.count >= 3 && task.retryCount < 3) {
                                 task.errInfo = TaskErrorInfo()
