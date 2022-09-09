@@ -78,6 +78,7 @@ class UserService : IUserService.Stub() {
         }
         val daemonLockFile = File(dir, ".init_service")
         if (!daemonLockFile.exists()) daemonLockFile.createNewFile()
+        execShell("chmod 664 ${daemonLockFile.absolutePath}")
         return daemonLockFile
     }
 
