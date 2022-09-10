@@ -1,7 +1,9 @@
 #include <jni.h>
+#include "log.h"
+#include <string_view>
+#include <vector>
 #include <map>
 #include <sstream>
-#include "log.h"
 #include "v2sign.h"
 #include "dex_kit.h"
 //
@@ -11,7 +13,6 @@ namespace {
 #define EXPORT extern "C" __attribute__((visibility("default")))
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
 
-std::string hostApkPath;
 
 EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     JNIEnv *env = nullptr;
@@ -25,10 +26,10 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return MMKV_JNI_OnLoad(vm, reserved);
 }
 
-vector<string> split(const string &s, char delim) {
-    vector<string> result;
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> result;
     std::stringstream ss(s);
-    string item;
+    std::string item;
 
     while (getline(ss, item, delim)) {
         result.push_back(item);
@@ -53,7 +54,7 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_findDex(
     auto file = (jstring) env->CallObjectMethod(url, mGetPath);
     const char *cStr = env->GetStringUTFChars(file, nullptr);
     std::string filePathStr(cStr);
-    hostApkPath = filePathStr.substr(5, filePathStr.size() - 26);
+    std::string hostApkPath = filePathStr.substr(5, filePathStr.size() - 26);
     LOGD("host apk path -> %s", hostApkPath.c_str());
     const char *obfuscate_str = env->GetStringUTFChars(input_str, nullptr);
     std::string inputStr(obfuscate_str);
@@ -64,12 +65,12 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_findDex(
 //            {"Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;", {"^TroopClockInHandler$"}},
 //    };
 
-    map<string, set<string>> obfuscate;
+    std::map<std::string, std::set<std::string>> obfuscate;
 
     for (auto &vec: split(inputStr, '\n')) {
         if (vec.empty()) continue;
         auto lines = split(vec, '\t');
-        set<string> strSet;
+        std::set<std::string> strSet;
         for (int i = 1; i < lines.size(); ++i) {
             strSet.emplace(lines[i]);
         }

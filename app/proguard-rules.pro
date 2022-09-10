@@ -1,6 +1,6 @@
 # Add project specific ProGuard rules here.
 # You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
+# proguardFiles setting in build.gradle.kts.
 #
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
@@ -113,7 +113,6 @@
     *;
 }
 
-
 ##########################################################################################################
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
     public static void check*(...);
@@ -133,6 +132,6 @@
 #-packageobfuscationdictionary   proguard-dic.txt
 -repackageclasses ''
 -keepattributes Signature
--keepattributes EnclosingMethod
+#-keepattributes EnclosingMethod
 -keepattributes *Annotation*
 -keep class * extends java.lang.annotation.Annotation {*;}
