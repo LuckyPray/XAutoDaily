@@ -1,36 +1,17 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(xa_native)
 
-find_package(cxx REQUIRED CONFIG)
-link_libraries(cxx::cxx)
-
-add_definitions(-std=c++20)
-
 add_subdirectory(../../../../mmkv mmkv)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/DexKit)
 
-add_library( # Sets the name of the library.
-        xa_native
+add_library(xa_native SHARED native-lib.cpp)
 
-        # Sets the library as a shared library.
-        SHARED
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
 
-        # Provides a relative path to your source file(s).
-        native-lib.cpp
-        )
+find_library(log-lib log)
 
-find_library(
-        log-lib
-        log)
-
-target_link_libraries( # Specifies the target library.
-        xa_native
-#        mmkv
-        dex_kit_static
-        # Links the target library to the log library
-        # included in the NDK.
-        ${log-lib}
-        )
+target_link_libraries(xa_native mmkv dex_kit_static ${log-lib})
 
 if (NOT DEFINED DEBUG_SYMBOLS_PATH)
     set(DEBUG_SYMBOLS_PATH ${CMAKE_BINARY_DIR}/symbols)

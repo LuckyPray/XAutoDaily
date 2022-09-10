@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
-import java.nio.file.Paths
 import org.gradle.internal.os.OperatingSystem
+import java.nio.file.Paths
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun findInPath(executable: String): String? {
     val pathEnv = System.getenv("PATH")
@@ -22,13 +24,19 @@ plugins {
     id("kotlin-android")
     id("kotlinx-serialization")
 }
+val signingPropFilePath = "./signing.properties"
+val performSigning = File(signingPropFilePath).exists()
 
 val releaseStoreFile: String? by rootProject
 val releaseStorePassword: String? by rootProject
 val releaseKeyAlias: String? by rootProject
 val releaseKeyPassword: String? by rootProject
 
-val appVerCode: String = "22090611"
+val appVerCode: Int get() {
+    val versionCode = SimpleDateFormat("yyMMddHH", Locale.ENGLISH).format(Date())
+    println("versionCode: $versionCode")
+    return versionCode.toInt()
+}
 val appVerName: String = "3.0.8"
 
 android {
@@ -36,22 +44,21 @@ android {
 
     compileSdk = 31
     buildToolsVersion = "32.0.0"
-    ndkVersion = "25.0.8775105"
+//    ndkVersion = "25.0.8775105"
 
     defaultConfig {
         applicationId = "me.teble.xposed.autodaily"
         minSdk = 24
         @SuppressLint("OldTargetApi")
         targetSdk = 31
-        versionCode = appVerCode.toInt()
+        versionCode = appVerCode
         versionName = appVerName
 
         externalNativeBuild {
             cmake {
                 targets("xa_native")
                 abiFilters("armeabi-v7a", "arm64-v8a")
-//                arguments("-DANDROID_STL=c++_static")
-                arguments("-DANDROID_STL=none")
+                arguments("-DANDROID_STL=c++_static")
                 val flags = arrayOf(
                     "-Wall",
 //                    "-Werror",
@@ -60,23 +67,22 @@ android {
                     "-fno-rtti",
                     "-fvisibility=hidden",
                     "-fvisibility-inlines-hidden",
-                    "-fno-exceptions",
+//                    "-fno-exceptions",
                     "-fno-stack-protector",
                     "-fomit-frame-pointer",
                     "-Wno-builtin-macro-redefined",
                     "-Wno-unused-value",
                     "-Wno-unused-variable",
                     "-D__FILE__=__FILE_NAME__",
-                    "-Dthrow='abort();'",
-//                    if (performSigning) {
-//                        // release 签名
-//                        "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
-//                    } else {
+                    if (performSigning) {
+                        // release 签名
+                        "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
+                    } else {
                         // android 默认 debug md5 签名可通过 signingReport 获取
                         "-DMODULE_SIGNATURE=CB49EE96102F0D9C331AB59A5921AA42"
-//                    }
+                    }
                 )
-                cppFlags("-std=c++20", *flags)
+                cppFlags("-std=c++17", *flags)
                 cFlags("-std=c18", *flags)
                 findInPath("ccache")?.let {
                     println("Using ccache $it")
@@ -88,11 +94,14 @@ android {
 
     signingConfigs {
         create("config") {
-            releaseStoreFile?.also {
-                storeFile = rootProject.file(it)
-                storePassword = releaseStorePassword
-                keyAlias = releaseKeyAlias
-                keyPassword = releaseKeyPassword
+            if (performSigning) {
+                val properties = Properties().apply {
+                    load(File("signing.properties").reader())
+                }
+                storeFile = File(properties.getProperty("storeFilePath"))
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
             }
         }
     }
@@ -101,9 +110,9 @@ android {
         prefab = true
     }
 
-    androidResources {
-        noCompress("libxa_native.so")
-    }
+//    androidResources {
+//        noCompress("libxa_native.so")
+//    }
 
     buildTypes {
         all {
@@ -160,17 +169,17 @@ android {
                         "-DNDEBUG"
                     ).joinToString(" ")
                     arguments(
-                        "-DCMAKE_BUILD_TYPE=Release",
-                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
-                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
+//                        "-DCMAKE_BUILD_TYPE=Release",
+//                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
+//                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
                         "-DDEBUG_SYMBOLS_PATH=${project.buildDir.absolutePath}/symbols/$name",
                     )
                 }
             }
         }
         val release by getting  {
-            isMinifyEnabled = false
-            isShrinkResources = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles("proguard-rules.pro")
             externalNativeBuild {
                 cmake {
@@ -190,9 +199,9 @@ android {
                         "-DNDEBUG"
                     ).joinToString(" ")
                     arguments(
-                        "-DCMAKE_BUILD_TYPE=Release",
-                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
-                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
+//                        "-DCMAKE_BUILD_TYPE=Release",
+//                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
+//                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
                         "-DDEBUG_SYMBOLS_PATH=${project.buildDir.absolutePath}/symbols/$name",
                     )
                 }
@@ -201,8 +210,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_11)
-        targetCompatibility(JavaVersion.VERSION_11)
+        sourceCompatibility(JavaVersion.VERSION_1_8)
+        targetCompatibility(JavaVersion.VERSION_1_8)
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -315,7 +324,6 @@ dependencies {
     // shizuku
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
-    implementation("dev.rikka.ndk.thirdparty:cxx:1.2.0")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

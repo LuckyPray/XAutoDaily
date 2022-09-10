@@ -8,6 +8,8 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven(url = "https://jitpack.io")
+        mavenLocal()
     }
     dependencies {
         classpath("com.android.tools.build:gradle:$gradleVersion")
@@ -15,7 +17,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
 
         // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle.bak files
+        // in the individual module build.gradle.kts files
     }
 }
 

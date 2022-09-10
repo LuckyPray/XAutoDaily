@@ -11,7 +11,7 @@
 //
 namespace {
 #define EXPORT extern "C" __attribute__((visibility("default")))
-//extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
+extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
 
 
 EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -23,8 +23,7 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (checkSignature(env) != JNI_TRUE) {
         return -2;
     }
-//    return MMKV_JNI_OnLoad(vm, reserved);
-    return JNI_VERSION_1_6;
+    return MMKV_JNI_OnLoad(vm, reserved);
 }
 
 std::vector<std::string> split(const std::string &s, char delim) {
