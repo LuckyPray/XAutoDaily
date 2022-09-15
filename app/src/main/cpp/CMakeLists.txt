@@ -16,7 +16,6 @@ find_package(dexkit REQUIRED CONFIG)
 target_link_libraries(xa_native
         mmkv
         dexkit::dex_kit_static
-        dexkit::dex_kit_helper
         z
         ${log-lib})
 

@@ -1,5 +1,6 @@
 #include <dex_kit.h>
-#include <DexKitHelper.h>
+#include "DexKitJniHelper.h"
+#include "log.h"
 
 extern "C"
 JNIEXPORT jlong JNICALL
@@ -19,7 +20,9 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_initDexKit(JNIEnv *env, jobje
     const char *cStr = env->GetStringUTFChars(file, nullptr);
     std::string filePathStr(cStr);
     std::string hostApkPath = filePathStr.substr(5, filePathStr.size() - 26);
-    return (jlong) new dexkit::DexKit(hostApkPath);
+    LOGI("hostApkPath: %s", hostApkPath.c_str());
+    auto dexkit = new dexkit::DexKit(hostApkPath);
+    return (jlong) dexkit;
 }
 
 extern "C"

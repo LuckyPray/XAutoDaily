@@ -22,6 +22,7 @@ import me.teble.xposed.autodaily.config.BaseApplicationImpl
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.NewRuntime
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
+import me.teble.xposed.autodaily.dexkit.DexKitHelper
 import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
@@ -132,19 +133,22 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             val context = it.thisObject as Service
             val intent = args[0] as Intent?
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 var builder: NotificationCompat.Builder
                 val channelId = "me.teble.xposed.autodaily.XA_TOOLS_FOREST_NOTIFY_CHANNEL"
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
                     val notificationChannel = NotificationChannel(
                         channelId, "XAutoDaily",
-                        NotificationManager.IMPORTANCE_LOW).apply {
+                        NotificationManager.IMPORTANCE_LOW
+                    ).apply {
                         enableLights(false)
                         enableVibration(false)
                         setShowBadge(false)
                     }
                     notificationManager.createNotificationChannel(notificationChannel)
-                    builder = NotificationCompat.Builder(context,
+                    builder = NotificationCompat.Builder(
+                        context,
                         channelId
                     )
                 } else {
@@ -187,6 +191,71 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun onStart() {
         ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
+    }
+
+    private fun testDex(dexKitHelper: DexKitHelper) {
+        val map = mapOf(
+            "Lcom/tencent/mobileqq/activity/ChatActivityFacade;" to setOf("^reSendEmo"),
+            "Lcooperation/qzone/PlatformInfor;" to setOf("52b7f2", "qimei"),
+            "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf("TroopClockInHandler"),
+            "com.tencent.widget.CustomWidgetUtil" to setOf("^NEW$"),
+        )
+        LogUtil.d("batchFindClassUsedString -> ${dexKitHelper.batchFindClassUsedString(map)}")
+        LogUtil.d("batchFindMethodUsedString -> ${dexKitHelper.batchFindMethodUsedString(map)}")
+        val invokeRes = dexKitHelper.findMethodInvoked(
+            "Lcom/tencent/mobileqq/app/CardHandler;->X6(Lcom/tencent/qphone/base/remote/ToServiceMsg;Lcom/tencent/qphone/base/remote/FromServiceMsg;Ljava/lang/Object;Landroid/os/Bundle;)V",
+            "",
+            "",
+            "",
+            emptyArray(),
+            IntArray(0),
+            false,
+        )
+        LogUtil.d("findMethodInvoked -> ${invokeRes.toList()}")
+        LogUtil.d(
+            "findSubClasses -> ${
+                dexKitHelper.findSubClasses("Landroid/app/Activity;").toList()
+            }"
+        )
+        LogUtil.d(
+            "FindMethodOpPrefixSeq -> ${
+                dexKitHelper.findMethodOpPrefixSeq(
+                    intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
+                    "",
+                    "",
+                    "",
+                    emptyArray(),
+                    IntArray(0),
+                    false,
+                ).toList()
+            }"
+        )
+        LogUtil.d(
+            "findMethodUsedString -> ${
+                dexKitHelper.findMethodUsedString(
+                    "^NEW$",
+                    "",
+                    "",
+                    "",
+                    emptyArray(),
+                    IntArray(0),
+                    true,
+                    advancedMatch = true
+                ).toList()
+            }"
+        )
+        LogUtil.d(
+            "findMethod -> ${
+                dexKitHelper.findMethod(
+                    "com.tencent.mobileqq.x.a",
+                    "i6",
+                    "",
+                    emptyArray(),
+                    IntArray(0),
+                    true,
+                ).toList()
+            }"
+        )
     }
 
     private fun doInit() {
@@ -260,45 +329,31 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (needLocateClasses.isEmpty()) {
             return
         }
-        dexIsInit = true
+        val dexKitHelper = DexKitHelper(hostClassLoader)
         LogUtil.log("needLocateClasses -> $needLocateClasses")
         val startTime = System.currentTimeMillis()
-        val info = needLocateClasses.associateWith { confuseInfo[it] }
+        val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
-        val locateStr = buildString {
-            info.forEach { (k, v) ->
-                append(k)
-                append("\t")
-                v!!.forEachIndexed { index, s ->
-                    if (index > 0) {
-                        append("\t")
-                    }
-                    append(s);
-                }
-                append("\n")
-            }
-        }
-        LogUtil.d(locateStr)
-        val resStr = ConfigUtil.findDex(hostClassLoader, locateStr)
-        LogUtil.d("res -> $resStr")
-        resStr.split("\n").forEach {
-            if (it.isEmpty()) return@forEach
-            val tokens = it.split("\t")
-            val key = tokens.first()
-            if (tokens.size == 2 && tokens[1].isNotEmpty()) {
-                LogUtil.i("locate info: $key -> ${tokens[1]}")
-                cache.putString("$key#${hostVersionCode}", tokens[1])
+        val res = dexKitHelper.batchFindClassUsedString(info)
+        dexKitHelper.release()
+        LogUtil.d("search result: $res")
+        res.forEach { (key, value) ->
+            LogUtil.d("search result: $key -> ${value.toList()}")
+            if (value.size == 1) {
+                LogUtil.i("locate info: $key -> ${value.first()}")
+                cache.putString("$key#${hostVersionCode}", value.first())
                 locateNum++
             } else {
-                LogUtil.w("locate not instance class: $tokens")
+                LogUtil.w("locate not instance class: ${value.toList()}")
                 // 保存为空字符串，表示已经搜索过，下次不再搜索
                 cache.putString("${key}#${hostVersionCode}", "")
             }
         }
         val usedTime = System.currentTimeMillis() - startTime
         cache.putStringSet("confuseClasses", confuseInfoKeys)
+        LogUtil.d("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个，耗时${usedTime}ms")
         ToastUtil.send("dex搜索完毕，成功${locateNum}个，失败${needLocateClasses.size - locateNum}个，耗时${usedTime}ms")
-        dexIsInit = false
+        dexIsInit = true
     }
 
     private fun initHook() {

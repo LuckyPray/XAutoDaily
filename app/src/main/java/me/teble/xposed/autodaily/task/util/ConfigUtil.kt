@@ -72,8 +72,6 @@ object ConfigUtil {
 
     external fun getMd5Hex(value: String): String
 
-    external fun findDex(classLoader: ClassLoader, string: String): String
-
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchUpdateInfo()
         info?.let {

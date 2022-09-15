@@ -325,7 +325,7 @@ dependencies {
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
     // dexkit
-    implementation("io.luckypray:dexkit:1.0")
+    implementation("io.luckypray:dexkit:1.0.1")
 //    implementation("com.github.LuckyPray:DexKit-Android:1.0")
 }
 
