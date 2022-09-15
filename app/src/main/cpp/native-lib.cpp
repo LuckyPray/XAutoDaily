@@ -5,10 +5,9 @@
 #include <map>
 #include <sstream>
 #include "v2sign.h"
-#include "dex_kit.h"
-//
-// Created by teble on 2020/2/10.
-//
+#include <dex_kit.h>
+#include <DexKitHelper.h>
+
 namespace {
 #define EXPORT extern "C" __attribute__((visibility("default")))
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);

@@ -79,7 +79,7 @@ android {
                         "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
                     } else {
                         // android 默认 debug md5 签名可通过 signingReport 获取
-                        "-DMODULE_SIGNATURE=CB49EE96102F0D9C331AB59A5921AA42"
+                        "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960"
                     }
                 )
                 cppFlags("-std=c++17", *flags)
@@ -324,6 +324,9 @@ dependencies {
     // shizuku
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
+    // dexkit
+    implementation("io.luckypray:dexkit:1.0")
+//    implementation("com.github.LuckyPray:DexKit-Android:1.0")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

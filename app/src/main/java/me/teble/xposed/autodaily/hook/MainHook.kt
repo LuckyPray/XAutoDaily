@@ -26,6 +26,7 @@ import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
+import me.teble.xposed.autodaily.hook.config.Config.isInit
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.inject.ServletPool
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
@@ -81,7 +82,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             hostPackageName = loadPackageParam.packageName
             hostProcessName = loadPackageParam.processName
             hostClassLoader = loadPackageParam.classLoader
-
+            var initializer = false
             findMethod(loadPackageParam.classLoader.loadClass(BaseApplicationImpl)) {
                 name == "onCreate"
             }.hookBefore {
@@ -90,7 +91,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     hostApp = it.thisObject as Application
                     EzXHelperInit.initAppContext(hostApp)
                     hostClassLoader = hostApp.classLoader
-                    if (ProcUtil.procType == ProcUtil.MAIN) {
+                    if (ProcUtil.isMain) {
                         // MMKV
                         Config.init()
                         injectClassLoader(hostClassLoader)
@@ -100,17 +101,20 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         ProxyManager.init
                         asyncHook()
                     }
+                    initializer = true
                 }.onFailure {
                     moduleLoadInit = true
                     ToastUtil.send(it.stackTraceToString(), true)
                     Log.e("XALog", it.stackTraceToString())
+                    return@hookBefore
                 }
             }
+            if (!initializer) return
             // TODO 分进程处理
-            if (loadPackageParam.processName == loadPackageParam.packageName) {
+            if (ProcUtil.isMain) {
                 doInit()
             }
-            if (loadPackageParam.processName.endsWith("tool")) {
+            if (ProcUtil.isTool) {
                 Log.d("XALog", "tool进程：" + loadPackageParam.processName)
                 toolsHook()
             }
