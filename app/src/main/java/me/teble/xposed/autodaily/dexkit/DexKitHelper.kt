@@ -1,11 +1,12 @@
 package me.teble.xposed.autodaily.dexkit
 
-import me.teble.xposed.autodaily.hook.base.hostClassLoader
-
 class DexKitHelper(
     classLoader: ClassLoader
 ) {
 
+    /**
+     * 使用完成后切记记得调用 [release]，否则内存不会释放
+     */
     private var token: Long = 0
 
     init {

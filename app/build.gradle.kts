@@ -24,19 +24,17 @@ plugins {
     id("kotlin-android")
     id("kotlinx-serialization")
 }
-val signingPropFilePath = "./signing.properties"
-val performSigning = File(signingPropFilePath).exists()
+val signingPropFile = File(projectDir, "signing.properties")
+val performSigning = signingPropFile.exists()
 
-val releaseStoreFile: String? by rootProject
-val releaseStorePassword: String? by rootProject
-val releaseKeyAlias: String? by rootProject
-val releaseKeyPassword: String? by rootProject
+println(performSigning)
 
 val appVerCode: Int get() {
     val versionCode = SimpleDateFormat("yyMMddHH", Locale.ENGLISH).format(Date())
     println("versionCode: $versionCode")
     return versionCode.toInt()
 }
+val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
 val appVerName: String = "3.0.8"
 
 android {
@@ -96,7 +94,7 @@ android {
         create("config") {
             if (performSigning) {
                 val properties = Properties().apply {
-                    load(File("signing.properties").reader())
+                    load(signingPropFile.reader())
                 }
                 storeFile = File(properties.getProperty("storeFilePath"))
                 storePassword = properties.getProperty("storePassword")
@@ -117,10 +115,11 @@ android {
     buildTypes {
         all {
             signingConfig =
-                if (releaseStoreFile.isNullOrEmpty()) signingConfigs.getByName("debug")
-                else signingConfigs.getByName("config")
+                if (performSigning) signingConfigs.getByName("config")
+                else signingConfigs.getByName("debug")
         }
         val debug by getting {
+            versionNameSuffix = ".$buildNum-debug"
             externalNativeBuild {
                 cmake {
                     arguments.addAll(
@@ -133,6 +132,7 @@ android {
             }
         }
         val alpha by creating  {
+            versionNameSuffix = ".$buildNum-alpha"
             isMinifyEnabled = true
             isShrinkResources = false
             proguardFiles("proguard-rules.pro")
@@ -325,8 +325,7 @@ dependencies {
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
     // dexkit
-    implementation("io.luckypray:dexkit:1.0.1")
-//    implementation("com.github.LuckyPray:DexKit-Android:1.0")
+    implementation("com.github.LuckyPray:DexKit-Android:1.1.0")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

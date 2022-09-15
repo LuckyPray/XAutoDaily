@@ -22,6 +22,7 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_initDexKit(JNIEnv *env, jobje
     std::string hostApkPath = filePathStr.substr(5, filePathStr.size() - 26);
     LOGI("hostApkPath: %s", hostApkPath.c_str());
     auto dexkit = new dexkit::DexKit(hostApkPath);
+    env->ReleaseStringUTFChars(file, cStr);
     return (jlong) dexkit;
 }
 
