@@ -3,6 +3,11 @@ package me.teble.xposed.autodaily.dexkit
 class DexKitHelper(
     classLoader: ClassLoader
 ) {
+    companion object {
+        const val FLAG_GETTING = 1
+        const val FLAG_SETTING = 2
+        const val FLAG_USING = FLAG_GETTING or FLAG_SETTING
+    }
 
     /**
      * 使用完成后切记记得调用 [release]，否则内存不会释放
@@ -13,179 +18,264 @@ class DexKitHelper(
         token = initDexKit(classLoader)
     }
 
-    fun batchFindClassUsedString(
-        map: Map<String, Set<String>>,
-        advancedMatch: Boolean = true,
-    ): Map<String, Array<String>> {
-        return batchFindClassUsedString(token, map, advancedMatch)
+    fun release() {
+        release(token)
     }
 
-    fun batchFindMethodUsedString(
+    fun batchFindClassesUsedStrings(
         map: Map<String, Set<String>>,
         advancedMatch: Boolean = true,
+        dexPriority: IntArray? = intArrayOf(),
     ): Map<String, Array<String>> {
-        return batchFindMethodUsedString(token, map, advancedMatch)
+        return batchFindClassesUsedStrings(token, map, advancedMatch, dexPriority)
     }
 
-    fun findMethodInvoked(
-        methodDesc: String,
-        className: String,
+    fun batchFindMethodsUsedStrings(
+        map: Map<String, Set<String>>,
+        advancedMatch: Boolean = true,
+        dexPriority: IntArray? = intArrayOf(),
+    ): Map<String, Array<String>> {
+        return batchFindMethodsUsedStrings(token, map, advancedMatch, dexPriority)
+    }
+
+    fun findMethodBeInvoked(
+        methodDescriptor: String,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
+        methodReturnType: String,
+        methodParamTypes: Array<String>? = null,
+        callerMethodDeclareClass: String,
+        callerMethodName: String,
+        callerMethodReturnType: String,
+        callerMethodParamTypes: Array<String>? = null,
+        dexPriority: IntArray? = intArrayOf(),
     ): Array<String> {
-        return findMethodInvoked(
+        return findMethodBeInvoked(
             token,
-            methodDesc,
-            className,
+            methodDescriptor,
+            methodDeclareClass,
             methodName,
-            resultClassName,
-            paramClassNames,
-            dexPriority,
-            matchAnyParamIfParamsEmpty
+            methodReturnType,
+            methodParamTypes,
+            callerMethodDeclareClass,
+            callerMethodName,
+            callerMethodReturnType,
+            callerMethodParamTypes,
+            dexPriority
+        )
+    }
+
+    fun findMethodInvoking(
+        methodDescriptor: String,
+        methodDeclareClass: String,
+        methodName: String,
+        methodReturnType: String,
+        methodParamTypes: Array<String>? = null,
+        beCalledMethodDeclareClass: String,
+        beCalledMethodName: String,
+        beCalledMethodReturnType: String,
+        beCalledMethodParamTypes: Array<String>? = null,
+        dexPriority: IntArray? = intArrayOf(),
+    ): Map<String, Array<String>> {
+        return findMethodInvoking(
+            token,
+            methodDescriptor,
+            methodDeclareClass,
+            methodName,
+            methodReturnType,
+            methodParamTypes,
+            beCalledMethodDeclareClass,
+            beCalledMethodName,
+            beCalledMethodReturnType,
+            beCalledMethodParamTypes,
+            dexPriority
+        )
+    }
+
+    fun findFieldBeUsed(
+        fieldDescriptor: String,
+        fieldDeclareClass: String,
+        fieldName: String,
+        fieldType: String,
+        beUsedFlag: Int,
+        callerMethodDeclareClass: String,
+        callerMethodName: String,
+        callerMethodReturnType: String,
+        callerMethodParamTypes: Array<String>? = null,
+        dexPriority: IntArray? = intArrayOf(),
+    ): Array<String> {
+        return findFieldBeUsed(
+            token,
+            fieldDescriptor,
+            fieldDeclareClass,
+            fieldName,
+            fieldType,
+            beUsedFlag,
+            callerMethodDeclareClass,
+            callerMethodName,
+            callerMethodReturnType,
+            callerMethodParamTypes,
+            dexPriority
         )
     }
 
     fun findMethodUsedString(
-        string: String,
-        className: String,
+        usedString: String,
+        advancedMatch: Boolean = true,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
-        advancedMatch: Boolean = false,
-    ) : Array<String> {
+        methodReturnType: String,
+        methodParamTypes: Array<String>? = null,
+        dexPriority: IntArray? = intArrayOf(),
+    ): Array<String> {
         return findMethodUsedString(
             token,
-            string,
-            className,
+            usedString,
+            advancedMatch,
+            methodDeclareClass,
             methodName,
-            resultClassName,
-            paramClassNames,
-            dexPriority,
-            matchAnyParamIfParamsEmpty,
-            advancedMatch
+            methodReturnType,
+            methodParamTypes,
+            dexPriority
         )
     }
 
     fun findMethod(
-        className: String,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
+        methodReturnType: String,
+        methodParamTypes: Array<String>? = null,
+        dexPriority: IntArray? = intArrayOf(),
     ): Array<String> {
         return findMethod(
             token,
-            className,
+            methodDeclareClass,
             methodName,
-            resultClassName,
-            paramClassNames,
-            dexPriority,
-            matchAnyParamIfParamsEmpty
+            methodReturnType,
+            methodParamTypes,
+            dexPriority
         )
     }
 
     fun findSubClasses(
-        className: String
+        parentClass: String,
+        dexPriority: IntArray? = intArrayOf(),
     ): Array<String> {
-        return findSubClasses(
-            token,
-            className
-        )
+        return findSubClasses(token, parentClass, dexPriority)
     }
 
     fun findMethodOpPrefixSeq(
         opPrefixSeq: IntArray,
-        className: String,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
+        methodReturnType: String,
+        methodParamTypes: Array<String>? = null,
+        dexPriority: IntArray? = intArrayOf(),
     ): Array<String> {
         return findMethodOpPrefixSeq(
             token,
             opPrefixSeq,
-            className,
+            methodDeclareClass,
             methodName,
-            resultClassName,
-            paramClassNames,
-            dexPriority,
-            matchAnyParamIfParamsEmpty
+            methodReturnType,
+            methodParamTypes,
+            dexPriority
         )
-    }
-
-    fun release() {
-        release(token)
     }
 
     private external fun initDexKit(classLoader: ClassLoader): Long
 
     private external fun release(token: Long)
 
-    private external fun batchFindClassUsedString(
+    private external fun batchFindClassesUsedStrings(
         token: Long,
         map: Map<String, Set<String>>,
-        advancedMatch: Boolean = false,
+        advancedMatch: Boolean,
+        dexPriority: IntArray?,
     ): Map<String, Array<String>>
 
-    private external fun batchFindMethodUsedString(
+    private external fun batchFindMethodsUsedStrings(
         token: Long,
         map: Map<String, Set<String>>,
-        advancedMatch: Boolean = false,
+        advancedMatch: Boolean,
+        dexPriority: IntArray?,
     ): Map<String, Array<String>>
 
-    private external fun findMethodInvoked(
+    private external fun findMethodBeInvoked(
         token: Long,
-        methodDesc: String,
-        className: String,
+        methodDescriptor: String,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
+        methodReturnType: String,
+        methodParamTypes: Array<String>?,
+        callerMethodDeclareClass: String,
+        callerMethodName: String,
+        callerMethodReturnType: String,
+        callerMethodParamTypes: Array<String>?,
+        dexPriority: IntArray?,
+    ): Array<String>
+    
+    private external fun findMethodInvoking(
+        token: Long,
+        methodDescriptor: String,
+        methodDeclareClass: String,
+        methodName: String,
+        methodReturnType: String,
+        methodParamTypes: Array<String>?,
+        beCalledMethodDeclareClass: String,
+        beCalledMethodName: String,
+        beCalledMethodReturnType: String,
+        beCalledMethodParamTypes: Array<String>?,
+        dexPriority: IntArray?,
+    ): Map<String, Array<String>>
+    
+    private external fun findFieldBeUsed(
+        token: Long,
+        fieldDescriptor: String,
+        fieldDeclareClass: String,
+        fieldName: String,
+        fieldType: String,
+        beUsedFlag: Int,
+        callerMethodDeclareClass: String,
+        callerMethodName: String,
+        callerMethodReturnType: String,
+        callerMethodParamTypes: Array<String>?,
+        dexPriority: IntArray?,
     ): Array<String>
 
     private external fun findMethodUsedString(
         token: Long,
-        string: String,
-        className: String,
+        usedString: String,
+        advancedMatch: Boolean,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
-        advancedMatch: Boolean = false,
+        methodReturnType: String,
+        methodParamTypes: Array<String>?,
+        dexPriority: IntArray?,
     ): Array<String>
 
     private external fun findMethod(
         token: Long,
-        className: String,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
+        methodReturnType: String,
+        methodParamTypes: Array<String>?,
+        dexPriority: IntArray?,
     ): Array<String>
 
     private external fun findSubClasses(
         token: Long,
-        className: String
+        parentClass: String,
+        dexPriority: IntArray?,
     ): Array<String>
 
     private external fun findMethodOpPrefixSeq(
         token: Long,
         opPrefixSeq: IntArray,
-        className: String,
+        methodDeclareClass: String,
         methodName: String,
-        resultClassName: String,
-        paramClassNames: Array<String>,
-        dexPriority: IntArray,
-        matchAnyParamIfParamsEmpty: Boolean,
+        methodReturnType: String,
+        methodParamTypes: Array<String>?,
+        dexPriority: IntArray?,
     ): Array<String>
 }

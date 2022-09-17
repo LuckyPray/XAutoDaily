@@ -23,17 +23,16 @@ import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.NewRuntime
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.dexkit.DexKitHelper
+import me.teble.xposed.autodaily.dexkit.DexKitHelper.Companion.FLAG_GETTING
 import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
-import me.teble.xposed.autodaily.hook.config.Config.isInit
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.hook.inject.ServletPool
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
-import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
@@ -200,33 +199,50 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf("TroopClockInHandler"),
             "com.tencent.widget.CustomWidgetUtil" to setOf("^NEW$"),
         )
-        LogUtil.d("batchFindClassUsedString -> ${dexKitHelper.batchFindClassUsedString(map)}")
-        LogUtil.d("batchFindMethodUsedString -> ${dexKitHelper.batchFindMethodUsedString(map)}")
-        val invokeRes = dexKitHelper.findMethodInvoked(
-            "Lcom/tencent/mobileqq/app/CardHandler;->X6(Lcom/tencent/qphone/base/remote/ToServiceMsg;Lcom/tencent/qphone/base/remote/FromServiceMsg;Ljava/lang/Object;Landroid/os/Bundle;)V",
-            "",
-            "",
-            "",
-            emptyArray(),
-            IntArray(0),
-            false,
-        )
-        LogUtil.d("findMethodInvoked -> ${invokeRes.toList()}")
+        LogUtil.d("batchFindClassUsedString -> ${dexKitHelper.batchFindClassesUsedStrings(map)}")
+        LogUtil.d("batchFindMethodUsedString -> ${dexKitHelper.batchFindMethodsUsedStrings(map)}")
         LogUtil.d(
-            "findSubClasses -> ${
-                dexKitHelper.findSubClasses("Landroid/app/Activity;").toList()
+            "findMethodBeInvoked -> ${
+                dexKitHelper.findMethodBeInvoked(
+                    "",
+                    "com.tencent.qphone.base.remote.ToServiceMsg",
+                    "<init>",
+                    "",
+                    null,
+                    "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
+                    "getRegQueryAccountMsg",
+                    "",
+                    null
+                ).toList()
             }"
         )
         LogUtil.d(
-            "FindMethodOpPrefixSeq -> ${
-                dexKitHelper.findMethodOpPrefixSeq(
-                    intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
+            "FindMethodInvoking -> ${
+                dexKitHelper.findMethodInvoking(
+                    "",
+                    "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
+                    "syncGetServerConfig",
+                    "",
+                    null,
                     "",
                     "",
                     "",
-                    emptyArray(),
-                    IntArray(0),
-                    false,
+                    null
+                ).toList()
+            }"
+        )
+        LogUtil.d(
+            "findFieldBeUsed -> ${
+                dexKitHelper.findFieldBeUsed(
+                    "",
+                    "",
+                    "",
+                    "Landroid/widget/TextView;",
+                    FLAG_GETTING,
+                    "Lcom/tencent/mobileqq/activity/aio/item/TextItemBuilder;",
+                    "",
+                    "void",
+                    arrayOf("", "Lcom/tencent/mobileqq/data/ChatMessage;")
                 ).toList()
             }"
         )
@@ -234,25 +250,37 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             "findMethodUsedString -> ${
                 dexKitHelper.findMethodUsedString(
                     "^NEW$",
-                    "",
-                    "",
-                    "",
-                    emptyArray(),
-                    IntArray(0),
                     true,
-                    advancedMatch = true
+                    "",
+                    "",
+                    "",
+                    null,
                 ).toList()
             }"
         )
         LogUtil.d(
             "findMethod -> ${
                 dexKitHelper.findMethod(
-                    "com.tencent.mobileqq.x.a",
-                    "i6",
+                    "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
                     "",
-                    emptyArray(),
-                    IntArray(0),
-                    true,
+                    "int",
+                    arrayOf(),
+                ).toList()
+            }"
+        )
+        LogUtil.d(
+            "findSubClasses -> ${
+                dexKitHelper.findSubClasses("Lcom/tencent/mobileqq/activity/aio/BaseBubbleBuilder\$d;").toList()
+            }"
+        )
+        LogUtil.d(
+            "FindMethodOpPrefixSeq -> ${
+                dexKitHelper.findMethodOpPrefixSeq(
+                    intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
+                    "",
+                    "<init>",
+                    "V",
+                    arrayOf(),
                 ).toList()
             }"
         )
@@ -334,7 +362,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val startTime = System.currentTimeMillis()
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
-        val res = dexKitHelper.batchFindClassUsedString(info)
+        val res = dexKitHelper.batchFindClassesUsedStrings(info)
         dexKitHelper.release()
         LogUtil.d("search result: $res")
         res.forEach { (key, value) ->
