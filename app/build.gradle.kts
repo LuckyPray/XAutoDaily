@@ -27,8 +27,6 @@ plugins {
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
 
-println(performSigning)
-
 val appVerCode: Int get() {
     val versionCode = SimpleDateFormat("yyMMddHH", Locale.ENGLISH).format(Date())
     println("versionCode: $versionCode")
@@ -42,7 +40,7 @@ android {
 
     compileSdk = 31
     buildToolsVersion = "32.0.0"
-//    ndkVersion = "25.0.8775105"
+    ndkVersion = "25.0.8775105"
 
     defaultConfig {
         applicationId = "me.teble.xposed.autodaily"
@@ -59,19 +57,13 @@ android {
                 arguments("-DANDROID_STL=c++_static")
                 val flags = arrayOf(
                     "-Wall",
-//                    "-Werror",
                     "-Qunused-arguments",
-                    "-Wno-gnu-string-literal-operator-template",
                     "-fno-rtti",
                     "-fvisibility=hidden",
                     "-fvisibility-inlines-hidden",
-//                    "-fno-exceptions",
-                    "-fno-stack-protector",
-                    "-fomit-frame-pointer",
-                    "-Wno-builtin-macro-redefined",
                     "-Wno-unused-value",
                     "-Wno-unused-variable",
-                    "-D__FILE__=__FILE_NAME__",
+                    "-Wno-unused-command-line-argument",
                     if (performSigning) {
                         // release 签名
                         "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
@@ -131,77 +123,35 @@ android {
                 }
             }
         }
-        val alpha by creating  {
-            versionNameSuffix = ".$buildNum-alpha"
-            isMinifyEnabled = true
-            isShrinkResources = false
-            proguardFiles("proguard-rules.pro")
-            externalNativeBuild {
-                cmake {
-                    arguments.addAll(
-                        arrayOf(
-                            "-DCMAKE_CXX_FLAGS_DEBUG=-Og",
-                            "-DCMAKE_C_FLAGS_DEBUG=-Og",
-                        )
-                    )
-                }
-            }
-        }
-        val rc by creating {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles("proguard-rules.pro")
-            externalNativeBuild {
-                cmake {
-                    val flags = arrayOf(
-                        "-flto",
-                        "-ffunction-sections",
-                        "-fdata-sections",
-                        "-Wl,--gc-sections",
-                        "-fno-unwind-tables",
-                        "-fno-asynchronous-unwind-tables",
-                        "-Wl,--exclude-libs,ALL",
-                    )
-                    cppFlags.addAll(flags)
-                    cFlags.addAll(flags)
-                    val configFlags = arrayOf(
-                        "-Oz",
-                        "-DNDEBUG"
-                    ).joinToString(" ")
-                    arguments(
-//                        "-DCMAKE_BUILD_TYPE=Release",
-//                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
-//                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
-                        "-DDEBUG_SYMBOLS_PATH=${project.buildDir.absolutePath}/symbols/$name",
-                    )
-                }
-            }
-        }
         val release by getting  {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles("proguard-rules.pro")
             externalNativeBuild {
                 cmake {
-                    val flags = arrayOf(
-                        "-flto",
+                    val ltoCacheFlags = listOf(
+                        "-flto=thin",
+                        "-Wl,--thinlto-cache-policy,cache_size_bytes=300m",
+                        "-Wl,--thinlto-cache-dir=${buildDir.absolutePath}/.lto-cache",
+                    )
+                    val releaseFlags = arrayOf<String>(
                         "-ffunction-sections",
                         "-fdata-sections",
                         "-Wl,--gc-sections",
-                        "-fno-unwind-tables",
-                        "-fno-asynchronous-unwind-tables",
-                        "-Wl,--exclude-libs,ALL",
+                        "-Oz",
                     )
-                    cppFlags.addAll(flags)
-                    cFlags.addAll(flags)
+                    cppFlags += releaseFlags
+                    cFlags += releaseFlags
+                    cppFlags += ltoCacheFlags
+                    cFlags += ltoCacheFlags
                     val configFlags = arrayOf(
                         "-Oz",
                         "-DNDEBUG"
                     ).joinToString(" ")
                     arguments(
-//                        "-DCMAKE_BUILD_TYPE=Release",
-//                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
-//                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
+                        "-DCMAKE_BUILD_TYPE=Release",
+                        "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
+                        "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
                         "-DDEBUG_SYMBOLS_PATH=${project.buildDir.absolutePath}/symbols/$name",
                     )
                 }

@@ -7,9 +7,6 @@ add_library(xa_native SHARED
         dexkit.cpp
         native-lib.cpp)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Os")
-
 find_library(log-lib log)
 find_package(dexkit REQUIRED CONFIG)
 
