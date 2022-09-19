@@ -233,7 +233,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         )
         LogUtil.d(
             "findFieldBeUsed -> ${
-                dexKitHelper.findFieldBeUsed(
+                dexKitHelper.findMethodUsedField(
                     "",
                     "",
                     "",
