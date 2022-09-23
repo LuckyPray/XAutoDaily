@@ -85,7 +85,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             hostPackageName = loadPackageParam.packageName
             hostProcessName = loadPackageParam.processName
             hostClassLoader = loadPackageParam.classLoader
-            var initializer = false
+
             findMethod(loadPackageParam.classLoader.loadClass(BaseApplicationImpl)) {
                 name == "onCreate"
             }.hookBefore {
@@ -104,22 +104,20 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         ProxyManager.init
                         asyncHook()
                     }
-                    initializer = true
+
+                    if (ProcUtil.isMain) {
+                        doInit()
+                    }
+                    if (ProcUtil.isTool) {
+                        Log.d("XALog", "tool进程：" + loadPackageParam.processName)
+                        toolsHook()
+                    }
                 }.onFailure {
                     moduleLoadInit = true
                     ToastUtil.send(it.stackTraceToString(), true)
                     Log.e("XALog", it.stackTraceToString())
                     return@hookBefore
                 }
-            }
-            if (!initializer) return
-            // TODO 分进程处理
-            if (ProcUtil.isMain) {
-                doInit()
-            }
-            if (ProcUtil.isTool) {
-                Log.d("XALog", "tool进程：" + loadPackageParam.processName)
-                toolsHook()
             }
         }
     }
@@ -298,6 +296,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun doInit() {
         val mNewRuntime = findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }
+        LogUtil.d("new runtime: $mNewRuntime")
         mNewRuntime.hookAfter {
             runCatching {
                 if (hookIsInit) {
@@ -369,11 +368,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             return
         }
         LogUtil.log("needLocateClasses -> $needLocateClasses")
-        val startTime = System.currentTimeMillis()
+        var startTime = 0L
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
         try {
             DexKitBridge.create(hostClassLoader).use {
+                startTime = System.currentTimeMillis()
                 it?.batchFindClassesUsingStrings(info)?.forEach { (key, value) ->
                     LogUtil.d("search result: $key -> ${value.toList()}")
                     if (value.size == 1) {
