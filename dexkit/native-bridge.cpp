@@ -135,7 +135,7 @@ DexKit_JNI jobject findMethodInvoking(JNIEnv *env, jobject thiz,
                               dex_priority);
 }
 
-DexKit_JNI jobjectArray findMethodUsingField(JNIEnv *env, jobject thiz,
+DexKit_JNI jobject findMethodUsingField(JNIEnv *env, jobject thiz,
                                              jstring field_descriptor,
                                              jstring field_declare_class,
                                              jstring field_name,
@@ -215,13 +215,15 @@ DexKit_JNI jobjectArray findMethodOpPrefixSeq(JNIEnv *env, jobject thiz,
 
 static JNINativeMethod g_methods[] {
         {"initDexKit", "(Ljava/lang/String;)V", (void *) DexKit::initDexKit},
+        {"getDexNum", "()I", (void *) DexKit::getDexNum},
         {"close", "()V", (void *) DexKit::close},
         {"batchFindClassesUsingStrings", "(Ljava/util/Map;Z[I)Ljava/util/Map;", (void *) DexKit::batchFindClassesUsingStrings},
         {"batchFindMethodsUsingStrings", "(Ljava/util/Map;Z[I)Ljava/util/Map;", (void *) DexKit::batchFindMethodsUsingStrings},
         {"findMethodBeInvoked", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::findMethodBeInvoked},
         {"findMethodInvoking", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/util/Map;", (void *) DexKit::findMethodInvoking},
-        {"findMethodUsingField", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::findMethodUsingField},
+        {"findMethodUsingField", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/util/Map;", (void *) DexKit::findMethodUsingField},
         {"findMethodUsingString", "(Ljava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::findMethodUsingString},
+        {"findMethod", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::findMethod},
         {"findSubClasses", "(Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::findSubClasses},
         {"findMethodOpPrefixSeq", "([ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::findMethodOpPrefixSeq},
 };
