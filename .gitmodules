@@ -4,3 +4,6 @@
 [submodule "mmkv/MMKV"]
 	path = mmkv/MMKV
 	url = https://github.com/Tencent/MMKV.git
+[submodule "dexkit/DexKit"]
+	path = dexkit/DexKit
+	url = git@github.com:LuckyPray/DexKit.git

@@ -16,14 +16,15 @@ import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import io.luckypray.dexkit.DexKitBridge
+import io.luckypray.dexkit.DexKitBridge.Companion.FLAG_GETTING
+import io.luckypray.dexkit.DexMethodDescriptor
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.BaseApplicationImpl
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.NewRuntime
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
-import me.teble.xposed.autodaily.dexkit.DexKitHelper
-import me.teble.xposed.autodaily.dexkit.DexKitHelper.Companion.FLAG_GETTING
 import me.teble.xposed.autodaily.hook.base.*
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
@@ -35,10 +36,12 @@ import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.NativeUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
+import java.lang.reflect.Constructor
 import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -192,95 +195,102 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
     }
 
-    private fun testDex(dexKitHelper: DexKitHelper) {
+    private fun testDex(dexkit: DexKitBridge) {
         val map = mapOf(
             "Lcom/tencent/mobileqq/activity/ChatActivityFacade;" to setOf("^reSendEmo"),
             "Lcooperation/qzone/PlatformInfor;" to setOf("52b7f2", "qimei"),
             "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf("TroopClockInHandler"),
             "com.tencent.widget.CustomWidgetUtil" to setOf("^NEW$"),
         )
-        LogUtil.d("batchFindClassUsedString -> ${dexKitHelper.batchFindClassesUsedStrings(map)}")
-        LogUtil.d("batchFindMethodUsedString -> ${dexKitHelper.batchFindMethodsUsedStrings(map)}")
+        LogUtil.d("dexNum -> ${dexkit.getDexNum()}")
+        LogUtil.d("batchFindClassUsedString -> ${
+            dexkit.batchFindClassesUsingStrings(map)
+                .mapValues { it.value.joinToString(", ", "[", "]") }
+        }")
+        LogUtil.d("batchFindMethodUsedString -> ${
+            dexkit.batchFindMethodsUsingStrings(map)
+                .mapValues { it.value.joinToString(", ", "[", "]") }
+        }")
         LogUtil.d(
             "findMethodBeInvoked -> ${
-                dexKitHelper.findMethodBeInvoked(
-                    "",
-                    "com.tencent.qphone.base.remote.ToServiceMsg",
-                    "<init>",
-                    "",
-                    null,
-                    "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
-                    "getRegQueryAccountMsg",
-                    "",
-                    null
+                dexkit.findMethodBeInvoked(
+                    methodDescriptor = "",
+                    methodDeclareClass = "com.tencent.qphone.base.remote.ToServiceMsg",
+                    methodName = "<init>",
+                    methodReturnType = "",
+                    methodParameterTypes = null,
+                    callerMethodDeclareClass = "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
+                    callerMethodName = "getRegQueryAccountMsg",
+                    callerMethodReturnType = "",
+                    callerMethodParameterTypes = null,
                 ).toList()
             }"
         )
         LogUtil.d(
             "FindMethodInvoking -> ${
-                dexKitHelper.findMethodInvoking(
-                    "",
-                    "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
-                    "syncGetServerConfig",
-                    "",
-                    null,
-                    "",
-                    "",
-                    "",
-                    null
+                dexkit.findMethodInvoking(
+                    methodDescriptor = "",
+                    methodDeclareClass = "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
+                    methodName = "syncGetServerConfig",
+                    methodReturnType = "",
+                    methodParameterTypes = null,
+                    beCalledMethodDeclareClass = "",
+                    beCalledMethodName = "",
+                    beCalledMethodParamTypes = null,
                 ).toList()
             }"
         )
         LogUtil.d(
             "findFieldBeUsed -> ${
-                dexKitHelper.findMethodUsedField(
-                    "",
-                    "",
-                    "",
-                    "Landroid/widget/TextView;",
-                    FLAG_GETTING,
-                    "Lcom/tencent/mobileqq/activity/aio/item/TextItemBuilder;",
-                    "",
-                    "void",
-                    arrayOf("", "Lcom/tencent/mobileqq/data/ChatMessage;")
+                dexkit.findMethodUsingField(
+                    fieldDescriptor = "",
+                    fieldDeclareClass = "",
+                    fieldName = "",
+                    fieldType = "Landroid/widget/TextView;",
+                    usedFlags = FLAG_GETTING,
+                    callerMethodDeclareClass = "Lcom/tencent/mobileqq/activity/aio/item/TextItemBuilder;",
+                    callerMethodName = "",
+                    callerMethodReturnType = "void",
+                    callerMethodParamTypes = arrayOf("", "Lcom/tencent/mobileqq/data/ChatMessage;"),
                 ).toList()
             }"
         )
         LogUtil.d(
             "findMethodUsedString -> ${
-                dexKitHelper.findMethodUsedString(
-                    "^NEW$",
-                    true,
-                    "",
-                    "",
-                    "",
-                    null,
+                dexkit.findMethodUsingString(
+                    usingString = "^NEW$",
+                    advancedMatch = true,
+                    methodDeclareClass = "",
+                    methodName = "",
+                    methodReturnType = "",
+                    methodParamTypes = null,
                 ).toList()
             }"
         )
         LogUtil.d(
             "findMethod -> ${
-                dexKitHelper.findMethod(
-                    "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
-                    "",
-                    "int",
-                    arrayOf(),
+                dexkit.findMethod(
+                    methodDeclareClass = "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
+                    methodName = "",
+                    methodReturnType = "int",
+                    methodParamTypes = arrayOf(),
                 ).toList()
             }"
         )
         LogUtil.d(
             "findSubClasses -> ${
-                dexKitHelper.findSubClasses("Lcom/tencent/mobileqq/activity/aio/BaseBubbleBuilder\$d;").toList()
+                dexkit.findSubClasses("Lcom/tencent/mobileqq/activity/aio/BaseBubbleBuilder\$d;")
+                    .toList()
             }"
         )
         LogUtil.d(
             "FindMethodOpPrefixSeq -> ${
-                dexKitHelper.findMethodOpPrefixSeq(
-                    intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
-                    "",
-                    "<init>",
-                    "V",
-                    arrayOf(),
+                dexkit.findMethodOpPrefixSeq(
+                    opPrefixSeq = intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
+                    methodDeclareClass = "",
+                    methodName = "<init>",
+                    methodReturnType = "V",
+                    methodParamTypes = arrayOf(),
                 ).toList()
             }"
         )
@@ -324,6 +334,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             cache.clearAll()
             cache.putInt("hooksVersion", hooksVersion)
         }
+        cache.clearAll()
         confuseInfo.forEach {
             val key = "${it.key}#hash"
             val hash = it.value.hashCode()
@@ -357,25 +368,27 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         if (needLocateClasses.isEmpty()) {
             return
         }
-        val dexKitHelper = DexKitHelper(hostClassLoader)
         LogUtil.log("needLocateClasses -> $needLocateClasses")
         val startTime = System.currentTimeMillis()
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
-        val res = dexKitHelper.batchFindClassesUsedStrings(info)
-        dexKitHelper.release()
-        LogUtil.d("search result: $res")
-        res.forEach { (key, value) ->
-            LogUtil.d("search result: $key -> ${value.toList()}")
-            if (value.size == 1) {
-                LogUtil.i("locate info: $key -> ${value.first()}")
-                cache.putString("$key#${hostVersionCode}", value.first())
-                locateNum++
-            } else {
-                LogUtil.w("locate not instance class: ${value.toList()}")
-                // 保存为空字符串，表示已经搜索过，下次不再搜索
-                cache.putString("${key}#${hostVersionCode}", "")
+        try {
+            DexKitBridge.create(hostClassLoader).use {
+                it?.batchFindClassesUsingStrings(info)?.forEach { (key, value) ->
+                    LogUtil.d("search result: $key -> ${value.toList()}")
+                    if (value.size == 1) {
+                        LogUtil.i("locate info: $key -> ${value.first()}")
+                        cache.putString("$key#${hostVersionCode}", value.first())
+                        locateNum++
+                    } else {
+                        LogUtil.w("locate not instance class: ${value.toList()}")
+                        // 保存为空字符串，表示已经搜索过，下次不再搜索
+                        cache.putString("${key}#${hostVersionCode}", "")
+                    }
+                }
             }
+        } catch (e: Throwable) {
+            LogUtil.e(e)
         }
         val usedTime = System.currentTimeMillis() - startTime
         cache.putStringSet("confuseClasses", confuseInfoKeys)

@@ -247,11 +247,12 @@ configurations.all {
 }
 
 dependencies {
+    implementation(project(":dexkit"))
     implementation(project(":mmkv"))
     compileOnly(project(":stub"))
 
     compileOnly("de.robv.android.xposed:api:82")
-    implementation("com.github.kyuubiran:EzXHelper:1.0.1")
+    implementation("com.github.kyuubiran:EzXHelper:1.0.3")
 
     implementation("com.google.protobuf:protobuf-kotlin-lite:3.21.2")
     compileOnly("com.google.protobuf:protoc:3.21.2")
@@ -274,9 +275,6 @@ dependencies {
     // shizuku
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
-    // dexkit
-//    implementation("io.luckypray:dexkit:1.2.1")
-    implementation("com.github.LuckyPray:DexKit-Android:1.2.1")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

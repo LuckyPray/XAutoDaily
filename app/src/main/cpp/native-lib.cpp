@@ -5,11 +5,11 @@
 #include <map>
 #include <sstream>
 #include "v2sign.h"
-#include <dex_kit.h>
 
 namespace {
 #define EXPORT extern "C" __attribute__((visibility("default")))
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
+extern "C" jint DexKit_JNI_OnLoad(JavaVM *vm, void *reserved);
 
 
 EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -21,7 +21,13 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (checkSignature(env) != JNI_TRUE) {
         return -2;
     }
-    return MMKV_JNI_OnLoad(vm, reserved);
+    LOGI("signature pass");
+    auto ret = MMKV_JNI_OnLoad(vm, reserved);
+    if (ret != JNI_VERSION_1_6) {
+        return -3;
+    }
+    LOGI("MMKV_JNI_OnLoad success");
+    return DexKit_JNI_OnLoad(vm, reserved);
 }
 
 }

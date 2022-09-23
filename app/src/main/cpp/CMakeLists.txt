@@ -2,17 +2,16 @@ cmake_minimum_required(VERSION 3.4.1)
 project(xa_native)
 
 add_subdirectory(../../../../mmkv mmkv)
+add_subdirectory(../../../../dexkit dexkit)
 
 add_library(xa_native SHARED
-        dexkit.cpp
         native-lib.cpp)
 
 find_library(log-lib log)
-find_package(dexkit REQUIRED CONFIG)
 
 target_link_libraries(xa_native
         mmkv
-        dexkit::dex_kit_static
+        dexkit
         z
         ${log-lib})
 

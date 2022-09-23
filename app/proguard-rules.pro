@@ -87,6 +87,7 @@
     <methods>;
 }
 -keep class com.tencent.mmkv.** { *; }
+-keep class io.luckypray.dexkit.** { *; }
 # 插件代理混
 -keep class me.teble.xposed.autodaily.hook.function.proxy.* {
     <methods>;

@@ -27,9 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
@@ -61,10 +60,11 @@ fun MainLayout(navController: NavHostController) {
     val updateDialogText = remember { mutableStateOf("") }
     val lastClickTime = remember { mutableStateOf(0L) }
     LaunchedEffect(notice) {
-        launch(IO) {
+        runAsync {
             val info = ConfUnit.versionInfoCache ?: fetchUpdateInfo()
-            if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L)
+            if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L) {
                 fetchUpdateInfo()
+            }
             info ?: ToastUtil.send("拉取公告失败")
             notice.value = info?.notice ?: ""
         }
