@@ -64,6 +64,7 @@ android {
                     "-Wno-unused-value",
                     "-Wno-unused-variable",
                     "-Wno-unused-command-line-argument",
+                    "-DMMKV_DISABLE_CRYPT",
                     if (performSigning) {
                         // release 签名
                         "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
@@ -130,7 +131,7 @@ android {
             externalNativeBuild {
                 cmake {
                     val ltoCacheFlags = listOf(
-                        "-flto=thin",
+                        "-flto=full",
                         "-Wl,--thinlto-cache-policy,cache_size_bytes=300m",
                         "-Wl,--thinlto-cache-dir=${buildDir.absolutePath}/.lto-cache",
                     )
@@ -139,6 +140,7 @@ android {
                         "-fdata-sections",
                         "-Wl,--gc-sections",
                         "-Oz",
+                        "-Wl,--exclude-libs,ALL",
                     )
                     cppFlags += releaseFlags
                     cFlags += releaseFlags
