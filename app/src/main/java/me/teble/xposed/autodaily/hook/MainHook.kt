@@ -333,7 +333,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             cache.clearAll()
             cache.putInt("hooksVersion", hooksVersion)
         }
-        cache.clearAll()
         confuseInfo.forEach {
             val key = "${it.key}#hash"
             val hash = it.value.hashCode()
