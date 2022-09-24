@@ -48,6 +48,15 @@ nativeInitDexKit(JNIEnv *env, jclass clazz,
     return (jlong) dexkit;
 }
 
+DEXKIT_JNI void
+nativeSetThreadNum(JNIEnv *env, jclass clazz,
+                   jlong native_ptr, jint thread_num) {
+    if (!native_ptr) {
+        return;
+    }
+    SetThreadNum(env, native_ptr, thread_num);
+}
+
 DEXKIT_JNI jint
 nativeGetDexNum(JNIEnv *env, jclass clazz,
                 jlong native_ptr) {
@@ -259,6 +268,7 @@ nativeGetMethodOpCodeSeq(JNIEnv *env, jclass clazz,
 
 static JNINativeMethod g_methods[]{
         {"nativeInitDexKit",                   "(Ljava/lang/String;)J",                                                                                                                                                                        (void *) DexKit::nativeInitDexKit},
+        {"nativeSetThreadNum",                 "(JI)V",                                                                                                                                                                                        (void *) DexKit::nativeSetThreadNum},
         {"nativeGetDexNum",                    "(J)I",                                                                                                                                                                                         (void *) DexKit::nativeGetDexNum},
         {"nativeRelease",                      "(J)V",                                                                                                                                                                                         (void *) DexKit::nativeRelease},
         {"nativeBatchFindClassesUsingStrings", "(JLjava/util/Map;Z[I)Ljava/util/Map;",                                                                                                                                                         (void *) DexKit::nativeBatchFindClassesUsingStrings},

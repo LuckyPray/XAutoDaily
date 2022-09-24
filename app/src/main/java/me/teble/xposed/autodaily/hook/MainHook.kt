@@ -200,6 +200,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf("TroopClockInHandler"),
             "com.tencent.widget.CustomWidgetUtil" to setOf("^NEW$"),
         )
+        dexkit.setThreadNum(1)
         LogUtil.d("dexNum -> ${dexkit.getDexNum()}")
         LogUtil.d(
             "batchFindClassUsedString -> ${
