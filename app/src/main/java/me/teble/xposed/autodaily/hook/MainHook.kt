@@ -202,11 +202,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         LogUtil.d("dexNum -> ${dexkit.getDexNum()}")
         LogUtil.d("batchFindClassUsedString -> ${
             dexkit.batchFindClassesUsingStrings(map)
-                .mapValues { it.value.joinToString(", ", "[", "]") }
         }")
         LogUtil.d("batchFindMethodUsedString -> ${
             dexkit.batchFindMethodsUsingStrings(map)
-                .mapValues { it.value.joinToString(", ", "[", "]") }
         }")
         LogUtil.d(
             "findMethodBeInvoked -> ${
@@ -220,7 +218,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     callerMethodName = "getRegQueryAccountMsg",
                     callerMethodReturnType = "",
                     callerMethodParameterTypes = null,
-                ).toList()
+                )
             }"
         )
         LogUtil.d(
@@ -234,7 +232,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     beCalledMethodDeclareClass = "",
                     beCalledMethodName = "",
                     beCalledMethodParamTypes = null,
-                ).toList()
+                )
             }"
         )
         LogUtil.d(
@@ -249,7 +247,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     callerMethodName = "",
                     callerMethodReturnType = "void",
                     callerMethodParamTypes = arrayOf("", "Lcom/tencent/mobileqq/data/ChatMessage;"),
-                ).toList()
+                )
             }"
         )
         LogUtil.d(
@@ -261,7 +259,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     methodName = "",
                     methodReturnType = "",
                     methodParamTypes = null,
-                ).toList()
+                )
             }"
         )
         LogUtil.d(
@@ -271,13 +269,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     methodName = "",
                     methodReturnType = "int",
                     methodParamTypes = arrayOf(),
-                ).toList()
+                )
             }"
         )
         LogUtil.d(
             "findSubClasses -> ${
                 dexkit.findSubClasses("Lcom/tencent/mobileqq/activity/aio/BaseBubbleBuilder\$d;")
-                    .toList()
             }"
         )
         LogUtil.d(
