@@ -192,7 +192,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
     }
 
-    private fun testDex(dexkit: DexKitBridge) {
+    private fun testDex(dexkit: DexKitBridge?) {
+        dexkit ?: return
         val map = mapOf(
             "Lcom/tencent/mobileqq/activity/ChatActivityFacade;" to setOf("^reSendEmo"),
             "Lcooperation/qzone/PlatformInfor;" to setOf("52b7f2", "qimei"),
@@ -200,15 +201,19 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             "com.tencent.widget.CustomWidgetUtil" to setOf("^NEW$"),
         )
         LogUtil.d("dexNum -> ${dexkit.getDexNum()}")
-        LogUtil.d("batchFindClassUsedString -> ${
-            dexkit.batchFindClassesUsingStrings(map)
-        }")
-        LogUtil.d("batchFindMethodUsedString -> ${
-            dexkit.batchFindMethodsUsingStrings(map)
-        }")
         LogUtil.d(
-            "findMethodBeInvoked -> ${
-                dexkit.findMethodBeInvoked(
+            "batchFindClassUsedString -> ${
+                dexkit.batchFindClassesUsingStrings(map)
+            }"
+        )
+        LogUtil.d(
+            "batchFindMethodUsedString -> ${
+                dexkit.batchFindMethodsUsingStrings(map)
+            }"
+        )
+        LogUtil.d(
+            "findMethodCaller -> ${
+                dexkit.findMethodCaller(
                     methodDescriptor = "",
                     methodDeclareClass = "com.tencent.qphone.base.remote.ToServiceMsg",
                     methodName = "<init>",
@@ -251,7 +256,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             }"
         )
         LogUtil.d(
-            "findMethodUsedString -> ${
+            "findMethodUsingString -> ${
                 dexkit.findMethodUsingString(
                     usingString = "^NEW$",
                     advancedMatch = true,
@@ -285,7 +290,29 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     methodName = "<init>",
                     methodReturnType = "V",
                     methodParamTypes = arrayOf(),
-                ).toList()
+                )
+            }"
+        )
+        LogUtil.d(
+            "findMethodUsingOpSeq -> ${
+                dexkit.findMethodUsingOpCodeSeq(
+                    opSeq = intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
+                    methodDeclareClass = "",
+                    methodName = "",
+                    methodReturnType = "",
+                    methodParamTypes = null,
+                )
+            }"
+        )
+        LogUtil.d(
+            "getMethodOpSeq -> ${
+                dexkit.getMethodOpCodeSeq(
+                    methodDescriptor = "",
+                    methodDeclareClass = "Lcom/tencent/mobileqq/msf/sdk/MsfServiceSdk;",
+                    methodName = "syncGetServerConfig",
+                    methodReturnType = "",
+                    methodParamTypes = null,
+                )
             }"
         )
     }

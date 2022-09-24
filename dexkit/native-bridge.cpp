@@ -1,7 +1,7 @@
 #include <jni.h>
 #include <android/log.h>
 #include <dex_kit.h>
-#include "DexKitJniHelper.h"
+#include "dex_kit_jni_helper.h"
 
 #define TAG "DexKit"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, TAG, __VA_ARGS__)
@@ -50,74 +50,74 @@ nativeInitDexKit(JNIEnv *env, jclass clazz,
 
 DEXKIT_JNI jint
 nativeGetDexNum(JNIEnv *env, jclass clazz,
-                jlong nativePtr) {
-    if (!nativePtr) {
+                jlong native_ptr) {
+    if (!native_ptr) {
         return 0;
     }
-    return GetDexNum(env, nativePtr);
+    return GetDexNum(env, native_ptr);
 }
 
 DEXKIT_JNI void
 nativeRelease(JNIEnv *env, jclass clazz,
-              jlong nativePtr) {
-    if (!nativePtr) {
+              jlong native_ptr) {
+    if (!native_ptr) {
         return;
     }
-    ReleaseDexKitInstance(env, nativePtr);
+    ReleaseDexKitInstance(env, native_ptr);
 }
 
 DEXKIT_JNI jobject
 nativeBatchFindClassesUsingStrings(JNIEnv *env,
                                    jclass clazz,
-                                   jlong nativePtr,
+                                   jlong native_ptr,
                                    jobject map,
                                    jboolean advanced_match,
                                    jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return CMap2JMap(env, std::map<std::string, std::vector<std::string>>());
     }
-    return BatchFindClassesUsingStrings(env, nativePtr, map, advanced_match, dex_priority);
+    return BatchFindClassesUsingStrings(env, native_ptr, map, advanced_match, dex_priority);
 }
 
 DEXKIT_JNI jobject
 nativeBatchFindMethodsUsingStrings(JNIEnv *env,
                                    jclass clazz,
-                                   jlong nativePtr,
+                                   jlong native_ptr,
                                    jobject map,
                                    jboolean advanced_match,
                                    jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return CMap2JMap(env, std::map<std::string, std::vector<std::string>>());
     }
-    return BatchFindMethodsUsingStrings(env, nativePtr, map, advanced_match, dex_priority);
+    return BatchFindMethodsUsingStrings(env, native_ptr, map, advanced_match, dex_priority);
 }
 
 DEXKIT_JNI jobjectArray
-nativeFindMethodBeInvoked(JNIEnv *env, jclass clazz,
-                          jlong nativePtr,
-                          jstring method_descriptor,
-                          jstring method_declare_class,
-                          jstring method_declare_name,
-                          jstring method_return_type,
-                          jobjectArray method_param_types,
-                          jstring caller_method_declare_class,
-                          jstring caller_method_declare_name,
-                          jstring caller_method_return_type,
-                          jobjectArray caller_method_param_types,
-                          jintArray dex_priority) {
-    if (!nativePtr) {
+nativeFindMethodCaller(JNIEnv *env, jclass clazz,
+                       jlong native_ptr,
+                       jstring method_descriptor,
+                       jstring method_declare_class,
+                       jstring method_declare_name,
+                       jstring method_return_type,
+                       jobjectArray method_param_types,
+                       jstring caller_method_declare_class,
+                       jstring caller_method_declare_name,
+                       jstring caller_method_return_type,
+                       jobjectArray caller_method_param_types,
+                       jintArray dex_priority) {
+    if (!native_ptr) {
         return StrVec2JStrArr(env, std::vector<std::string>());
     }
-    return FindMethodBeInvoked(env, nativePtr, method_descriptor, method_declare_class,
-                               method_declare_name, method_return_type, method_param_types,
-                               caller_method_declare_class, caller_method_declare_name,
-                               caller_method_return_type, caller_method_param_types,
-                               dex_priority);
+    return FindMethodCaller(env, native_ptr, method_descriptor, method_declare_class,
+                            method_declare_name, method_return_type, method_param_types,
+                            caller_method_declare_class, caller_method_declare_name,
+                            caller_method_return_type, caller_method_param_types,
+                            dex_priority);
 }
 
 DEXKIT_JNI jobject
 nativeFindMethodInvoking(JNIEnv *env, jclass clazz,
-                         jlong nativePtr,
+                         jlong native_ptr,
                          jstring method_descriptor,
                          jstring method_declare_class,
                          jstring method_declare_name,
@@ -128,10 +128,10 @@ nativeFindMethodInvoking(JNIEnv *env, jclass clazz,
                          jstring be_called_method_return_type,
                          jobjectArray be_called_method_param_types,
                          jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return CMap2JMap(env, std::map<std::string, std::vector<std::string>>());
     }
-    return FindMethodInvoking(env, nativePtr, method_descriptor, method_declare_class,
+    return FindMethodInvoking(env, native_ptr, method_descriptor, method_declare_class,
                               method_declare_name, method_return_type, method_param_types,
                               be_called_method_declare_class, be_called_method_declare_name,
                               be_called_method_return_type, be_called_method_param_types,
@@ -140,7 +140,7 @@ nativeFindMethodInvoking(JNIEnv *env, jclass clazz,
 
 DEXKIT_JNI jobject
 nativeFindMethodUsingField(JNIEnv *env, jclass clazz,
-                           jlong nativePtr,
+                           jlong native_ptr,
                            jstring field_descriptor,
                            jstring field_declare_class,
                            jstring field_name,
@@ -151,10 +151,10 @@ nativeFindMethodUsingField(JNIEnv *env, jclass clazz,
                            jstring caller_method_return_type,
                            jobjectArray caller_method_param_types,
                            jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return StrVec2JStrArr(env, std::vector<std::string>());
     }
-    return FindMethodUsingField(env, nativePtr, field_descriptor, field_declare_class,
+    return FindMethodUsingField(env, native_ptr, field_descriptor, field_declare_class,
                                 field_name,
                                 field_type, used_flags, caller_method_declare_class,
                                 caller_method_name, caller_method_return_type,
@@ -163,7 +163,7 @@ nativeFindMethodUsingField(JNIEnv *env, jclass clazz,
 
 DEXKIT_JNI jobjectArray
 nativeFindMethodUsingString(JNIEnv *env, jclass clazz,
-                            jlong nativePtr,
+                            jlong native_ptr,
                             jstring used_string,
                             jboolean advanced_match,
                             jstring method_declare_class,
@@ -171,10 +171,10 @@ nativeFindMethodUsingString(JNIEnv *env, jclass clazz,
                             jstring method_return_type,
                             jobjectArray method_param_types,
                             jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return StrVec2JStrArr(env, std::vector<std::string>());
     }
-    return FindMethodUsingString(env, nativePtr, used_string, advanced_match,
+    return FindMethodUsingString(env, native_ptr, used_string, advanced_match,
                                  method_declare_class,
                                  method_name, method_return_type, method_param_types,
                                  dex_priority);
@@ -182,45 +182,77 @@ nativeFindMethodUsingString(JNIEnv *env, jclass clazz,
 
 DEXKIT_JNI jobjectArray
 nativeFindMethod(JNIEnv *env, jclass clazz,
-                 jlong nativePtr,
+                 jlong native_ptr,
                  jstring method_declare_class,
                  jstring method_name,
                  jstring method_return_type,
                  jobjectArray method_param_types,
                  jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return StrVec2JStrArr(env, std::vector<std::string>());
     }
-    return FindMethod(env, nativePtr, method_declare_class, method_name, method_return_type,
+    return FindMethod(env, native_ptr, method_declare_class, method_name, method_return_type,
                       method_param_types, dex_priority);
 }
 
 DEXKIT_JNI jobjectArray
 nativeFindSubClasses(JNIEnv *env, jclass clazz,
-                     jlong nativePtr,
+                     jlong native_ptr,
                      jstring parent_class,
                      jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return StrVec2JStrArr(env, std::vector<std::string>());
     }
-    return FindSubClasses(env, nativePtr, parent_class, dex_priority);
+    return FindSubClasses(env, native_ptr, parent_class, dex_priority);
 }
 
 DEXKIT_JNI jobjectArray
 nativeFindMethodOpPrefixSeq(JNIEnv *env, jclass clazz,
-                            jlong nativePtr,
+                            jlong native_ptr,
                             jintArray op_prefix_seq,
                             jstring method_declare_class,
                             jstring method_name,
                             jstring method_return_type,
                             jobjectArray method_param_types,
                             jintArray dex_priority) {
-    if (!nativePtr) {
+    if (!native_ptr) {
         return StrVec2JStrArr(env, std::vector<std::string>());
     }
-    return FindMethodOpPrefixSeq(env, nativePtr, op_prefix_seq, method_declare_class,
+    return FindMethodOpPrefixSeq(env, native_ptr, op_prefix_seq, method_declare_class,
                                  method_name,
                                  method_return_type, method_param_types, dex_priority);
+}
+
+DEXKIT_JNI jobjectArray
+nativeFindMethodUsingOpCodeSeq(JNIEnv *env, jclass clazz,
+                               jlong native_ptr,
+                               jintArray op_code_seq,
+                               jstring method_declare_class,
+                               jstring method_name,
+                               jstring method_return_type,
+                               jobjectArray method_param_types,
+                               jintArray dex_priority) {
+    if (!native_ptr) {
+        return StrVec2JStrArr(env, std::vector<std::string>());
+    }
+    return FindMethodUsingOpCodeSeq(env, native_ptr, op_code_seq, method_declare_class, method_name,
+                                    method_return_type, method_param_types, dex_priority);
+}
+
+DEXKIT_JNI jobject
+nativeGetMethodOpCodeSeq(JNIEnv *env, jclass clazz,
+                         jlong native_ptr,
+                         jstring method_descriptor,
+                         jstring method_declare_class,
+                         jstring method_name,
+                         jstring method_return_type,
+                         jobjectArray method_param_types,
+                         jintArray dex_priority) {
+    if (!native_ptr) {
+        return EmptyJMap(env);
+    }
+    return GetMethodOpCodeSeq(env, native_ptr, method_descriptor, method_declare_class, method_name,
+                              method_return_type, method_param_types, dex_priority);
 }
 
 } // namespace
@@ -230,14 +262,16 @@ static JNINativeMethod g_methods[]{
         {"nativeGetDexNum",                    "(J)I",                                                                                                                                                                                         (void *) DexKit::nativeGetDexNum},
         {"nativeRelease",                      "(J)V",                                                                                                                                                                                         (void *) DexKit::nativeRelease},
         {"nativeBatchFindClassesUsingStrings", "(JLjava/util/Map;Z[I)Ljava/util/Map;",                                                                                                                                                         (void *) DexKit::nativeBatchFindClassesUsingStrings},
-        {"nativeBatchFindMethodsUsingStrings", "(JLjava/util/Map;Z[I)Ljava/util/Map;",                                                                                                                                                          (void *) DexKit::nativeBatchFindMethodsUsingStrings},
-        {"nativeFindMethodBeInvoked",          "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::nativeFindMethodBeInvoked},
+        {"nativeBatchFindMethodsUsingStrings", "(JLjava/util/Map;Z[I)Ljava/util/Map;",                                                                                                                                                         (void *) DexKit::nativeBatchFindMethodsUsingStrings},
+        {"nativeFindMethodCaller",             "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;", (void *) DexKit::nativeFindMethodCaller},
         {"nativeFindMethodInvoking",           "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/util/Map;",     (void *) DexKit::nativeFindMethodInvoking},
         {"nativeFindMethodUsingField",         "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/util/Map;",                       (void *) DexKit::nativeFindMethodUsingField},
         {"nativeFindMethodUsingString",        "(JLjava/lang/String;ZLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;",                                                                         (void *) DexKit::nativeFindMethodUsingString},
         {"nativeFindMethod",                   "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;",                                                                                            (void *) DexKit::nativeFindMethod},
         {"nativeFindSubClasses",               "(JLjava/lang/String;[I)[Ljava/lang/String;",                                                                                                                                                   (void *) DexKit::nativeFindSubClasses},
         {"nativeFindMethodOpPrefixSeq",        "(J[ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;",                                                                                          (void *) DexKit::nativeFindMethodOpPrefixSeq},
+        {"nativeFindMethodUsingOpCodeSeq",     "(J[ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)[Ljava/lang/String;",                                                                                          (void *) DexKit::nativeFindMethodUsingOpCodeSeq},
+        {"nativeGetMethodOpCodeSeq",           "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;[I)Ljava/util/Map;",                                                                              (void *) DexKit::nativeGetMethodOpCodeSeq},
 };
 
 static int registerNativeMethods(JNIEnv *env, jclass cls) {
