@@ -18,7 +18,6 @@ import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import io.luckypray.dexkit.DexKitBridge
 import io.luckypray.dexkit.DexKitBridge.Companion.FLAG_GETTING
-import io.luckypray.dexkit.DexMethodDescriptor
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.BaseApplicationImpl
@@ -377,7 +376,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     LogUtil.d("search result: $key -> ${value.toList()}")
                     if (value.size == 1) {
                         LogUtil.i("locate info: $key -> ${value.first()}")
-                        cache.putString("$key#${hostVersionCode}", value.first())
+                        cache.putString("$key#${hostVersionCode}", value.first().descriptor)
                         locateNum++
                     } else {
                         LogUtil.w("locate not instance class: ${value.toList()}")
