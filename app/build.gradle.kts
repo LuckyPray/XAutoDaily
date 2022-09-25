@@ -208,6 +208,9 @@ android {
             version = "3.22.1+"
         }
     }
+    packagingOptions {
+        jniLibs.excludes += arrayOf("lib/**/liblog.so", "lib/**/libz.so")
+    }
 }
 
 abstract class CopyApksTask : DefaultTask() {
@@ -277,6 +280,9 @@ dependencies {
     // shizuku
     implementation("dev.rikka.shizuku:api:12.1.0")
     implementation("dev.rikka.shizuku:provider:12.1.0")
+
+//    implementation("io.luckypray:dexkit:1.0.0")
+//    implementation("com.github.LuckyPray:DexKit:1.0.0")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

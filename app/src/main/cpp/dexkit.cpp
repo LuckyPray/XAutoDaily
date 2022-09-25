@@ -1,5 +1,5 @@
 #include <dex_kit.h>
-#include "DexKitJniHelper.h"
+#include "dex_kit_jni_helper.h"
 #include "log.h"
 
 extern "C"
@@ -29,6 +29,9 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_initDexKit(JNIEnv *env, jobje
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_release(JNIEnv *env, jobject thiz, jlong token) {
+    if (!token) {
+        return;
+    }
     ReleaseDexKitInstance(env, token);
 }
 
@@ -40,7 +43,7 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_batchFindClassesUsedStrings(J
                                                                                jobject map,
                                                                                jboolean advanced_match,
                                                                                jintArray dex_priority) {
-    return BatchFindClassesUsedStrings(env, token, map, advanced_match, dex_priority);
+    return BatchFindClassesUsingStrings(env, token, map, advanced_match, dex_priority);
 }
 
 extern "C"
@@ -51,7 +54,7 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_batchFindMethodsUsedStrings(J
                                                                                jobject map,
                                                                                jboolean advanced_match,
                                                                                jintArray dex_priority) {
-    return BatchFindMethodsUsedStrings(env, token, map, advanced_match, dex_priority);
+    return BatchFindMethodsUsingStrings(env, token, map, advanced_match, dex_priority);
 }
 
 extern "C"
@@ -68,10 +71,10 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_findMethodBeInvoked(JNIEnv *e
                                                                        jstring caller_method_return_type,
                                                                        jobjectArray caller_method_param_types,
                                                                        jintArray dex_priority) {
-    return FindMethodBeInvoked(env, token, method_descriptor, method_declare_class,
-                               method_declare_name, method_return_type, method_param_types,
-                               caller_method_declare_class, caller_method_declare_name,
-                               caller_method_return_type, caller_method_param_types, dex_priority);
+    return FindMethodCaller(env, token, method_descriptor, method_declare_class,
+                            method_declare_name, method_return_type, method_param_types,
+                            caller_method_declare_class, caller_method_declare_name,
+                            caller_method_return_type, caller_method_param_types, dex_priority);
 }
 
 extern "C"
@@ -96,7 +99,7 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_findMethodInvoking(JNIEnv *en
 }
 
 extern "C"
-JNIEXPORT jobjectArray JNICALL
+JNIEXPORT jobject JNICALL
 Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_findMethodUsedField(JNIEnv *env, jobject thiz,
                                                                        jlong token,
                                                                        jstring field_descriptor,
@@ -109,10 +112,10 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_findMethodUsedField(JNIEnv *e
                                                                        jstring caller_method_return_type,
                                                                        jobjectArray caller_method_param_types,
                                                                        jintArray dex_priority) {
-    return FindMethodUsedField(env, token, field_descriptor, field_declare_class, field_name,
-                               field_type, used_flags, caller_method_declare_class,
-                               caller_method_name, caller_method_return_type,
-                               caller_method_param_types, dex_priority);
+    return FindMethodUsingField(env, token, field_descriptor, field_declare_class, field_name,
+                                field_type, used_flags, caller_method_declare_class,
+                                caller_method_name, caller_method_return_type,
+                                caller_method_param_types, dex_priority);
 }
 
 extern "C"
@@ -126,8 +129,8 @@ Java_me_teble_xposed_autodaily_dexkit_DexKitHelper_findMethodUsedString(JNIEnv *
                                                                         jstring method_return_type,
                                                                         jobjectArray method_param_types,
                                                                         jintArray dex_priority) {
-    return FindMethodUsedString(env, token, used_string, advanced_match, method_declare_class,
-                                method_name, method_return_type, method_param_types, dex_priority);
+    return FindMethodUsingString(env, token, used_string, advanced_match, method_declare_class,
+                                 method_name, method_return_type, method_param_types, dex_priority);
 }
 
 extern "C"

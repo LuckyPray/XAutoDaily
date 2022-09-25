@@ -1,8 +1,10 @@
 package me.teble.xposed.autodaily.dexkit
 
+import java.io.Closeable
+
 class DexKitHelper(
     classLoader: ClassLoader
-) {
+) : Closeable {
     companion object {
         const val FLAG_GETTING = 1
         const val FLAG_SETTING = 2
@@ -14,12 +16,27 @@ class DexKitHelper(
      */
     private var token: Long = 0
 
+    val isValid: Boolean
+        get() = token != 0L
+
     init {
         token = initDexKit(classLoader)
     }
 
+    @Synchronized
     fun release() {
         release(token)
+        token = 0
+    }
+
+    override fun close() {
+        if (isValid) {
+            release()
+        }
+    }
+
+    protected fun finalize() {
+        close()
     }
 
     fun batchFindClassesUsedStrings(
@@ -103,7 +120,7 @@ class DexKitHelper(
         callerMethodReturnType: String,
         callerMethodParamTypes: Array<String>? = null,
         dexPriority: IntArray? = intArrayOf(),
-    ): Array<String> {
+    ): Map<String, Array<String>> {
         return findMethodUsedField(
             token,
             fieldDescriptor,
@@ -214,7 +231,7 @@ class DexKitHelper(
         callerMethodParamTypes: Array<String>?,
         dexPriority: IntArray?,
     ): Array<String>
-    
+
     private external fun findMethodInvoking(
         token: Long,
         methodDescriptor: String,
@@ -228,7 +245,7 @@ class DexKitHelper(
         beCalledMethodParamTypes: Array<String>?,
         dexPriority: IntArray?,
     ): Map<String, Array<String>>
-    
+
     private external fun findMethodUsedField(
         token: Long,
         fieldDescriptor: String,
@@ -241,7 +258,7 @@ class DexKitHelper(
         callerMethodReturnType: String,
         callerMethodParamTypes: Array<String>?,
         dexPriority: IntArray?,
-    ): Array<String>
+    ): Map<String, Array<String>>
 
     private external fun findMethodUsedString(
         token: Long,

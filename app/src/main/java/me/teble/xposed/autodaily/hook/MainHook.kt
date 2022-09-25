@@ -9,10 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
-import com.github.kyuubiran.ezxhelper.utils.emptyParam
-import com.github.kyuubiran.ezxhelper.utils.findMethod
-import com.github.kyuubiran.ezxhelper.utils.hookAfter
-import com.github.kyuubiran.ezxhelper.utils.hookBefore
+import com.github.kyuubiran.ezxhelper.utils.*
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
@@ -35,12 +32,10 @@ import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.NativeUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
-import java.lang.reflect.Constructor
 import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -200,7 +195,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf("TroopClockInHandler"),
             "com.tencent.widget.CustomWidgetUtil" to setOf("^NEW$"),
         )
-        dexkit.setThreadNum(1)
+        dexkit.setThreadNum(4)
         LogUtil.d("dexNum -> ${dexkit.getDexNum()}")
         LogUtil.d(
             "batchFindClassUsedString -> ${
