@@ -8,6 +8,9 @@ android {
     compileSdk = 32
 
     defaultConfig {
+        minSdk = 24
+        targetSdk = 31
+
         buildConfigField("String", "FLAVOR", "\"StaticCpp\"")
     }
 

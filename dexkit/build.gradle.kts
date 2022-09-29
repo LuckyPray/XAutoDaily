@@ -8,6 +8,11 @@ plugins {
 android {
     compileSdk = 32
 
+    defaultConfig {
+        minSdk = 24
+        targetSdk = 31
+    }
+
     sourceSets {
         val main by getting
         main.apply {
