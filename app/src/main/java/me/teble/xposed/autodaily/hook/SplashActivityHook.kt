@@ -95,6 +95,7 @@ private lateinit var appUpdateDialog: AlertDialog
 
 private var lastAutoResetTime = 0L
 
+@Synchronized
 private fun autoResetTask(isOnCreate: Boolean) {
     if (System.currentTimeMillis() - lastAutoResetTime < 30 * 60_000L) {
         return
