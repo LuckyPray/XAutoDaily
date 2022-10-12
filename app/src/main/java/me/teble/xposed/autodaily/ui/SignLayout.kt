@@ -30,10 +30,12 @@ fun SignLayout(navController: NavHostController) {
             conf = ConfigUtil.loadSaveConf()
             conf.taskGroups.forEach { taskGroup ->
                 taskGroup.tasks.forEach {
-                    if (it.retryCount >= 3) {
-                        errorMap[it.id] = "任务执行失败次数过多，今日暂停执行，可能存在功能不兼容"
-                    } else if (it.errInfo.count >= 3) {
-                        errorMap[it.id] = "任务执行失败次数超过3次，本次启动暂停执行，可长按重置执行记录"
+                    if (it.errInfo.count >= 3) {
+                        if (it.retryCount >= 3) {
+                            errorMap[it.id] = "任务执行失败次数过多，今日暂停执行，可能存在功能不兼容"
+                        } else {
+                            errorMap[it.id] = "任务执行失败次数超过3次，本次启动暂停执行，可长按重置执行记录"
+                        }
                     }
                 }
             }

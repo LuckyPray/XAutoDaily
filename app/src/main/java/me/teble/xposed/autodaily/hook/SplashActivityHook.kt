@@ -54,31 +54,17 @@ class SplashActivityHook : BaseHook() {
                     val daemonDir = context.getExternalFilesDir("xa_daemon")
                     val file = File(daemonDir, ".init_service")
                     if (file.exists()) {
-                        val accessFile = RandomAccessFile(file, "rw")
-                        val lock = accessFile.channel.tryLock()
-                        lock?.let {
-                            LogUtil.d("获取文件锁成功，守护进程未在运行？")
-                            context.openJumpModuleDialog(lock, file)
-                        }
+                        runCatching {
+                            val accessFile = RandomAccessFile(file, "rw")
+                            val lock = accessFile.channel.tryLock()
+                            lock?.let {
+                                LogUtil.d("获取文件锁成功，守护进程未在运行？")
+                                context.openJumpModuleDialog(lock, file)
+                            }
+                        }.onFailure { LogUtil.e(it, "try lock fail: ") }
                     }
                     ConfUnit.versionInfoCache ?: ConfigUtil.checkUpdate(false)
-                    val conf = loadSaveConf()
-                    val currDateStr = TimeUtil.getCNDate().formatDate()
-                    conf.taskGroups.forEach { group ->
-                        group.tasks.forEach { task ->
-                            val errInfo = task.errInfo
-                            if (errInfo.dateStr.isNotEmpty() && errInfo.dateStr != currDateStr) {
-                                if (task.retryCount != 0) {
-                                    task.retryCount = 0
-                                    task.errInfo = TaskErrorInfo()
-                                }
-                            } else if (errInfo.count >= 3 && task.retryCount < 3) {
-                                task.errInfo = TaskErrorInfo()
-                                task.retryCount++
-                                LogUtil.d("重置task: ${task.id} retryCount: ${task.retryCount}")
-                            }
-                        }
-                    }
+                    autoResetTask(true)
                 }
                 handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
             }
@@ -88,11 +74,11 @@ class SplashActivityHook : BaseHook() {
             val context = it.thisObject as Activity
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    loadSaveConf()
                     if (ConfUnit.versionInfoCache == null
                         || System.currentTimeMillis() - ConfUnit.lastFetchTime > 3 * 60 * 60_000L) {
                         ConfigUtil.fetchUpdateInfo()
                     }
+                    autoResetTask(false)
                 }
                 if (ConfUnit.needUpdate) {
                     context.openAppUpdateDialog()
@@ -106,6 +92,35 @@ class SplashActivityHook : BaseHook() {
 }
 
 private lateinit var appUpdateDialog: AlertDialog
+
+private var lastAutoResetTime = 0L
+
+private fun autoResetTask(isOnCreate: Boolean) {
+    if (System.currentTimeMillis() - lastAutoResetTime < 30 * 60_000L) {
+        return
+    }
+    lastAutoResetTime = System.currentTimeMillis()
+    val conf = loadSaveConf()
+    val currDateStr = TimeUtil.getCNDate().formatDate()
+    conf.taskGroups.forEach { group ->
+        group.tasks.forEach { task ->
+            val errInfo = task.errInfo
+            if (errInfo.dateStr.isNotEmpty() && errInfo.dateStr != currDateStr) {
+                if (task.retryCount != 0) {
+                    task.retryCount = 0
+                    task.errInfo = TaskErrorInfo()
+                }
+            } else if (errInfo.count >= 3) {
+                if ((!isOnCreate && task.retryCount < 2) ||
+                    (isOnCreate && task.retryCount < 3)) {
+                    task.errInfo = TaskErrorInfo()
+                    task.retryCount++
+                    LogUtil.d("重置task: ${task.id} retryCount: ${task.retryCount}")
+                }
+            }
+        }
+    }
+}
 
 suspend fun Activity.openAppUpdateDialog() {
     withContext(Dispatchers.IO) {
