@@ -69,7 +69,10 @@ open class GroupSignInManager : BaseFunction(
     }
 
     private fun sendReq(toServiceMsg: ToServiceMsg) {
+        // qq <= 8.9.8
         toServiceMsg.extraData.putBoolean("req_pb_protocol_flag", true)
+        // qq >= 8.9.10
+        toServiceMsg.attributes["req_pb_protocol_flag"] = true
         if (mRealHandlerReq.parameterTypes.size == 2) {
             MethodHandleUtil.invokeSpecial<Unit>(mqqService, mRealHandlerReq, toServiceMsg, TroopClockInServlet::class.java)
         } else {
