@@ -9,6 +9,7 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.NOTICE
 import me.teble.xposed.autodaily.config.XA_API_URL
 import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
@@ -76,23 +77,18 @@ object ConfigUtil {
         val info = fetchUpdateInfo()
         info?.let {
             val currConfVer = loadSaveConf().version
+            if (currConfVer < info.confVersion) {
+                if (BuildConfig.VERSION_CODE >= info.minAppVersion) {
+                    updateConfig(info.confUrl, showToast)
+                } else {
+                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
+                }
+            }
             if (BuildConfig.VERSION_CODE < info.appVersion) {
                 if (showToast) {
                     ToastUtil.send("插件版本存在更新")
                 }
                 return true
-            }
-            if (currConfVer < info.confVersion) {
-                if (BuildConfig.VERSION_CODE >= info.minAppVersion) {
-                    updateConfig(info.confUrl, showToast)
-                } else {
-                    ToastUtil.send("插件版本过低无法更新配置")
-                }
-                return false
-            }
-        } ?: let {
-            if (showToast) {
-                ToastUtil.send("检查更新失败")
             }
         }
         if (showToast) {
