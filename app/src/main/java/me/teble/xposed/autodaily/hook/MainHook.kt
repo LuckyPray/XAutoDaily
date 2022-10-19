@@ -8,10 +8,14 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import cn.hutool.core.util.ReflectUtil.getMethodsDirectly
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.*
+import dalvik.system.BaseDexClassLoader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import io.luckypray.dexkit.DexKitBridge
 import io.luckypray.dexkit.DexKitBridge.Companion.FLAG_GETTING
@@ -73,6 +77,32 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 EzXHelperInit.setLogTag("XALog")
                 EzXHelperInit.setToastTag("XALog")
             }
+        }
+        fun ClassLoader.findDexClassLoader(): BaseDexClassLoader? {
+            var classLoader = this
+            while (classLoader !is BaseDexClassLoader) {
+                if (classLoader.parent != null) classLoader = classLoader.parent
+                else return null
+            }
+            return classLoader
+        }
+        if (loadPackageParam.packageName == "com.moyan.dailytask") {
+            XposedHelpers.findAndHookMethod("com.stub.StubApp", loadPackageParam.classLoader,
+                "a", Context::class.java, object : XC_MethodHook() {
+                    override fun afterHookedMethod(param: MethodHookParam?) {
+                        val context = param!!.args[0] as Context
+                        val classLoader = context.classLoader
+                        Log.d("XALog", "classLoader: $classLoader")
+                        val cJsonUtil = classLoader.loadClass("com.moyan.dailytask.utils.JsonUtils")
+                        val methods = getMethodsDirectly(cJsonUtil, false, false)
+                        Log.d("XALog", "DailyTask clz: ${methods.toList()}")
+                        System.loadLibrary("xa_native")
+                        DexKitBridge.create(classLoader.findDexClassLoader()!!)?.use {
+                            Log.d("XALog", it.findMethod(methodDeclareClass = "com.moyan.dailytask.utils.JsonUtils").toString())
+                        }
+                    }
+                })
+            return
         }
 
         if (QQTypeEnum.contain(loadPackageParam.packageName)) {
