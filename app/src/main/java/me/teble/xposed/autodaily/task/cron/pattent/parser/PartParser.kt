@@ -232,13 +232,15 @@ class PartParser(val part: Part) {
             // L表示最大值
             return part.max
         }
-        when (part) {
+        return when (part) {
             Part.MONTH ->                // 月份从1开始
-                return Month.of(name).valueBaseOne
+                Month.of(name).valueBaseOne
+
             Part.DAY_OF_WEEK ->                // 周从0开始，0表示周日
-                return Week.of(name).ordinal
+                Week.of(name).ordinal
+
+            else -> throw CronException("Invalid alias value: [{}]", name)
         }
-        throw CronException("Invalid alias value: [{}]", name)
     }
 
     companion object {

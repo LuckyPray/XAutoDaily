@@ -11,7 +11,7 @@ import androidx.lifecycle.*
 import androidx.savedstate.SavedStateRegistry
 import androidx.savedstate.SavedStateRegistryController
 import androidx.savedstate.SavedStateRegistryOwner
-import androidx.savedstate.ViewTreeSavedStateRegistryOwner
+import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 
 @SuppressLint("ResourceType")
 class CustomDialog(context: Context) : Dialog(context, 5),
@@ -40,7 +40,7 @@ class CustomDialog(context: Context) : Dialog(context, 5),
         super.setContentView(view)
         ViewTreeLifecycleOwner.set(view, this)
         ViewTreeViewModelStoreOwner.set(view, this)
-        ViewTreeSavedStateRegistryOwner.set(view, this)
+        view.setViewTreeSavedStateRegistryOwner(this)
     }
 
     private fun handleLifecycleEvent(event: Lifecycle.Event) =
