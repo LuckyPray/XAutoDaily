@@ -4,6 +4,7 @@ package me.teble.xposed.autodaily.config
 const val AppActivity = "mqq.app.AppActivity"
 const val SplashActivity = "com.tencent.mobileqq.activity.SplashActivity"
 const val QQSettingSettingActivity = "com.tencent.mobileqq.activity.QQSettingSettingActivity"
+const val QQSettingSettingFragment = "com.tencent.mobileqq.fragment.QQSettingSettingFragment"
 const val LoadData = "com.tencent.mobileqq.startup.step.LoadData"
 const val LoadDex = "com.tencent.mobileqq.startup.step.LoadDex"
 const val LoadUi = "com.tencent.mobileqq.startup.step.LoadUi"

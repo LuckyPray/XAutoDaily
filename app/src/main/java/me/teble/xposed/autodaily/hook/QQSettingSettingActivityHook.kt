@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.compose.foundation.ExperimentalFoundationApi
+import com.github.kyuubiran.ezxhelper.utils.Hooker
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import me.teble.xposed.autodaily.BuildConfig
@@ -16,6 +17,7 @@ import me.teble.xposed.autodaily.activity.module.ModuleActivity
 import me.teble.xposed.autodaily.config.FormCommonSingleLineItem
 import me.teble.xposed.autodaily.config.FormSimpleItem
 import me.teble.xposed.autodaily.config.QQSettingSettingActivity
+import me.teble.xposed.autodaily.config.QQSettingSettingFragment
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
@@ -23,6 +25,7 @@ import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.new
 
@@ -42,18 +45,25 @@ class QQSettingSettingActivityHook : BaseHook() {
     @ExperimentalFoundationApi
     @MethodHook("创建模块设置入口")
     private fun addModuleEntrance() {
-        findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter(52) { param ->
+        val hooker: Hooker = { param ->
             try {
                 val clazz: Class<*> = load(FormSimpleItem) ?: load(FormCommonSingleLineItem)!!
-                val context = param.thisObject as Activity
-                val entity = clazz.new(context) as View
-                injectRes(context.resources)
-                entity.invoke("setLeftText", context.getString(R.string.app_name))
+                val obj = param.thisObject
+                var isFragment = false
+                val activity = if (obj is Activity) {
+                    obj
+                } else {
+                    isFragment = true
+                    obj.invoke("getActivity") as Activity
+                }
+                val entity = clazz.new(activity) as View
+                injectRes(activity.resources)
+                entity.invoke("setLeftText", activity.getString(R.string.app_name))
                 entity.invoke("setRightText", BuildConfig.VERSION_NAME)
                 entity.setOnClickListener {
                     try {
-                        val intent = Intent(context, ModuleActivity::class.java)
-                        context.startActivity(intent)
+                        val intent = Intent(activity, ModuleActivity::class.java)
+                        activity.startActivity(intent)
                     } catch (e: Exception) {
                         LogUtil.e(e)
                     }
@@ -61,9 +71,13 @@ class QQSettingSettingActivityHook : BaseHook() {
                 entity.setOnLongClickListener {
                     true
                 }
-                val id: Int = context.resources
-                    .getIdentifier("account_switch", "id", context.packageName)
-                val viewGroup: ViewGroup = context.findViewById<View>(id).parent as ViewGroup
+                val id: Int = activity.resources
+                    .getIdentifier("account_switch", "id", activity.packageName)
+                val viewGroup: ViewGroup = if (isFragment) {
+                    (obj.fieldValue(clazz) as View).parent as ViewGroup
+                } else {
+                    activity.findViewById<View>(id).parent as ViewGroup
+                }
                 try {
                     (viewGroup.parent as ViewGroup).addView(
                         entity, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
@@ -80,5 +94,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                 ToastUtil.send("创建入口失败")
             }
         }
+        findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter(52, hooker)
+        findMethod(QQSettingSettingFragment) { name == "doOnCreateView" }.hookAfter(52, hooker)
     }
 }
