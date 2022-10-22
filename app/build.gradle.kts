@@ -1,6 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import android.annotation.SuppressLint
 import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
@@ -33,7 +32,7 @@ val appVerCode: Int get() {
     return versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.10"
+val appVerName: String = "3.0.11"
 
 android {
     namespace = "me.teble.xposed.autodaily"
