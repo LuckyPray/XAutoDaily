@@ -86,24 +86,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             }
             return classLoader
         }
-        if (loadPackageParam.packageName == "com.moyan.dailytask") {
-            XposedHelpers.findAndHookMethod("com.stub.StubApp", loadPackageParam.classLoader,
-                "a", Context::class.java, object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam?) {
-                        val context = param!!.args[0] as Context
-                        val classLoader = context.classLoader
-                        Log.d("XALog", "classLoader: $classLoader")
-                        val cJsonUtil = classLoader.loadClass("com.moyan.dailytask.utils.JsonUtils")
-                        val methods = getMethodsDirectly(cJsonUtil, false, false)
-                        Log.d("XALog", "DailyTask clz: ${methods.toList()}")
-                        System.loadLibrary("xa_native")
-                        DexKitBridge.create(classLoader.findDexClassLoader()!!)?.use {
-                            Log.d("XALog", it.findMethod(methodDeclareClass = "com.moyan.dailytask.utils.JsonUtils").toString())
-                        }
-                    }
-                })
-            return
-        }
 
         if (QQTypeEnum.contain(loadPackageParam.packageName)) {
             hostPackageName = loadPackageParam.packageName
@@ -420,7 +402,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
         try {
-            DexKitBridge.create(hostClassLoader).use {
+            DexKitBridge.create(hostApp.applicationInfo.sourceDir).use {
                 startTime = System.currentTimeMillis()
                 it?.batchFindClassesUsingStrings(info)?.forEach { (key, value) ->
                     LogUtil.d("search result: $key -> ${value.toList()}")
