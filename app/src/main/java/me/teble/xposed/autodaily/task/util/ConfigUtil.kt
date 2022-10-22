@@ -81,7 +81,7 @@ object ConfigUtil {
                 if (BuildConfig.VERSION_CODE >= info.minAppVersion) {
                     updateConfig(info.confUrl, showToast)
                 } else {
-                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
+//                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
                 }
             }
             if (BuildConfig.VERSION_CODE < info.appVersion) {
