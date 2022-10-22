@@ -66,9 +66,6 @@ object Config {
             "^52b7f2$",
             "^qimei",
         ),
-        "Lcom/tencent/mobileqq/troop/clockin/handler/TroopClockInHandler;" to setOf(
-            "^TroopClockInHandler$"
-        ),
         "Lcom/tencent/mobileqq/service/MobileQQServiceBase;" to setOf(
             "^PB cmd: req cmd:", "^MobileQQServiceBase$"
         ),

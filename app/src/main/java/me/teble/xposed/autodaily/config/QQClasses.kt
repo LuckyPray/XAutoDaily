@@ -65,7 +65,6 @@ const val StSignInWriteReq = "tencent.im.oidb.cmd0xeb7.oidb_0xeb7\$StSignInWrite
 const val StSignInStatusReq = "tencent.im.oidb.cmd0xeb7.oidb_0xeb7\$StSignInStatusReq"
 const val OIDBSSOPkg = "tencent.im.oidb.oidb_sso\$OIDBSSOPkg"
 const val ByteStringMicro = "com.tencent.mobileqq.pb.ByteStringMicro"
-const val TroopClockInHandler = "com.tencent.mobileqq.troop.clockin.handler.TroopClockInHandler"
 
 // TIM 2.3.1
 const val FormCommonSingleLineItem = "com.tencent.mobileqq.widget.FormCommonSingleLineItem"
