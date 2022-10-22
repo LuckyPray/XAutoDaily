@@ -70,7 +70,7 @@ object Config {
             "^PB cmd: req cmd:", "^MobileQQServiceBase$"
         ),
     )
-    const val hooksVersion = 1
+    const val hooksVersion = 2
     val confuseInfo = mutableMapOf<String, Set<String>>().apply {
         obfuscate.forEach { (k, v) ->
             put(getSimpleName(k), v)
