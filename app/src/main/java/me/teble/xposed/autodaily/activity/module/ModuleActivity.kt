@@ -16,7 +16,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewTreeLifecycleOwner
 import androidx.lifecycle.ViewTreeViewModelStoreOwner
-import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -68,7 +68,7 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
         view.let {
             ViewTreeLifecycleOwner.set(it, this)
             ViewTreeViewModelStoreOwner.set(it, this)
-            it.setViewTreeSavedStateRegistryOwner(this)
+            ViewTreeSavedStateRegistryOwner.set(it, this)
         }
         setContentView(view)
     }
