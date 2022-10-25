@@ -292,7 +292,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         )
         LogUtil.d(
             "FindMethodOpPrefixSeq -> ${
-                dexkit.findMethodOpPrefixSeq(
+                dexkit.findMethodUsingOpPrefixSeq(
                     opPrefixSeq = intArrayOf(0x70, 0x22, 0x70, 0x5b, 0x22, 0x70, 0x5b, 0x0e),
                     methodDeclareClass = "",
                     methodName = "<init>",
