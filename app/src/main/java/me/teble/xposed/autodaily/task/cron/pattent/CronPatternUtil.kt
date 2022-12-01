@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.task.cron.pattent
 
 import cn.hutool.core.collection.CollUtil
+import cn.hutool.core.date.DateField
 import cn.hutool.core.date.DateUnit
 import cn.hutool.core.date.DateUtil
 import cn.hutool.core.lang.Assert
@@ -36,11 +37,12 @@ object CronPatternUtil {
     }
 
     fun nextDateAfter(timezone: TimeZone?, pattern: CronPattern, start: Date, isMatchSecond: Boolean): Date? {
+        val endOfDate = DateUtil.endOfYear(DateUtil.offset(start, DateField.YEAR, 1))
         val matchedDates: List<Date> = matchedDates(
             timezone,
             pattern,
             start.time,
-            DateUtil.endOfYear(start).time,
+            endOfDate.time,
             1,
             isMatchSecond
         )

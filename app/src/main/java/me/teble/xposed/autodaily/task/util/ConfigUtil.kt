@@ -4,12 +4,10 @@ import android.annotation.SuppressLint
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
-import com.github.kyuubiran.ezxhelper.utils.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.NOTICE
 import me.teble.xposed.autodaily.config.XA_API_URL
 import me.teble.xposed.autodaily.hook.base.hostContext
-import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
@@ -162,7 +160,7 @@ object ConfigUtil {
         } finally {
             // clear cache
             _conf = null
-            Log.d("clear conf cache")
+            LogUtil.d("clear conf cache")
         }
     }
 
@@ -274,10 +272,11 @@ object ConfigUtil {
             task.nextShouldExecTime ?: let {
                 val realCron = TaskUtil.getRealCron(task)
                 ///////////////////////////////////////////////////////////////////////////////////////
+                val currDate = Date(TimeUtil.cnTimeMillis() + 1)
                 val time = CronPatternUtil.nextDateAfter(
                     TimeZone.getTimeZone("GMT+8"),
                     CronPattern(realCron),
-                    Date(TimeUtil.cnTimeMillis() + 1),
+                    currDate,
                     true)!!
                 task.nextShouldExecTime = Date(time.time - TimeUtil.offsetTime).format()
                 Date(time.time + TimeUtil.offsetTime).format()
