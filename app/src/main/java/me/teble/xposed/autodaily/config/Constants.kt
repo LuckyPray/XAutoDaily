@@ -1,5 +1,6 @@
 @file:JvmName("Constants")
 @file:JvmMultifileClass
+
 package me.teble.xposed.autodaily.config
 
 import me.teble.xposed.autodaily.BuildConfig
@@ -24,5 +25,4 @@ const val XA_API_URL = "http://daily.huasteble.cn"
 const val VERSION = "/version"
 const val NOTICE = "/notice"
 const val QZONE = "/qzone"
-const val qqUserAgent =
-    "Mozilla/5.0 (Linux; Android 10; Mi 10 Pro Build/QKQ1.191117.002; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/66.0.3359.126 MQQBrowser/6.2 TBS/045132 Mobile Safari/537.36 V1_AND_SQ_8.2.8_1346_YYB_D QQ/8.2.8.4440 NetType/4G WebP/0.3.0 Pixel/1080 StatusBarHeight/91 SimpleUISwitch/0 QQTheme/1000"
+const val qqUserAgent = "Mozilla/5.0 (Linux; Android 12; Mi 10 Pro Build/SKQ1.211006.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/89.0.4389.72 MQQBrowser/6.2 TBS/046213 Mobile Safari/537.36 V1_AND_SQ_8.9.15_3408_YYB_D A_8091500 QQ/8.9.15.9425 NetType/WIFI WebP/0.3.0 AppId/537138832 Pixel/1080 StatusBarHeight/90 SimpleUISwitch/0 QQTheme/999 StudyMode/0 CurrentMode/0 CurrentFontScale/1.0 GlobalDensityScale/0.9818181 AllowLandscape/false InMagicWin/0"
