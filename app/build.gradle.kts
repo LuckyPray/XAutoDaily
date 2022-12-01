@@ -32,13 +32,13 @@ val appVerCode: Int get() {
     return versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.11-fix"
+val appVerName: String = "3.0.12"
 
 android {
     namespace = "me.teble.xposed.autodaily"
 
     compileSdk = 33
-    buildToolsVersion = "33.0.0"
+    buildToolsVersion = "33.0.1"
     ndkVersion = "25.0.8775105"
 
     defaultConfig {
