@@ -28,6 +28,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
+        .followRedirects(false)
         .connectionPool(ConnectionPool(32, 5, TimeUnit.SECONDS))
         .dispatcher(Dispatcher().apply {
             maxRequestsPerHost = 10
