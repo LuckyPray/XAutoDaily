@@ -3,7 +3,7 @@
 
 [![license](https://img.shields.io/github/license/teble/XAutoDaily.svg)](https://www.gnu.org/licenses/gpl-3.0.html)
 [![GitHub release](https://img.shields.io/github/release/teble/XAutoDaily.svg)](https://github.com/teble/XAutoDaily/releases/latest)
-[![Download](https://img.shields.io/github/downloads/teble/XAutoDaily/total)](https://github.com/teble/XAutoDaily/releases/latest)
+[![Download](https://img.shields.io/github/downloads/Xposed-Modules-Repo/me.teble.xposed.autodaily/total)](https://github.com/LuckyPray/XAutoDaily/releases/latest)
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=Channel&color=0088cc)](https://t.me/XAutoDaily)
 [![Telegram](https://img.shields.io/static/v1?label=Telegram&message=Chat&color=0088cc)](https://t.me/XAutoDailyChat)
 </div>
