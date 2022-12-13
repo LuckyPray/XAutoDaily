@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.shizuku
 
+import android.annotation.SuppressLint
 import android.os.Build
-import android.os.Environment
 import android.util.Log
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
@@ -18,7 +18,8 @@ import kotlin.system.exitProcess
 
 class UserService : IUserService.Stub() {
 
-    private val sdcardPath by lazy { Environment.getExternalStorageDirectory() }
+    @SuppressLint("SdCardPath")
+    private val sdcardPath = "/sdcard"
 
     /**
      * package -> daemonLock
