@@ -25,8 +25,8 @@ import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.invoke
+import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 
 /**
@@ -74,7 +74,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                 val id: Int = activity.resources
                     .getIdentifier("account_switch", "id", activity.packageName)
                 val viewGroup: ViewGroup = if (isFragment) {
-                    (obj.fieldValue(clazz) as View).parent as ViewGroup
+                    obj.invokeAs<View>("findViewById", id)!!.parent as ViewGroup
                 } else {
                     activity.findViewById<View>(id).parent as ViewGroup
                 }
