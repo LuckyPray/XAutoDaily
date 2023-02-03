@@ -17,9 +17,9 @@ namespace {
             0x20, 0x67, 0x69, 0x53, 0x20, 0x4b, 0x50, 0x41,
     };
 
-    const unsigned long long revertMagikFirst = 0x3234206b636f6c42L;
-    const unsigned long long revertMagikSecond = 0x20676953204b5041L;
-    const unsigned long v2Id = 0x7109871a;
+    const uint64_t revertMagikFirst = 0x3234206b636f6c42L;
+    const uint64_t revertMagikSecond = 0x20676953204b5041L;
+    const uint32_t v2Id = 0x7109871a;
 
     std::string getModulePath(JNIEnv *env) {
         jclass cMainHook = env->FindClass("me/teble/xposed/autodaily/hook/MainHook");
@@ -49,26 +49,26 @@ namespace {
     std::string getSignBlock(const std::string &path) {
         std::ifstream f(path);
         std::string file((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-        std::reverse(file.begin(), file.end());
-        unsigned long long curr = 0;
-        const char *p = file.c_str();
+        uint64_t curr = 0;
+        const char *base = file.c_str();
+        const char *ptr = base + file.size() - 1;
         std::string signBlock;
-        for (int j = 0; j < file.length(); j++) {
-            curr = (curr << 8) | *p++;
+        while (ptr >= base) {
+            curr = (curr << 8) | *ptr--;
             if (curr == revertMagikFirst) {
-                unsigned long long tmp = 0;
+                uint64_t tmp = 0;
                 for (int i = 0; i < 8; ++i) {
-                    tmp = (tmp << 8) | *(p + i);
+                    tmp = (tmp << 8) | *(ptr - i);
                 }
                 if (tmp == revertMagikSecond) {
                     for (int i = 8; i < 16; ++i) {
-                        tmp = (tmp << 8) | *(p + i);
+                        tmp = (tmp << 8) | *(ptr - i);
                     }
                     // TODO 只判断魔数“APK Sig Block 42”可能存在误判
-                    p += 16;
+                    ptr -= 16;
                     tmp -= 24;
                     for (int i = 0; i < tmp; ++i) {
-                        signBlock.push_back(*p++);
+                        signBlock.push_back(*ptr--);
                     }
                     break;
                 }
@@ -87,26 +87,26 @@ namespace {
         const char *p = block.c_str();
         const char *last = block.c_str() + block.size();
         while (p < last) {
-            unsigned long long blockSize = 0;
+            uint64_t blockSize = 0;
             for (int i = 0; i < 8; ++i) {
-                blockSize = (blockSize >> 8) | (((unsigned long long) *p++) << 56);
+                blockSize = (blockSize >> 8) | (((uint64_t) *p++) << 56);
             }
-            unsigned long id = 0;
+            uint32_t id = 0;
             for (int i = 0; i < 4; ++i) {
-                id = (id >> 8) | (((unsigned long) *p++) << 24);
+                id = (id >> 8) | (((uint32_t) *p++) << 24);
             }
             if (id != v2Id) {
                 p += blockSize - 12;
                 continue;
             }
             p += 12;
-            unsigned long size = 0;
+            uint32_t size = 0;
             for (int i = 0; i < 4; ++i) {
-                size = (size >> 8) | (((unsigned long) *p++) << 24);
+                size = (size >> 8) | (((uint32_t) *p++) << 24);
             }
             p += size + 4;
             for (int i = 0; i < 4; ++i) {
-                size = (size >> 8) | (((unsigned long) *p++) << 24);
+                size = (size >> 8) | (((uint32_t) *p++) << 24);
             }
             for (int i = 0; i < size; ++i) {
                 signature.push_back(*p++);
