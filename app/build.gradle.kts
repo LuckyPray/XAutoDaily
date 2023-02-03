@@ -63,13 +63,6 @@ android {
                     "-Wno-unused-variable",
                     "-Wno-unused-command-line-argument",
                     "-DMMKV_DISABLE_CRYPT",
-                    if (performSigning) {
-                        // release 签名
-                        "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
-                    } else {
-                        // android 默认 debug md5 签名可通过 signingReport 获取
-                        "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960"
-                    }
                 )
                 cppFlags("-std=c++17", *flags)
                 cFlags("-std=c18", *flags)
@@ -99,10 +92,6 @@ android {
         prefab = true
     }
 
-//    androidResources {
-//        noCompress("libxa_native.so")
-//    }
-
     buildTypes {
         all {
             signingConfig =
@@ -111,6 +100,10 @@ android {
         }
         val debug by getting {
             versionNameSuffix = ".$buildNum-debug"
+            val debugFlags = arrayOf<String>(
+//                "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960",
+//                "-DTEST_SIGNATURE",
+            )
             externalNativeBuild {
                 cmake {
                     arguments.addAll(
@@ -119,6 +112,8 @@ android {
                             "-DCMAKE_C_FLAGS_DEBUG=-Og",
                         )
                     )
+                    cFlags += debugFlags
+                    cppFlags += debugFlags
                 }
             }
         }
@@ -128,31 +123,25 @@ android {
             proguardFiles("proguard-rules.pro")
             externalNativeBuild {
                 cmake {
-                    val ltoCacheFlags = listOf(
-                        "-flto=full",
-                        "-Wl,--thinlto-cache-policy,cache_size_bytes=300m",
-                        "-Wl,--thinlto-cache-dir=${buildDir.absolutePath}/.lto-cache",
-                    )
                     val releaseFlags = arrayOf<String>(
                         "-ffunction-sections",
                         "-fdata-sections",
                         "-Wl,--gc-sections",
                         "-Oz",
                         "-Wl,--exclude-libs,ALL",
+                        "-flto=full",
                     )
                     cppFlags += releaseFlags
                     cFlags += releaseFlags
-                    cppFlags += ltoCacheFlags
-                    cFlags += ltoCacheFlags
                     val configFlags = arrayOf(
                         "-Oz",
-                        "-DNDEBUG"
+                        "-DNDEBUG",
+                        "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
                     ).joinToString(" ")
                     arguments(
                         "-DCMAKE_BUILD_TYPE=Release",
                         "-DCMAKE_CXX_FLAGS_RELEASE=$configFlags",
                         "-DCMAKE_C_FLAGS_RELEASE=$configFlags",
-                        "-DDEBUG_SYMBOLS_PATH=${project.buildDir.absolutePath}/symbols/$name",
                     )
                 }
             }

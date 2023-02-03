@@ -16,11 +16,13 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
+#if defined(NDEBUG) || defined(TEST_SIGNATURE)
     // 模块签名不正确拒绝加载 jni
     if (checkSignature(env) != JNI_TRUE) {
         return -2;
     }
     LOGI("signature pass");
+#endif
     auto ret = MMKV_JNI_OnLoad(vm, reserved);
     if (ret != JNI_VERSION_1_6) {
         return -3;
