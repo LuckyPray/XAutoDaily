@@ -9,7 +9,6 @@
 namespace {
 #define EXPORT extern "C" __attribute__((visibility("default")))
 extern "C" jint MMKV_JNI_OnLoad(JavaVM *vm, void *reserved);
-extern "C" jint DexKit_JNI_OnLoad(JavaVM *vm, void *reserved);
 
 
 EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -27,7 +26,7 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
         return -3;
     }
     LOGI("MMKV_JNI_OnLoad success");
-    return DexKit_JNI_OnLoad(vm, reserved);
+    return JNI_VERSION_1_6;
 }
 
 }

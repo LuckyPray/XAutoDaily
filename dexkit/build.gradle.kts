@@ -16,9 +16,9 @@ android {
     sourceSets {
         val main by getting
         main.apply {
-            manifest.srcFile("DexKit/Android/dexkit/src/main/AndroidManifest.xml")
-            java.setSrcDirs(listOf("DexKit/Android/dexkit/src/main/java"))
-            res.setSrcDirs(listOf("DexKit/Android/dexkit/src/main/res"))
+            manifest.srcFile("DexKit/dexkit-android/src/main/AndroidManifest.xml")
+            java.setSrcDirs(listOf("DexKit/dexkit/src/main/java"))
+            res.setSrcDirs(listOf("DexKit/dexkit/src/main/res"))
         }
     }
 }
