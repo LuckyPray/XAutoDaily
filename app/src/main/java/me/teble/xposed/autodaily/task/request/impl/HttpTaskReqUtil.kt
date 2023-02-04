@@ -62,21 +62,6 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 var cookie: String? = null
                 when (task.domain) {
                     null -> {}
-                    "daily.huasteble.cn" -> {
-                        val cd = Calendar.getInstance()
-                        val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
-                        sdf.timeZone = TimeZone.getTimeZone("GMT")
-                        val timeStr = sdf.format(cd.time)
-                        val signStr = "date: $timeStr\nuin: $currentUin"
-                        val secretId = "AKIDl03byn0gmi1cpfgtknn3qESie9c7w6joyLef"
-                        val sig: String = ConfigUtil.getTencentDigest(signStr)
-                        val authorization = """
-                                hmac id="$secretId", algorithm="hmac-sha1", headers="date uin", signature="$sig"
-                                """.trimIndent()
-                        headers["uin"] = "$currentUin"
-                        headers["date"] = timeStr
-                        headers["Authorization"] = authorization
-                    }
                     // qqDomain
                     else -> {
                         cookie = getQDomainCookies(task.domain)

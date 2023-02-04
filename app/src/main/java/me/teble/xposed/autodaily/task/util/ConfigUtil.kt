@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
-import android.annotation.SuppressLint
+import cn.hutool.core.codec.Base64Decoder
 import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
@@ -23,9 +23,13 @@ import me.teble.xposed.autodaily.ui.lastExecTime
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.utils.*
 import java.io.File
+import java.security.KeyFactory
+import java.security.spec.X509EncodedKeySpec
 import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import java.util.regex.Pattern
+import javax.crypto.Cipher
+
 
 object ConfigUtil {
     /**
@@ -42,34 +46,28 @@ object ConfigUtil {
     private val lock = ReentrantLock()
     private var _conf: TaskProperties? = null
 
-    init {
-        loadLib()
-    }
+    private external fun decryptXAConf(encConfBytes: ByteArray): ByteArray
 
-    @SuppressLint("UnsafeDynamicallyLoadedCode")
-    fun loadLib() {
-        val xaLibDir = File(hostContext.filesDir, "xa_lib")
-        if (xaLibDir.isFile) {
-            xaLibDir.delete()
-        }
-        if (!xaLibDir.exists()) {
-            xaLibDir.mkdirs()
-        }
-        val soFilePath = NativeUtil.getNativeLibrary(hostContext, "xa_decrypt").absolutePath
-        LogUtil.i("loadLib: $soFilePath")
+    external fun getMd5Hex(value: String): String
+
+    @JvmStatic
+    @Throws(java.lang.Exception::class)
+    fun decryptByPublicKey(
+        encrypted: ByteArray,
+        publicKey: ByteArray
+    ): ByteArray {
         try {
-            System.load(soFilePath)
-        } catch (e: Throwable) {
-            LogUtil.e(e, "加载so失败 -> $soFilePath")
+            val keySpec = X509EncodedKeySpec(Base64Decoder.decode(publicKey))
+            val keyFactory = KeyFactory.getInstance("RSA")
+            val publicK = keyFactory.generatePublic(keySpec)
+            val cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding")
+            cipher.init(Cipher.DECRYPT_MODE, publicK)
+            return cipher.doFinal(encrypted)
+        } catch (e: Exception) {
+            LogUtil.e(e)
             throw e
         }
     }
-
-    private external fun decryptXAConf(encConfBytes: ByteArray): ByteArray
-
-    external fun getTencentDigest(value: String): String
-
-    external fun getMd5Hex(value: String): String
 
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchUpdateInfo()
@@ -178,7 +176,12 @@ object ConfigUtil {
             conf = loadConf(FileUtil.readUtf8String(propertiesFile))
         }
         val encodeConfig = getDefaultConf()
-        val defaultConf = loadConf(encodeConfig)!!
+        val defaultConf = loadConf(encodeConfig)
+        defaultConf ?: let {
+            LogUtil.w("加载默认配置失败，清联系开发者排查")
+            ToastUtil.send("加载默认配置失败，请联系开发者排查")
+            return TaskProperties(0, 0, listOf(), listOf())
+        }
         if (conf == null) {
             conf = defaultConf
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
