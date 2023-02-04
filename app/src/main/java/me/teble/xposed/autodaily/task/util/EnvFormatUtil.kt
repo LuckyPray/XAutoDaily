@@ -2,6 +2,8 @@ package me.teble.xposed.autodaily.task.util
 
 import cn.hutool.core.codec.Base64
 import cn.hutool.core.date.DateUtil
+import cn.hutool.core.net.URLDecoder
+import cn.hutool.core.net.URLEncodeUtil
 import cn.hutool.core.util.ReUtil
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.miniLoginManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.miniProfileManager
@@ -9,16 +11,20 @@ import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.ticketManager
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.VersionUtil
 import me.teble.xposed.autodaily.task.model.MiniProfile
+import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.toJsonString
-import java.util.*
+import java.nio.charset.Charset
+import java.util.Random
 import java.util.regex.Pattern
 import java.util.regex.Pattern.DOTALL
 
 object EnvFormatUtil {
 
-    private val ARG_REG = Pattern.compile("(\\\$\\{.*?\\}|\\\$[a-zA-Z0-9\\_]+)", DOTALL)
+    // 懒得模拟栈了，定死规则${xxx}$，避免json被误判
+    private val ARG_REG = Pattern.compile("(\\\$\\{.*?\\}\\\$|\\\$[a-zA-Z0-9\\_]+)", DOTALL)
     private val FUN_REG = Pattern.compile("\\(.*\\)")
 
     fun format(evalStr: String, env: MutableMap<String, Any>): String {
@@ -39,7 +45,7 @@ object EnvFormatUtil {
             LogUtil.d("regex find result -> ${this.toJsonString()}")
             forEachIndexed { index, s ->
                 val start = if (s.startsWith("\${")) 2 else 1
-                val end = if (s.endsWith("}")) s.length - 1 else s.length
+                val end = if (s.endsWith("}\$")) s.length - 2 else s.length
                 val name = s.substring(start, end)
                 LogUtil.d("name -> $name")
                 this[index] = name
@@ -99,34 +105,58 @@ object EnvFormatUtil {
                         val integer = strings[0].toInt()
                         (Random().nextInt(integer) + 1).toString()
                     }
+
                     2 -> {
                         val start = strings[0].toInt()
                         val end = strings[1].toInt()
                         (Random().nextInt(end - start + 1) + start).toString()
                     }
+
                     else -> {
                         throw RuntimeException("表达式错误: $argFunc")
                     }
                 }
             }
+
             argFunc.startsWith("randHex(") -> {
                 val tmpStr = argFunc.substring(8, argFunc.length - 1)
                 return RandomUtil.randHex(tmpStr.toInt())
             }
+
             argFunc.startsWith("randLowerHex(") -> {
                 val tmpStr = argFunc.substring(13, argFunc.length - 1)
                 return RandomUtil.randLowerHex(tmpStr.toInt())
             }
+
             argFunc.startsWith("encBase64(") -> {
                 val tmpStr = argFunc.substring(10, argFunc.length - 1)
                 val str = format(tmpStr, qDomain, env)
                 return Base64.encode(str)
             }
+
             argFunc.startsWith("decBase64(") -> {
                 val tmpStr = argFunc.substring(10, argFunc.length - 1)
                 val str = format("\$$tmpStr", qDomain, env)
                 return Base64.decodeStr(str)
             }
+
+            argFunc.startsWith("urlEncode(") -> {
+                val tmpStr = argFunc.substring(10, argFunc.length - 1)
+                val str = format(tmpStr, qDomain, env)
+                return URLEncodeUtil.encodeAll(str)
+            }
+
+            argFunc.startsWith("urlDecode(") -> {
+                val tmpStr = argFunc.substring(10, argFunc.length - 1)
+                val str = format("\$$tmpStr", qDomain, env)
+                return URLDecoder.decode(str, Charset.forName("UTF-8"))
+            }
+
+            argFunc.startsWith("taskEnable(") -> {
+                val taskName = argFunc.substring(11, argFunc.length - 1)
+                return Task(taskName).enable.toString()
+            }
+
             else -> throw RuntimeException("没有找到对应的函数: $argFunc")
         }
     }
@@ -148,30 +178,25 @@ object EnvFormatUtil {
             "uin" -> currentUin.toString()
             "qua" -> VersionUtil.qua
             "csrf_token" -> CalculationUtil.getCSRFToken(ticketManager.getSkey() ?: "")
+            "skey" -> ticketManager.getSkey() ?: ""
             "bkn" -> {
-                val skey = env["skey"] ?: let {
-                    env["skey"] = ticketManager.getSkey()
-                        ?: throw RuntimeException("获取skey失败")
-                    env["skey"]
-                }
+                val skey = ticketManager.getSkey()
+                    ?: throw RuntimeException("获取skey失败")
                 CalculationUtil.getBkn(skey as String).toString()
             }
+
             "ps_bkn" -> {
-                val pskey = env["pskey"] ?: let {
-                    env["pskey"] = ticketManager.getPskey(qDomain ?: "")
-                        ?: throw RuntimeException("获取pskey失败")
-                    env["pskey"]
-                }
+                val pskey = ticketManager.getPskey(qDomain ?: "")
+                    ?: throw RuntimeException("获取pskey失败")
                 CalculationUtil.getBkn(pskey as String).toString()
             }
+
             "ps_tk" -> {
-                val pskey = env["pskey"] ?: let {
-                    env["pskey"] = ticketManager.getPskey(qDomain ?: "")
-                        ?: throw RuntimeException("获取pskey失败")
-                    env["pskey"]
-                }
+                val pskey = ticketManager.getPskey(qDomain ?: "")
+                    ?: throw RuntimeException("获取pskey失败")
                 CalculationUtil.getPsToken(pskey as String).toString()
             }
+
             "client_key" -> ticketManager.getStweb() ?: ""
             "mini_nick" -> {
                 val miniProfile = (env["mini_profile"] ?: let {
@@ -182,6 +207,7 @@ object EnvFormatUtil {
                 }) as MiniProfile
                 miniProfile.nick
             }
+
             "mini_avatar" -> {
                 val miniProfile = (env["mini_profile"] ?: let {
                     val profile = miniProfileManager.syncGetProfile(env["mini_app_id"] as String)
@@ -191,8 +217,10 @@ object EnvFormatUtil {
                 }) as MiniProfile
                 miniProfile.avatar
             }
+
             "mini_login_code" -> miniLoginManager.syncGetLoginCode(env["mini_app_id"] as String)
                 ?: throw RuntimeException("获取mini_login_code失败")
+
             else -> env[argField] ?: throw RuntimeException("不存在的变量 $argField")
         }
         return res

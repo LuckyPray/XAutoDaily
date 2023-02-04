@@ -1,6 +1,9 @@
 package me.teble.xposed.autodaily.task.model
 
 import kotlinx.serialization.Serializable
+import me.teble.xposed.autodaily.task.util.EnvFormatUtil
+import me.teble.xposed.autodaily.utils.LogUtil
+import java.math.BigInteger
 
 @Serializable
 data class TaskProperties(
@@ -46,6 +49,8 @@ data class Task(
     val relay: String?,
     // 环境变量，允许自定义内容
     val envs: List<TaskEnv>?,
+    // 执行条件，如果为 null，表示无条件执行
+    val conditions: List<TaskCondition>?,
     // 重复请求次数，允许通过环境变量自定义
     val repeat: String,
     // 延迟（秒）
@@ -63,7 +68,7 @@ data class Task(
     // 请求回调
     val callback: TaskCallback
 ) {
-    constructor(id: String): this(id, "", null, null, null, "1", 0, "", "", null, null, null,
+    constructor(id: String): this(id, "", null, null, null, null, "1", 0, "", "", null, null, null,
         TaskCallback(null, null, null, null, null, null))
     val isRelayTask = cron == null
     val isBasic = cron == "basic"
@@ -115,6 +120,55 @@ data class Assert(
     // 值 eval string
     val value: String,
 )
+
+@Serializable
+data class TaskCondition(
+    // 任务执行条件，eval string
+    val var1: String,
+    // 判断类型
+    val operator: String,
+    // 任务执行条件值，eval string
+    val var2: String,
+)
+
+fun isNumber(str: String): Boolean {
+    return str.matches("-?[0-9]+".toRegex())
+}
+
+fun TaskCondition.test(env: MutableMap<String, Any>): Boolean {
+    var v1 = if (env.containsKey(var1)) env[var1] else EnvFormatUtil.format(var1, env)
+    var v2 = if (env.containsKey(var2)) env[var2] else EnvFormatUtil.format(var2, env)
+    if (v1 == null) v1 = "null"
+    if (v2 == null) v2 = "null"
+    LogUtil.d("test: $v1 $operator $v2")
+    return when (operator) {
+        "=" -> v1 == v2
+        "!=" -> v1 != v2
+        ">" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) > BigInteger(v2) else v1.toString() > v2.toString()
+        "<" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) < BigInteger(v2) else v1.toString() < v2.toString()
+        ">=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) >= BigInteger(v2) else v1.toString() >= v2.toString()
+        "<=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) <= BigInteger(v2) else v1.toString() <= v2.toString()
+        "in" -> {
+            when (v2) {
+                is Iterable<*> -> {
+                    v2.contains(v1)
+                }
+                is String -> {
+                    if (v2.startsWith("[") && v2.endsWith("]")) {
+                        v2.substring(1, v2.length - 1).split(",").map { it.trim() }.contains(v1.toString())
+                    } else {
+                        v2.contains(v1.toString())
+                    }
+                }
+                else -> {
+                    throw IllegalArgumentException("var2 must be Iterable or String")
+                }
+            }
+        }
+        else -> throw IllegalArgumentException("unknown operator: $operator")
+    }
+}
+
 @Serializable
 data class MsgReplace(
     // 需要替换内容对应的正则表达式

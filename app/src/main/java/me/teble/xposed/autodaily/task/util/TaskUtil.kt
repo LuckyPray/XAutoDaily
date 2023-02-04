@@ -11,18 +11,25 @@ import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.MsgExtract
 import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.task.model.test
 import me.teble.xposed.autodaily.task.request.ReqFactory
 import me.teble.xposed.autodaily.task.request.enum.ReqType
 import me.teble.xposed.autodaily.task.request.model.TaskResponse
 import me.teble.xposed.autodaily.task.util.Const.ENV_VARIABLE
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.format
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil.formatList
-import me.teble.xposed.autodaily.ui.*
+import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.TaskStatus
+import me.teble.xposed.autodaily.ui.lastExecMsg
+import me.teble.xposed.autodaily.ui.lastExecTime
+import me.teble.xposed.autodaily.ui.nextShouldExecTime
+import me.teble.xposed.autodaily.ui.taskExecStatus
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.parse
 import me.teble.xposed.autodaily.utils.toJsonString
-import java.util.*
+import java.util.Date
+import java.util.TimeZone
 
 object TaskUtil {
 
@@ -41,6 +48,23 @@ object TaskUtil {
             }
         } ?: emptyList()
         generateEnv(task, env)
+        if (task.conditions?.all { it.test(env) } == false) {
+            LogUtil.i("任务条件不满足，跳过：${task.id}")
+            if (task.cron != null && task.cron != "basic") {
+                val now = TimeUtil.getCNDate()
+                task.lastExecTime = now.format()
+                val realCron = format(task.cron, null, env)
+                val nextTime = CronPatternUtil.nextDateAfter(
+                    TimeZone.getTimeZone("GMT+8"),
+                    CronPattern(realCron),
+                    Date(TimeUtil.cnTimeMillis() + 1),
+                    true
+                )!!
+                task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
+                task.lastExecMsg = "不满足任务执行条件，跳过执行"
+            }
+            return true
+        }
         val repeatNum = format(task.repeat, null, env).toInt()
         LogUtil.d("重复请求次数 -> $repeatNum")
         val currDateStr = TimeUtil.getCNDate().formatDate()
