@@ -8,7 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
-import me.teble.xposed.autodaily.hook.base.moduleRes
+import me.teble.xposed.autodaily.hook.base.moduleClassLoader
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
@@ -51,21 +51,9 @@ fun getAppIcon(context: Context, packageName: String): Bitmap? {
     return null
 }
 
-fun getTextFromAssets(context: Context, fileName: String): String {
+fun getTextFromAssets(classLoader: ClassLoader, fileName: String): String {
     runCatching {
-        context.assets.open(fileName).use { stream ->
-            val length = stream.available()
-            val buffer = ByteArray(length)
-            stream.read(buffer)
-            return String(buffer, StandardCharsets.UTF_8)
-        }
-    }.onFailure { LogUtil.e(it) }
-    return ""
-}
-
-fun getTextFromModuleAssets(fileName: String): String {
-    runCatching {
-        moduleRes.assets.open(fileName).use { stream ->
+        classLoader.getResourceAsStream("assets/$fileName").use { stream ->
             val bis = BufferedInputStream(stream)
             val bos = ByteArrayOutputStream()
             val buffer = ByteArray(1024)
@@ -73,10 +61,14 @@ fun getTextFromModuleAssets(fileName: String): String {
             while (bis.read(buffer).also { len = it } != -1) {
                 bos.write(buffer, 0, len)
             }
-            return String(bos.toByteArray())
+            String(buffer, StandardCharsets.UTF_8)
         }
     }.onFailure { LogUtil.e(it) }
     return ""
+}
+
+fun getTextFromModuleAssets(fileName: String): String {
+    return getTextFromAssets(moduleClassLoader, fileName)
 }
 
 
