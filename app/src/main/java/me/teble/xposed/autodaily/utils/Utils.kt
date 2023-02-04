@@ -61,7 +61,7 @@ fun getTextFromAssets(classLoader: ClassLoader, fileName: String): String {
             while (bis.read(buffer).also { len = it } != -1) {
                 bos.write(buffer, 0, len)
             }
-            String(buffer, StandardCharsets.UTF_8)
+            return String(bos.toByteArray(), StandardCharsets.UTF_8)
         }
     }.onFailure { LogUtil.e(it) }
     return ""
