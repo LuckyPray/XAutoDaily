@@ -15,7 +15,7 @@ import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.net.SocketTimeoutException
-import java.util.*
+import java.util.Date
 
 class GroupTaskFilterChain(
     val taskGroup: TaskGroup
@@ -58,7 +58,7 @@ class GroupTaskFilterChain(
                 }
                 try {
                     XANotification.setContent("正在执行任务${task.id}")
-                    TaskUtil.execute(reqType, task, relayTaskMap, env.toMutableMap())
+                    TaskUtil.execute(reqType, task, relayTaskMap, env)
                 } catch (e: SocketTimeoutException) {
                     LogUtil.e(e, "执行任务${task.id}异常: ")
                 } catch (e: Throwable) {

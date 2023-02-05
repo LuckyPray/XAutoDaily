@@ -48,23 +48,6 @@ object TaskUtil {
             }
         } ?: emptyList()
         generateEnv(task, env)
-        if (task.conditions?.all { it.test(env) } == false) {
-            LogUtil.i("任务条件不满足，跳过：${task.id}")
-            if (task.cron != null && task.cron != "basic") {
-                val now = TimeUtil.getCNDate()
-                task.lastExecTime = now.format()
-                val realCron = format(task.cron, null, env)
-                val nextTime = CronPatternUtil.nextDateAfter(
-                    TimeZone.getTimeZone("GMT+8"),
-                    CronPattern(realCron),
-                    Date(TimeUtil.cnTimeMillis() + 1),
-                    true
-                )!!
-                task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
-                task.lastExecMsg = "不满足任务执行条件，跳过执行"
-            }
-            return true
-        }
         val repeatNum = format(task.repeat, null, env).toInt()
         LogUtil.d("重复请求次数 -> $repeatNum")
         val currDateStr = TimeUtil.getCNDate().formatDate()
@@ -84,6 +67,23 @@ object TaskUtil {
                     // TODO 多次失败，任务禁用
                     return false
                 }
+            }
+            if (task.conditions?.all { it.test(env) } == false) {
+                LogUtil.i("任务条件不满足，跳过：${task.id}")
+                if (task.cron != null && task.cron != "basic") {
+                    val now = TimeUtil.getCNDate()
+                    task.lastExecTime = now.format()
+                    val realCron = format(task.cron, null, env)
+                    val nextTime = CronPatternUtil.nextDateAfter(
+                        TimeZone.getTimeZone("GMT+8"),
+                        CronPattern(realCron),
+                        Date(TimeUtil.cnTimeMillis() + 1),
+                        true
+                    )!!
+                    task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
+                    task.lastExecMsg = "不满足任务执行条件，跳过执行"
+                }
+                return true
             }
             val taskReqUtil = ReqFactory.getReq(reqType)
             val requests = taskReqUtil.create(task, env)

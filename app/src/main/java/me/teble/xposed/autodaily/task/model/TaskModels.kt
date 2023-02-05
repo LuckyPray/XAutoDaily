@@ -142,8 +142,8 @@ fun TaskCondition.test(env: MutableMap<String, Any>): Boolean {
     if (v2 == null) v2 = "null"
     LogUtil.d("test: $v1 $operator $v2")
     return when (operator) {
-        "=" -> v1 == v2
-        "!=" -> v1 != v2
+        "=", "==" -> v1.toString() == v2.toString()
+        "!=" -> v1.toString() != v2.toString()
         ">" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) > BigInteger(v2) else v1.toString() > v2.toString()
         "<" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) < BigInteger(v2) else v1.toString() < v2.toString()
         ">=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) >= BigInteger(v2) else v1.toString() >= v2.toString()

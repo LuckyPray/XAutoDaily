@@ -49,7 +49,9 @@ object EnvFormatUtil {
                 val name = s.substring(start, end)
                 LogUtil.d("name -> $name")
                 this[index] = name
-                values.add(getFormatArgValue(name, qDomain, env))
+                val value = getFormatArgValue(name, qDomain, env)
+                LogUtil.d("value -> $value")
+                values.add(value)
             }
         }
         LogUtil.d("evalString -> $evalStr")
@@ -154,6 +156,7 @@ object EnvFormatUtil {
 
             argFunc.startsWith("taskEnable(") -> {
                 val taskName = argFunc.substring(11, argFunc.length - 1)
+                LogUtil.d("taskEnable($taskName) -> ${Task(taskName).enable}")
                 return Task(taskName).enable.toString()
             }
 
@@ -169,7 +172,10 @@ object EnvFormatUtil {
         if (ReUtil.contains(FUN_REG, argField)) {
             return getFormatArgFunction(argField, qDomain, env)
         }
-        val res = when (argField) {
+        val splitIdx = argField.indexOf(":")
+        val argName = if (splitIdx == -1) argField else argField.substring(0, splitIdx)
+        val defaultValue = if (splitIdx == -1) null else argField.substring(splitIdx + 1)
+        val res = when (argName) {
             "week_day_index" -> buildString { append((DateUtil.dayOfWeek(TimeUtil.getCNDate()) + 5) % 7) }
             "week_day" -> buildString { append((DateUtil.dayOfWeek(TimeUtil.getCNDate()) + 5) % 7 + 1) }
             "random" -> CalculationUtil.getRandom().toString()
@@ -177,6 +183,7 @@ object EnvFormatUtil {
             "second" -> CalculationUtil.getSecondTime().toString()
             "uin" -> currentUin.toString()
             "qua" -> VersionUtil.qua
+            "qVer" -> VersionUtil.qqVersionName
             "csrf_token" -> CalculationUtil.getCSRFToken(ticketManager.getSkey() ?: "")
             "skey" -> ticketManager.getSkey() ?: ""
             "bkn" -> {
@@ -221,8 +228,15 @@ object EnvFormatUtil {
             "mini_login_code" -> miniLoginManager.syncGetLoginCode(env["mini_app_id"] as String)
                 ?: throw RuntimeException("获取mini_login_code失败")
 
-            else -> env[argField] ?: throw RuntimeException("不存在的变量 $argField")
+            else -> env[argName] ?: let {
+                LogUtil.w("没有找到对应的参数: $argName")
+                ""
+            }
         }
-        return res
+        return if (res is String && defaultValue != null) {
+            res.ifEmpty { defaultValue }
+        } else {
+            res
+        }
     }
 }
