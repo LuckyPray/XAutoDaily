@@ -32,7 +32,7 @@ val appVerCode: Int get() {
     return versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.15"
+val appVerName: String = "3.0.16"
 
 android {
     namespace = "me.teble.xposed.autodaily"
