@@ -189,19 +189,13 @@ object EnvFormatUtil {
             "bkn" -> {
                 val skey = ticketManager.getSkey()
                     ?: throw RuntimeException("获取skey失败")
-                CalculationUtil.getBkn(skey as String).toString()
-            }
-
-            "ps_bkn" -> {
-                val pskey = ticketManager.getPskey(qDomain ?: "")
-                    ?: throw RuntimeException("获取pskey失败")
-                CalculationUtil.getBkn(pskey as String).toString()
+                CalculationUtil.getBkn(skey).toString()
             }
 
             "ps_tk" -> {
                 val pskey = ticketManager.getPskey(qDomain ?: "")
                     ?: throw RuntimeException("获取pskey失败")
-                CalculationUtil.getPsToken(pskey as String).toString()
+                CalculationUtil.getPsToken(pskey).toString()
             }
 
             "client_key" -> ticketManager.getStweb() ?: ""

@@ -47,6 +47,8 @@ data class Task(
     val cron: String?,
     // 依赖task的id，有些任务需要前置请求获取某些参数
     val relay: String?,
+    // 依赖task的id，有些任务需要后置请求
+    val rear: String?,
     // 环境变量，允许自定义内容
     val envs: List<TaskEnv>?,
     // 执行条件，如果为 null，表示无条件执行
@@ -68,7 +70,7 @@ data class Task(
     // 请求回调
     val callback: TaskCallback
 ) {
-    constructor(id: String): this(id, "", null, null, null, null, "1", 0, "", "", null, null, null,
+    constructor(id: String): this(id, "", null, null, null, null, null, "1", 0, "", "", null, null, null,
         TaskCallback(null, null, null, null, null, null))
     val isRelayTask = cron == null
     val isBasic = cron == "basic"

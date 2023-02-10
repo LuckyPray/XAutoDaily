@@ -2,29 +2,29 @@ package me.teble.xposed.autodaily.task.request.impl
 
 import me.teble.xposed.autodaily.config.qqUserAgent
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
-import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
 import me.teble.xposed.autodaily.task.request.model.TaskRequest
 import me.teble.xposed.autodaily.task.request.model.TaskResponse
-import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.toJsonString
-import okhttp3.*
+import okhttp3.ConnectionPool
+import okhttp3.Dispatcher
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.Buffer
 import java.io.IOException
 import java.lang.Integer.min
 import java.nio.charset.Charset
-import java.text.SimpleDateFormat
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 object HttpTaskReqUtil : ITaskReqUtil {
 
-    private val  client = OkHttpClient.Builder()
+    private val client = OkHttpClient.Builder()
         .connectTimeout(60, TimeUnit.SECONDS)
         .readTimeout(60, TimeUnit.SECONDS)
         .writeTimeout(60, TimeUnit.SECONDS)
@@ -56,7 +56,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 env["req_url"] = url
                 val headers = mutableMapOf<String, String>()
                 task.reqHeaders?.entries?.forEach {
-                    headers[it.key] = EnvFormatUtil.format(it.value, task.domain, env)
+                    headers[it.key.lowercase()] = EnvFormatUtil.format(it.value, task.domain, env)
                 }
                 LogUtil.d("header 头构造完毕: $headers")
                 var cookie: String? = null
@@ -67,7 +67,7 @@ object HttpTaskReqUtil : ITaskReqUtil {
                         cookie = getQDomainCookies(task.domain)
                     }
                 }
-                LogUtil.d("cookie 构造完毕: ***(${cookie?.length})")
+                LogUtil.d("cookie 构造完毕: $cookie(${cookie?.length})")
                 LogUtil.d("开始format data -> ${task.reqData}")
                 val bodyList = task.reqData?.let {
                     EnvFormatUtil.formatList(it, task.domain, env)
@@ -108,21 +108,22 @@ object HttpTaskReqUtil : ITaskReqUtil {
                 if (req.data == null) {
                     method(req.method!!, null)
                 } else {
-                    req.data.let {
-                        addHeader("Content-Length", it.length.toString())
-                        if (it.startsWith("{") && it.endsWith("}")) {
-                            addHeader("Content-Type", "application/json")
-                            method(
-                                req.method!!,
-                                it.toRequestBody("application/json".toMediaTypeOrNull())
-                            )
-                        } else {
-                            addHeader("Content-Type", "application/x-www-form-urlencoded")
-                            method(
-                                req.method!!,
-                                it.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
-                            )
-                        }
+                    addHeader("Content-Length", req.data.length.toString())
+                    if (req.headers?.contains("Content-Type".lowercase()) == true) {
+                        val mediaType = req.headers["Content-Type".lowercase()]!!
+                        method(req.method!!, req.data.toRequestBody(mediaType.toMediaTypeOrNull()))
+                    } else if (req.data.startsWith("{") && req.data.endsWith("}")) {
+                        addHeader("Content-Type", "application/json")
+                        method(
+                            req.method!!,
+                            req.data.toRequestBody("application/json".toMediaTypeOrNull())
+                        )
+                    } else {
+                        addHeader("Content-Type", "application/x-www-form-urlencoded")
+                        method(
+                            req.method!!,
+                            req.data.toRequestBody("application/x-www-form-urlencoded".toMediaTypeOrNull())
+                        )
                     }
                 }
             }.build()

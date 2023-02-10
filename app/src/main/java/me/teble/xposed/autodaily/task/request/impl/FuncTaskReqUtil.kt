@@ -35,13 +35,14 @@ object FuncTaskReqUtil : ITaskReqUtil {
         var message = ""
         var resultCode = 200
         when {
-            url.startsWith("xa://FavoriteManager/favoriteAllYesterdayVoter") -> {
-                LogUtil.d("--------favoriteAllYesterdayVoter-------")
+            url.startsWith("xa://FavoriteManager/favoriteAllVoter") -> {
+                LogUtil.d("--------favoriteAllVoter-------")
                 val maxPage = paramMap["maxPage"]!!.toInt()
-                LogUtil.d("maxPage: $maxPage")
+                val maxDays = paramMap["maxDays"]!!.toInt()
+                LogUtil.d("maxPage: $maxPage, maxDays: $maxDays")
                 manager = favoriteManager
-                val res = favoriteManager.getAllYesterdayVoter(maxPage)
-                LogUtil.d("昨日点赞列表人数: ${res.size}")
+                val res = favoriteManager.getAllVoter(maxPage)
+                LogUtil.d("满足要求点赞列表人数: ${res.size}")
                 var favoriteCnt = 0
                 res.forEach {
                     LogUtil.d(it.toString())

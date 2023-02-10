@@ -141,9 +141,9 @@ open class FavoriteManager : BaseFunction(
         throw RuntimeException("获取点赞列表超时")
     }
 
-    open fun getAllYesterdayVoter(maxPage: Int): List<VoterInfo> {
+    open fun getAllVoter(maxPage: Int, maxDays: Int = 2): List<VoterInfo> {
         LogUtil.i("正在获取前${maxPage}页的点赞列表")
-        val beginOfYesterday = DateUtil.beginOfDay(Date(TimeUtil.cnTimeMillis())).time / 1000 - 24 * 60 * 60
+        val beginTime = DateUtil.beginOfDay(Date(TimeUtil.cnTimeMillis())).time / 1000 - 24 * 60 * 60 * maxDays
         val mutableList = mutableListOf<VoterInfo>()
         for (i in 1..maxPage) {
             val list = syncGetVoterList(i, 30)
@@ -153,7 +153,7 @@ open class FavoriteManager : BaseFunction(
                     return mutableList
                 }
                 it.forEach {
-                    if (it.lastTime < beginOfYesterday) {
+                    if (it.lastTime < beginTime) {
                         return mutableList
                     }
                     mutableList.add(it)

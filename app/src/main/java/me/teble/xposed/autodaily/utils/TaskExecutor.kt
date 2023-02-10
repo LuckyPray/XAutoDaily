@@ -17,6 +17,7 @@ import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.errInfo
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
@@ -139,29 +140,31 @@ object TaskExecutor {
         if (scheduler.isStarted) {
             return
         }
-        TimeUtil.init()
-        CronUtil.setMatchSecond(true)
-        scheduler.setTimeZone(TimeZone.getTimeZone("GMT+8"))
-        try {
-            CronUtil.start()
-        } catch (e: Throwable) {
-            LogUtil.e(e, "CronUtil.start error: ")
-            ToastUtil.send("任务调度器启动失败，详情请查看日志")
+        runAsync {
+            TimeUtil.init()
+            CronUtil.setMatchSecond(true)
+            scheduler.setTimeZone(TimeZone.getTimeZone("GMT+8"))
+            try {
+                CronUtil.start()
+            } catch (e: Throwable) {
+                LogUtil.e(e, "CronUtil.start error: ")
+                ToastUtil.send("任务调度器启动失败，详情请查看日志")
+            }
+            LogUtil.i("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
+            LogUtil.i("任务调度器启动成功")
+            CronUtil.schedule(
+                "task_timer",
+                "0 */10 * * * *"
+            ) {
+                handler.sendEmptyMessage(AUTO_EXEC)
+            }
+            CronUtil.schedule(
+                "check_update_task",
+                "0 0 9/3 * * *"
+            ) {
+                ConfigUtil.checkUpdate(false)
+            }
+            LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
         }
-        LogUtil.i("CoreService 进程已经启动，启动时间 -> ${LocalDateTime.now()}")
-        LogUtil.i("任务调度器启动成功")
-        CronUtil.schedule(
-            "task_timer",
-            "0 */10 * * * *"
-        ) {
-            handler.sendEmptyMessage(AUTO_EXEC)
-        }
-        CronUtil.schedule(
-            "check_update_task",
-            "0 0 9/3 * * *"
-        ) {
-            ConfigUtil.checkUpdate(false)
-        }
-        LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
     }
 }

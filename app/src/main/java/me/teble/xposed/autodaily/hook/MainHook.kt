@@ -8,14 +8,10 @@ import android.os.Build
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
-import cn.hutool.core.util.ReflectUtil.getMethodsDirectly
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
 import com.github.kyuubiran.ezxhelper.utils.*
-import dalvik.system.BaseDexClassLoader
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import io.luckypray.dexkit.DexKitBridge
 import io.luckypray.dexkit.DexKitBridge.Companion.FLAG_GETTING
@@ -40,7 +36,6 @@ import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
-import java.util.concurrent.CompletableFuture.runAsync
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -72,19 +67,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             packageName == PACKAGE_NAME_SELF -> {
                 ModuleHook.hookSelf()
             }
+
             QQTypeEnum.contain(packageName) -> {
                 EzXHelperInit.initHandleLoadPackage(mLoadPackageParam)
                 EzXHelperInit.setLogTag("XALog")
                 EzXHelperInit.setToastTag("XALog")
             }
-        }
-        fun ClassLoader.findDexClassLoader(): BaseDexClassLoader? {
-            var classLoader = this
-            while (classLoader !is BaseDexClassLoader) {
-                if (classLoader.parent != null) classLoader = classLoader.parent
-                else return null
-            }
-            return classLoader
         }
 
         if (QQTypeEnum.contain(loadPackageParam.packageName)) {
@@ -108,7 +96,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
                         LogUtil.d("init ActivityProxyManager")
                         ProxyManager.init
-                        asyncHook()
+                        filterAndHook()
                     }
 
                     if (ProcUtil.isMain) {
@@ -179,8 +167,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
-    private fun asyncHook() {
-        runAsync {
+    private fun filterAndHook() {
+        val enabledHooks = subHookClasses
+            .map { it.new() }
+            .filter { it.enabled }
+        if (enabledHooks.isNotEmpty()) {
             // 加载资源注入
             LogUtil.d("injectRes")
             injectRes(hostContext.resources)
@@ -189,7 +180,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             doDexInit()
             //初始化hook
             LogUtil.d("initHook")
-            initHook()
+            initHook(enabledHooks)
             moduleLoadInit = true
             TaskExecutor.startCorn()
         }
@@ -402,9 +393,11 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
         try {
-            DexKitBridge.create(hostApp.applicationInfo.sourceDir).use {
+            DexKitBridge.create(hostApp.applicationInfo.sourceDir)?.use {
                 startTime = System.currentTimeMillis()
-                it?.batchFindClassesUsingStrings(info)?.forEach { (key, value) ->
+                it.batchFindClassesUsingStrings {
+                    queryMap = info
+                }.forEach { (key, value) ->
                     LogUtil.d("search result: $key -> ${value.toList()}")
                     if (value.size == 1) {
                         LogUtil.i("locate info: $key -> ${value.first()}")
@@ -427,13 +420,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         dexIsInit = true
     }
 
-    private fun initHook() {
-        for (cls in subHookClasses) {
-            try {
-//                loadAs<BaseHook>(cls, Global.moduleClassLoader).new().init()
-                cls.new().init()
-            } catch (e: Exception) {
-                LogUtil.e(e)
+    private fun initHook(hooks: List<BaseHook>) {
+        hooks.forEach {
+            kotlin.runCatching {
+                it.init()
+            }.onFailure {
+                LogUtil.e(it)
             }
         }
         LogUtil.i("模块加载完毕")

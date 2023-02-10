@@ -178,8 +178,8 @@ object ConfigUtil {
         val encodeConfig = getDefaultConf()
         val defaultConf = loadConf(encodeConfig)
         defaultConf ?: let {
-            LogUtil.w("加载默认配置失败，清联系开发者排查")
-            ToastUtil.send("加载默认配置失败，请联系开发者排查")
+            LogUtil.w("加载默认配置失败")
+            ToastUtil.send("加载默认配置失败")
             return TaskProperties(0, 0, listOf(), listOf())
         }
         if (conf == null) {

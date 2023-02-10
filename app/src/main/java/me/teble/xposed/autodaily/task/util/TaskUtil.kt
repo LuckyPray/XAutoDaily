@@ -47,6 +47,13 @@ object TaskUtil {
                 }
             }
         } ?: emptyList()
+        val rears: List<Task> = task.rear?.let {
+            mutableListOf<Task>().apply {
+                it.split("|").forEach {
+                    add(relayMap[it] ?: throw RuntimeException("未知的依赖任务：${it}"))
+                }
+            }
+        } ?: emptyList()
         generateEnv(task, env)
         val repeatNum = format(task.repeat, null, env).toInt()
         LogUtil.d("重复请求次数 -> $repeatNum")
@@ -105,6 +112,14 @@ object TaskUtil {
                 status.reqCount++
                 if (task.isCronTask) {
                     task.taskExecStatus = status
+                }
+            }
+            rears.forEach {
+                LogUtil.i("开始执行后置任务列表: ${task.rear}")
+                // 后置任务失败，退出执行
+                if (!execute(reqType, it, relayMap, env)) {
+                    // TODO 多次失败，任务禁用
+                    return false
                 }
             }
         }

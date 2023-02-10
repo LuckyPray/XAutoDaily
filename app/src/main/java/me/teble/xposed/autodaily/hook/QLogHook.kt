@@ -22,13 +22,15 @@ class QLogHook : BaseHook() {
 //        "PublicAccountManager-Click:",
 //        "PublicAccountManager-Event:",
 //        "PublicAccountManager-Location:",
-        "VisitorsActivity",
-        "MobileQQServiceBase",
-        "FaceInfo",
-        "MsgRespHandler",
-        "CardHandler",
-        "MsgRespHandleReporter",
-        "mqq"
+//        "VisitorsActivity",
+//        "MobileQQServiceBase",
+//        "FaceInfo",
+//        "MsgRespHandler",
+//        "CardHandler",
+//        "MsgRespHandleReporter",
+//        "mqq",
+        "TicketManager",
+        "PskeyManagerImpl",
     )
 
     private fun containsTag(tag: String?): Boolean {
@@ -54,7 +56,14 @@ class QLogHook : BaseHook() {
     fun hookInfo() {
         findMethod(QLog) {
             name == "i"
-                && parameterTypes.contentEquals(arrayOf(String::class.java, Int::class.java, String::class.java, Throwable::class.java))
+                && parameterTypes.contentEquals(
+                arrayOf(
+                    String::class.java,
+                    Int::class.java,
+                    String::class.java,
+                    Throwable::class.java
+                )
+            )
         }.hookReplace {
             if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
                 Log.i("XALog", "QTag: ${it.args[0]}, msg: ${it.args[2]}")
@@ -67,7 +76,14 @@ class QLogHook : BaseHook() {
     fun hookDebug() {
         findMethod(QLog) {
             name == "d"
-                && parameterTypes.contentEquals(arrayOf(String::class.java, Int::class.java, String::class.java, Throwable::class.java))
+                && parameterTypes.contentEquals(
+                arrayOf(
+                    String::class.java,
+                    Int::class.java,
+                    String::class.java,
+                    Throwable::class.java
+                )
+            )
         }.hookReplace {
             if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
                 Log.i("XALog", "QTag: ${it.args[0]}, msg: ${it.args[2]}")
