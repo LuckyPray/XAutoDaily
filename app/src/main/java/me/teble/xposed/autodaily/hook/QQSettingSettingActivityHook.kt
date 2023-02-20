@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.LinearLayout
 import androidx.compose.foundation.ExperimentalFoundationApi
 import com.github.kyuubiran.ezxhelper.utils.Hooker
 import com.github.kyuubiran.ezxhelper.utils.findMethod
@@ -25,6 +26,7 @@ import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.dp2px
 import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
@@ -56,6 +58,11 @@ class QQSettingSettingActivityHook : BaseHook() {
                     isFragment = true
                     obj.invoke("getActivity") as Activity
                 }
+                val entityRoot = LinearLayout(activity)
+                val entityRootLayoutParams = LinearLayout.LayoutParams(MATCH_PARENT, 1).apply {
+                    topMargin = 20.dp2px(activity)
+                }
+                entityRoot.layoutParams = entityRootLayoutParams
                 val entity = clazz.new(activity) as View
                 injectRes(activity.resources)
                 entity.invoke("setLeftText", activity.getString(R.string.app_name))
@@ -78,13 +85,14 @@ class QQSettingSettingActivityHook : BaseHook() {
                 } else {
                     activity.findViewById<View>(id).parent as ViewGroup
                 }
+                entityRoot.addView(entity, entityRootLayoutParams)
                 try {
                     (viewGroup.parent as ViewGroup).addView(
-                        entity, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                        entityRoot, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                     )
                 } catch (e: Throwable) {
                     viewGroup.addView(
-                        entity, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+                        entityRoot, 0, ViewGroup.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
                     )
                 }
             } catch (e: Resources.NotFoundException) {
