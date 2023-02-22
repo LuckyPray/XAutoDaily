@@ -19,7 +19,9 @@ set_target_properties(openssl
 add_library(${PROJECT_NAME} SHARED
         md5.cpp
         base64.cpp
-        native-lib.cpp)
+        native-lib.cpp
+        ../../../../dexkit/DexKit/dexkit/src/main/cpp/native-bridge.cpp
+        )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 find_library(log-lib log)
