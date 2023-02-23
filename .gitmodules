@@ -7,3 +7,6 @@
 [submodule "dexkit/DexKit"]
 	path = dexkit/DexKit
 	url = git@github.com:LuckyPray/DexKit.git
+[submodule "openssl"]
+	path = openssl
+	url = https://github.com/LuckyPray/openssl-android.git

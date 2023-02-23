@@ -5,23 +5,28 @@ add_subdirectory(../../../../mmkv mmkv)
 add_subdirectory(../../../../dexkit/DexKit/Core dex_kit_static)
 
 add_library(crypto STATIC IMPORTED)
-set_target_properties(crypto
+set_target_properties(
+        crypto
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${ANDROID_ABI}/libcrypto.a
-        )
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../../openssl/lib/${ANDROID_ABI}/libcrypto.a
+)
 
 add_library(openssl STATIC IMPORTED)
-set_target_properties(openssl
+set_target_properties(
+        openssl
         PROPERTIES IMPORTED_LOCATION
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib/${ANDROID_ABI}/libssl.a
-        )
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../../openssl/lib/${ANDROID_ABI}/libssl.a
+)
 
-add_library(${PROJECT_NAME} SHARED
+add_library(
+        ${PROJECT_NAME} SHARED
         md5.cpp
         base64.cpp
         native-lib.cpp
         ../../../../dexkit/DexKit/dexkit/src/main/cpp/native-bridge.cpp
-        )
+)
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../openssl/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 find_library(log-lib log)
