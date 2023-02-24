@@ -67,7 +67,7 @@ object Config {
             "^qimei",
         ),
         "Lcom/tencent/mobileqq/service/MobileQQServiceBase;" to setOf(
-            "^PB cmd: req cmd:", "^MobileQQServiceBase$"
+            "^req_pb_protocol_flag$", "^MobileQQServiceBase$"
         ),
     )
     const val hooksVersion = 2
