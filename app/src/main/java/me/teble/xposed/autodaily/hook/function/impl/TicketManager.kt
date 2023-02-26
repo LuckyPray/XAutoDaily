@@ -38,31 +38,40 @@ open class TicketManager : BaseFunction(
         )
     }
 
-    lateinit var ticketManager: TicketManager
-    private var uin: String = "${QApplicationUtil.currentUin}"
+    private val ticketManagerMap = mutableMapOf<String, TicketManager>()
+    private val uin: String get() = "${QApplicationUtil.currentUin}"
 
     override fun init() {
-        ticketManager = QApplicationUtil.appRuntime.getManager(2) as TicketManager
+        getTicketManager()
+    }
+
+    private fun getTicketManager(): TicketManager {
+        if (ticketManagerMap.containsKey(uin)) {
+            return ticketManagerMap[uin]!!
+        }
+        val manager = QApplicationUtil.appRuntime.getManager(2) as TicketManager
+        ticketManagerMap[uin] = manager
+        return manager
     }
 
     open fun getSkey(): String? {
-        return ticketManager.getSkey(uin)
+        return getTicketManager().getSkey(uin)
     }
 
     open fun getSuperkey(): String? {
-        return ticketManager.getSuperkey(uin)
+        return getTicketManager().getSuperkey(uin)
     }
 
     open fun getPt4Token(domain: String?): String? {
-        return ticketManager.getPt4Token(uin, domain)
+        return getTicketManager().getPt4Token(uin, domain)
     }
 
     open fun getPskey(domain: String): String? {
-        return ticketManager.getPskey(uin, domain)
+        return getTicketManager().getPskey(uin, domain)
     }
 
     open fun getStweb(): String? {
-        return ticketManager.getStweb(uin)
+        return getTicketManager().getStweb(uin)
     }
 
     open fun getCookies(domain: String): String {
