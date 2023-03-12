@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.hook
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.res.Resources
@@ -44,6 +45,7 @@ class QQSettingSettingActivityHook : BaseHook() {
     override val enabled: Boolean
         get() = true
 
+    @SuppressLint("DiscouragedApi")
     @ExperimentalFoundationApi
     @MethodHook("创建模块设置入口")
     private fun addModuleEntrance() {

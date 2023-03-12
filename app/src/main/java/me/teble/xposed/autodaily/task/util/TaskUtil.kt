@@ -98,7 +98,8 @@ object TaskUtil {
             if (cnt < startRepeatNum) {
                 continue
             }
-            val startIdx = if (task.isBasic || task.isRelayTask) 0 else status.reqCount % requests.size
+            val startIdx =
+                if (task.isBasic || task.isRelayTask) 0 else status.reqCount % requests.size
             for (i in startIdx until requests.size) {
                 Thread.sleep((task.delay * 1000).toLong())
                 val response = taskReqUtil.executor(requests[i])
@@ -132,7 +133,8 @@ object TaskUtil {
                 TimeZone.getTimeZone("GMT+8"),
                 CronPattern(realCron),
                 Date(TimeUtil.cnTimeMillis() + 1),
-                true)!!
+                true
+            )!!
             task.nextShouldExecTime = Date(nextTime.time + TimeUtil.offsetTime).format()
             task.lastExecMsg =
                 if (status.reqCount == 1) {
@@ -273,16 +275,20 @@ object TaskUtil {
                 "num" -> {
                     env[it.name] = confValue ?: it.default
                 }
+
                 "string" -> {
                     env[it.name] = confValue ?: it.default
                 }
+
                 "randString" -> {
                     env[it.name] = (confValue ?: it.default).split("|").random()
                 }
+
                 "list", "friend", "group" -> {
                     val value = confValue ?: it.default
                     env[it.name] = value.split(",").toMutableList()
                 }
+
                 else -> throw RuntimeException("未处理的变量类型：${it.type}")
             }
             LogUtil.d("开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
@@ -293,7 +299,7 @@ object TaskUtil {
         val env = mutableMapOf<String, Any>()
         task.envs?.forEach {
             val confValue = getConfEnv(task.id, it.name)
-            when(it.name) {
+            when (it.name) {
                 "hour", "minute" -> {
                     env[it.name] = confValue ?: it.default
                 }
