@@ -192,7 +192,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
     }
 
-    private fun findNewRuntimeMethod(): Method {
+    private fun findInjectStepMethod(): Method {
         val cl = hostClassLoader
         // classic
         try {
@@ -222,7 +222,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         taskClassMapField.isAccessible = true
         // XXX: this will cause <clinit>() to be called, check whether it will cause any problem
         val taskClassMap: HashMap<String, Class<*>> = taskClassMapField.get(null) as HashMap<String, Class<*>>
-        val kNewRuntimeTask = taskClassMap["NewRuntimeTask"] ?: error("NewRuntimeTask not found")
+        val kNewRuntimeTask = taskClassMap["LoadDexTask"] ?: error("LoadDexTask not found")
         // public void run(Context)
         return findMethod(kNewRuntimeTask) {
             returnType == Void.TYPE &&
@@ -231,9 +231,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     }
 
     private fun doInit() {
-        val mNewRuntime = findNewRuntimeMethod()
-        LogUtil.d("new runtime: $mNewRuntime")
-        mNewRuntime.hookAfter {
+        val startupStep = findInjectStepMethod()
+        LogUtil.d("startup method: $startupStep")
+        startupStep.hookAfter {
             runCatching {
                 if (hookIsInit) {
                     return@hookAfter
@@ -250,7 +250,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 ToastUtil.send("初始化失败: " + it.stackTraceToString())
             }
         }
-        mNewRuntime.hookBefore {
+        startupStep.hookBefore {
             runCatching {
                 ServletPool.injectServlet()
             }.onFailure { LogUtil.e(it) }
