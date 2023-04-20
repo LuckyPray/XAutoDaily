@@ -35,6 +35,9 @@ import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
+import java.lang.reflect.Field
+import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -189,8 +192,46 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         ConfUnit.lastModuleVersion = BuildConfig.VERSION_CODE
     }
 
+    private fun findNewRuntimeMethod(): Method {
+        val cl = hostClassLoader
+        // classic
+        try {
+            val kNewRuntime = cl.loadClass(NewRuntime)
+            return findMethod(kNewRuntime) { returnType == Boolean::class.java && emptyParam }
+        } catch (ignored: ClassNotFoundException) {
+            // ignore
+        }
+        // for NT QQ
+        // TODO: 2023-04-19 'com.tencent.mobileqq.startup.task.config.a' is not a good way to find the class
+        val kTaskFactory = cl.loadClass("com.tencent.mobileqq.startup.task.config.a")
+        val kITaskFactory = cl.loadClass("com.tencent.qqnt.startup.task.d")
+        // check cast so that we can sure that we have found the right class
+        if (!kITaskFactory.isAssignableFrom(kTaskFactory)) {
+            error("$kITaskFactory is not assignable from $kTaskFactory")
+        }
+        var taskClassMapField: Field? = null
+        for (field in kTaskFactory.declaredFields) {
+            if (field.type == HashMap::class.java && Modifier.isStatic(field.modifiers)) {
+                taskClassMapField = field
+                break
+            }
+        }
+        if (taskClassMapField == null) {
+            error("taskClassMapField not found")
+        }
+        taskClassMapField.isAccessible = true
+        // XXX: this will cause <clinit>() to be called, check whether it will cause any problem
+        val taskClassMap: HashMap<String, Class<*>> = taskClassMapField.get(null) as HashMap<String, Class<*>>
+        val kNewRuntimeTask = taskClassMap["NewRuntimeTask"] ?: error("NewRuntimeTask not found")
+        // public void run(Context)
+        return findMethod(kNewRuntimeTask) {
+            returnType == Void.TYPE &&
+                    parameterTypes.size == 1 && parameterTypes[0] == Context::class.java
+        }
+    }
+
     private fun doInit() {
-        val mNewRuntime = findMethod(NewRuntime) { returnType == Boolean::class.java && emptyParam }
+        val mNewRuntime = findNewRuntimeMethod()
         LogUtil.d("new runtime: $mNewRuntime")
         mNewRuntime.hookAfter {
             runCatching {
