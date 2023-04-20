@@ -104,7 +104,9 @@ class QQSettingSettingActivityHook : BaseHook() {
                 ToastUtil.send("创建入口失败")
             }
         }
-        findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter(52, hooker)
-        findMethod(QQSettingSettingFragment) { name == "doOnCreateView" }.hookAfter(52, hooker)
+        runCatching {
+            findMethod(QQSettingSettingActivity) { name == "doOnCreate" }.hookAfter(52, hooker)
+            findMethod(QQSettingSettingFragment) { name == "doOnCreateView" }.hookAfter(52, hooker)
+        }
     }
 }
