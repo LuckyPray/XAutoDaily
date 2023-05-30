@@ -52,6 +52,8 @@ object FuncTaskReqUtil : ITaskReqUtil {
                         Thread.sleep(1000)
                         if (favoriteManager.syncFavorite(uin, min(cnt.toInt(), 20))) {
                             favoriteCnt++
+                        }else if (favoriteManager.syncFavorite(uin, min(cnt.toInt(), 10))){
+                            favoriteCnt++
                         }
                     }
                 }
@@ -61,8 +63,10 @@ object FuncTaskReqUtil : ITaskReqUtil {
                 val uin = paramMap["uin"]!!.toLong()
                 manager = favoriteManager
                 if (!favoriteManager.syncFavorite(uin, 20)) {
-                    message = "执行失败"
-                    resultCode = -1
+                    if (!favoriteManager.syncFavorite(uin, 10)) {
+                        message = "执行失败"
+                        resultCode = -1
+                    }
                 }
             }
             url.startsWith("xa://SendMessageManager/sendMessage/friend") -> {
