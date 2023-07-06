@@ -31,10 +31,10 @@ plugins {
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
 
-val appVerCode: Int get() {
+val appVerCode: Int by lazy {
     val versionCode = SimpleDateFormat("yyMMddHH", Locale.ENGLISH).format(Date())
     println("versionCode: $versionCode")
-    return versionCode.toInt()
+    versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
 val appVerName: String = "3.0.17-NT"
@@ -242,16 +242,15 @@ androidComponents.onVariants { variant ->
         val cmd = exec {
             workingDir = project.rootDir
 
-            var cmdLine = if (OperatingSystem.current().isWindows) {
-                arrayOf("cmd", "/c")
+            val cmdLine = if (OperatingSystem.current().isWindows) {
+                arrayOf("cmd", "/c", "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G")
             } else {
-                arrayOf("sh", "-c")
+                arrayOf("sh", "-c", "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'")
             }
-            cmdLine += """
-                git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '"' '{print ${'$'}2}'
-            """.trimIndent()
             commandLine(*cmdLine)
             standardOutput = stdout
+            // 没有更新版本号，会返回非0导致构建失败
+            isIgnoreExitValue = true
         }
         if (cmd.exitValue == 0 && stdout.size() > 0) {
             println("version be updated to ${stdout.toString().trim()}")
