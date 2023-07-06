@@ -7,7 +7,7 @@ import okhttp3.Request
 import java.util.concurrent.TimeUnit
 
 
-private val client = OkHttpClient.Builder()
+val client = OkHttpClient.Builder()
     .connectTimeout(60, TimeUnit.SECONDS)
     .readTimeout(60, TimeUnit.SECONDS)
     .writeTimeout(60, TimeUnit.SECONDS)

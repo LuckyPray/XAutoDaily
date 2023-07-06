@@ -4,9 +4,14 @@ import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
 import org.gradle.internal.os.OperatingSystem
+import java.io.ByteArrayOutputStream
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
-import java.util.*
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
+import java.util.Properties
 
 fun findInPath(executable: String): String? {
     val pathEnv = System.getenv("PATH")
@@ -228,6 +233,38 @@ androidComponents.onVariants { variant ->
         this.transformationRequest.set(transformationRequest)
         transformer.set { builtArtifact ->
             File(projectDir, "${variant.name}/XAutoDaily_${builtArtifact.versionName}.apk")
+        }
+    }
+    // update version.json
+    findInPath("git")?.let {
+        val stdout = ByteArrayOutputStream()
+        val appGradlePath = "app/build.gradle.kts"
+        val cmd = exec {
+            workingDir = project.rootDir
+
+            var cmdLine = if (OperatingSystem.current().isWindows) {
+                arrayOf("cmd", "/c")
+            } else {
+                arrayOf("sh", "-c")
+            }
+            cmdLine += """
+                git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '"' '{print ${'$'}2}'
+            """.trimIndent()
+            commandLine(*cmdLine)
+            standardOutput = stdout
+        }
+        if (cmd.exitValue == 0 && stdout.size() > 0) {
+            println("version be updated to ${stdout.toString().trim()}")
+            val versionJson = File(project.rootDir, "version.json")
+            val formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .format(LocalDateTime.now())
+            versionJson.writeText("""
+                {
+                    "versionName": "$appVerName",
+                    "versionCode": $appVerCode,
+                    "updateTime": "$formatTime"
+                }
+            """.trimIndent())
         }
     }
 }
