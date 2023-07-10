@@ -2,7 +2,11 @@ package me.teble.xposed.autodaily.hook.proxy.activity
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Handler
+import android.os.IBinder
+import android.os.Message
 import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.utils.LogUtil
@@ -12,13 +16,12 @@ import me.teble.xposed.autodaily.utils.invoke
 
 class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
 
-    private var init = false
     @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun handleMessage(msg: Message): Boolean {
         when (msg.what) {
             // LAUNCH_ACTIVITY     sdk <= 8.0
             100 -> {
-                try {
+                runCatching {
                     val record = msg.obj
                     val fIntent = record.field(Intent::class.java)!!
                     val intent = fIntent.get(record) as Intent
@@ -34,14 +37,14 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                             fIntent.set(record, rIntent)
                         }
                     }
-                } catch (e: Exception) {
-                    LogUtil.e(e)
+                }.onFailure {
+                    LogUtil.e(it)
                 }
             }
             // EXECUTE_TRANSACTION    8.0+
             159 -> {
                 val clientTransaction = msg.obj
-                try {
+                runCatching {
                     clientTransaction?.let { cTrans ->
                         //获取列表
 //                        LogUtil.log("clientTransaction -> $cTrans")
@@ -63,7 +66,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                                         )
                                         fmIntent.set(item, rIntent)
                                         // android 12
-                                        if (Build.VERSION.SDK_INT >= 31) {
+                                        if (Build.VERSION.SDK_INT == 31) {
                                             val cActivityThread =
                                                 Class.forName("android.app.ActivityThread")
                                             val currentActivityThread =
@@ -90,13 +93,13 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                             }
                         }
                     }
-                } catch (e: Exception) {
-                    LogUtil.e(e)
+                }.onFailure {
+                    LogUtil.e(it)
                 }
             }
 //            else -> LogUtil.log("code -> " + msg.what)
         }
-        return mDefault?.handleMessage(msg) ?: false
+        return runCatching { mDefault?.handleMessage(msg) }.getOrNull() ?: false
     }
 
 }
