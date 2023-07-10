@@ -300,11 +300,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     // implementation ("org.apache-extras.beanshell:bsh:2.0b6")
     // shizuku
-    implementation("dev.rikka.shizuku:api:12.2.0")
-    implementation("dev.rikka.shizuku:provider:12.2.0")
-
-//    implementation("io.luckypray:dexkit:1.0.0")
-//    implementation("com.github.LuckyPray:DexKit:1.0.0")
+    implementation("dev.rikka.shizuku:api:13.1.3")
+    implementation("dev.rikka.shizuku:provider:13.1.3")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath
