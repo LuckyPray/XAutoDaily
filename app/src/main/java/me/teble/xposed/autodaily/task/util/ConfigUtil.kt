@@ -267,7 +267,7 @@ object ConfigUtil {
     fun fetchMeta(): MetaInfo? {
         val text: String? = RepoFileLoader.load(FileEnum.META)
         LogUtil.d("fetch meta -> $text")
-        val meta: MetaInfo? = runCatching { text?.parse<MetaInfo>() }.getOrNull()
+        val meta = runCatching { text?.parse<MetaInfo>() }.getOrNull()
         metaInfoCache = meta
         lastFetchTime = System.currentTimeMillis()
         return meta

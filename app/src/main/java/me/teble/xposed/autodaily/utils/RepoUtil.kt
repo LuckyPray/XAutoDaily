@@ -24,11 +24,17 @@ object RepoFileLoader {
 
     private var repoUrl = originRepoUrl
 
-    private fun loadRepoFile(path: String): String {
+    private fun loadRepoFile(path: String): String? {
         LogUtil.d("curr repo url: $repoUrl")
-        val req = Request.Builder().url("$repoUrl/$path").build()
-        return try {
-            client.newCall(req).execute().body!!.string()
+        val url = "$repoUrl/$path"
+        val req = Request.Builder().url(url).build()
+        try {
+            val response = client.newCall(req).execute()
+            if (response.isSuccessful) {
+                return response.body!!.string()
+            }
+            LogUtil.w("load repo file failed: $url, code: ${response.code}, response: ${response.body}")
+            return null
         } catch (e: Throwable) {
             LogUtil.e(e)
             val index = repoUrls.indexOf(repoUrl)
