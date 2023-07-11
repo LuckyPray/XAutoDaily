@@ -11,12 +11,14 @@ import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
+import me.teble.xposed.autodaily.task.model.MetaInfo
 import me.teble.xposed.autodaily.task.model.Result
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit.lastFetchTime
+import me.teble.xposed.autodaily.ui.ConfUnit.metaInfoCache
 import me.teble.xposed.autodaily.ui.ConfUnit.versionInfoCache
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.lastExecTime
@@ -70,17 +72,17 @@ object ConfigUtil {
     }
 
     fun checkUpdate(showToast: Boolean): Boolean {
-        val info = fetchUpdateInfo()
+        val info = fetchMeta()
         info?.let {
             val currConfVer = loadSaveConf().version
-            if (currConfVer < info.confVersion) {
-                if (BuildConfig.VERSION_CODE >= info.minAppVersion) {
-                    updateConfig(info.confUrl, showToast)
+            if (currConfVer < info.config.version) {
+                if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
+                    updateConfig(showToast)
                 } else {
 //                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
                 }
             }
-            if (BuildConfig.VERSION_CODE < info.appVersion) {
+            if (BuildConfig.VERSION_CODE < info.app.versionCode) {
                 if (showToast) {
                     ToastUtil.send("插件版本存在更新")
                 }
@@ -93,9 +95,9 @@ object ConfigUtil {
         return false
     }
 
-    private fun updateConfig(confUrl: String, showToast: Boolean): Boolean {
+    private fun updateConfig(showToast: Boolean): Boolean {
         try {
-            val encRes = confUrl.get()
+            val encRes = RepoFileLoader.load(FileEnum.CONF) ?: return false
             val res = decodeConfStr(encRes)
             res ?: let {
                 LogUtil.w("配置文件获取失败")
@@ -260,6 +262,15 @@ object ConfigUtil {
             LogUtil.e(e, "拉取公告失败：")
             null
         }
+    }
+
+    fun fetchMeta(): MetaInfo? {
+        val text: String? = RepoFileLoader.load(FileEnum.META)
+        LogUtil.d("fetch meta -> $text")
+        val meta: MetaInfo? = runCatching { text?.parse<MetaInfo>() }.getOrNull()
+        metaInfoCache = meta
+        lastFetchTime = System.currentTimeMillis()
+        return meta
     }
 
     fun checkExecuteTask(task: Task): Boolean {

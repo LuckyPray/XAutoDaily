@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
@@ -38,7 +37,7 @@ import me.teble.xposed.autodaily.hook.base.hostVersionCode
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
-import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchUpdateInfo
+import me.teble.xposed.autodaily.task.util.ConfigUtil.fetchMeta
 import me.teble.xposed.autodaily.task.util.ConfigUtil.getCurrentExecTaskNum
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
@@ -61,12 +60,12 @@ fun MainLayout(navController: NavHostController) {
     val lastClickTime = remember { mutableStateOf(0L) }
     LaunchedEffect(notice) {
         runAsync {
-            val info = ConfUnit.versionInfoCache ?: fetchUpdateInfo()
+            val meta = ConfUnit.metaInfoCache ?: fetchMeta()
             if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L) {
-                fetchUpdateInfo()
+                fetchMeta()
             }
-            info ?: ToastUtil.send("拉取公告失败")
-            notice.value = info?.notice ?: ""
+            meta ?: ToastUtil.send("拉取公告失败")
+            notice.value = meta?.notice ?: ""
         }
     }
     if (showUpdateDialog.value) {
@@ -342,7 +341,7 @@ fun BackgroundView() {
                 Button(
                     onClick = {
                         runAsync {
-                            val currentTime = TimeUtil.cnTimeMillis()
+                            val currentTime = System.currentTimeMillis()
                             if (currentTime - lastClickTime < 5000) {
                                 ToastUtil.send("点那么快怎么不上天呢")
                                 return@runAsync
