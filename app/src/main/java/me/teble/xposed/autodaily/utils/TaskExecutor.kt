@@ -4,7 +4,11 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
 import cn.hutool.core.thread.ThreadUtil
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.hook.base.moduleLoadInit
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -13,10 +17,13 @@ import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.TaskErrorInfo
 import me.teble.xposed.autodaily.ui.errInfo
+import me.teble.xposed.autodaily.ui.retryCount
 import java.time.LocalDateTime
-import java.util.*
+import java.util.TimeZone
 import java.util.concurrent.CompletableFuture.runAsync
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.locks.ReentrantLock
@@ -77,9 +84,19 @@ object TaskExecutor {
     private suspend fun executorTask(conf: TaskProperties) {
         val executeTime = System.currentTimeMillis()
         val needExecGroups = mutableListOf<TaskGroup>()
+        val currDateStr = TimeUtil.getCNDate().formatDate()
         lock.withLock {
             for (group in conf.taskGroups) {
                 for (task in group.tasks) {
+                    val taskException = task.errInfo
+                    // 重置历史异常数据
+                    if (taskException.dateStr.isNotEmpty() && taskException.dateStr != currDateStr) {
+                        if (task.retryCount != 0) {
+                            LogUtil.d("重置任务${task.id}历史异常数据")
+                            task.retryCount = 0
+                            task.errInfo = TaskErrorInfo()
+                        }
+                    }
                     if (ConfigUtil.checkExecuteTask(task) && task.errInfo.count < 3) {
                         if (!runtimeTasks.contains(group)) {
                             needExecGroups.add(group)
