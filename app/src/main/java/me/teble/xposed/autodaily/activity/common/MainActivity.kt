@@ -147,7 +147,7 @@ class MainActivity : ComponentActivity() {
 
         fun peekUserService(): Boolean {
             try {
-                return Shizuku.peekUserService(userServiceArgs, userServiceConnection)
+                return Shizuku.peekUserService(userServiceArgs, userServiceConnection) == 0
             } catch (e: Throwable) {
                 Log.e("XALog", e.stackTraceToString())
             }
