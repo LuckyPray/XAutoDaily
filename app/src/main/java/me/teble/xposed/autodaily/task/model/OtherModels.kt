@@ -47,6 +47,30 @@ data class VersionInfo(
 )
 
 @Serializable
+data class AppMeta(
+    val versionName: String,
+    val versionCode: Int,
+    val updateTime: String,
+    val updateLog: String,
+)
+
+@Serializable
+data class ConfigMeta(
+    val version: Int,
+    val md5: String,
+    val needAppVersion: Int,
+    val updateLog: String,
+    val updateTime: String,
+)
+
+@Serializable
+data class MetaInfo(
+    val app: AppMeta,
+    val config: ConfigMeta,
+    val notice: String,
+)
+
+@Serializable
 data class Result(
     val code: Int,
     val data: VersionInfo

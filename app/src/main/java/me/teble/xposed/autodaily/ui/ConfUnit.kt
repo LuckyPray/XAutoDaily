@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
+import me.teble.xposed.autodaily.task.model.MetaInfo
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
@@ -19,6 +20,7 @@ import me.teble.xposed.autodaily.task.util.Const.LAST_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.LAST_FETCH_TIME
 import me.teble.xposed.autodaily.task.util.Const.LOG_TO_XPOSED
 import me.teble.xposed.autodaily.task.util.Const.LastModuleVersion
+import me.teble.xposed.autodaily.task.util.Const.META_INFO_CACHE
 import me.teble.xposed.autodaily.task.util.Const.NEED_SHOW_LOG
 import me.teble.xposed.autodaily.task.util.Const.NEXT_SHOULD_EXEC_TIME
 import me.teble.xposed.autodaily.task.util.Const.RETRY_COUNT
@@ -53,6 +55,19 @@ object ConfUnit {
         }
         set(value) {
             xaConfig.putString(VERSION_INFO_CACHE, value.toJsonString())
+        }
+    var metaInfoCache: MetaInfo?
+        get() {
+            val str = xaConfig.getString(META_INFO_CACHE, "")
+            return runCatching {
+                if (str.isNotEmpty()) {
+                    return str.parse()
+                }
+                return null
+            }.getOrNull()
+        }
+        set(value) {
+            xaConfig.putString(META_INFO_CACHE, value.toJsonString())
         }
     var lastModuleVersion: Int
         get() = xaConfig.getInt(LastModuleVersion, 0)

@@ -1,5 +1,7 @@
 package me.teble.xposed.autodaily.utils
 
+import me.teble.xposed.autodaily.task.model.MetaInfo
+import me.teble.xposed.autodaily.ui.ConfUnit
 import okhttp3.Request
 
 enum class FileEnum(val path: String) {
@@ -39,7 +41,18 @@ object RepoFileLoader {
         }
     }
 
-    fun load(fileEnum: FileEnum) {
-        loadRepoFile(fileEnum.path)
+    fun load(fileEnum: FileEnum): String {
+        return loadRepoFile(fileEnum.path)
+    }
+
+    fun fetchMeta(): MetaInfo? {
+        return runCatching {
+            val text = load(FileEnum.META)
+            LogUtil.d("fetch meta -> $text")
+            val meta: MetaInfo = text.parse()
+            ConfUnit.metaInfoCache = meta
+            ConfUnit.lastFetchTime = System.currentTimeMillis()
+            return meta
+        }.getOrNull()
     }
 }

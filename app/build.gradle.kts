@@ -38,6 +38,8 @@ val appVerCode: Int by lazy {
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
 val appVerName: String = "3.0.17-NT"
+val updateLog = """
+""".trimIndent()
 
 android {
     namespace = "me.teble.xposed.autodaily"
@@ -254,14 +256,15 @@ androidComponents.onVariants { variant ->
         }
         if (cmd.exitValue == 0 && stdout.size() > 0) {
             println("version be updated to ${stdout.toString().trim()}")
-            val versionJson = File(project.rootDir, "version.json")
+            val versionJson = File(project.rootDir, "app-meta.json")
             val formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .format(LocalDateTime.now())
             versionJson.writeText("""
                 {
                     "versionName": "$appVerName",
                     "versionCode": $appVerCode,
-                    "updateTime": "$formatTime"
+                    "updateTime": "$formatTime",
+                    "updateLog": "$updateLog"
                 }
             """.trimIndent())
         }
