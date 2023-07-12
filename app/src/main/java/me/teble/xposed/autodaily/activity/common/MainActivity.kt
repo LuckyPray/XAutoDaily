@@ -198,6 +198,11 @@ fun ShizukuCard() {
                     }
                     return@clickable
                 }
+                val keepAlive = xaApp.prefs.getBoolean("KeepAlive", false)
+                if (!keepAlive) {
+                    Toast.makeText(xaApp, "未启用保活，无需启动守护进程", Toast.LENGTH_SHORT).show()
+                    return@clickable
+                }
                 if (!MainActivity.shizukuDaemonRunning) {
                     bindUserService()
                     startPeekRunnable()
