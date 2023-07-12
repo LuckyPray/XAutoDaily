@@ -6,7 +6,6 @@ import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.MetaInfo
 import me.teble.xposed.autodaily.task.model.Task
-import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_VERSION
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
@@ -28,34 +27,20 @@ import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXEC_STATUS
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
-import me.teble.xposed.autodaily.task.util.Const.VERSION_INFO_CACHE
 import me.teble.xposed.autodaily.utils.parse
 import me.teble.xposed.autodaily.utils.toJsonString
 
 object ConfUnit {
     val needUpdate: Boolean get() {
-        versionInfoCache?.let {
-            if (BuildConfig.VERSION_CODE < it.appVersion) {
+        metaInfoCache?.let {
+            if (BuildConfig.VERSION_CODE < it.app.versionCode) {
                 return true
             }
         }
         return false
     }
 
-    // -------------------------------------------------- //
-    var versionInfoCache: VersionInfo?
-        get() {
-            val str = xaConfig.getString(VERSION_INFO_CACHE, "")
-            return runCatching {
-                if (str.isNotEmpty()) {
-                    return str.parse()
-                }
-                return null
-            }.getOrNull()
-        }
-        set(value) {
-            xaConfig.putString(VERSION_INFO_CACHE, value.toJsonString())
-        }
+    // -------------------------------------------------- //\
     var metaInfoCache: MetaInfo?
         get() {
             val str = xaConfig.getString(META_INFO_CACHE, "")

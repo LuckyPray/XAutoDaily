@@ -37,21 +37,11 @@ data class MiniProfile(
 )
 
 @Serializable
-data class VersionInfo(
-    val appVersion: Int,
-    val minAppVersion: Int,
-    val updateLog: List<String>,
-    val confUrl: String,
-    val confVersion: Int,
-    val notice: String,
-)
-
-@Serializable
 data class AppMeta(
     val versionName: String,
     val versionCode: Int,
     val updateTime: String,
-    val updateLog: String,
+    val updateLog: String?,
 )
 
 @Serializable
@@ -67,17 +57,5 @@ data class ConfigMeta(
 data class MetaInfo(
     val app: AppMeta,
     val config: ConfigMeta,
-    val notice: String,
-)
-
-@Serializable
-data class Result(
-    val code: Int,
-    val data: VersionInfo
-)
-
-@Serializable
-data class PackageData(
-    val tags: List<String>,
-    val versions: List<String>
+    val notice: String?,
 )

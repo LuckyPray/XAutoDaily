@@ -232,7 +232,7 @@ fun MainLayout(navController: NavHostController) {
                             if (res) {
                                 showUpdateDialog.value = true
                                 updateDialogText.value =
-                                    ConfUnit.versionInfoCache?.updateLog?.joinToString("\n") ?: ""
+                                    ConfUnit.metaInfoCache?.app?.updateLog ?: ""
                             }
                             configVersion = loadSaveConf().version
                         }

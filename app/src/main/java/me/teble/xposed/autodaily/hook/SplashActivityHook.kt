@@ -63,7 +63,7 @@ class SplashActivityHook : BaseHook() {
                             }
                         }.onFailure { LogUtil.e(it, "try lock fail: ") }
                     }
-                    ConfUnit.versionInfoCache ?: ConfigUtil.checkUpdate(false)
+                    ConfUnit.metaInfoCache ?: ConfigUtil.checkUpdate(false)
                     autoResetTask(true)
                 }
                 handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
@@ -74,7 +74,7 @@ class SplashActivityHook : BaseHook() {
             val context = it.thisObject as Activity
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    if (ConfUnit.versionInfoCache == null
+                    if (ConfUnit.metaInfoCache == null
                         || System.currentTimeMillis() - ConfUnit.lastFetchTime > 3 * 60 * 60_000L) {
                         ConfigUtil.fetchMeta()
                     }
@@ -130,17 +130,11 @@ suspend fun Activity.openAppUpdateDialog() {
         if (!isInitialized) {
             builder = AlertDialog.Builder(this@openAppUpdateDialog, 5).apply {
                 setTitle("检测到新版本")
-                val updateList = ConfUnit.versionInfoCache?.updateLog ?: emptyList()
-                val updateLog = buildList {
-                    updateList.forEach {
-                        if (it.isNotEmpty()) {
-                            add(it)
-                        }
-                    }
-                }.toTypedArray()
-                setItems(updateLog, null)
+                val updateLog = ConfUnit.metaInfoCache?.app?.updateLog ?: ""
+                val updateLogLines = updateLog.lines().toTypedArray()
+                setItems(updateLogLines, null)
                 setNeutralButton("本次更新不再提示") { _, _ ->
-                    ConfUnit.skipUpdateVersion = "${ConfUnit.versionInfoCache?.appVersion}"
+                    ConfUnit.skipUpdateVersion = "${ConfUnit.metaInfoCache?.app?.versionCode}"
                 }
                 setNegativeButton("蓝奏云") { _, _ ->
                     context.startActivity(Intent().apply {
@@ -161,7 +155,7 @@ suspend fun Activity.openAppUpdateDialog() {
                 appUpdateDialog = builder!!.create()
             }
             if (!appUpdateDialog.isShowing && !isFinishing
-                && ConfUnit.skipUpdateVersion != "${ConfUnit.versionInfoCache?.appVersion}") {
+                && ConfUnit.skipUpdateVersion != "${ConfUnit.metaInfoCache?.app?.versionCode}") {
                 appUpdateDialog.show()
             }
         }

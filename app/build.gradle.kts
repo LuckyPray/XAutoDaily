@@ -39,6 +39,7 @@ val appVerCode: Int by lazy {
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
 val appVerName: String = "3.0.17-NT"
 val updateLog = """
+    在3.0.17基础上仅适配 NT 版本 QQ（正式版v8.9.63+）
 """.trimIndent()
 
 android {
@@ -264,7 +265,7 @@ androidComponents.onVariants { variant ->
                     "versionName": "$appVerName",
                     "versionCode": $appVerCode,
                     "updateTime": "$formatTime",
-                    "updateLog": "$updateLog"
+                    "updateLog": "${updateLog.replace("\n", "\\n")}"
                 }
             """.trimIndent())
         }

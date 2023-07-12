@@ -5,21 +5,16 @@ import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.config.NOTICE
-import me.teble.xposed.autodaily.config.XA_API_URL
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.MetaInfo
-import me.teble.xposed.autodaily.task.model.Result
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskProperties
-import me.teble.xposed.autodaily.task.model.VersionInfo
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit.lastFetchTime
 import me.teble.xposed.autodaily.ui.ConfUnit.metaInfoCache
-import me.teble.xposed.autodaily.ui.ConfUnit.versionInfoCache
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.lastExecTime
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
@@ -250,24 +245,15 @@ object ConfigUtil {
         return num
     }
 
-    fun fetchUpdateInfo(): VersionInfo? {
-        return try {
-            val text = "$XA_API_URL$NOTICE".get()
-            LogUtil.d("getNotice -> $text")
-            val res: Result = text.parse()
-            versionInfoCache = res.data
-            lastFetchTime = System.currentTimeMillis()
-            return res.data
-        } catch (e: Exception) {
-            LogUtil.e(e, "拉取公告失败：")
-            null
-        }
-    }
-
     fun fetchMeta(): MetaInfo? {
         val text: String? = RepoFileLoader.load(FileEnum.META)
         LogUtil.d("fetch meta -> $text")
-        val meta = runCatching { text?.parse<MetaInfo>() }.getOrNull()
+        val meta = runCatching {
+            text?.parse<MetaInfo>()
+        }.onFailure {
+            LogUtil.e(it, "解析meta失败：")
+        }.getOrNull()
+        LogUtil.d("fetch meta -> $meta")
         metaInfoCache = meta
         lastFetchTime = System.currentTimeMillis()
         return meta

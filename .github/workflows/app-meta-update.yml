@@ -38,3 +38,9 @@ jobs:
             git commit -m "Update app-meta.json"
             git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" pages:pages
           fi
+
+      - name: Purge jsdelivr CDN
+        run: |
+          for file in $(ls); do
+            curl -i "https://purge.jsdelivr.net/gh/${{ github.repository }}@pages/${file}"
+          done
