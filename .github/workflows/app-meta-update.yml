@@ -30,5 +30,5 @@ jobs:
           git add .
           if [[ -n $(git status -s) ]]; then
             git commit -m "Update app-meta.json"
-            git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@${{ github.repository }}" pages:pages
+            git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" pages:pages
           fi
