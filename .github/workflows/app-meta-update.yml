@@ -28,7 +28,7 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add .
-          if [[ -n $(git diff --stat) ]]; then
+          if [[ -n $(git status -s) ]]; then
             git commit -m "Update app-meta.json"
             git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@${{ github.repository }}" pages:pages
           fi
