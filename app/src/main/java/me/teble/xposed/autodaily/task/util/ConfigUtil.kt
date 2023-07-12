@@ -253,7 +253,6 @@ object ConfigUtil {
         }.onFailure {
             LogUtil.e(it, "解析meta失败：")
         }.getOrNull()
-        LogUtil.d("fetch meta -> $meta")
         metaInfoCache = meta
         lastFetchTime = System.currentTimeMillis()
         return meta
