@@ -1,0 +1,31 @@
+name: update app-meta.json
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'app-meta.json'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set variables
+        run: |
+          echo "app_meta=https://raw.githubusercontent.com/LuckyPray/XAutoDaily/master/app-meta.json" >> $GITHUB_ENV
+
+      - name: Clone pages branch
+        uses: actions/checkout@v3.3.0
+        with:
+          ref: pages
+
+      - name: Update app-meta.json
+        run: |
+          curl -sSL ${app_meta} > app-meta.json
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "Update app-meta.json"
+          git push "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" pages:${{ github.ref }}
