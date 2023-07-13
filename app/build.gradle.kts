@@ -37,12 +37,10 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.18"
+val appVerName: String = "3.0.18-fix"
 val updateLog = """
-    1. 适配 QQ NT 版本（v8.9.63以上版本）
-    2. 修复一个历史错误计数不会重置的bug
-    3. 由于原域名即将过期，对模块版本检测机制进行升级，配置托管至 github 仓库以及 CDN，7.22后未升级的模块将无法再检测更新
-    4. 更新内置配置至 v32, 暂时移除失效的排行榜点赞
+    1. 基于 3.0.18 修复部分设备无法进入模块设置界面的 bug
+    2. 优化守护进程启动提示，未启用保活选项无需运行守护进程
 """.trimIndent()
 
 android {
