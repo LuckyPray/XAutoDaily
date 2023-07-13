@@ -66,7 +66,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                                         )
                                         fmIntent.set(item, rIntent)
                                         // android 12
-                                        if (Build.VERSION.SDK_INT == 31) {
+                                        if (Build.VERSION.SDK_INT >= 31) {
                                             val cActivityThread =
                                                 Class.forName("android.app.ActivityThread")
                                             val currentActivityThread =
@@ -99,7 +99,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
             }
 //            else -> LogUtil.log("code -> " + msg.what)
         }
-        return runCatching { mDefault?.handleMessage(msg) }.getOrNull() ?: false
+        return mDefault?.handleMessage(msg) ?: false
     }
 
 }
