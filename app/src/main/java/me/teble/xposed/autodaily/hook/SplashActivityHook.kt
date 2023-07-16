@@ -84,7 +84,6 @@ class SplashActivityHook : BaseHook() {
                     context.openAppUpdateDialog()
                 } else if (ConfUnit.needShowUpdateLog) {
                     context.openConfigUpdateLog()
-                    ConfUnit.needShowUpdateLog = false
                 }
             }
         }
@@ -129,7 +128,7 @@ suspend fun Activity.openAppUpdateDialog() {
         val isInitialized = ::appUpdateDialog.isInitialized
         if (!isInitialized) {
             builder = AlertDialog.Builder(this@openAppUpdateDialog, 5).apply {
-                setTitle("检测到新版本")
+                setTitle("检测到新版本 ${ConfUnit.metaInfoCache?.app?.versionName ?: ""}")
                 val updateLog = ConfUnit.metaInfoCache?.app?.updateLog ?: ""
                 val updateLogLines = updateLog.lines().toTypedArray()
                 setItems(updateLogLines, null)
@@ -178,10 +177,14 @@ suspend fun Activity.openConfigUpdateLog() {
                         add("v${it.version}:\n${it.desc}")
                     }
                 }.reversed().toTypedArray()
+                setCancelable(false)
                 setItems(updateLog, null)
-                setNegativeButton("确定") { _, _ -> }
+                setNegativeButton("确定") { _, _ ->
+                    ConfUnit.needShowUpdateLog = false
+                }
                 setPositiveButton("前往配置") { _, _ ->
                     val intent = Intent(context, ModuleActivity::class.java)
+                    ConfUnit.needShowUpdateLog = false
                     context.startActivity(intent)
                 }
             }
