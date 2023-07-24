@@ -2,6 +2,8 @@ package me.teble.xposed.autodaily.activity.common
 
 import android.annotation.SuppressLint
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.*
@@ -19,11 +21,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.BuildConfig
@@ -33,8 +37,11 @@ import me.teble.xposed.autodaily.activity.common.MainActivity.Companion.startPee
 import me.teble.xposed.autodaily.activity.module.colors
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
+import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
+import me.teble.xposed.autodaily.hook.JumpActivityHook
+import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.ShizukuConf
 import me.teble.xposed.autodaily.shizuku.UserService
@@ -193,14 +200,17 @@ fun ShizukuCard() {
                     runAsync {
                         while (!ShizukuApi.isPermissionGranted) {
                             Thread.sleep(500)
-                            ShizukuApi.isPermissionGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                            ShizukuApi.isPermissionGranted =
+                                Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
                         }
                     }
                     return@clickable
                 }
                 val keepAlive = xaApp.prefs.getBoolean("KeepAlive", false)
                 if (!keepAlive) {
-                    Toast.makeText(xaApp, "未启用保活，无需启动守护进程", Toast.LENGTH_SHORT).show()
+                    Toast
+                        .makeText(xaApp, "未启用保活，无需启动守护进程", Toast.LENGTH_SHORT)
+                        .show()
                     return@clickable
                 }
                 if (!MainActivity.shizukuDaemonRunning) {
@@ -258,6 +268,60 @@ fun ShizukuCard() {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(text = "部分功能无法运行")
+            }
+        }
+    }
+}
+
+private fun openHostSetting(context: Context, type: QQTypeEnum) {
+    val intent = Intent().apply {
+        component = ComponentName(type.packageName, JUMP_ACTIVITY)
+        action = Intent.ACTION_VIEW
+        putExtra(JumpActivityHook.JUMP_ACTION_CMD, "jump")
+    }
+    runCatching {
+        Log.d("XALog", "启动 ${type.appName} 设置")
+        context.startActivity(intent)
+    }.onFailure {
+        Log.e("XALog", "启动失败 ${type.appName} ", it)
+        Toast.makeText(context, "启动失败，请确定 ${type.appName} 已安装并未被停用（冻结）", Toast.LENGTH_SHORT).show()
+    }
+}
+
+@Composable
+private fun SettingCard() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White, shape = RoundedCornerShape(6.dp))
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Outlined.Settings, "设置")
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+            Text(
+                text = "模块设置",
+                color = Color.Black
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(text = "请在 QQ/TIM 内进行操作")
+            Text(text = "APP 侧滑 > 设置 > XAutoDaily")
+            Spacer(modifier = Modifier.height(10.dp))
+            Row {
+                val context = LocalContext.current
+                Text(text = "QQ",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        openHostSetting(context, QQTypeEnum.QQ)
+                    }
+                )
+                Spacer(modifier = Modifier.width(20.dp))
+                Text(text = "TIM",
+                    color = Color.Blue,
+                    modifier = Modifier.clickable {
+                        openHostSetting(context, QQTypeEnum.TIM)
+                    }
+                )
             }
         }
     }
@@ -405,6 +469,9 @@ fun ModuleView() {
                         }
                     }
                 }
+            }
+            item {
+                SettingCard()
             }
         }
     }

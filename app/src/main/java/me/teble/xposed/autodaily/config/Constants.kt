@@ -10,6 +10,7 @@ const val PACKAGE_NAME_QQ = "com.tencent.mobileqq"
 const val PACKAGE_NAME_TIM = "com.tencent.tim"
 const val PACKAGE_NAME_QQ_LITE = "com.tencent.qqlite"
 const val PACKAGE_NAME_QQ_INTERNATIONAL = "com.tencent.mobileqqi"
+const val JUMP_ACTIVITY = "com.tencent.mobileqq.activity.JumpActivity"
 const val PACKAGE_NAME_SELF = BuildConfig.APPLICATION_ID
 const val PAN_URL = "https://teble.lanzoui.com/b00t9lw3a"
 const val GITHUB_RELEASE_URL = "https://github.com/LuckyPray/XAutoDaily/releases"

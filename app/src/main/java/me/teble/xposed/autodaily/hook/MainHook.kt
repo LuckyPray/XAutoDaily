@@ -1,6 +1,10 @@
 package me.teble.xposed.autodaily.hook
 
-import android.app.*
+import android.app.Application
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.res.XModuleResources
@@ -9,7 +13,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.github.kyuubiran.ezxhelper.init.EzXHelperInit
-import com.github.kyuubiran.ezxhelper.utils.*
+import com.github.kyuubiran.ezxhelper.utils.emptyParam
+import com.github.kyuubiran.ezxhelper.utils.findMethod
+import com.github.kyuubiran.ezxhelper.utils.hookAfter
+import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
@@ -20,7 +27,21 @@ import me.teble.xposed.autodaily.config.BaseApplicationImpl
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.NewRuntime
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
-import me.teble.xposed.autodaily.hook.base.*
+import me.teble.xposed.autodaily.hook.base.BaseHook
+import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.hook.base.hostApp
+import me.teble.xposed.autodaily.hook.base.hostAppName
+import me.teble.xposed.autodaily.hook.base.hostClassLoader
+import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.base.hostInit
+import me.teble.xposed.autodaily.hook.base.hostPackageName
+import me.teble.xposed.autodaily.hook.base.hostProcessName
+import me.teble.xposed.autodaily.hook.base.hostVersionCode
+import me.teble.xposed.autodaily.hook.base.injectClassLoader
+import me.teble.xposed.autodaily.hook.base.load
+import me.teble.xposed.autodaily.hook.base.moduleLoadInit
+import me.teble.xposed.autodaily.hook.base.modulePath
+import me.teble.xposed.autodaily.hook.base.moduleRes
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.hook.config.Config.confuseInfo
 import me.teble.xposed.autodaily.hook.config.Config.hooksVersion
@@ -48,6 +69,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         QLogHook::class.java,
         QQSettingSettingActivityHook::class.java,
         SplashActivityHook::class.java,
+//        JumpActivityHook::class.java,
         ToServiceMsgHook::class.java,
         BugHook::class.java,
     )
@@ -108,6 +130,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         Log.d("XALog", "tool进程：" + loadPackageParam.processName)
                         toolsHook()
                     }
+                    JumpActivityHook().hookJumpActivity()
                 }.onFailure {
                     moduleLoadInit = true
                     ToastUtil.send(it.stackTraceToString(), true)
