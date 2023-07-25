@@ -37,10 +37,10 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.18-fix"
+val appVerName: String = "3.0.19"
 val updateLog = """
-    1. 基于 3.0.18 修复部分设备无法进入模块设置界面的 bug
-    2. 优化守护进程启动提示，未启用保活选项无需运行守护进程
+    1. 适配 QQ 8.9.70+ 模块设置入口
+    2. 模块本体新增快捷跳转
 """.trimIndent()
 
 android {
