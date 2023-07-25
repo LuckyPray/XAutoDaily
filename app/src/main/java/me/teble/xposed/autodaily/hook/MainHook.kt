@@ -69,7 +69,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         QLogHook::class.java,
         QQSettingSettingActivityHook::class.java,
         SplashActivityHook::class.java,
-//        JumpActivityHook::class.java,
+        JumpActivityHook::class.java,
         ToServiceMsgHook::class.java,
         BugHook::class.java,
     )
@@ -130,7 +130,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         Log.d("XALog", "tool进程：" + loadPackageParam.processName)
                         toolsHook()
                     }
-                    JumpActivityHook().hookJumpActivity()
                 }.onFailure {
                     moduleLoadInit = true
                     ToastUtil.send(it.stackTraceToString(), true)

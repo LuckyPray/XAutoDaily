@@ -34,7 +34,7 @@ class JumpActivityHook : BaseHook() {
                 if (intent?.hasExtra(JUMP_ACTION_CMD) == true) {
                     activity.startActivity(Intent(activity, ModuleActivity::class.java))
                 }
-            }.unhook()
+            }
         }.onFailure {
             LogUtil.e(it, "JumpActivity hook failed")
         }

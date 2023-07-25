@@ -310,14 +310,14 @@ private fun SettingCard() {
             Row {
                 val context = LocalContext.current
                 Text(text = "QQ",
-                    color = Color.Blue,
+                    color = Color(0xFF409EFF),
                     modifier = Modifier.clickable {
                         openHostSetting(context, QQTypeEnum.QQ)
                     }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
                 Text(text = "TIM",
-                    color = Color.Blue,
+                    color = Color(0xFF409EFF),
                     modifier = Modifier.clickable {
                         openHostSetting(context, QQTypeEnum.TIM)
                     }

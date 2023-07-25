@@ -37,7 +37,6 @@ import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Proxy
-import kotlin.jvm.internal.DefaultConstructorMarker
 
 /**
  * @author teble
@@ -136,11 +135,8 @@ class QQSettingSettingActivityHook : BaseHook() {
             LogUtil.d("${cSimpleItemProcessor}, ${cSimpleItemProcessor.getMethods(false).toList()}")
             val listeners = cSimpleItemProcessor.getMethods(false)
                 .filter {
-                    runCatching {
-                        LogUtil.d("${it} \n${it.returnType == Void.TYPE && it.parameterTypes.size == 1}\n${it.parameterTypes[0]}, ${kotlin.jvm.functions.Function0::class.java}")
-                    }
                     it.returnType == Void.TYPE && it.parameterTypes.size == 1
-                        && it.parameterTypes[0].name == kotlin.jvm.functions.Function0::class.java.name
+                        && it.parameterTypes[0].name == "kotlin.jvm.functions.Function0"
                 }
                 .sortedBy { it.name }
             LogUtil.d("listeners: $listeners")
@@ -159,7 +155,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                     resId
                 )
                 val function0 = mSimpleItemProcessorOnClickListener.parameterTypes.first()
-                val unit = hostClassLoader.loadClass(Unit::class.java.name).fieldValue("INSTANCE")!!
+                val unit = hostClassLoader.loadClass("kotlin.Unit").fieldValue("INSTANCE")!!
                 val proxy = Proxy.newProxyInstance(hostClassLoader, arrayOf(function0)) { _, method, args ->
                     if (method.name == "invoke") {
                         try {
@@ -175,7 +171,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                 val groupClass = result.first()!!::class.java
                 LogUtil.d("groupClass: $groupClass")
                 val constructor = groupClass.getConstructor(java.util.List::class.java, CharSequence::class.java, CharSequence::class.java,
-                    Int::class.javaPrimitiveType, hostClassLoader.loadClass(DefaultConstructorMarker::class.java.name))
+                    Int::class.javaPrimitiveType, hostClassLoader.loadClass("kotlin.jvm.internal.DefaultConstructorMarker"))
                 val group = constructor.newInstance(listOf(item), null, null, 6, null)
                 result.invoke("add", 0, group)
             }
