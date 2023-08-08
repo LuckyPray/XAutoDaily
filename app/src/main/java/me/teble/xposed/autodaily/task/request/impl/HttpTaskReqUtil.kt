@@ -21,6 +21,7 @@ import java.io.IOException
 import java.lang.Integer.min
 import java.nio.charset.Charset
 import java.util.concurrent.TimeUnit
+import kotlin.collections.set
 
 object HttpTaskReqUtil : ITaskReqUtil {
 
@@ -59,12 +60,20 @@ object HttpTaskReqUtil : ITaskReqUtil {
                     headers[it.key.lowercase()] = EnvFormatUtil.format(it.value, task.domain, env)
                 }
                 LogUtil.d("header 头构造完毕: $headers")
-                var cookie: String? = null
+                var cookie: String? = headers["cookie"]
                 when (task.domain) {
                     null -> {}
                     // qqDomain
                     else -> {
-                        cookie = getQDomainCookies(task.domain)
+                        if (cookie != null) {
+                            cookie = cookie.trim()
+                            if (!cookie.endsWith(";")) {
+                                cookie += "; ";
+                            }
+                            cookie += getQDomainCookies(task.domain)
+                        } else {
+                            cookie = getQDomainCookies(task.domain)
+                        }
                     }
                 }
                 LogUtil.d("cookie 构造完毕: $cookie(${cookie?.length})")
