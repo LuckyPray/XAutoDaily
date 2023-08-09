@@ -37,10 +37,10 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.19"
+val appVerName: String = "3.0.20"
 val updateLog = """
-    1. 适配 QQ 8.9.70+ 模块设置入口
-    2. 模块本体新增快捷跳转
+    1. 更新配置解析器，低于此版本的模块不再支持后续配置的更新
+    2. 更新内置配置版本至v35，尝试支持腾讯视频签到
 """.trimIndent()
 
 android {
