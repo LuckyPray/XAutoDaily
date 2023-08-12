@@ -1,7 +1,7 @@
 {
-    "version": 37,
+    "version": 38,
     "needAppVersion": 23080814,
-    "updateLog": "替换活跃任务中添加好友时使用的机器人，完成2.0活跃天（同时干掉了发消息的烦人机器人",
-    "md5": "883ebaa9a5bce16624bab47bfdaf5182",
-    "updateTime": "2023-08-12 14:55:00"
+    "updateLog": "去除失效的个性装扮签到",
+    "md5": "aee309d85491eceb6b46e885bf7247e8",
+    "updateTime": "2023-08-12 14:58:49"
 }
