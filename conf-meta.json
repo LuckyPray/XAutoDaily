@@ -1,7 +1,7 @@
 {
-    "version": 38,
-    "needAppVersion": 23080814,
-    "updateLog": "去除失效的个性装扮签到",
-    "md5": "aee309d85491eceb6b46e885bf7247e8",
-    "updateTime": "2023-08-12 14:58:49"
+    "version": 39,
+    "needAppVersion": 23021016,
+    "updateLog": "由于官方接到代刷“添加好友”举报，移除加好友活跃（别问为什么",
+    "md5": "fa01386199f74c874b2df2db69f83741",
+    "updateTime": "2023-08-16 18:12:16"
 }
