@@ -1,7 +1,7 @@
 {
-    "version": 39,
-    "needAppVersion": 23021016,
-    "updateLog": "由于官方接到代刷“添加好友”举报，移除加好友活跃（别问为什么",
-    "md5": "fa01386199f74c874b2df2db69f83741",
-    "updateTime": "2023-08-16 18:12:16"
+    "version": 41,
+    "needAppVersion": 23080814,
+    "updateLog": "新增2个大会员每周等级、SVIP加倍卡领取",
+    "md5": "2dc550d22642a82e12cf7c5a033ee81f",
+    "updateTime": "2023-08-28 16:09:55"
 }
