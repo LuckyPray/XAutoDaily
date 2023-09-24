@@ -255,9 +255,7 @@ struct [[gnu::packed]] ZipLocalFile {
                 return {};
             }
 
-#if !(defined(_WIN32) || defined(WIN32))
             mprotect(out.addr(), out.len(), PROT_READ);
-#endif
             return out;
         } else if (record->compress == 0 && real_compress_size == real_uncompress_size) {
             MemMap out(data(), real_uncompress_size);
