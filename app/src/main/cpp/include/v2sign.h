@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fstream>
 #include <android/log.h>
+#include "zip_helper.h"
 #include "md5.h"
 #include "log.h"
 #ifndef MODULE_SIGNATURE
@@ -47,11 +48,15 @@ namespace {
     }
 
     std::string getSignBlock(const std::string &path) {
-        std::ifstream f(path);
-        std::string file((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
+        zip_helper::MemMap memMap(path);
+        auto zip_file = zip_helper::ZipFile::Open(memMap);
+        if (!zip_file || zip_file->entries.size() == 0) return {};
+        auto last_entry = zip_file->entries.back();
+        auto zip_entries_end_ptr = reinterpret_cast<uint8_t *>(last_entry->record) + last_entry->getEntrySize();
+        auto apk_end_ptr = memMap.addr() + memMap.len();
         uint64_t curr = 0;
-        const char *base = file.c_str();
-        const char *ptr = base + file.size() - 1;
+        uint8_t *base = zip_entries_end_ptr;
+        uint8_t *ptr = apk_end_ptr - 1;
         std::string signBlock;
         while (ptr >= base) {
             curr = (curr << 8) | *ptr--;
@@ -64,7 +69,6 @@ namespace {
                     for (int i = 8; i < 16; ++i) {
                         tmp = (tmp << 8) | *(ptr - i);
                     }
-                    // TODO 只判断魔数“APK Sig Block 42”可能存在误判
                     ptr -= 16;
                     tmp -= 24;
                     for (int i = 0; i < tmp; ++i) {
