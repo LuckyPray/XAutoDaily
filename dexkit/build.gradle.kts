@@ -22,3 +22,7 @@ android {
         }
     }
 }
+
+dependencies {
+    implementation("com.google.flatbuffers:flatbuffers-java:23.5.26")
+}

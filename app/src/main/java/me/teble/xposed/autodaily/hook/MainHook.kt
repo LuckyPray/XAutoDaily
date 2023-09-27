@@ -20,7 +20,6 @@ import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
-import io.luckypray.dexkit.DexKitBridge
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.BaseApplicationImpl
@@ -56,6 +55,8 @@ import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
+import org.luckypray.dexkit.DexKitBridge
+import org.luckypray.dexkit.query.enums.StringMatchType
 import java.lang.reflect.Field
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
@@ -325,19 +326,20 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             return
         }
         LogUtil.log("needLocateClasses -> $needLocateClasses")
-        var startTime = 0L
+        val startTime = System.currentTimeMillis()
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
         try {
-            DexKitBridge.create(hostApp.applicationInfo.sourceDir)?.use {
-                startTime = System.currentTimeMillis()
-                it.batchFindClassesUsingStrings {
-                    queryMap = info
+            DexKitBridge.create(hostApp.applicationInfo.sourceDir)?.use { bridge ->
+                bridge.batchFindClassUsingStrings {
+                    info.forEach { (key, valueSet) ->
+                        addSearchGroup(key, valueSet.toList(), StringMatchType.SimilarRegex)
+                    }
                 }.forEach { (key, value) ->
                     LogUtil.d("search result: $key -> ${value.toList()}")
                     if (value.size == 1) {
                         LogUtil.i("locate info: $key -> ${value.first()}")
-                        cache.putString("$key#${hostVersionCode}", value.first().descriptor)
+                        cache.putString("$key#${hostVersionCode}", value.first().dexDescriptor)
                         locateNum++
                     } else {
                         LogUtil.w("locate not instance class: ${value.toList()}")

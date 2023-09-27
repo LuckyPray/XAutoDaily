@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.4.1)
 project(xa_native)
 
 add_subdirectory(../../../../mmkv mmkv)
-add_subdirectory(../../../../dexkit/DexKit/Core dex_kit_static)
+add_subdirectory(../../../../dexkit/DexKit/Core dexkit_static)
 
 add_library(crypto STATIC IMPORTED)
 set_target_properties(
@@ -35,6 +35,6 @@ target_link_libraries(xa_native
         crypto
         openssl
         mmkv
-        dex_kit_static
+        dexkit_static
         z
         ${log-lib})

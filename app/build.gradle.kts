@@ -73,7 +73,7 @@ android {
                     "-Wno-unused-command-line-argument",
                     "-DMMKV_DISABLE_CRYPT",
                 )
-                cppFlags("-std=c++17", *flags)
+                cppFlags("-std=c++20", *flags)
                 cFlags("-std=c18", *flags)
                 findInPath("ccache")?.let {
                     println("Using ccache $it")
@@ -110,19 +110,17 @@ android {
         val debug by getting {
             versionNameSuffix = ".$buildNum-debug"
             val debugFlags = arrayOf<String>(
-//                "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960",
+                "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960",
 //                "-DTEST_SIGNATURE",
             )
             externalNativeBuild {
                 cmake {
-                    arguments.addAll(
-                        arrayOf(
-                            "-DCMAKE_CXX_FLAGS_DEBUG=-Og",
-                            "-DCMAKE_C_FLAGS_DEBUG=-Og",
-                        )
-                    )
-                    cFlags += debugFlags
                     cppFlags += debugFlags
+                    cFlags += debugFlags
+                    arguments(
+                        "-DCMAKE_CXX_FLAGS_DEBUG=-Og",
+                        "-DCMAKE_C_FLAGS_DEBUG=-Og",
+                    )
                 }
             }
         }
