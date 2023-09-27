@@ -19,7 +19,7 @@ object ProcUtil {
     const val TROOP = 1 shl 9
     const val UNITY = 1 shl 10
 
-    const val OTHOE = 1 shl 31
+    const val OTHER = 1 shl 31
     const val ANY = (1 shl 32) - 1
 
     val mPid: Int by lazy { Process.myPid() }
@@ -37,7 +37,9 @@ object ProcUtil {
     val procType: Int by lazy {
         val parts = procName.split(":")
         if (parts.size == 1) {
-            if (parts.last() == "unknown") {
+            if (procName == "com.tencent.ilink.ServiceProcess") {
+                return@lazy OTHER
+            } else if (parts.last() == "unknown") {
                 return@lazy UNKNOW
             } else return@lazy MAIN
         }
@@ -53,7 +55,7 @@ object ProcUtil {
             tail.startsWith("troop") -> TROOP
             tail.startsWith("unity") -> UNITY
             tail.startsWith("qqfav") -> QQFAV
-            else -> OTHOE
+            else -> OTHER
         }
     }
 
@@ -70,5 +72,5 @@ object ProcUtil {
     val isQQFav: Boolean = inProcess(QQFAV)
     val isTroop: Boolean = inProcess(TROOP)
     val isUnity: Boolean = inProcess(UNITY)
-    val isAny: Boolean = inProcess(ANY)
+
 }
