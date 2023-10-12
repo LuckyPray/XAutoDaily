@@ -26,6 +26,7 @@ import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.TaskErrorInfo
 import me.teble.xposed.autodaily.ui.errInfo
+import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.ui.retryCount
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor.AUTO_EXEC
@@ -65,6 +66,7 @@ class SplashActivityHook : BaseHook() {
                     }
                     ConfUnit.metaInfoCache ?: ConfigUtil.checkUpdate(false)
                     autoResetTask(true)
+                    resetTasksNextExecTime()
                 }
                 handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
             }
@@ -230,6 +232,22 @@ suspend fun Activity.openJumpModuleDialog(lock: FileLock, file: File) {
             }
             if (!configUpdateDialog.isShowing && !isFinishing) {
                 configUpdateDialog.show()
+            }
+        }
+    }
+}
+
+suspend fun resetTasksNextExecTime() {
+    withContext(Dispatchers.IO) {
+        val conf = loadSaveConf()
+        val currCnDate = TimeUtil.getCNDate().formatDate()
+        conf.taskGroups.forEach { group ->
+            group.tasks.forEach { task ->
+                task.nextShouldExecTime?.let {
+                    if (it > currCnDate) {
+                        task.nextShouldExecTime = null
+                    }
+                }
             }
         }
     }

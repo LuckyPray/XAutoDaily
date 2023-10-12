@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.utils
 
+import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.millisecond
 import java.net.HttpURLConnection
@@ -12,10 +13,10 @@ import java.util.*
 
 object TimeUtil {
 
-    private var timeDiff: Long? = null
+    private var timeDiff: Long = 0
 
     private val diff: Long
-        get() = timeDiff ?: 0
+        get() = timeDiff
 
     private val cnZoneId by lazy { ZoneId.of("+8") }
 
@@ -30,25 +31,20 @@ object TimeUtil {
         LogUtil.d("networkTime: $networkTime")
         networkTime?.let {
             timeDiff = it - getCNTime()
+            xaConfig.putLong("cnTimeDiff", timeDiff)
+        } ?: run {
+            timeDiff = xaConfig.getLong("cnTimeDiff", 0)
         }
     }
 
     private fun getNetworkTime(): Long? {
-        return try {
+        return runRetry(3) {
             val url = URL("http://www.baidu.com")
             val uc = url.openConnection() as HttpURLConnection
             uc.connectTimeout = 2000
             uc.connect()
             // 避免时间误差
             uc.date + 500
-        } catch (e: Exception) {
-            try {
-                LogUtil.e(e, "get network time error, will used localtime -> ${getCNTime()}:")
-                ToastUtil.send("获取网络时间失败，将使用本地时间执行任务，可能存在误差")
-            } catch (ignore: Exception) {
-                LogUtil.e(e,"get network time error, will used localtime -> ${getCNTime()}:")
-            }
-            null
         }
     }
 
