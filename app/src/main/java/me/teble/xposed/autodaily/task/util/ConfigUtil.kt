@@ -6,6 +6,7 @@ import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
@@ -135,28 +136,11 @@ object ConfigUtil {
     }
 
     private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {
-        try {
-            if (confDir.isFile) {
-                confDir.delete()
-            }
-            if (!confDir.exists()) {
-                confDir.mkdirs()
-            }
-            val propertiesFile = File(confDir, "xa_conf")
-            if (!propertiesFile.exists()) {
-                propertiesFile.createNewFile()
-            }
-            FileUtil.writeUtf8String(encConfStr, propertiesFile)
-            return true
-        } catch (e: Exception) {
-            LogUtil.e(e)
-            ToastUtil.send("保存配置文件失败，详情请看日志")
-            return false
-        } finally {
-            // clear cache
-            _conf = null
-            LogUtil.d("clear conf cache")
-        }
+        xaConfig.putString("xa_conf", encConfStr)
+        // clear cache
+        _conf = null
+        LogUtil.d("clear conf cache")
+        return true
     }
 
     private fun getDefaultConf(): String {
@@ -167,11 +151,7 @@ object ConfigUtil {
         if (_conf != null) {
             return _conf as TaskProperties
         }
-        var conf: TaskProperties? = null
-        val propertiesFile = File(confDir, "xa_conf")
-        if (propertiesFile.exists()) {
-            conf = loadConf(FileUtil.readUtf8String(propertiesFile))
-        }
+        var conf: TaskProperties? = loadConf()
         val encodeConfig = getDefaultConf()
         val defaultConf = loadConf(encodeConfig)
         defaultConf ?: let {
@@ -200,6 +180,13 @@ object ConfigUtil {
         }
         _conf = conf
         return conf
+    }
+
+    private fun loadConf(): TaskProperties? {
+        val encodeConfStr = xaConfig.getString("xa_conf")
+        return encodeConfStr?.let {
+            loadConf(it)
+        }
     }
 
     private fun loadConf(encodeConfStr: String): TaskProperties? {

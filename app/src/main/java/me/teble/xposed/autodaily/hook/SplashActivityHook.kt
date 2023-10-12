@@ -75,8 +75,8 @@ class SplashActivityHook : BaseHook() {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     if (ConfUnit.metaInfoCache == null
-                        || System.currentTimeMillis() - ConfUnit.lastFetchTime > 3 * 60 * 60_000L) {
-                        ConfigUtil.fetchMeta()
+                        || System.currentTimeMillis() - ConfUnit.lastFetchTime > 1 * 60 * 60_000L) {
+                        ConfigUtil.checkUpdate(false)
                     }
                     autoResetTask(false)
                 }
