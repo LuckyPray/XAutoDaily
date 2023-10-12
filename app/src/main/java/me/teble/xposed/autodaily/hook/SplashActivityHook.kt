@@ -22,11 +22,13 @@ import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
+import me.teble.xposed.autodaily.task.util.format
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.TaskErrorInfo
 import me.teble.xposed.autodaily.ui.errInfo
-import me.teble.xposed.autodaily.ui.nextShouldExecTime
+import me.teble.xposed.autodaily.ui.lastExecTime
+import me.teble.xposed.autodaily.ui.reset
 import me.teble.xposed.autodaily.ui.retryCount
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor.AUTO_EXEC
@@ -240,12 +242,13 @@ suspend fun Activity.openJumpModuleDialog(lock: FileLock, file: File) {
 suspend fun resetTasksNextExecTime() {
     withContext(Dispatchers.IO) {
         val conf = loadSaveConf()
-        val currCnDate = TimeUtil.getCNDate().formatDate()
+        val currCnDate = TimeUtil.getCNDate().format()
         conf.taskGroups.forEach { group ->
             group.tasks.forEach { task ->
-                task.nextShouldExecTime?.let {
+                task.lastExecTime?.let {
                     if (it > currCnDate) {
-                        task.nextShouldExecTime = null
+                        LogUtil.d("任务${task.id}时间错误，当前时间：$currCnDate，上次执行时间：$it")
+                        task.reset()
                     }
                 }
             }
