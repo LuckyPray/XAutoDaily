@@ -81,7 +81,7 @@ fun MainLayout(navController: NavHostController) {
                 fetchMeta()
             }
             meta ?: ToastUtil.send("拉取公告失败")
-            notice.value = meta?.notice ?: ""
+            notice.value = meta?.notice?.trimEnd() ?: ""
         }
     }
     if (showUpdateDialog.value) {

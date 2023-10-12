@@ -12,7 +12,7 @@ object NativeUtil {
     private val is64Bit: Boolean
         get() {
             val clazz = Class.forName("dalvik.system.VMRuntime")
-            return clazz.new().invoke("is64Bit") as Boolean
+            return clazz.invoke("getRuntime")!!.invoke("is64Bit") as Boolean
         }
 
     private fun getLibFilePath(name: String): String {
