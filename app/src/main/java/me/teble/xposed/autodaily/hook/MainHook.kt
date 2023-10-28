@@ -339,7 +339,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     LogUtil.d("search result: $key -> ${value.toList()}")
                     if (value.size == 1) {
                         LogUtil.i("locate info: $key -> ${value.first()}")
-                        cache.putString("$key#${hostVersionCode}", value.first().dexDescriptor)
+                        cache.putString("$key#${hostVersionCode}", value.first().descriptor)
                         locateNum++
                     } else {
                         LogUtil.w("locate not instance class: ${value.toList()}")
