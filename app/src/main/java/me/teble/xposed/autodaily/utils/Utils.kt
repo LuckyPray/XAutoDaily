@@ -87,13 +87,10 @@ fun Context.openUrl(url: String) {
 }
 
 
-fun <T> runRetry(retryNum: Int, block: () -> T): T? {
+fun <T> runRetry(retryNum: Int, block: () -> T?): T? {
     for (i in 1..retryNum) {
         runCatching {
-            val result = block()
-            if (result != null) {
-                return result
-            }
+            return block()
         }.onFailure {
             LogUtil.e(it)
         }
