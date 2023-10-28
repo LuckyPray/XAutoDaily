@@ -37,11 +37,12 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.21"
+val appVerName: String = "3.0.22"
 val updateLog = """
-    1. 修复误判 ilink 进程的导致的插件进程崩溃
-    2. 更换配置存储方式，避免由于玄学因素导致的配置回滚
-    3. 其它bug修复以及优化
+    1. 修复获取网络时间异常导致签到时间为 1970 年的 bug
+    2. 优化配置加载
+    3. 替换更新网盘链接为 123 盘
+    4. 更新内置配置文件为 v43
 """.trimIndent()
 
 android {
