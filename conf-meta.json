@@ -1,7 +1,7 @@
 {
-    "version": 42,
+    "version": 43,
     "needAppVersion": 23080814,
-    "updateLog": "不知道更新了个啥，反正就是更新了",
-    "md5": "dc429d46f65b840d0c775cddc6b3537e",
-    "updateTime": "2023-09-05 11:20:24"
+    "updateLog": "移除失效的腾讯视频签到",
+    "md5": "f15e085740cbaeb0f7f0abe9c9573534",
+    "updateTime": "2023-10-29 00:55:19"
 }
