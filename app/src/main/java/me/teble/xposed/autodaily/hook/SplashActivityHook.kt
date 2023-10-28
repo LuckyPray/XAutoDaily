@@ -139,7 +139,7 @@ suspend fun Activity.openAppUpdateDialog() {
                 setNeutralButton("本次更新不再提示") { _, _ ->
                     ConfUnit.skipUpdateVersion = "${ConfUnit.metaInfoCache?.app?.versionCode}"
                 }
-                setNegativeButton("蓝奏云") { _, _ ->
+                setNegativeButton("123盘") { _, _ ->
                     context.startActivity(Intent().apply {
                         action = Intent.ACTION_VIEW
                         data = Uri.parse(PAN_URL)

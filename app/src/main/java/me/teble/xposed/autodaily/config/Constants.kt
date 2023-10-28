@@ -12,7 +12,7 @@ const val PACKAGE_NAME_QQ_LITE = "com.tencent.qqlite"
 const val PACKAGE_NAME_QQ_INTERNATIONAL = "com.tencent.mobileqqi"
 const val JUMP_ACTIVITY = "com.tencent.mobileqq.activity.JumpActivity"
 const val PACKAGE_NAME_SELF = BuildConfig.APPLICATION_ID
-const val PAN_URL = "https://teble.lanzoui.com/b00t9lw3a"
+const val PAN_URL = "https://www.123pan.com/s/suekjv-bG4md.html"
 const val GITHUB_RELEASE_URL = "https://github.com/LuckyPray/XAutoDaily/releases"
 const val ALIPAY_QRCODE = "tsx060790flcdxvkynija2e"
 
