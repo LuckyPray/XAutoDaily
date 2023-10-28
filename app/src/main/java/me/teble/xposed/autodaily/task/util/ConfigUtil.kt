@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
 import cn.hutool.core.codec.Base64Decoder
-import cn.hutool.core.io.FileUtil
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
 import me.teble.xposed.autodaily.BuildConfig
@@ -190,22 +189,18 @@ object ConfigUtil {
     }
 
     private fun loadConf(encodeConfStr: String): TaskProperties? {
-        try {
+        return runRetry(3, 20) {
             decodeConfStr(encodeConfStr)?.let { decodeConfStr ->
                 val version = readMinVersion(decodeConfStr)
                 if (version > BuildConfig.VERSION_CODE) {
                     LogUtil.i("插件版本过低，无法加载配置。配置要求最低插件版本: ${version}，当前插件版本: ${BuildConfig.VERSION_CODE}")
 //                    ToastUtil.send("插件版本过低，无法加载配置。配置要求最低插件版本: ${version}，当前插件版本: ${BuildConfig.VERSION_CODE}", true)
-                    return null
+                    return@let null
                 }
                 // 版本不对应抛出异常
-                return Yaml.default.decodeFromString(TaskProperties.serializer(), decodeConfStr)
+                return@let Yaml.default.decodeFromString(TaskProperties.serializer(), decodeConfStr)
             }
-        } catch (e: Exception) {
-            LogUtil.e(e)
-//            ToastUtil.send("配置加载失败，请检查插件是否为最新版本", true)
         }
-        return null
     }
 
     private fun readMinVersion(confStr: String): Int {

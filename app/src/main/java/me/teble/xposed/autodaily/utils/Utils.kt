@@ -87,13 +87,14 @@ fun Context.openUrl(url: String) {
 }
 
 
-fun <T> runRetry(retryNum: Int, block: () -> T?): T? {
+fun <T> runRetry(retryNum: Int, sleepMs: Long = 0, block: () -> T?): T? {
     for (i in 1..retryNum) {
         runCatching {
             return block()
         }.onFailure {
             LogUtil.e(it)
         }
+        if (sleepMs > 0) Thread.sleep(sleepMs)
     }
     return null
 }
