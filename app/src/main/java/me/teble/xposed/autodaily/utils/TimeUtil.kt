@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.utils
 
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
-import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.millisecond
 import java.net.HttpURLConnection
 import java.net.URL
@@ -9,7 +8,7 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.Date
 
 object TimeUtil {
 
@@ -44,7 +43,7 @@ object TimeUtil {
             uc.connectTimeout = 2000
             uc.connect()
             // 避免时间误差
-            uc.date + 500
+            if (uc.date == 0L) null else uc.date + 500
         }
     }
 
