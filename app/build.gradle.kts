@@ -47,14 +47,14 @@ val updateLog = """
 android {
     namespace = "me.teble.xposed.autodaily"
 
-    compileSdk = 33
+    compileSdk = 34
     buildToolsVersion = "33.0.1"
     ndkVersion = "25.0.8775105"
 
     defaultConfig {
         applicationId = "me.teble.xposed.autodaily"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = appVerCode
         versionName = appVerName
 
