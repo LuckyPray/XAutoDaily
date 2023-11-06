@@ -55,6 +55,7 @@ android {
         applicationId = "me.teble.xposed.autodaily"
         minSdk = 24
         targetSdk = 34
+        multiDexEnabled = true
         versionCode = appVerCode
         versionName = appVerName
 
@@ -110,7 +111,7 @@ android {
         }
         val debug by getting {
             versionNameSuffix = ".$buildNum-debug"
-            val debugFlags = arrayOf<String>(
+            val debugFlags = arrayOf(
                 "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960",
 //                "-DTEST_SIGNATURE",
             )
@@ -193,7 +194,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = rootProject.extra["composeVersion"] as String
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
 
     externalNativeBuild {
@@ -282,26 +283,28 @@ dependencies {
     implementation(project(":mmkv"))
     compileOnly(project(":stub"))
 
+    implementation("androidx.multidex:multidex:2.0.1")
+
     compileOnly("de.robv.android.xposed:api:82")
     implementation("com.github.kyuubiran:EzXHelper:1.0.3")
 
     implementation("com.google.protobuf:protobuf-kotlin-lite:3.21.2")
     compileOnly("com.google.protobuf:protoc:3.21.2")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
     // jetpack compose
-    implementation("androidx.activity:activity-compose:1.4.0")
+    implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.compose.ui:ui:${rootProject.extra["composeVersion"]}")
     implementation("androidx.compose.ui:ui-tooling:${rootProject.extra["composeVersion"]}")
     implementation("androidx.compose.material:material:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.navigation:navigation-compose:2.5.0-alpha04")
+    implementation("androidx.navigation:navigation-compose:2.7.4")
     implementation("cn.hutool:hutool-core:5.8.0.M1")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     // Other
     implementation("com.hankcs:aho-corasick-double-array-trie:1.2.3")
     implementation("net.bytebuddy:byte-buddy-android:1.12.7")
     implementation("com.charleskorn.kaml:kaml:0.44.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     // implementation ("org.apache-extras.beanshell:bsh:2.0b6")
     // shizuku
     implementation("dev.rikka.shizuku:api:13.1.3")

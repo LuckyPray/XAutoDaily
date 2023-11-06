@@ -14,9 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.ViewTreeLifecycleOwner
-import androidx.lifecycle.ViewTreeViewModelStoreOwner
-import androidx.savedstate.ViewTreeSavedStateRegistryOwner
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
@@ -64,11 +61,6 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
             }
             // 保证点击事件不击穿
             setOnClickListener {}
-        }
-        view.let {
-            ViewTreeLifecycleOwner.set(it, this)
-            ViewTreeViewModelStoreOwner.set(it, this)
-            ViewTreeSavedStateRegistryOwner.set(it, this)
         }
         setContentView(view)
     }

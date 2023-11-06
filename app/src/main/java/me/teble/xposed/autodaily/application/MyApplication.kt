@@ -11,6 +11,8 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.multidex.MultiDex
+import androidx.multidex.MultiDexApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -25,7 +27,7 @@ val xaAppIsInit get() = ::xaApp.isInitialized
 lateinit var context: Context
 
 @SuppressLint("MutableCollectionMutableState")
-class MyApplication : Application() {
+class MyApplication : MultiDexApplication() {
 
     lateinit var prefs: SharedPreferences
 
@@ -37,6 +39,7 @@ class MyApplication : Application() {
         super.onCreate()
         Shizuku.pingBinder()
         ShizukuApi.init()
+        MultiDex.install(this)
         context = applicationContext
         xaApp = this
         prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
@@ -53,8 +56,8 @@ suspend fun fetchAppList() {
         val pm = xaApp.packageManager
         pm.getInstalledApplications(GET_META_DATA).let {
             Log.d("XALog", it.count().toString())
-            it.forEach {
-                val packageName = it.packageName
+            it.forEach { info ->
+                val packageName = info.packageName
                 if (qPackageSet.contains(packageName)) {
                     Log.d("XALog", packageName)
                     xaApp.qPackageState[packageName] = true
