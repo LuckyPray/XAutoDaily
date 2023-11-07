@@ -6,11 +6,15 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    namespace = "org.luckypray.dexkit"
+    compileSdk = 34
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 31
+    }
+
+    kotlin {
+        jvmToolchain(8)
     }
 
     sourceSets {

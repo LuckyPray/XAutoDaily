@@ -5,11 +5,15 @@ plugins {
 }
 
 android {
-    compileSdk = 32
+    namespace = "com.tencent.mmkv"
+    compileSdk = 34
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 31
 
         buildConfigField("String", "FLAVOR", "\"StaticCpp\"")
     }

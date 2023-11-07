@@ -2,7 +2,7 @@
 
 buildscript {
     val kotlinVersion by extra("1.9.10")
-    val gradleVersion by extra("7.4.2")
+    val gradleVersion by extra("8.1.0")
     val gradlePluginVersion by extra("2.2.1")
     val composeVersion by extra("1.6.0-alpha08")
     repositories {

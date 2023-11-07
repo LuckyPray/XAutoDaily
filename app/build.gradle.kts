@@ -53,11 +53,15 @@ android {
 
     defaultConfig {
         applicationId = "me.teble.xposed.autodaily"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
-        multiDexEnabled = true
         versionCode = appVerCode
         versionName = appVerName
+
+        buildFeatures {
+            buildConfig = true
+            aidl = true
+        }
 
         externalNativeBuild {
             cmake {
@@ -307,8 +311,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     // implementation ("org.apache-extras.beanshell:bsh:2.0b6")
     // shizuku
-    implementation("dev.rikka.shizuku:api:13.1.3")
-    implementation("dev.rikka.shizuku:provider:13.1.3")
+    implementation("dev.rikka.shizuku:api:13.1.5")
+    implementation("dev.rikka.shizuku:provider:13.1.5")
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath
