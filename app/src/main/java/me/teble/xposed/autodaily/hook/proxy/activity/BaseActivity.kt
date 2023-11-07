@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.hook.proxy.activity
 import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import com.highcapable.betterandroid.ui.component.activity.AppViewsActivity
 import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.utils.LogUtil
 
@@ -10,7 +11,7 @@ import me.teble.xposed.autodaily.utils.LogUtil
  * 所有在宿主内启动的AppCompatActivity都应该继承与此类 否则会报错
  */
 //open class BaseActivity : ComponentActivity() {
-open class BaseActivity : ComponentActivity() {
+open class BaseActivity : AppViewsActivity() {
     private val mLoader by lazy {
         BaseActivityClassLoader(BaseActivity::class.java.classLoader!!)
     }

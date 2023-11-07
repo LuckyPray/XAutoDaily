@@ -297,11 +297,15 @@ dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
 
     // jetpack compose
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-compose:1.8.0")
     implementation("androidx.compose.ui:ui:${rootProject.extra["composeVersion"]}")
     implementation("androidx.compose.ui:ui-tooling:${rootProject.extra["composeVersion"]}")
     implementation("androidx.compose.material:material:${rootProject.extra["composeVersion"]}")
     implementation("androidx.navigation:navigation-compose:2.7.4")
+
+    implementation("com.highcapable.betterandroid:ui-component:1.0.0")
+
     implementation("cn.hutool:hutool-core:5.8.0.M1")
     implementation("com.squareup.okhttp3:okhttp:4.9.3")
     // Other
