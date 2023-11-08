@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         android:allowBackup="true"
         android:fullBackupOnly="true">
-        <activity android:name=".activity.common.TestActivity"
+        <activity android:name=".activity.common.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -28,7 +28,7 @@
         <activity-alias
             android:name=".activity.common.MainActivityAlias"
             android:label="@string/app_name"
-            android:targetActivity=".activity.common.TestActivity"
+            android:targetActivity=".activity.common.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

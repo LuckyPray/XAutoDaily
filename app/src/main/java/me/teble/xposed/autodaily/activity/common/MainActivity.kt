@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import com.highcapable.betterandroid.ui.component.proxy.ISystemBarsController
+import com.highcapable.betterandroid.ui.component.systembar.SystemBarsController
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.activity.common.MainActivity.Companion.bindUserService
@@ -58,7 +60,6 @@ import kotlin.math.expm1
 import kotlin.math.sqrt
 
 class MainActivity : ComponentActivity() {
-
     companion object {
         var shizukuErrInfo by mutableStateOf("")
         var shizukuDaemonRunning by mutableStateOf(false)
@@ -165,6 +166,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         handler.post(peekServiceRunnable)
         setContent {
             MaterialTheme(colors = colors()) {
