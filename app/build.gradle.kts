@@ -136,7 +136,7 @@ android {
             proguardFiles("proguard-rules.pro")
             externalNativeBuild {
                 cmake {
-                    val releaseFlags = arrayOf<String>(
+                    val releaseFlags = arrayOf(
                         "-ffunction-sections",
                         "-fdata-sections",
                         "-Wl,--gc-sections",
@@ -177,7 +177,7 @@ android {
         )
     }
 
-    packagingOptions {
+    packaging {
         resources {
             excludes += arrayOf("**")
         }
@@ -207,7 +207,7 @@ android {
             version = "3.22.1+"
         }
     }
-    packagingOptions {
+    packaging {
         jniLibs.excludes += arrayOf("lib/**/liblog.so", "lib/**/libz.so")
     }
 }

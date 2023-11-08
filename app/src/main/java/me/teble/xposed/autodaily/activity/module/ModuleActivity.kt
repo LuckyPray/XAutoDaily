@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,9 +20,6 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
-import me.teble.xposed.autodaily.utils.navigationBarMode
-import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
-import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
 class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
 
@@ -32,37 +30,26 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
 
     @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
     override fun onCreate(savedInstanceState: Bundle?) {
-        this.window.setStatusBarTranslation()
-        this.window.setNavigationBarTranslation()
-        this.navigationBarMode(true)
         super.onCreate(savedInstanceState)
+        systemBars.isDarkColorStatusBars = false
+        systemBars.isDarkColorNavigationBars = true
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val view = ComposeView(this).apply {
-            // 设置布局为最大
-            this.layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            this.setContent {
-                MaterialTheme(colors = colors()) {
-                    Scaffold {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.White)
-                        ) {
-                            XAutoDailyApp()
-                        }
+        setContent {
+            MaterialTheme(colors = colors()) {
+                Scaffold {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.White)
+                    ) {
+                        XAutoDailyApp()
                     }
                 }
-
             }
-            // 保证点击事件不击穿
-            setOnClickListener {}
         }
-        setContentView(view)
+
     }
 }
 
