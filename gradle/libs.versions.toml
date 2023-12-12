@@ -1,0 +1,75 @@
+[versions]
+# 依赖版本号
+activityCompose = "1.8.1"
+agp = "8.2.0"
+ahoCorasickDoubleArrayTrie = "1.2.3"
+annotation = "1.7.0"
+apiVersion = "13.1.5"
+appcompat = "1.6.1"
+byteBuddyAndroid = "1.12.7"
+desugar_jdk_libs = "2.0.4"
+ezxhelper = "1.0.3"
+api = "82"
+flatbuffersJava = "23.5.26"
+kaml = "0.55.0"
+hutoolCore = "5.8.0.M1"
+kotlin = "1.9.20"
+compose = "1.6.0-beta02"
+kotlinxSerializationJson = "1.6.2"
+okhttp = "4.12.0"
+navigationCompose = "2.7.5"
+protoc = "3.21.2"
+protobufKotlinLite = "3.21.2"
+multidex = "2.0.1"
+provider = "13.1.5"
+window-size = "1.2.0-alpha12"
+
+# @keep
+compileSdk = "34"
+minSdk = "24"
+targetSdk = "34"
+buildTool = "34.0.0"
+ndk = "25.0.8775105"
+
+compose-compiler = "1.5.4"
+
+jvm-target = "11"
+
+[libraries]
+
+# compose
+aho-corasick-double-array-trie = { module = "com.hankcs:aho-corasick-double-array-trie", version.ref = "ahoCorasickDoubleArrayTrie" }
+androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+
+byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+flatbuffers-java = { module = "com.google.flatbuffers:flatbuffers-java", version.ref = "flatbuffersJava" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+hutool-core = { module = "cn.hutool:hutool-core", version.ref = "hutoolCore" }
+protoc = { module = "com.google.protobuf:protoc", version.ref = "protoc" }
+protobuf-kotlin-lite = { module = "com.google.protobuf:protobuf-kotlin-lite", version.ref = "protobufKotlinLite" }
+ezxhelper = { module = "com.github.kyuubiran:EzXHelper", version.ref = "ezxhelper" }
+api = { module = "de.robv.android.xposed:api", version.ref = "api" }
+androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
+provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
+shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "apiVersion" }
+
+androidx-compose-animation = { module = "androidx.compose.animation:animation",version.ref = "compose" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation",version.ref = "compose" }
+androidx-compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout", version.ref = "compose" }
+androidx-compose-material = { module = "androidx.compose.material:material" , version.ref = "compose"}
+androidx-compose-materialWindow = { module = "androidx.compose.material3:material3-window-size-class", version.ref="window-size" }
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime",version.ref = "compose" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling",version.ref = "compose" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose"  }
+
+[plugins]
+androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

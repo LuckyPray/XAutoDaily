@@ -1,20 +1,22 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinAndroid)
 }
 
 android {
     namespace = "org.luckypray.dexkit"
-    compileSdk = 34
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTool.get()
 
     defaultConfig {
-        minSdk = 24
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
     }
 
     kotlin {
-        jvmToolchain(8)
+        jvmToolchain(libs.versions.jvm.target.get().toInt())
     }
 
     sourceSets {
@@ -28,5 +30,5 @@ android {
 }
 
 dependencies {
-    implementation("com.google.flatbuffers:flatbuffers-java:23.5.26")
+    implementation(libs.flatbuffers.java)
 }

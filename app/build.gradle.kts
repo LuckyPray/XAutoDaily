@@ -24,9 +24,9 @@ fun findInPath(executable: String): String? {
 }
 
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("kotlinx-serialization")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.serialization)
 }
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
@@ -47,14 +47,14 @@ val updateLog = """
 android {
     namespace = "me.teble.xposed.autodaily"
 
-    compileSdk = 34
-    buildToolsVersion = "33.0.1"
-    ndkVersion = "25.0.8775105"
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTool.get()
+    ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
         applicationId = "me.teble.xposed.autodaily"
-        minSdk = 26
-        targetSdk = 34
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = appVerCode
         versionName = appVerName
 
@@ -168,13 +168,17 @@ android {
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+
         freeCompilerArgs = listOf(
             "-Xno-param-assertions",
             "-Xno-call-assertions",
             "-Xno-receiver-assertions",
             "-opt-in=kotlin.RequiresOptIn",
         )
+    }
+
+    kotlin {
+        jvmToolchain(libs.versions.jvm.target.get().toInt())
     }
 
     packaging {
@@ -197,8 +201,9 @@ android {
     buildFeatures {
         compose = true
     }
+
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
 
     externalNativeBuild {
@@ -287,36 +292,41 @@ dependencies {
     implementation(project(":mmkv"))
     compileOnly(project(":stub"))
 
-    implementation("androidx.multidex:multidex:2.0.1")
+    implementation(libs.androidx.multidex)
 
-    compileOnly("de.robv.android.xposed:api:82")
-    implementation("com.github.kyuubiran:EzXHelper:1.0.3")
+    compileOnly(libs.api)
+    implementation(libs.ezxhelper)
 
-    implementation("com.google.protobuf:protobuf-kotlin-lite:3.21.2")
-    compileOnly("com.google.protobuf:protoc:3.21.2")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+    implementation(libs.protobuf.kotlin.lite)
+    compileOnly(libs.protoc)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // jetpack compose
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.activity:activity-compose:1.8.0")
-    implementation("androidx.compose.ui:ui:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.compose.ui:ui-tooling:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.compose.material:material:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.navigation:navigation-compose:2.7.4")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity.compose)
 
-    implementation("com.highcapable.betterandroid:ui-component:1.0.0")
 
-    implementation("cn.hutool:hutool-core:5.8.0.M1")
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.materialWindow)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.runtime)
+    implementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.androidx.navigation.compose)
+
+    implementation(libs.hutool.core)
+    implementation(libs.okhttp)
     // Other
-    implementation("com.hankcs:aho-corasick-double-array-trie:1.2.3")
-    implementation("net.bytebuddy:byte-buddy-android:1.12.7")
-    implementation("com.charleskorn.kaml:kaml:0.44.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation(libs.aho.corasick.double.array.trie)
+    implementation(libs.byte.buddy.android)
+    implementation(libs.kaml)
+    implementation(libs.kotlinx.serialization.json)
     // implementation ("org.apache-extras.beanshell:bsh:2.0b6")
     // shizuku
-    implementation("dev.rikka.shizuku:api:13.1.5")
-    implementation("dev.rikka.shizuku:provider:13.1.5")
+    implementation(libs.shizuku.api)
+    implementation(libs.provider)
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath
@@ -329,6 +339,18 @@ val restartQQ = task("restartQQ").doLast {
         commandLine(
             adbExecutable, "shell", "am", "start",
             "$(pm resolve-activity --components com.tencent.mobileqq)"
+        )
+    }
+}
+
+val restartTim = task("restartTim").doLast {
+    exec {
+        commandLine(adbExecutable, "shell", "am", "force-stop", "com.tencent.tim")
+    }
+    exec {
+        commandLine(
+            adbExecutable, "shell", "am", "start",
+            "$(pm resolve-activity --components com.tencent.tim)"
         )
     }
 }
@@ -358,7 +380,7 @@ tasks.whenTaskAdded {
             finalizedBy(optimizeReleaseRes)
         }
         "installDebug" -> {
-            finalizedBy(restartQQ)
+            finalizedBy(restartTim)
         }
     }
 }

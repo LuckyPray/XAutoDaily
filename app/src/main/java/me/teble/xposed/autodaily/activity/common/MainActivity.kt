@@ -30,8 +30,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import com.highcapable.betterandroid.ui.component.proxy.ISystemBarsController
-import com.highcapable.betterandroid.ui.component.systembar.SystemBarsController
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.activity.common.MainActivity.Companion.bindUserService
