@@ -7,7 +7,7 @@
     </queries>
 
     <application
-        android:name=".application.MyApplication"
+        android:name=".application.XaApplication"
         android:icon="@drawable/icon_x_auto_daily_2"
         android:label="@string/app_name"
         android:roundIcon="@drawable/icon_x_auto_daily_2"

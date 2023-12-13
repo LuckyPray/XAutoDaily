@@ -290,6 +290,7 @@ configurations.all {
 dependencies {
     implementation(project(":dexkit"))
     implementation(project(":mmkv"))
+
     compileOnly(project(":stub"))
 
     implementation(libs.androidx.multidex)
@@ -315,6 +316,13 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.androidx.navigation.compose)
+
+
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // ViewModel utilities for Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.hutool.core)
     implementation(libs.okhttp)

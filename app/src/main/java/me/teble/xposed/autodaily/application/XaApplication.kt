@@ -3,7 +3,6 @@
 package me.teble.xposed.autodaily.application
 
 import android.annotation.SuppressLint
-import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager.GET_META_DATA
@@ -13,8 +12,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
@@ -22,18 +23,21 @@ import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import rikka.shizuku.Shizuku
 
-lateinit var xaApp: MyApplication
+lateinit var xaApp: XaApplication
 val xaAppIsInit get() = ::xaApp.isInitialized
 lateinit var context: Context
 
 @SuppressLint("MutableCollectionMutableState")
-class MyApplication : MultiDexApplication() {
+class XaApplication : MultiDexApplication() {
+
+    companion object {
+        var applicationScope = MainScope()
+    }
 
     lateinit var prefs: SharedPreferences
 
-    private val globalScope = CoroutineScope(Dispatchers.Default)
-
     var qPackageState by mutableStateOf(mutableMapOf<String, Boolean>())
+
 
     override fun onCreate() {
         super.onCreate()
@@ -43,10 +47,17 @@ class MyApplication : MultiDexApplication() {
         context = applicationContext
         xaApp = this
         prefs = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        globalScope.launch {
+        applicationScope.launch(IO) {
             fetchAppList()
         }
     }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        applicationScope.cancel("onLowMemory() called by system")
+        applicationScope = MainScope()
+    }
+
 }
 
 val qPackageSet = setOf(PACKAGE_NAME_QQ, PACKAGE_NAME_TIM)
