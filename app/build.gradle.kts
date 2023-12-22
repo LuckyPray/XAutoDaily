@@ -37,10 +37,11 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.23"
+val appVerName: String = "3.0.23-fix"
 val updateLog = """
     1. 修复模块在 QQ 9.0.8 上加载异常的问题
     2. 更新内置配置版本为 v44
+    fix. 修复模块在 QQ 8.9.68 上加载异常的问题
 """.trimIndent()
 
 android {
