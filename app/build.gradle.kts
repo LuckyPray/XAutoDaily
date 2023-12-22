@@ -37,12 +37,10 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.22"
+val appVerName: String = "3.0.23"
 val updateLog = """
-    1. 修复获取网络时间异常导致签到时间为 1970 年的 bug
-    2. 优化配置加载
-    3. 替换更新网盘链接为 123 盘
-    4. 更新内置配置文件为 v43
+    1. 修复模块在 QQ 9.0.8 上加载异常的问题
+    2. 更新内置配置版本为 v44
 """.trimIndent()
 
 android {
