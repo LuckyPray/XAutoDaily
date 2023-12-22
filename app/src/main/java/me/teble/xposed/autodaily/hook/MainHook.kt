@@ -225,32 +225,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             // ignore
         }
         // for NT QQ
-        // TODO: 2023-04-19 'com.tencent.mobileqq.startup.task.config.a' is not a good way to find the class
-        val kTaskFactory = cl.loadClass("com.tencent.mobileqq.startup.task.config.a")
-        val kITaskFactory = cl.loadClass("com.tencent.qqnt.startup.task.d")
-        // check cast so that we can sure that we have found the right class
-        if (!kITaskFactory.isAssignableFrom(kTaskFactory)) {
-            error("$kITaskFactory is not assignable from $kTaskFactory")
+        val cKernelInitTask = cl.loadClass("com.tencent.mobileqq.startup.task.KernelInitTask")
+        val method = cKernelInitTask.declaredMethods.first {
+            it.name == "run" && it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
         }
-        var taskClassMapField: Field? = null
-        for (field in kTaskFactory.declaredFields) {
-            if (field.type == HashMap::class.java && Modifier.isStatic(field.modifiers)) {
-                taskClassMapField = field
-                break
-            }
-        }
-        if (taskClassMapField == null) {
-            error("taskClassMapField not found")
-        }
-        taskClassMapField.isAccessible = true
-        // XXX: this will cause <clinit>() to be called, check whether it will cause any problem
-        val taskClassMap: HashMap<String, Class<*>> = taskClassMapField.get(null) as HashMap<String, Class<*>>
-        val kNewRuntimeTask = taskClassMap["LoadDexTask"] ?: error("LoadDexTask not found")
-        // public void run(Context)
-        return findMethod(kNewRuntimeTask) {
-            returnType == Void.TYPE &&
-                    parameterTypes.size == 1 && parameterTypes[0] == Context::class.java
-        }
+        method.isAccessible = true
+        return method
     }
 
     private fun doInit() {
