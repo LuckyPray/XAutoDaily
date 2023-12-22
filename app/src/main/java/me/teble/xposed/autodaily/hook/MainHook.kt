@@ -17,6 +17,7 @@ import com.github.kyuubiran.ezxhelper.utils.emptyParam
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookBefore
+import com.github.kyuubiran.ezxhelper.utils.isPublic
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
@@ -227,8 +228,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         // for NT QQ
         val cKernelInitTask = cl.loadClass("com.tencent.mobileqq.startup.task.KernelInitTask")
         val method = cKernelInitTask.declaredMethods.first {
-            it.name == "run" && it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
-        }
+            it.returnType == Void.TYPE &&
+                it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
+        } ?: throw NoSuchMethodException("KernelInitTask.run(Context)")
         method.isAccessible = true
         return method
     }
