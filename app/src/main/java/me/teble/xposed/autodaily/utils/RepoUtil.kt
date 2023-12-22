@@ -1,5 +1,8 @@
 package me.teble.xposed.autodaily.utils
 
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import okhttp3.Request
 
 enum class FileEnum(val path: String) {
@@ -24,14 +27,23 @@ object RepoFileLoader {
 
     private var repoUrl = originRepoUrl
 
-    private fun loadRepoFile(path: String): String? {
+    private fun loadRepoFile(path: String, verifyJson: Boolean): String? {
         LogUtil.d("curr repo url: $repoUrl")
         val url = "$repoUrl/$path"
         val req = Request.Builder().url(url).build()
         try {
             val response = client.newCall(req).execute()
             if (response.isSuccessful) {
-                return response.body!!.string()
+                val content = response.body!!.string()
+                if (verifyJson) {
+                    val cls = content.parse<JsonElement>()::class.java
+                    LogUtil.d("verify json content: $cls")
+                    if (cls != JsonObject::class.java
+                        && cls != JsonArray::class.java) {
+                        throw IllegalArgumentException("invalid json: $content")
+                    }
+                }
+                return content
             }
             LogUtil.w("load repo file failed: $url, code: ${response.code}, response: ${response.body}")
             return null
@@ -40,7 +52,7 @@ object RepoFileLoader {
             val index = repoUrls.indexOf(repoUrl)
             if (index < repoUrls.size - 1) {
                 repoUrl = repoUrls[index + 1]
-                return loadRepoFile(path)
+                return loadRepoFile(path, verifyJson)
             }
             throw e
         }
@@ -48,7 +60,7 @@ object RepoFileLoader {
 
     fun load(fileEnum: FileEnum): String? {
         return runCatching {
-            loadRepoFile(fileEnum.path)
+            loadRepoFile(fileEnum.path, fileEnum.path.endsWith(".json"))
         }.getOrNull()
     }
 }
