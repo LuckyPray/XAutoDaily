@@ -22,7 +22,7 @@ object RepoFileLoader {
         "https://xa-vercel.luckypray.org",
         "https://xa-cloudflare.luckypray.org",
         "https://cdn.jsdelivr.net/gh/LuckyPray/XAutoDaily@pages",
-        "https://ghproxy.com/https://raw.githubusercontent.com/LuckyPray/XAutoDaily/pages",
+        "https://mirror.ghproxy.com/https://raw.githubusercontent.com/LuckyPray/XAutoDaily/pages",
     )
 
     private var repoUrl = originRepoUrl
