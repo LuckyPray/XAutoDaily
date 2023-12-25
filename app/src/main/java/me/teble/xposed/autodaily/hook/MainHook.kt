@@ -177,7 +177,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         .setPriority(Notification.PRIORITY_LOW)
                 }
                 builder = builder.setContentTitle("XAutoDaily")
-                    .setSmallIcon(R.drawable.icon_x_auto_daily_2)
+                    .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setOngoing(false)
                     .setShowWhen(true)
                 val notification = builder.setContentText("正在唤醒主进程").build()

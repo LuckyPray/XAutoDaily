@@ -1,40 +1,42 @@
 package me.teble.xposed.autodaily.activity.module
 
-import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.ViewGroup
 import android.view.Window
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowCompat
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
+import me.teble.xposed.autodaily.utils.navigationBarLightOldMode
+import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
+import me.teble.xposed.autodaily.utils.setStatusBarTranslation
+import me.teble.xposed.autodaily.utils.statusBarLightOldMode
 
 class ModuleActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setStatusBarTranslation()
+        setNavigationBarTranslation()
+
         super.onCreate(savedInstanceState)
+        window.apply {
+            statusBarLightOldMode()
+            navigationBarLightOldMode()
+        }
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         setContent {
-
-            enableEdgeToEdge()
-
-            Box(Modifier.fillMaxSize().background(Color.White).safeDrawingPadding()){
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color(0xFFF7F7F7))) {
                 XAutoDailyApp()
             }
 

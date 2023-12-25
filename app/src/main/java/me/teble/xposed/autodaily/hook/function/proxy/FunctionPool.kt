@@ -3,7 +3,15 @@ package me.teble.xposed.autodaily.hook.function.proxy
 import android.content.Context
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.function.BaseFunction
-import me.teble.xposed.autodaily.hook.function.impl.*
+import me.teble.xposed.autodaily.hook.function.impl.FavoriteManager
+import me.teble.xposed.autodaily.hook.function.impl.FriendsManager
+import me.teble.xposed.autodaily.hook.function.impl.GroupSignInManager
+import me.teble.xposed.autodaily.hook.function.impl.MiniLoginManager
+import me.teble.xposed.autodaily.hook.function.impl.MiniProfileManager
+import me.teble.xposed.autodaily.hook.function.impl.PublicAccountManager
+import me.teble.xposed.autodaily.hook.function.impl.SendMessageManager
+import me.teble.xposed.autodaily.hook.function.impl.TicketManager
+import me.teble.xposed.autodaily.hook.function.impl.TroopManager
 import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
@@ -45,7 +53,7 @@ object FunctionPool {
                 .intercept(MethodDelegation.to(FunctionProxy()))
                 .make()
                 .load(cls.classLoader, strategy)
-                .loaded.newInstance()
+                .loaded.getDeclaredConstructor().newInstance()
         }
         it
     }

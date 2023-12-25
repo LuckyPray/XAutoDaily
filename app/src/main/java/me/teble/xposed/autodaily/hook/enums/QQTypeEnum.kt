@@ -17,7 +17,7 @@ enum class QQTypeEnum(
 
     companion object {
         fun valueOfPackage(packageName: String): QQTypeEnum {
-            val qqTypeEnums = values()
+            val qqTypeEnums = entries.toTypedArray()
             for (qqTypeEnum in qqTypeEnums) {
                 if (qqTypeEnum.packageName == packageName) {
                     return qqTypeEnum
@@ -27,7 +27,7 @@ enum class QQTypeEnum(
         }
 
         fun contain(packageName: String): Boolean {
-            val qqTypeEnums = values()
+            val qqTypeEnums = entries.toTypedArray()
             for (qqTypeEnum in qqTypeEnums) {
                 if (qqTypeEnum.packageName == packageName) {
                     return true

@@ -179,6 +179,11 @@ android {
 
     kotlin {
         jvmToolchain(libs.versions.jvm.target.get().toInt())
+        sourceSets.all {
+            languageSettings {
+                enableLanguageFeature("ContextReceivers")
+            }
+        }
     }
 
     packaging {
