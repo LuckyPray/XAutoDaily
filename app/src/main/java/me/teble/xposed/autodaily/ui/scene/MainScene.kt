@@ -4,6 +4,7 @@ package me.teble.xposed.autodaily.ui.scene
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -14,10 +15,13 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.mandatorySystemGesturesPadding
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.waterfallPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,6 +39,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +52,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 
 
@@ -55,54 +62,90 @@ private const val Announcement = 1
 
 @Composable
 fun MainScreen(navController: NavController)  {
-
-    Column(modifier = Modifier.safeContentPadding()) {
-        TopBar()
-        Banner()
-        val paddingValues = WindowInsets.navigationBars.asPaddingValues()
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp),
-            contentPadding = paddingValues,
-            verticalArrangement = Arrangement.spacedBy(18.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .waterfallPadding()
+                .mandatorySystemGesturesPadding()
+                .padding(horizontal = 16.dp)
         ) {
-            cardItem(
-                iconColor = Color(0xFF47B6FF),
-                Icons.Default.AccountBox,
-                "签到配置",
-                "已启用 16 项",
-                false
+            TopBar()
+            Banner()
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier.padding(top = 24.dp),
+                contentPadding = WindowInsets.navigationBars.asPaddingValues(),
+                verticalArrangement = Arrangement.spacedBy(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                cardItem(
+                    iconColor = Color(0xFF47B6FF),
+                    Icons.Default.AccountBox,
+                    "签到配置",
+                    "已启用 16 项",
+                    false
 
-            )
-            cardItem(
-                iconColor = Color(0xFF8286FF),
-                Icons.Default.Create,
-                "自定义脚本",
-                "敬请期待",
-                false
+                )
+                cardItem(
+                    iconColor = Color(0xFF8286FF),
+                    Icons.Default.Create,
+                    "自定义脚本",
+                    "敬请期待",
+                    false
 
-            )
-            cardItem(
-                iconColor = Color(0xFF60D893),
-                Icons.Default.Call,
-                "设置",
-                "配置模块",
-                false
+                )
+                cardItem(
+                    iconColor = Color(0xFF60D893),
+                    Icons.Default.Call,
+                    "设置",
+                    "配置模块",
+                    false
 
-            )
-            cardItem(
-                iconColor = Color(0xFFFFBC04),
-                Icons.Default.Add,
-                "关于",
-                "关于模块",
-                false
+                )
+                cardItem(
+                    iconColor = Color(0xFFFFBC04),
+                    Icons.Default.Add,
+                    "关于",
+                    "关于模块",
+                    false
 
-            )
+                )
+
+            }
 
         }
+        UpdateDialog()
+
+        Fab()
     }
 
+}
+
+@Composable
+private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
+    val updateDialogText by viewModel.updateDialogText.collectAsState()
+    val showUpdateDialog by viewModel.showUpdateDialog.collectAsState()
+    if (showUpdateDialog) {
+        me.teble.xposed.autodaily.ui.UpdateDialog(
+            title = "版本更新",
+            text = updateDialogText,
+            onGithub = {
+//            navController.context.startActivity(Intent().apply {
+//                action = Intent.ACTION_VIEW
+//                data = Uri.parse(GITHUB_RELEASE_URL)
+//            })
+            },
+            onLanzou = {
+//            navController.context.startActivity(Intent().apply {
+//                action = Intent.ACTION_VIEW
+//                data = Uri.parse(PAN_URL)
+//            })
+            },
+            onDismiss = {
+                viewModel.dismissDialogState()
+            }
+        )
+    }
 
 }
 
@@ -112,7 +155,8 @@ private fun TopBar() {
         text = "XAutoDaily",
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 32.dp, bottom = 20.dp, top = 10.dp),
+            .statusBarsPadding()
+            .padding(start = 16.dp, bottom = 20.dp, top = 10.dp),
         style = TextStyle(
             color = Color(0xFF202124),
             fontWeight = FontWeight(700),
@@ -131,12 +175,10 @@ private fun Banner() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(156.dp)
-                .padding(horizontal = 16.dp)
                 .clip(RoundedCornerShape(16.dp))
         ) { state ->
             when (state) {
                 Today -> TodayCard()
-
                 Announcement -> AnnouncementCard()
             }
 
@@ -148,18 +190,22 @@ private fun Banner() {
 }
 
 @Composable
-private fun TodayCard() {
+private fun TodayCard(
+    viewModel: MainViewModel = viewModel()
+) {
     // background: linear-gradient(97.16deg, #0065FF 17.78%, #34B6FF 86.9%);
     val colorStops = arrayOf(
         0.1778f to Color(0xff0065FF),
         0.869f to Color(0xff34B6FF)
     )
+    val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Brush.horizontalGradient(colorStops = colorStops))
             .padding(start = 36.dp, top = 24.dp)
     ) {
+        // text = execTaskNum
         Text(
             text = "16",
             modifier = Modifier.padding(bottom = 4.dp),
@@ -186,7 +232,10 @@ private fun TodayCard() {
 }
 
 @Composable
-private fun AnnouncementCard() {
+private fun AnnouncementCard(
+    viewModel: MainViewModel = viewModel()
+) {
+    val notice by viewModel.notice.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -210,13 +259,16 @@ private fun AnnouncementCard() {
                 .background(Color(0xFFD6DDE7), shape = RoundedCornerShape(size = 20.dp))
         )
 
+        // text = notice
         Text(
             text = "最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。",
+            maxLines = 3,
             style = TextStyle(
                 color = Color(0xFF4F5355),
                 fontWeight = FontWeight(400),
                 fontSize = 14.sp,
                 lineHeight = 16.sp,
+
             )
         )
     }
@@ -299,6 +351,7 @@ private fun LazyGridScope.cardItem(
             Color(if (enable) 0xFF4F5355 else 0x614F5355),
             label = ""
         )
+
         Column(
             Modifier
                 .background(color = cardBackground, shape = RoundedCornerShape(size = 12.dp))
@@ -332,4 +385,33 @@ private fun LazyGridScope.cardItem(
             )
         }
     }
+}
+
+@Composable
+fun BoxScope.Fab(viewModel: MainViewModel = viewModel()) {
+    // #2ECC71, #31CC2E
+    val colorStops = arrayOf(
+        0.1778f to Color(0xff2ECC71),
+        0.869f to Color(0xff31CC2E)
+    )
+    Text(text = "立刻签到",
+        modifier = Modifier
+            .align(Alignment.BottomCenter)
+            .navigationBarsPadding()
+            .padding(bottom = 48.dp)
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                Brush.horizontalGradient(colorStops = colorStops)
+            )
+            .clickable {
+                viewModel.signClick()
+            }
+            .padding(vertical = 12.dp, horizontal = 24.dp),
+        style = TextStyle(
+            fontSize = 14.sp,
+            lineHeight = 16.sp,
+            fontWeight = FontWeight(700),
+            color = Color(0xFFFFFFFF),
+            textAlign = TextAlign.Center,
+        ))
 }
