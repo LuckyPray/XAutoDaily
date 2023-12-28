@@ -59,7 +59,6 @@ class MainViewModel : ViewModel() {
             }
             meta ?: ToastUtil.send("拉取公告失败")
             _notice.value = meta?.notice?.trimEnd() ?: ""
-            Log.d("TAG", "initNotice: ${_notice.value}")
         }
     }
 

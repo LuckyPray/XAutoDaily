@@ -71,48 +71,7 @@ fun MainScreen(navController: NavController)  {
         ) {
             TopBar()
             Banner()
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.padding(top = 24.dp),
-                contentPadding = WindowInsets.navigationBars.asPaddingValues(),
-                verticalArrangement = Arrangement.spacedBy(18.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                cardItem(
-                    iconColor = Color(0xFF47B6FF),
-                    Icons.Default.AccountBox,
-                    "签到配置",
-                    "已启用 16 项",
-                    false
-
-                )
-                cardItem(
-                    iconColor = Color(0xFF8286FF),
-                    Icons.Default.Create,
-                    "自定义脚本",
-                    "敬请期待",
-                    false
-
-                )
-                cardItem(
-                    iconColor = Color(0xFF60D893),
-                    Icons.Default.Call,
-                    "设置",
-                    "配置模块",
-                    false
-
-                )
-                cardItem(
-                    iconColor = Color(0xFFFFBC04),
-                    Icons.Default.Add,
-                    "关于",
-                    "关于模块",
-                    false
-
-                )
-
-            }
-
+            GridLayout()
         }
         UpdateDialog()
 
@@ -120,6 +79,52 @@ fun MainScreen(navController: NavController)  {
     }
 
 }
+@Composable
+fun GridLayout(viewModel: MainViewModel = viewModel()){
+    val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
+    LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        modifier = Modifier.padding(top = 24.dp),
+        contentPadding = WindowInsets.navigationBars.asPaddingValues(),
+        verticalArrangement = Arrangement.spacedBy(18.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        cardItem(
+            iconColor = Color(0xFF47B6FF),
+            Icons.Default.AccountBox,
+            "签到配置",
+            "已启用 $execTaskNum 项",
+            false
+
+        )
+        cardItem(
+            iconColor = Color(0xFF8286FF),
+            Icons.Default.Create,
+            "自定义脚本",
+            "敬请期待",
+            false
+
+        )
+        cardItem(
+            iconColor = Color(0xFF60D893),
+            Icons.Default.Call,
+            "设置",
+            "配置模块",
+            false
+
+        )
+        cardItem(
+            iconColor = Color(0xFFFFBC04),
+            Icons.Default.Add,
+            "关于",
+            "关于模块",
+            false
+
+        )
+
+    }
+}
+
 
 @Composable
 private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
@@ -205,9 +210,8 @@ private fun TodayCard(
             .background(Brush.horizontalGradient(colorStops = colorStops))
             .padding(start = 36.dp, top = 24.dp)
     ) {
-        // text = execTaskNum
         Text(
-            text = "16",
+            text = execTaskNum.toString(),
             modifier = Modifier.padding(bottom = 4.dp),
             style = TextStyle(
                 color = Color(0xFFFFFFFF),
@@ -259,9 +263,8 @@ private fun AnnouncementCard(
                 .background(Color(0xFFD6DDE7), shape = RoundedCornerShape(size = 20.dp))
         )
 
-        // text = notice
         Text(
-            text = "最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。",
+            text = notice,
             maxLines = 3,
             style = TextStyle(
                 color = Color(0xFF4F5355),
