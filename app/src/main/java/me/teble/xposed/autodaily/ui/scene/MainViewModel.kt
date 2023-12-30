@@ -20,7 +20,7 @@ class MainViewModel : ViewModel() {
     private val _execTaskNum = MutableStateFlow(0)
     val execTaskNum = _execTaskNum.asStateFlow()
 
-    private val _notice = MutableStateFlow("")
+    private val _notice = MutableStateFlow("暂无公告")
 
     val notice = _notice.asStateFlow()
 
@@ -57,8 +57,12 @@ class MainViewModel : ViewModel() {
             if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L) {
                 ConfigUtil.fetchMeta()
             }
-            meta ?: ToastUtil.send("拉取公告失败")
-            _notice.value = meta?.notice?.trimEnd() ?: ""
+            meta?.let {
+                _notice.value = it.notice?.trimEnd() ?: "暂无公告"
+            } ?: run{
+                ToastUtil.send("拉取公告失败")
+            }
+
         }
     }
 
