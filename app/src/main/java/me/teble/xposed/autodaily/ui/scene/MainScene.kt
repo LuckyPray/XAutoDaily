@@ -33,11 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Create
+import me.teble.xposed.autodaily.ui.icon.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,6 +51,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import me.teble.xposed.autodaily.ui.icon.icons.About
+import me.teble.xposed.autodaily.ui.icon.icons.Configuration
+import me.teble.xposed.autodaily.ui.icon.icons.Script
+import me.teble.xposed.autodaily.ui.icon.icons.Setting
 
 
 private const val Today = 0
@@ -91,15 +91,15 @@ fun GridLayout(viewModel: MainViewModel = viewModel()){
     ) {
         cardItem(
             iconColor = Color(0xFF47B6FF),
-            Icons.Default.AccountBox,
+            Icons.Configuration,
             "签到配置",
             "已启用 $execTaskNum 项",
-            false
+            true
 
         )
         cardItem(
             iconColor = Color(0xFF8286FF),
-            Icons.Default.Create,
+            Icons.Script,
             "自定义脚本",
             "敬请期待",
             false
@@ -107,18 +107,18 @@ fun GridLayout(viewModel: MainViewModel = viewModel()){
         )
         cardItem(
             iconColor = Color(0xFF60D893),
-            Icons.Default.Call,
+            Icons.Setting,
             "设置",
             "配置模块",
-            false
+            true
 
         )
         cardItem(
             iconColor = Color(0xFFFFBC04),
-            Icons.Default.Add,
+            Icons.About,
             "关于",
             "关于模块",
-            false
+            true
 
         )
 
@@ -365,8 +365,7 @@ private fun LazyGridScope.cardItem(
                 contentDescription = "",
                 modifier = Modifier
                     .size(32.dp)
-                    .background(iconBackgroundColor, RoundedCornerShape(16.dp))
-                    .padding(8.dp),
+                    .background(iconBackgroundColor, RoundedCornerShape(16.dp)),
                 tint = contentColor
             )
 
