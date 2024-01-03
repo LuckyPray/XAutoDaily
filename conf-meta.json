@@ -1,7 +1,7 @@
 {
-    "version": 44,
+    "version": 45,
     "needAppVersion": 23080814,
-    "updateLog": "移除部分失效任务，新增2个大会员周任务",
-    "md5": "6ace9c6dbeaead0dc9925ce57823b584",
-    "updateTime": "2023-12-22 14:27:14"
+    "updateLog": "更新超星会员任务参数，解决活动结束无法领取的问题 (需长按重置一次任务)",
+    "md5": "cf7cec6387d0f3fa58e6f5c648538e95",
+    "updateTime": "2024-01-03 15:12:03"
 }
