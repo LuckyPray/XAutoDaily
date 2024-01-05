@@ -30,7 +30,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -51,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.icons.About
 import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Script
@@ -180,7 +180,7 @@ private fun Banner() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(156.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(SmootherShape(16.dp))
         ) { state ->
             when (state) {
                 Today -> TodayCard()
@@ -260,7 +260,7 @@ private fun AnnouncementCard(
                 .padding(vertical = 4.dp)
                 .width(32.dp)
                 .height(4.dp)
-                .background(Color(0xFFD6DDE7), shape = RoundedCornerShape(size = 20.dp))
+                .background(Color(0xFFD6DDE7), shape = SmootherShape( 20.dp))
         )
 
         Text(
@@ -357,7 +357,7 @@ private fun LazyGridScope.cardItem(
 
         Column(
             Modifier
-                .background(color = cardBackground, shape = RoundedCornerShape(size = 12.dp))
+                .background(color = cardBackground, shape = SmootherShape(12.dp))
                 .padding(top = 24.dp, start = 16.dp, bottom = 24.dp)
         ) {
             Icon(
@@ -365,7 +365,7 @@ private fun LazyGridScope.cardItem(
                 contentDescription = "",
                 modifier = Modifier
                     .size(32.dp)
-                    .background(iconBackgroundColor, RoundedCornerShape(16.dp)),
+                    .background(iconBackgroundColor, CircleShape),
                 tint = contentColor
             )
 
@@ -401,7 +401,7 @@ fun BoxScope.Fab(viewModel: MainViewModel = viewModel()) {
             .align(Alignment.BottomCenter)
             .navigationBarsPadding()
             .padding(bottom = 48.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .clip(SmootherShape(24.dp))
             .background(
                 Brush.horizontalGradient(colorStops = colorStops)
             )

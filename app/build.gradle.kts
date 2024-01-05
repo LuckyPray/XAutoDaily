@@ -243,7 +243,11 @@ abstract class CopyApksTask : DefaultTask() {
 
 androidComponents.onVariants { variant ->
     if (variant.name != "release") return@onVariants
-    val updateArtifact = project.tasks.register<CopyApksTask>("copy${variant.name.capitalize()}Apk")
+    val updateArtifact = project.tasks.register<CopyApksTask>("copy${variant.name.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.getDefault()
+        ) else it.toString()
+    }}Apk")
     val transformationRequest = variant.artifacts.use(updateArtifact)
         .wiredWithDirectories(CopyApksTask::apkFolder, CopyApksTask::outFolder)
         .toTransformMany(SingleArtifact.APK)
