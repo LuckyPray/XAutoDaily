@@ -1,14 +1,20 @@
-package me.teble.xposed.autodaily.utils
+package com.agoines.system.common
 
 import android.app.Activity
 import android.graphics.Color
-import android.os.Build
-import android.view.View
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 import android.view.Window
-import android.view.WindowInsetsController
-import android.view.WindowManager
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+import android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+import android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
+import android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import com.highcapable.betterandroid.system.extension.tool.SystemKind
+import com.highcapable.betterandroid.system.extension.tool.SystemVersion
+
 
 context(Activity)
 fun setStatusBarTranslation() {
@@ -20,13 +26,17 @@ fun setStatusBarTranslation() {
  */
 @Suppress("DEPRECATION")
 fun Window.setStatusBarTranslation() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+    SystemVersion.require(SystemVersion.Q) {
         isStatusBarContrastEnforced = false
+    }
     // 设置状态栏透明,暂时没有更好的办法解决透明问题
-    clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-    addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
-    if (isMiuiDevices())
-        addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+    clearFlags(FLAG_TRANSLUCENT_STATUS)
+    addFlags(FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+
+    when (SystemKind.current) {
+        SystemKind.MIUI -> addFlags(FLAG_TRANSLUCENT_STATUS)
+    }
+
     statusBarColor = Color.TRANSPARENT
 }
 
@@ -41,15 +51,20 @@ fun setNavigationBarTranslation() {
  */
 @Suppress("DEPRECATION")
 fun Window.setNavigationBarTranslation() {
-    clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-    if (isMiuiDevices())
-        addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+    clearFlags(FLAG_TRANSLUCENT_NAVIGATION)
+    when (SystemKind.current) {
+        SystemKind.MIUI -> addFlags(FLAG_TRANSLUCENT_NAVIGATION)
+    }
+
     // 防止透明以后高对比度
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+    SystemVersion.require(SystemVersion.Q) {
         isNavigationBarContrastEnforced = false
+    }
     // 去除导航栏线段
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+    SystemVersion.require(SystemVersion.P) {
         navigationBarDividerColor = Color.TRANSPARENT
+    }
+
     navigationBarColor = Color.TRANSPARENT
 }
 
@@ -66,13 +81,14 @@ fun statusBarLightMode(enable: Boolean = true) {
  * 这个更适合在页面有绘制的 View 的时候调用
  */
 fun Window.statusBarLightMode(enable: Boolean = true) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-        insetsController?.apply {
-            setSystemBarsAppearance(
-                if (enable) WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS else 0,
-                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-            )
-        }
+    SystemVersion.require(SystemVersion.R) {
+        insetsController?. setSystemBarsAppearance(
+            if (enable) APPEARANCE_LIGHT_STATUS_BARS else 0,
+            APPEARANCE_LIGHT_STATUS_BARS
+        )
+
+    }
+
     statusBarLightOldMode(enable)
 }
 
@@ -84,9 +100,9 @@ fun Window.statusBarLightMode(enable: Boolean = true) {
 fun Window.statusBarLightOldMode(enable: Boolean = true) {
     decorView.apply {
         systemUiVisibility = if (enable)
-            systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            systemUiVisibility or SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         else
-            systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
+            systemUiVisibility and SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
     }
 }
 
@@ -124,13 +140,13 @@ fun navigationBarLightMode(enable: Boolean = true) {
 
 fun Window.navigationBarLightMode(enable: Boolean = true) {
     setNavigationBarTranslation()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
-        insetsController?.apply {
-            setSystemBarsAppearance(
-                if (enable) WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS else 0,
-                WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
-            )
-        }
+    SystemVersion.require(SystemVersion.R) {
+        insetsController?.setSystemBarsAppearance(
+            if (enable) APPEARANCE_LIGHT_NAVIGATION_BARS else 0,
+            APPEARANCE_LIGHT_NAVIGATION_BARS
+        )
+    }
+
     navigationBarLightOldMode(enable)
 }
 
@@ -141,11 +157,12 @@ fun Window.navigationBarLightMode(enable: Boolean = true) {
 
 @Suppress("DEPRECATION")
 fun Window.navigationBarLightOldMode(enable: Boolean = true) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+    SystemVersion.require(SystemVersion.O) {
         decorView.apply {
             systemUiVisibility = if (enable)
-                systemUiVisibility or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                systemUiVisibility or SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
             else
-                systemUiVisibility and View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
+                systemUiVisibility and SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR.inv()
         }
+    }
 }

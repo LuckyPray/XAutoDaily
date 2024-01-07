@@ -301,6 +301,7 @@ dependencies {
     implementation(project(":mmkv"))
 
     compileOnly(project(":stub"))
+    implementation(project(":system"))
 
     implementation(libs.androidx.multidex)
 
@@ -312,9 +313,7 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // jetpack compose
-    implementation(libs.androidx.appcompat)
     implementation(libs.androidx.activity.compose)
-
 
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.materialWindow)

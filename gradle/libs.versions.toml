@@ -24,6 +24,7 @@ protoc = "3.25.1"
 protobufKotlinLite = "3.25.1"
 multidex = "2.0.1"
 provider = "13.1.5"
+systemExtension = "1.0.1"
 window-size = "1.2.0-beta01"
 
 # @keep
@@ -37,6 +38,11 @@ compose-compiler = "1.5.4"
 
 jvm-target = "11"
 lifecycleRuntimeCompose = "2.6.2"
+coreKtx = "1.12.0"
+junit = "4.13.2"
+junitVersion = "1.1.5"
+espressoCore = "3.5.1"
+material = "1.11.0"
 
 [libraries]
 
@@ -73,6 +79,11 @@ androidx-compose-runtime = { module = "androidx.compose.runtime:runtime",version
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling",version.ref = "compose" }
 androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose"  }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+system-extension = { module = "com.highcapable.betterandroid:system-extension", version.ref = "systemExtension" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

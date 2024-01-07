@@ -10,12 +10,12 @@ import androidx.compose.material.Colors
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
+import com.agoines.system.common.navigationBarLightOldMode
+import com.agoines.system.common.setNavigationBarTranslation
+import com.agoines.system.common.setStatusBarTranslation
+import com.agoines.system.common.statusBarLightOldMode
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
-import me.teble.xposed.autodaily.utils.navigationBarLightOldMode
-import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
-import me.teble.xposed.autodaily.utils.setStatusBarTranslation
-import me.teble.xposed.autodaily.utils.statusBarLightOldMode
 
 class ModuleActivity : BaseActivity() {
 
