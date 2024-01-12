@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.MainScope
@@ -27,7 +28,7 @@ lateinit var xaApp: XaApplication
 val xaAppIsInit get() = ::xaApp.isInitialized
 lateinit var context: Context
 
-@SuppressLint("MutableCollectionMutableState")
+@HiltAndroidApp
 class XaApplication : MultiDexApplication() {
 
     companion object {

@@ -88,16 +88,16 @@ fun FriendsCheckDialog(
                             show.value = true
                         }
                         if (show.value) {
-                            item {
-                                LineCheckBox(
-                                    title = friend.remark ?: friend.nike,
-                                    desc = friend.uin,
-                                    checked = uinSelectMap[friend.uin]!!,
-                                    onChange = {
-                                        uinSelectMap[friend.uin]?.value = it
-                                    }
-                                )
-                            }
+//                            item {
+//                                LineCheckBox(
+//                                    title = friend.remark ?: friend.nike,
+//                                    desc = friend.uin,
+//                                    checked = uinSelectMap[friend.uin]!!,
+//                                    onChange = {
+//                                        uinSelectMap[friend.uin]?.value = it
+//                                    }
+//                                )
+//                            }
                         }
                     }
                 }
@@ -196,16 +196,16 @@ fun TroopsCheckDialog(
                             show.value = true
                         }
                         if (show.value) {
-                            item {
-                                LineCheckBox(
-                                    title = troop.name,
-                                    desc = troop.uin,
-                                    checked = uinSelectMap[troop.uin]!!,
-                                    onChange = {
-                                        uinSelectMap[troop.uin]?.value = it
-                                    }
-                                )
-                            }
+//                            item {
+//                                LineCheckBox(
+//                                    title = troop.name,
+//                                    desc = troop.uin,
+//                                    checked = uinSelectMap[troop.uin]!!,
+//                                    onChange = {
+//                                        uinSelectMap[troop.uin]?.value = it
+//                                    }
+//                                )
+//                            }
                         }
                     }
                 }
@@ -357,20 +357,20 @@ fun PreviewFriendsCheckDialog() {
             .height(600.dp)
     ) {
         friends.forEach { friend ->
-            item {
-                LineCheckBox(
-                    title = friend.remark ?: friend.nike,
-                    desc = friend.uin,
-                    checked = mutableStateOf(uinSelectSet.value.contains(friend.uin)),
-                    onChange = {
-                        if (it) {
-                            uinSelectSet.value.add(friend.uin)
-                        } else {
-                            uinSelectSet.value.remove(friend.uin)
-                        }
-                    }
-                )
-            }
+//            item {
+//                LineCheckBox(
+//                    title = friend.remark ?: friend.nike,
+//                    desc = friend.uin,
+//                    checked = mutableStateOf(uinSelectSet.value.contains(friend.uin)),
+//                    onChange = {
+//                        if (it) {
+//                            uinSelectSet.value.add(friend.uin)
+//                        } else {
+//                            uinSelectSet.value.remove(friend.uin)
+//                        }
+//                    }
+//                )
+//            }
         }
     }
 }

@@ -7,14 +7,17 @@ annotation = "1.7.1"
 apiVersion = "13.1.5"
 appcompat = "1.6.1"
 byteBuddyAndroid = "1.12.7"
+datastorePreferences = "1.1.0-beta01"
 desugar_jdk_libs = "2.0.4"
 ezxhelper = "1.0.3"
 api = "82"
 flatbuffersJava = "23.5.26"
 kaml = "0.55.0"
 hutoolCore = "5.8.0.M1"
-kotlin = "1.9.20"
-compose = "1.6.0-beta03"
+kotlin = "1.9.22"
+ksp = "1.9.22-1.0.16"
+hilt = "2.50"
+compose = "1.6.0-rc01"
 kotlinxSerializationJson = "1.6.2"
 lifecycleViewmodelCompose = "2.6.2"
 lifecycleViewmodelKtx = "2.6.2"
@@ -34,7 +37,7 @@ targetSdk = "34"
 buildTool = "34.0.0"
 ndk = "25.0.8775105"
 
-compose-compiler = "1.5.4"
+compose-compiler = "1.5.8"
 
 jvm-target = "11"
 lifecycleRuntimeCompose = "2.6.2"
@@ -42,7 +45,6 @@ coreKtx = "1.12.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
-material = "1.11.0"
 
 [libraries]
 
@@ -52,6 +54,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
@@ -69,6 +72,9 @@ api = { module = "de.robv.android.xposed:api", version.ref = "api" }
 androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "apiVersion" }
+
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 
 androidx-compose-animation = { module = "androidx.compose.animation:animation",version.ref = "compose" }
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation",version.ref = "compose" }
@@ -90,3 +96,5 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

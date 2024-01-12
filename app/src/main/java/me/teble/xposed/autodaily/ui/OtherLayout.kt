@@ -108,115 +108,115 @@ fun OtherLayout(navController: NavHostController) {
             // 绘制间隔
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            item {
-                val checked = remember { mutableStateOf(ConfUnit.showTaskToast) }
-                LineSwitch(
-                    title = "签到提示",
-                    desc = "执行完签到任务是否提示",
-                    checked = checked,
-                    onChange = {
-                        ConfUnit.showTaskToast = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                val checked = remember { mutableStateOf(ConfUnit.usedThreadPool) }
-                LineSwitch(
-                    title = "多线程执行",
-                    desc = "是否启用线程池执行任务，加快任务执行速度",
-                    checked = checked,
-                    onChange = {
-                        ConfUnit.usedThreadPool = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                val checked = remember { mutableStateOf(ConfUnit.enableTaskNotification) }
-                LineSwitch(
-                    title = "启用签到通知",
-                    desc = "是否启用签到通知，任务执行时通知提醒，结束后自动销毁",
-                    checked = checked,
-                    onChange = {
-                        ConfUnit.enableTaskNotification = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                val checked = remember { mutableStateOf(ConfUnit.enableTaskNotification) }
-                LineSwitch(
-                    title = "任务异常通知",
-                    desc = "当任务执行异常时提示用户，一次性通知",
-                    checked = checked,
-                    onChange = {
-                        ConfUnit.enableTaskExceptionNotification = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                val checked = remember { mutableStateOf(ConfUnit.logToXposed) }
-                LineSwitch(
-                    title = "日志输出至xposed",
-                    desc = "是否将日志信息输出至框架日志中(默认方式为输出至logcat)",
-                    checked = checked,
-                    onChange = {
-                        ConfUnit.logToXposed = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                val checked = remember { mutableStateOf(ConfUnit.enableDebugLog) }
-                LineSwitch(
-                    title = "是否输出调试日志",
-                    desc = "仅供调试使用",
-                    checked = checked,
-                    onChange = {
-                        ConfUnit.enableDebugLog = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                LineButton(
-                    title = "日志导出",
-                    desc = "保存日志文件打包导出至内部存储",
-                    onClick = {
-                        MainScope().launch(IO) {
-                            ToastUtil.send("请选择保存位置")
-                            logSaveLauncher.launch("XAutoDaily_${LocalDateTime.now()}.zip")
-                        }
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                LineButton(
-                    title = "配置备份",
-                    desc = "将配置文件打包导出至内部存储",
-                    onClick = {
-                        MainScope().launch(IO) {
-                            ToastUtil.send("请选择保存位置")
-                            configBackupLauncher.launch("XAutoDaily_config_${LocalDateTime.now()}.zip")
-
-                        }
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
-            item {
-                LineButton(
-                    title = "配置恢复",
-                    desc = "选择待恢复配置文件",
-                    onClick = {
-                        restoreLauncher.launch("application/zip")
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
-            }
+//            item {
+//                val checked = remember { mutableStateOf(ConfUnit.showTaskToast) }
+//                LineSwitch(
+//                    title = "签到提示",
+//                    desc = "执行完签到任务是否提示",
+//                    checked = checked,
+//                    onChange = {
+//                        ConfUnit.showTaskToast = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                val checked = remember { mutableStateOf(ConfUnit.usedThreadPool) }
+//                LineSwitch(
+//                    title = "多线程执行",
+//                    desc = "是否启用线程池执行任务，加快任务执行速度",
+//                    checked = checked,
+//                    onChange = {
+//                        ConfUnit.usedThreadPool = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                val checked = remember { mutableStateOf(ConfUnit.enableTaskNotification) }
+//                LineSwitch(
+//                    title = "启用签到通知",
+//                    desc = "是否启用签到通知，任务执行时通知提醒，结束后自动销毁",
+//                    checked = checked,
+//                    onChange = {
+//                        ConfUnit.enableTaskNotification = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                val checked = remember { mutableStateOf(ConfUnit.enableTaskNotification) }
+//                LineSwitch(
+//                    title = "任务异常通知",
+//                    desc = "当任务执行异常时提示用户，一次性通知",
+//                    checked = checked,
+//                    onChange = {
+//                        ConfUnit.enableTaskExceptionNotification = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                val checked = remember { mutableStateOf(ConfUnit.logToXposed) }
+//                LineSwitch(
+//                    title = "日志输出至xposed",
+//                    desc = "是否将日志信息输出至框架日志中(默认方式为输出至logcat)",
+//                    checked = checked,
+//                    onChange = {
+//                        ConfUnit.logToXposed = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                val checked = remember { mutableStateOf(ConfUnit.enableDebugLog) }
+//                LineSwitch(
+//                    title = "是否输出调试日志",
+//                    desc = "仅供调试使用",
+//                    checked = checked,
+//                    onChange = {
+//                        ConfUnit.enableDebugLog = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                LineButton(
+//                    title = "日志导出",
+//                    desc = "保存日志文件打包导出至内部存储",
+//                    onClick = {
+//                        MainScope().launch(IO) {
+//                            ToastUtil.send("请选择保存位置")
+//                            logSaveLauncher.launch("XAutoDaily_${LocalDateTime.now()}.zip")
+//                        }
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                LineButton(
+//                    title = "配置备份",
+//                    desc = "将配置文件打包导出至内部存储",
+//                    onClick = {
+//                        MainScope().launch(IO) {
+//                            ToastUtil.send("请选择保存位置")
+//                            configBackupLauncher.launch("XAutoDaily_config_${LocalDateTime.now()}.zip")
+//
+//                        }
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
+//            item {
+//                LineButton(
+//                    title = "配置恢复",
+//                    desc = "选择待恢复配置文件",
+//                    onClick = {
+//                        restoreLauncher.launch("application/zip")
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
+//            }
         }
     }
 }

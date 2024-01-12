@@ -126,15 +126,15 @@ fun MainLayout(navController: NavHostController) {
                 val globalSwitch = remember {
                     mutableStateOf(ConfUnit.globalEnable)
                 }
-                LineSwitch(
-                    title = "总开关",
-                    checked = globalSwitch,
-                    desc = "关闭后一切任务都不会执行",
-                    onChange = {
-                        ConfUnit.globalEnable = it
-                    },
-                    modifier = Modifier.padding(vertical = 8.dp),
-                )
+//                LineSwitch(
+//                    title = "总开关",
+//                    checked = globalSwitch,
+//                    desc = "关闭后一切任务都不会执行",
+//                    onChange = {
+//                        ConfUnit.globalEnable = it
+//                    },
+//                    modifier = Modifier.padding(vertical = 8.dp),
+//                )
             }
             item {
                 LineButton(

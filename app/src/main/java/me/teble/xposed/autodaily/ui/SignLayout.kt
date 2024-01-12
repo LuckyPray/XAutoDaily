@@ -73,43 +73,43 @@ fun SignLayout(navController: NavHostController) {
                             }
                             // 绘制分割线
                             Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
-                            LineSwitch(
-                                title = title,
-                                desc = desc,
-                                checked = checked,
-                                onChange = {
-                                    task.enable = it
-                                },
-                                longPress = {
-                                    ToastUtil.send("正在重置上次执行时间")
-                                    task.reset()
-                                    lastExecTime = "从未执行"
-                                    lastExecMsg = ""
-                                    nextShouldExecTime = "从未执行"
-                                    if (errorMap.containsKey(task.id)) {
-                                        errorMap.remove(task.id)
-                                    }
-                                },
-                                otherInfoList = (mutableListOf<String>().apply {
-                                    if (!checked.value) {
-                                        return@apply
-                                    }
-                                    if (errorMap.containsKey(task.id)) {
-                                        add(errorMap[task.id]!!)
-                                    }
-                                    add("上次: $lastExecTime, 响应: $lastExecMsg")
-                                    add("下次: $nextShouldExecTime")
-                                }),
-                                onClick = {
-                                    if (clickFlag) {
-                                        navController.navigate(
-                                            route = "${EditEnv}/${taskGroup.id}/${task.id}"
-                                        ) {
-                                            popUpTo(Sign)
-                                        }
-                                    }
-                                }
-                            )
+//                            LineSwitch(
+//                                title = title,
+//                                desc = desc,
+//                                checked = checked,
+//                                onChange = {
+//                                    task.enable = it
+//                                },
+//                                longPress = {
+//                                    ToastUtil.send("正在重置上次执行时间")
+//                                    task.reset()
+//                                    lastExecTime = "从未执行"
+//                                    lastExecMsg = ""
+//                                    nextShouldExecTime = "从未执行"
+//                                    if (errorMap.containsKey(task.id)) {
+//                                        errorMap.remove(task.id)
+//                                    }
+//                                },
+//                                otherInfoList = (mutableListOf<String>().apply {
+//                                    if (!checked.value) {
+//                                        return@apply
+//                                    }
+//                                    if (errorMap.containsKey(task.id)) {
+//                                        add(errorMap[task.id]!!)
+//                                    }
+//                                    add("上次: $lastExecTime, 响应: $lastExecMsg")
+//                                    add("下次: $nextShouldExecTime")
+//                                }),
+//                                onClick = {
+//                                    if (clickFlag) {
+//                                        navController.navigate(
+//                                            route = "${EditEnv}/${taskGroup.id}/${task.id}"
+//                                        ) {
+//                                            popUpTo(Sign)
+//                                        }
+//                                    }
+//                                }
+//                            )
                         }
                     }
                 }
@@ -126,20 +126,20 @@ fun PreviewSignLayout() {
             modifier = Modifier.padding(13.dp)
         ) {
             item {
-                GroupList(title = "续火相关") {
-                    Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
-                    LineSwitch(
-                        title = "好友自动续火",
-                        desc = "点按打开好友续火配置",
-                        checked = remember { mutableStateOf(false) }
-                    )
-                    Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
-                    LineSwitch(
-                        title = "好友自动续火",
-                        desc = "点按打开好友续火配置",
-                        checked = remember { mutableStateOf(false) }
-                    )
-                }
+//                GroupList(title = "续火相关") {
+//                    Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
+//                    LineSwitch(
+//                        title = "好友自动续火",
+//                        desc = "点按打开好友续火配置",
+//                        checked = remember { mutableStateOf(false) }
+//                    )
+//                    Divider(color = Color(color = 0xFFF2F2F2), thickness = 1.dp)
+//                    LineSwitch(
+//                        title = "好友自动续火",
+//                        desc = "点按打开好友续火配置",
+//                        checked = remember { mutableStateOf(false) }
+//                    )
+//                }
             }
         }
     }

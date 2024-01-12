@@ -200,7 +200,7 @@ fun LineButton(
 @Composable
 fun LineSwitch(
     modifier: Modifier = Modifier,
-    checked: MutableState<Boolean>,
+    checked: Boolean,
     title: String,
     enabled: Boolean = true,
     desc: String? = null,
@@ -218,8 +218,7 @@ fun LineSwitch(
                 onClick = {
                     if (!enabled) return@combinedClickable
                     if (onClick == null) {
-                        checked.value = !checked.value
-                        onChange(checked.value)
+                        onChange(!checked)
                     } else {
                         onClick.invoke()
                     }
@@ -263,10 +262,9 @@ fun LineSwitch(
             ) {
                 Switch(
 //                    modifier = Modifier.fillMaxHeight(),
-                    checked = checked.value,
+                    checked = checked,
                     enabled = enabled,
                     onCheckedChange = {
-                        checked.value = it
                         onChange(it)
                     }
                 )
@@ -279,7 +277,7 @@ fun LineSwitch(
 @Composable
 fun LineCheckBox(
     modifier: Modifier = Modifier,
-    checked: MutableState<Boolean>,
+    checked: Boolean,
     title: String,
     enabled: Boolean = true,
     desc: String? = null,
@@ -297,8 +295,7 @@ fun LineCheckBox(
                 onClick = {
                     if (!enabled) return@combinedClickable
                     if (onClick == null) {
-                        checked.value = !checked.value
-                        onChange(checked.value)
+                        onChange(!checked)
                     } else {
                         onClick.invoke()
                     }
@@ -341,11 +338,10 @@ fun LineCheckBox(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Checkbox(
-                    checked = checked.value,
+                    checked = checked,
                     enabled = enabled,
                     onCheckedChange = {
-                        checked.value = it
-                        onChange(it)
+                        onChange(checked)
                     },
                 )
             }
@@ -455,7 +451,7 @@ fun PreviewGroupList() {
         LineSwitch(
             title = "测试任务",
             desc = "测试任务",
-            checked = mutableStateOf(true),
+            checked = true,
             onChange = {
 
             },
@@ -464,13 +460,13 @@ fun PreviewGroupList() {
         LineCheckBox(
             title = "好友111111111111111111111111111111111111111111111",
             desc = "110",
-            checked = mutableStateOf(true),
+            checked = true,
             onChange = {}
         )
         LineCheckBox(
             title = "好友12",
             desc = "119",
-            checked = mutableStateOf(true),
+            checked = true,
             onChange = {}
         )
     }

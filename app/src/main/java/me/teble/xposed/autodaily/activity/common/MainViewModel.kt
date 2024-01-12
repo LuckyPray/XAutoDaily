@@ -8,34 +8,57 @@ import android.content.pm.PackageManager
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
-import me.teble.xposed.autodaily.application.XaApplication
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
+import me.teble.xposed.autodaily.data.KeepAlive
+import me.teble.xposed.autodaily.data.QKeepAlive
+import me.teble.xposed.autodaily.data.TimKeepAlive
+import me.teble.xposed.autodaily.data.UntrustedTouchEvents
 import me.teble.xposed.autodaily.hook.JumpActivityHook
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
+import javax.inject.Inject
 
-class MainViewModel : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(private val dataStore : DataStore<Preferences>) : ViewModel() {
     private val _shizukuDaemonRunning = MutableStateFlow(false)
     val shizukuDaemonRunning = _shizukuDaemonRunning.asStateFlow()
     private val _shizukuErrInfo = MutableStateFlow("")
     val shizukuErrInfo = _shizukuErrInfo.asStateFlow()
 
 
-    private val _toastText = MutableSharedFlow<String>()
+    val keepAlive= dataStore.data.map {
+        it[KeepAlive]?:false
+    }
+    val qqKeepAlive = dataStore.data.map {
+        it[QKeepAlive]?:false
+    }
+    val timKeepAlive = dataStore.data.map {
+        it[TimKeepAlive]?:false
+    }
 
+    val untrustedTouchEvents = dataStore.data.map {
+        it[UntrustedTouchEvents]?:false
+    }
+    private val _toastText = MutableSharedFlow<String>()
     val toastText = _toastText.asSharedFlow()
 
     private val peekServiceJob = viewModelScope.launch(IO) {
@@ -45,6 +68,40 @@ class MainViewModel : ViewModel() {
         }
         bindUserService()
     }
+
+    fun updateKeepAliveChecked(bool :Boolean){
+        viewModelScope.launch(IO) {
+            dataStore.edit {
+                it[KeepAlive] = bool
+            }
+        }
+
+    }
+    fun updateQQKeepAlive(bool :Boolean){
+        viewModelScope.launch(IO) {
+            dataStore.edit {
+                it[QKeepAlive] = bool
+            }
+        }
+    }
+
+
+    fun updateTimKeepAlive(bool :Boolean){
+        viewModelScope.launch(IO) {
+            dataStore.edit {
+                it[TimKeepAlive] = bool
+            }
+        }
+    }
+
+    fun updateUntrustedTouchEvents(bool :Boolean){
+        viewModelScope.launch(IO) {
+            dataStore.edit {
+                it[UntrustedTouchEvents] = bool
+            }
+        }
+    }
+
     /**
      * 用于与Shizuku服务的连接和断开
      */
@@ -145,13 +202,13 @@ class MainViewModel : ViewModel() {
         }
     }
 
-    fun sendToastText(text: String){
+    private fun sendToastText(text: String){
         viewModelScope.launch {
             _toastText.emit(text)
         }
     }
 
-    fun shizukuClickable(application : XaApplication){
+    fun shizukuClickable() {
         if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
             Shizuku.requestPermission(1101)
 
@@ -165,17 +222,18 @@ class MainViewModel : ViewModel() {
             Log.d("TAG", "shizukuClickable: 被调用")
             return
         }
-        val keepAlive = application.prefs.getBoolean("KeepAlive", false)
-        if (!keepAlive) {
-            sendToastText("未启用保活，无需启动守护进程")
-            return
-        }
-        if (!shizukuDaemonRunning.value) {
-            bindUserService()
-            peekServiceJob.start()
-            sendToastText("正在启动守护进程，请稍后")
-        } else {
-            unbindUserService()
+        viewModelScope.launch(IO) {
+            if (!keepAlive.first()) {
+                sendToastText("未启用保活，无需启动守护进程")
+                return@launch
+            }
+            if (!shizukuDaemonRunning.value) {
+                bindUserService()
+                peekServiceJob.start()
+                sendToastText("正在启动守护进程，请稍后")
+            } else {
+                unbindUserService()
+            }
         }
     }
 }

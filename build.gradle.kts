@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.kotlinAndroid) apply false
     alias(libs.plugins.androidLibrary) apply false
     alias(libs.plugins.serialization) apply false
+    alias(libs.plugins.google.dagger.hilt.android) apply false
+    alias(libs.plugins.google.devtools.ksp) apply false
 }
 
 tasks.register<Delete>("clean") {

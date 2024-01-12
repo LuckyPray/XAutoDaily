@@ -47,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.activity.module.colors
@@ -64,7 +65,7 @@ import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.toJsonString
 import rikka.shizuku.Shizuku
 import java.io.File
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewmodel : MainViewModel by viewModels()
 
@@ -105,7 +106,7 @@ fun ShizukuCard(
             .fillMaxWidth()
             .background(color = Color.White, shape = RoundedCornerShape(6.dp))
             .clickable {
-                viewmodel.shizukuClickable(xaApp)
+                viewmodel.shizukuClickable()
             }
             .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -201,7 +202,9 @@ private fun SettingCard(
 
 @SuppressLint("MutableCollectionMutableState")
 @Composable
-fun ModuleView() {
+fun ModuleView(
+    viewmodel : MainViewModel = viewModel()
+) {
 
         var infoList by remember { mutableStateOf(listOf<String>()) }
         LaunchedEffect(ShizukuApi.isPermissionGranted) {
@@ -237,18 +240,15 @@ fun ModuleView() {
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 item {
-                    val checked = remember { mutableStateOf(xaApp.prefs.getBoolean("UntrustedTouchEvents", false)) }
+                    val checked by viewmodel.untrustedTouchEvents.collectAsStateWithLifecycle(false)
                     LineSwitch(
                         title = "取消安卓12不受信触摸",
                         desc = "安卓12后启用对toast弹窗等事件触摸不可穿透，勾选此项可关闭",
                         checked = checked,
-                        enabled = ShizukuApi.isPermissionGranted,
+                        enabled =true,
                         onChange = {
                             ShizukuApi.setUntrustedTouchEvents(it)
-                            checked.value = it
-                            xaApp.prefs.edit()
-                                .putBoolean("UntrustedTouchEvents", it)
-                                .apply()
+                            viewmodel.updateUntrustedTouchEvents(it)
                         },
                         modifier = Modifier
                             .background(color = Color.White, shape = RoundedCornerShape(6.dp))
@@ -258,16 +258,10 @@ fun ModuleView() {
                 }
             }
             item {
-                val keepAliveChecked = remember {
-                    mutableStateOf(xaApp.prefs.getBoolean("KeepAlive", false))
-                }
-                val qqKeepAlive = remember {
-                    mutableStateOf(xaApp.prefs.getBoolean("QKeepAlive", false))
-                }
-                val timKeepAlive = remember {
-                    mutableStateOf(xaApp.prefs.getBoolean("TimKeepAlive", false))
-                }
-                LaunchedEffect(qqKeepAlive.value, timKeepAlive.value, keepAliveChecked.value) {
+                val keepAliveChecked by viewmodel.keepAlive.collectAsStateWithLifecycle(false)
+                val qqKeepAlive by viewmodel.qqKeepAlive.collectAsStateWithLifecycle(false)
+                val timKeepAlive by viewmodel.timKeepAlive.collectAsStateWithLifecycle(false)
+                LaunchedEffect(qqKeepAlive, timKeepAlive, keepAliveChecked) {
                     val confDir = File(xaApp.getExternalFilesDir(null), "conf")
                     if (confDir.isFile) {
                         confDir.delete()
@@ -276,10 +270,10 @@ fun ModuleView() {
                         confDir.mkdirs()
                     }
                     val confFile = File(confDir, "conf.json")
-                    val conf = ShizukuConf(keepAliveChecked.value,
+                    val conf = ShizukuConf(keepAliveChecked,
                         mutableMapOf<String, Boolean>().apply {
-                            put(PACKAGE_NAME_QQ, qqKeepAlive.value)
-                            put(PACKAGE_NAME_TIM, timKeepAlive.value)
+                            put(PACKAGE_NAME_QQ, qqKeepAlive)
+                            put(PACKAGE_NAME_TIM, timKeepAlive)
                         })
                     val confString = conf.toJsonString()
                     Log.d("XALog", confString)
@@ -298,14 +292,11 @@ fun ModuleView() {
                         desc = "通过shizuku运行一个service，当监测到qq/tim被杀死后重新拉起进程",
                         enabled = ShizukuApi.isPermissionGranted,
                         onChange = {
-                            keepAliveChecked.value = it
-                            xaApp.prefs.edit()
-                                .putBoolean("KeepAlive", it)
-                                .apply()
+                            viewmodel.updateKeepAliveChecked(!it)
                         },
                         otherInfoList = infoList
                     )
-                    if (keepAliveChecked.value) {
+                    if (keepAliveChecked) {
                         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
                             LineCheckBox(
                                 checked = qqKeepAlive,
@@ -320,10 +311,8 @@ fun ModuleView() {
                                         ))
                                 },
                                 onChange = {
-                                    qqKeepAlive.value = it
-                                    xaApp.prefs.edit()
-                                        .putBoolean("QKeepAlive", it)
-                                        .apply()
+
+                                    viewmodel.updateQQKeepAlive(it)
                                 }
                             )
                         }
@@ -341,10 +330,7 @@ fun ModuleView() {
                                         ))
                                 },
                                 onChange = {
-                                    timKeepAlive.value = it
-                                    xaApp.prefs.edit()
-                                        .putBoolean("TimKeepAlive", it)
-                                        .apply()
+                                    viewmodel.updateTimKeepAlive(it)
                                 }
                             )
                         }
