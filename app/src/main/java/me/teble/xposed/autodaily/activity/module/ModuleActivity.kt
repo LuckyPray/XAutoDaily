@@ -33,20 +33,20 @@ class ModuleActivity : BaseActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+
         setContent {
             MaterialTheme {
-
                 Box(
                     Modifier
                         .fillMaxSize()
-                        .background(Color(0xFFF7F7F7))) {
+                        .background(Color(0xFFF7F7F7))
+                ) {
                     XAutoDailyApp()
                 }
             }
 
 
         }
-
     }
 }
 

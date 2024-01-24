@@ -1,10 +1,11 @@
 package me.teble.xposed.autodaily.task.model
 
+import androidx.compose.runtime.StableMarker
 import kotlinx.serialization.Serializable
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.math.BigInteger
-
+@StableMarker
 @Serializable
 data class TaskProperties(
     // 配置文件版本
@@ -16,13 +17,13 @@ data class TaskProperties(
     // 任务组
     val taskGroups: List<TaskGroup>,
 )
-
+@StableMarker
 @Serializable
 data class UpdateInfo(
     val version: Int,
     val desc: String
 )
-
+@StableMarker
 @Serializable
 data class TaskGroup(
     // 组名
@@ -35,6 +36,7 @@ data class TaskGroup(
     // 任务列表
     val tasks: List<Task>,
 )
+@StableMarker
 @Serializable
 data class Task(
     // 任务名
@@ -76,6 +78,7 @@ data class Task(
     val isBasic = cron == "basic"
     val isCronTask = !isRelayTask && !isBasic
 }
+@StableMarker
 @Serializable
 data class TaskEnv(
     // 变量名
@@ -89,6 +92,7 @@ data class TaskEnv(
     // 变量描述
     val desc: String,
 )
+@StableMarker
 @Serializable
 data class TaskCallback(
     // 响应的data提取正则，如果为null，则表示不需要处理
@@ -104,6 +108,7 @@ data class TaskCallback(
     // 签到提示的替换规则
     val replaces: List<MsgReplace>?
 )
+@StableMarker
 @Serializable
 data class MsgExtract(
     // headers/data，提取响应中返回的响应头或者响应体
@@ -115,6 +120,7 @@ data class MsgExtract(
     // 保存的值 eval string
     val value: String,
 )
+@StableMarker
 @Serializable
 data class Assert(
     // eval string
@@ -122,7 +128,7 @@ data class Assert(
     // 值 eval string
     val value: String,
 )
-
+@StableMarker
 @Serializable
 data class TaskCondition(
     // 任务执行条件，eval string

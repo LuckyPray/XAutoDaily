@@ -53,7 +53,7 @@ fun SignLayout(navController: NavHostController) {
                     GroupList(title = taskGroup.id) {
                         taskGroup.tasks.forEach { task ->
                             val checked = remember { mutableStateOf(task.enable) }
-                            val clickFlag = remember { task.envs != null && task.envs.isNotEmpty() }
+                            val clickFlag = remember { !task.envs.isNullOrEmpty() }
                             var desc by remember { mutableStateOf("") }
                             var title by remember { mutableStateOf("") }
                             var lastExecTime by remember { mutableStateOf("") }
