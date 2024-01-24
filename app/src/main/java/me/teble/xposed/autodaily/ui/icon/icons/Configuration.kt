@@ -9,7 +9,6 @@ import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
-
 import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.ui.icon.Icons
 
@@ -114,4 +113,3 @@ public val Icons.Configuration: ImageVector
     }
 
 private var _configuration: ImageVector? = null
-

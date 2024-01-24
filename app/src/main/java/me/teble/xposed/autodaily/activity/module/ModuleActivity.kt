@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Colors
+import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
@@ -33,12 +34,16 @@ class ModuleActivity : BaseActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFFF7F7F7))) {
-                XAutoDailyApp()
+            MaterialTheme {
+
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFFF7F7F7))) {
+                    XAutoDailyApp()
+                }
             }
+
 
         }
 

@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.icon.icons
 
-
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathFillType.Companion.EvenOdd
 import androidx.compose.ui.graphics.PathFillType.Companion.NonZero
@@ -10,7 +9,6 @@ import androidx.compose.ui.graphics.StrokeJoin.Companion.Miter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.ui.icon.Icons
 
