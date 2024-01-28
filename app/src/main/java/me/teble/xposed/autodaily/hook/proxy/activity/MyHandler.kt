@@ -34,16 +34,9 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                     bundle?.let {
                         it.classLoader = hostClassLoader
                         if (intent.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
-                            val rIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                intent.getParcelableExtra(
-                                    ProxyManager.ACTIVITY_PROXY_INTENT,
-                                    Intent::class.java
-                                )
-                            } else {
-                                intent.getParcelableExtra(
+                            val rIntent = intent.getParcelableExtra<Intent>(
                                     ProxyManager.ACTIVITY_PROXY_INTENT
-                                )
-                            }!!
+                                )!!
                             fIntent.set(record, rIntent)
                         }
                     }
