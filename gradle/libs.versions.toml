@@ -1,7 +1,7 @@
 [versions]
 # 依赖版本号
 activityCompose = "1.8.2"
-agp = "8.2.1"
+agp = "8.2.2"
 ahoCorasickDoubleArrayTrie = "1.2.3"
 annotation = "1.7.1"
 apiVersion = "13.1.5"
