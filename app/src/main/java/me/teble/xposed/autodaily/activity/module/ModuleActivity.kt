@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.activity.module
 
+import me.teble.xposed.autodaily.ui.XAutoDailyApp
 import android.os.Bundle
 import android.view.Window
 import androidx.activity.compose.setContent
@@ -16,7 +17,6 @@ import com.agoines.system.common.setNavigationBarTranslation
 import com.agoines.system.common.setStatusBarTranslation
 import com.agoines.system.common.statusBarLightOldMode
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
-import me.teble.xposed.autodaily.ui.XAutoDailyApp
 
 class ModuleActivity : BaseActivity() {
 
@@ -42,6 +42,7 @@ class ModuleActivity : BaseActivity() {
                         .background(Color(0xFFF7F7F7))
                 ) {
                     XAutoDailyApp()
+
                 }
             }
 

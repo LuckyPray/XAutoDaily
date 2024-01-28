@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -41,25 +39,19 @@ import me.teble.xposed.autodaily.ui.icon.icons.Info
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFontFamilyResolver
-import androidx.compose.ui.text.TextLayoutResult
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlin.math.ceil
+import me.teble.xposed.autodaily.ui.NavigationItem
+import me.teble.xposed.autodaily.ui.navigate
 
 @Composable
 fun SignScene(navController: NavController, signViewModel: SignViewModel = viewModel()) {
     Column(
 
     ) {
-        TopBar(text = "签到配置", hasBack = true, endIcon = Icons.Info)
+        TopBar(text = "签到配置", hasBack = true, endIcon = Icons.Info,
+            backClick = {
+                navController.popBackStack()
+            })
         val globalEnable by signViewModel.globalEnable.collectAsState()
         SwitchTextItem(
             modifier = Modifier
@@ -73,16 +65,14 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
             },
             enable = globalEnable
         )
-        GroupColumn()
+        GroupColumn(navController)
     }
-
 }
 
 @Composable
-fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
+fun GroupColumn(navController: NavController, signViewModel: SignViewModel = viewModel()) {
 
     val taskGroups by signViewModel.taskGroupsState.collectAsState()
-
     LazyColumn(
         modifier = Modifier
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
@@ -92,8 +82,9 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
 
-        items(items = taskGroups, key = { it.id }, contentType = { it.type }) { taskGroup ->
-            val groupTitle by remember{
+        items(items = taskGroups, key = { it.id }, contentType = { it.id }) { taskGroup ->
+
+            val groupTitle by remember {
                 derivedStateOf {
                     taskGroup.id
                 }
@@ -109,7 +100,8 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
                 )
             )
 
-            val tasks by remember{
+
+            val tasks by remember {
                 derivedStateOf {
                     taskGroup.tasks
                 }
@@ -121,7 +113,6 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
                     .clip(SmootherShape(12.dp))
                     .background(color = Color(0xffffffff)),
             ) {
-                Log.d("TAG", "GroupColumn:")
                 tasks.forEach { task ->
 
                     val checked = remember {
@@ -145,9 +136,8 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
                         }
                     }
 
-                    if(desc.isNotBlank()){
-
-                        if(clickFlag){
+                    if (desc.isNotBlank()) {
+                        if (clickFlag) {
                             SwitchInfoDivideItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -156,10 +146,16 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
                                 text = title,
                                 infoText = desc,
                                 onClick = {
-
+                                    navController.navigate(
+                                        NavigationItem.EditEnv(
+                                            taskGroup.id,
+                                            task.id
+                                        ),
+                                        NavigationItem.Sign
+                                    )
                                 }
                             )
-                        }else{
+                        } else {
                             SwitchInfoItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -174,8 +170,8 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
                         }
 
 
-                    }else{
-                        if(clickFlag){
+                    } else {
+                        if (clickFlag) {
                             SwitchTextItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -186,7 +182,7 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
 
                                 }
                             )
-                        }else{
+                        } else {
                             SwitchTextDivideItem(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -204,21 +200,21 @@ fun GroupColumn(signViewModel: SignViewModel = viewModel()) {
 
 
                 }
-
             }
 
         }
     }
+
 }
+
 
 @Composable
 fun SwitchTextItem(
     modifier: Modifier = Modifier,
     text: String,
     onClick: (Boolean) -> Unit,
-    enable: Boolean,
-
-    ) {
+    enable: Boolean
+) {
     Row(
         modifier
             .clickable(role = Role.Switch, onClick = { onClick(!enable) })
@@ -245,9 +241,9 @@ fun SwitchTextDivideItem(
     modifier: Modifier = Modifier,
     text: String,
     onClick: (Boolean) -> Unit,
-    enable: Boolean,
+    enable: Boolean
+) {
 
-    ) {
     Row(
         modifier
             .clickable(role = Role.Switch, onClick = { onClick(!enable) })
@@ -338,6 +334,7 @@ fun SwitchInfoDivideItem(
         Column(
             modifier = Modifier
                 .weight(1f)
+                .clip(SmootherShape(12.dp))
                 .clickable(role = Role.Switch, onClick = { onClick(!enable) })
                 .padding(vertical = 20.dp, horizontal = 16.dp),
         ) {
@@ -362,6 +359,8 @@ fun SwitchInfoDivideItem(
                 )
             )
         }
+
+        // 其他不渲染，先使用 Text 占位
         Text(
             modifier = Modifier
                 .fillMaxHeight()
@@ -370,8 +369,10 @@ fun SwitchInfoDivideItem(
             text = ""
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = "占位", modifier = Modifier
-            .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
-            .padding(end = 16.dp))
+        Text(
+            text = "占位", modifier = Modifier
+                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .padding(end = 16.dp)
+        )
     }
 }

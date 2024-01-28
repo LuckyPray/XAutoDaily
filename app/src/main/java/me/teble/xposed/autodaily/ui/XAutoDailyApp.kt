@@ -1,13 +1,12 @@
 package me.teble.xposed.autodaily.ui
 
+import androidx.annotation.Keep
 import androidx.compose.runtime.*
 import androidx.navigation.NavController
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
-import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
+import me.teble.xposed.autodaily.ui.scene.EditEnvScene
 import me.teble.xposed.autodaily.ui.scene.MainScreen
 import me.teble.xposed.autodaily.ui.scene.SignScene
 
@@ -18,18 +17,22 @@ object XAutoDailyApp {
     const val EditEnv = "EditEnvLayout"
 }
 
+@Keep
 enum class Screen {
     Main,
-    Sign
+    Sign,
+    EditEnv
 }
 sealed class NavigationItem(val route: String) {
     data object Main : NavigationItem(Screen.Main.name)
     data object Sign : NavigationItem(Screen.Sign.name)
+
+    data class EditEnv(val taskGroup: String, val taskId : String) : NavigationItem("${Screen.EditEnv.name}/$taskGroup/$taskId")
 }
 
-fun NavController.navigate(item : NavigationItem){
+fun NavController.navigate(item : NavigationItem, popUpToItem: NavigationItem){
     this.navigate(item.route){
-        popUpTo(graph.startDestinationId)
+        popUpTo(popUpToItem.route)
         launchSingleTop = true
     }
 
@@ -48,6 +51,13 @@ fun XAutoDailyApp() {
 
         composable(NavigationItem.Sign.route) {
             SignScene(navController)
+        }
+        composable("${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
+            EditEnvScene(
+                navController,
+                backStackEntry.arguments!!.getString("taskGroup", ""),
+                backStackEntry.arguments!!.getString("taskId","")
+            )
         }
 
     }

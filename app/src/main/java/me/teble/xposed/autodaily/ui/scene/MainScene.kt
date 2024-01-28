@@ -5,28 +5,17 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import me.teble.xposed.autodaily.ui.icon.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -34,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -60,18 +48,20 @@ import me.teble.xposed.autodaily.ui.navigate
 
 @Composable
 fun MainScreen(navController: NavController) {
-        Column(
-            modifier = Modifier
-        ) {
-            TopBar(text = "XAutoDaily", endIcon = Icons.Notice)
-            Banner()
-            GridLayout(navController)
-        }
+    Column(
+        modifier = Modifier
+    ) {
+        TopBar(text = "XAutoDaily", endIcon = Icons.Notice, backClick = {
+            navController.popBackStack()
+        })
+        Banner()
+        GridLayout(navController)
+    }
 
 }
 
 @Composable
-private fun GridLayout(navController: NavController,viewModel: MainViewModel = viewModel()) {
+private fun GridLayout(navController: NavController, viewModel: MainViewModel = viewModel()) {
     val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
@@ -91,7 +81,7 @@ private fun GridLayout(navController: NavController,viewModel: MainViewModel = v
                 "已启用 $execTaskNum 项",
                 true
             ) {
-                navController.navigate(NavigationItem.Sign)
+                navController.navigate(NavigationItem.Sign, NavigationItem.Main)
             }
             CardItem(
                 iconColor = Color(0xFF8286FF),
@@ -180,7 +170,8 @@ private fun ColumnScope.Banner() {
                 textAlign = TextAlign.Center
             )
         )
-        Text(text = "立即签到",
+        Text(
+            text = "立即签到",
             modifier = Modifier
                 .padding(top = 16.dp)
                 .clip(shape = SmootherShape(radius = 24.dp))
@@ -194,7 +185,8 @@ private fun ColumnScope.Banner() {
                 color = Color(0xFF0095FF),
 
                 textAlign = TextAlign.Center,
-            ))
+            )
+        )
 
 
     }
@@ -207,7 +199,7 @@ private fun RowScope.CardItem(
     text: String,
     subText: String,
     enable: Boolean = true,
-    onClick :()-> Unit= {}
+    onClick: () -> Unit = {}
 ) {
 
     val cardBackground by animateColorAsState(

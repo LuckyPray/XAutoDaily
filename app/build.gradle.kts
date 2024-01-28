@@ -315,13 +315,13 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.androidx.datastore.preferences)
-
     // jetpack compose
     implementation(libs.androidx.activity.compose)
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
 
+    implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.materialWindow)
     implementation(libs.androidx.compose.foundation)
@@ -345,7 +345,6 @@ dependencies {
     implementation(libs.aho.corasick.double.array.trie)
     implementation(libs.byte.buddy.android)
     implementation(libs.kaml)
-    implementation(libs.kotlinx.serialization.json)
     // implementation ("org.apache-extras.beanshell:bsh:2.0b6")
     // shizuku
     implementation(libs.shizuku.api)

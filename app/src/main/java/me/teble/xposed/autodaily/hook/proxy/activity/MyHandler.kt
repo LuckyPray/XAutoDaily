@@ -7,12 +7,14 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.Message
+import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.invoke
+
 
 class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
 
@@ -32,9 +34,16 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                     bundle?.let {
                         it.classLoader = hostClassLoader
                         if (intent.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
-                            val rIntent = intent.getParcelableExtra<Intent>(
-                                ProxyManager.ACTIVITY_PROXY_INTENT
-                            )
+                            val rIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                intent.getParcelableExtra(
+                                    ProxyManager.ACTIVITY_PROXY_INTENT,
+                                    Intent::class.java
+                                )
+                            } else {
+                                intent.getParcelableExtra(
+                                    ProxyManager.ACTIVITY_PROXY_INTENT
+                                )
+                            }!!
                             fIntent.set(record, rIntent)
                         }
                     }
@@ -62,9 +71,16 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                                 bundle?.let {
                                     it.classLoader = hostClassLoader
                                     if (wrapper.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
-                                        val rIntent = wrapper.getParcelableExtra<Intent>(
-                                            ProxyManager.ACTIVITY_PROXY_INTENT
-                                        )
+                                        val rIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                            wrapper.getParcelableExtra(
+                                                ProxyManager.ACTIVITY_PROXY_INTENT,
+                                                Intent::class.java
+                                            )
+                                        } else {
+                                            wrapper.getParcelableExtra(
+                                                ProxyManager.ACTIVITY_PROXY_INTENT
+                                            )
+                                        }!!
                                         fmIntent.set(item, rIntent)
                                         // android 12
                                         if (Build.VERSION.SDK_INT >= 31) {

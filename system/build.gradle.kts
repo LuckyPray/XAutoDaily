@@ -45,8 +45,4 @@ dependencies {
     api(libs.kotlinx.serialization.json)
     api(libs.androidx.appcompat)
     implementation(libs.system.extension)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }
