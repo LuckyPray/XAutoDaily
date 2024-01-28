@@ -16,6 +16,7 @@ import me.teble.xposed.autodaily.utils.invoke
 
 class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
 
+    @Suppress("DEPRECATION")
     @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
     override fun handleMessage(msg: Message): Boolean {
         when (msg.what) {

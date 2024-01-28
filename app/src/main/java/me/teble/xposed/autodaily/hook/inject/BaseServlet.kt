@@ -29,6 +29,7 @@ abstract class BaseServlet: MSFServlet() {
         return null
     }
 
+    @Suppress("DEPRECATION")
     override fun onReceive(intent: Intent, fromServiceMsg: FromServiceMsg) {
         val toServiceMsg: ToServiceMsg =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -47,6 +48,7 @@ abstract class BaseServlet: MSFServlet() {
         seqReceiveMap[toServiceMsg.appSeq] = fromServiceMsg
     }
 
+    @Suppress("DEPRECATION")
     override fun onSend(intent: Intent, packet: Packet) {
         val toServiceMsg: ToServiceMsg? =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

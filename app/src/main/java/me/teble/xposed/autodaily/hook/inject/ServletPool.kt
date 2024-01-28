@@ -24,7 +24,7 @@ object ServletPool {
         val managedServlet = servletContainer
             .fieldValueAs<ConcurrentHashMap<String, Servlet>>("managedServlet")!!
         for (servletClass in servletArray) {
-            val servlet = servletClass.newInstance() as Servlet
+            val servlet = servletClass.getDeclaredConstructor().newInstance() as Servlet
             servlet.invoke("init", appRuntime, servletContainer)
             servlet.invoke("onCreate")
             managedServlet[servlet::class.java.name] = servlet

@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.utils
 
 import android.os.Bundle
 
+@Suppress("DEPRECATION")
 fun Bundle?.toMap(): Map<String, Any?>{
     if (this == null) return mapOf()
     val res = HashMap<String, Any?>()
