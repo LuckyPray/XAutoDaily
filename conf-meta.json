@@ -1,7 +1,7 @@
 {
-    "version": 45,
+    "version": 46,
     "needAppVersion": 23080814,
-    "updateLog": "更新超星会员任务参数，解决活动结束无法领取的问题 (需长按重置一次任务)",
-    "md5": "cf7cec6387d0f3fa58e6f5c648538e95",
-    "updateTime": "2024-01-03 15:12:03"
+    "updateLog": "新增发表私密说说加速支持，0.5活跃天",
+    "md5": "b66ce06f6b7056ca88e70c204a8b6739",
+    "updateTime": "2024-01-30 17:49:40"
 }
