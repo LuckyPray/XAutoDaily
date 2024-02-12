@@ -17,7 +17,6 @@ import com.github.kyuubiran.ezxhelper.utils.emptyParam
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookBefore
-import com.github.kyuubiran.ezxhelper.utils.isPublic
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
@@ -58,9 +57,7 @@ import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.new
 import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.query.enums.StringMatchType
-import java.lang.reflect.Field
 import java.lang.reflect.Method
-import java.lang.reflect.Modifier
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
@@ -176,6 +173,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     builder = NotificationCompat.Builder(context)
                         .setPriority(Notification.PRIORITY_LOW)
                 }
+                injectRes()
                 builder = builder.setContentTitle("XAutoDaily")
                     .setSmallIcon(R.drawable.icon_x_auto_daily_2)
                     .setOngoing(false)

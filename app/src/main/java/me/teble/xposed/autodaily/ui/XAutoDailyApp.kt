@@ -2,13 +2,21 @@ package me.teble.xposed.autodaily.ui
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.EditEnv
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
@@ -23,6 +31,10 @@ object XAutoDailyApp {
 
 @Composable
 fun XAutoDailyApp() {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        injectRes(context.resources)
+    }
     val navController = rememberNavController()
     NavHost(
         navController = navController,

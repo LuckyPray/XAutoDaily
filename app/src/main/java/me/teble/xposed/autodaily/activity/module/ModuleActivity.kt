@@ -1,6 +1,8 @@
 package me.teble.xposed.autodaily.activity.module
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.view.ViewGroup
 import android.view.Window
@@ -21,12 +23,17 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
+import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
 import me.teble.xposed.autodaily.utils.navigationBarMode
 import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
 import me.teble.xposed.autodaily.utils.setStatusBarTranslation
 
 class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
+
+    companion object {
+        lateinit var composeViewContext: Context
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -48,6 +55,7 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+            composeViewContext = context
             this.setContent {
                 MaterialTheme(colors = colors()) {
                     Scaffold {
@@ -71,6 +79,11 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
             ViewTreeSavedStateRegistryOwner.set(it, this)
         }
         setContentView(view)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        injectRes(composeViewContext.resources)
     }
 }
 

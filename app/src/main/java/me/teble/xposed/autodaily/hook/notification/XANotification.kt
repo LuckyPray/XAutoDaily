@@ -13,6 +13,7 @@ import com.github.kyuubiran.ezxhelper.utils.loadClass
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.SplashActivity
 import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.ui.ConfUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -39,6 +40,7 @@ object XANotification {
         isStart = true
     }
 
+    @SuppressLint("NotificationPermission")
     fun setContent(content: String, onGoing: Boolean = true, bigText: Boolean = false, isTask: Boolean = true) {
         if (isTask && !enabled) return
         if (!isStart) start()
@@ -98,6 +100,7 @@ object XANotification {
                 .setPriority(Notification.PRIORITY_LOW)
                 .setSound(null)
         }
+        injectRes()
         builder = builder.setContentTitle("XAutoDaily")
             .setSmallIcon(R.drawable.icon_x_auto_daily_2)
             .setOngoing(true)

@@ -148,6 +148,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                 val context = it.args.first() as Context
                 val result = it.result as List<*>
                 val resId: Int = context.resources.getIdentifier("qui_tuning", "drawable", hostPackageName)
+                injectRes()
                 val item = cSimpleItemProcessor.new(
                     context,
                     R.id.setting2Activity_settingEntryItem,
