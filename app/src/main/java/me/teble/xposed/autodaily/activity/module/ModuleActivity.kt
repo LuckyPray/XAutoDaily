@@ -28,11 +28,12 @@ import me.teble.xposed.autodaily.ui.XAutoDailyApp
 import me.teble.xposed.autodaily.utils.navigationBarMode
 import me.teble.xposed.autodaily.utils.setNavigationBarTranslation
 import me.teble.xposed.autodaily.utils.setStatusBarTranslation
+import java.lang.ref.WeakReference
 
 class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
 
     companion object {
-        lateinit var composeViewContext: Context
+        var composeViewContext = WeakReference<Context>(null)
     }
 
     override fun onDestroy() {
@@ -55,7 +56,7 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            composeViewContext = context
+            composeViewContext = WeakReference(context)
             this.setContent {
                 MaterialTheme(colors = colors()) {
                     Scaffold {
@@ -83,7 +84,9 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        injectRes(composeViewContext.resources)
+        composeViewContext.get()?.let {
+            injectRes(it.resources)
+        }
     }
 }
 
