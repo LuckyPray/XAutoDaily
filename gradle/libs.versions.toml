@@ -6,6 +6,7 @@ ahoCorasickDoubleArrayTrie = "1.2.3"
 annotation = "1.7.1"
 apiVersion = "13.1.5"
 appcompat = "1.6.1"
+bottomsheetdialogCompose = "1.5.0"
 byteBuddyAndroid = "1.12.7"
 datastorePreferences = "1.1.0-beta01"
 desugar_jdk_libs = "2.0.4"
@@ -17,17 +18,17 @@ hutoolCore = "5.8.0.M1"
 kotlin = "1.9.22"
 ksp = "1.9.22-1.0.17"
 hilt = "2.50"
-compose = "1.6.0"
+compose = "1.7.0-alpha02"
 kotlinxSerializationJson = "1.6.2"
 lifecycle= "2.7.0"
 okhttp = "4.12.0"
-navigationCompose = "2.7.6"
+navigationCompose = "2.7.7"
 protoc = "3.25.1"
 protobufKotlinLite = "3.25.1"
 multidex = "2.0.1"
 provider = "13.1.5"
 systemExtension = "1.0.1"
-window-size = "1.2.0-rc01"
+window-size = "1.2.0"
 
 # @keep
 compileSdk = "34"
@@ -50,6 +51,7 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+bottomsheetdialog-compose = { module = "com.holix.android:bottomsheetdialog-compose", version.ref = "bottomsheetdialogCompose" }
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }

@@ -330,6 +330,9 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui.tooling)
 
+    // bottom dialog
+    implementation(libs.bottomsheetdialog.compose)
+
     implementation(libs.androidx.navigation.compose)
 
 
@@ -349,6 +352,7 @@ dependencies {
     // shizuku
     implementation(libs.shizuku.api)
     implementation(libs.provider)
+
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

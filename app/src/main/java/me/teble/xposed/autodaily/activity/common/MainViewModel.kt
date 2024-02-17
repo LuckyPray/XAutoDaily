@@ -38,25 +38,26 @@ import rikka.shizuku.Shizuku
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(private val dataStore : DataStore<Preferences>) : ViewModel() {
+class MainViewModel @Inject constructor(private val dataStore: DataStore<Preferences>) :
+    ViewModel() {
     private val _shizukuDaemonRunning = MutableStateFlow(false)
     val shizukuDaemonRunning = _shizukuDaemonRunning.asStateFlow()
     private val _shizukuErrInfo = MutableStateFlow("")
     val shizukuErrInfo = _shizukuErrInfo.asStateFlow()
 
 
-    val keepAlive= dataStore.data.map {
-        it[KeepAlive]?:false
+    val keepAlive = dataStore.data.map {
+        it[KeepAlive] ?: false
     }
     val qqKeepAlive = dataStore.data.map {
-        it[QKeepAlive]?:false
+        it[QKeepAlive] ?: false
     }
     val timKeepAlive = dataStore.data.map {
-        it[TimKeepAlive]?:false
+        it[TimKeepAlive] ?: false
     }
 
     val untrustedTouchEvents = dataStore.data.map {
-        it[UntrustedTouchEvents]?:false
+        it[UntrustedTouchEvents] ?: false
     }
     private val _toastText = MutableSharedFlow<String>()
     val toastText = _toastText.asSharedFlow()
@@ -69,7 +70,7 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
         bindUserService()
     }
 
-    fun updateKeepAliveChecked(bool :Boolean){
+    fun updateKeepAliveChecked(bool: Boolean) {
         viewModelScope.launch(IO) {
             dataStore.edit {
                 it[KeepAlive] = bool
@@ -77,7 +78,8 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
         }
 
     }
-    fun updateQQKeepAlive(bool :Boolean){
+
+    fun updateQQKeepAlive(bool: Boolean) {
         viewModelScope.launch(IO) {
             dataStore.edit {
                 it[QKeepAlive] = bool
@@ -86,7 +88,7 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
     }
 
 
-    fun updateTimKeepAlive(bool :Boolean){
+    fun updateTimKeepAlive(bool: Boolean) {
         viewModelScope.launch(IO) {
             dataStore.edit {
                 it[TimKeepAlive] = bool
@@ -94,7 +96,7 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
         }
     }
 
-    fun updateUntrustedTouchEvents(bool :Boolean){
+    fun updateUntrustedTouchEvents(bool: Boolean) {
         viewModelScope.launch(IO) {
             dataStore.edit {
                 it[UntrustedTouchEvents] = bool
@@ -131,15 +133,16 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
     }
 
 
-
-    private val userServiceArgs by lazy {
-        Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, UserService::class.java.name))
+    private val userServiceArgs = Shizuku.UserServiceArgs(
+            ComponentName(
+                BuildConfig.APPLICATION_ID,
+                UserService::class.java.name
+            )
+        )
             .daemon(true)
             .processNameSuffix("service")
             .debuggable(BuildConfig.DEBUG)
             .version(BuildConfig.VERSION_CODE)
-    }
-
 
 
     fun rebindUserService() {
@@ -163,7 +166,8 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
         try {
             Shizuku.unbindUserService(
                 userServiceArgs,
-                userServiceConnection, true)
+                userServiceConnection, true
+            )
             _shizukuDaemonRunning.value = false
             return true
         } catch (e: Throwable) {
@@ -202,7 +206,7 @@ class MainViewModel @Inject constructor(private val dataStore : DataStore<Prefer
         }
     }
 
-    private fun sendToastText(text: String){
+    private fun sendToastText(text: String) {
         viewModelScope.launch {
             _toastText.emit(text)
         }

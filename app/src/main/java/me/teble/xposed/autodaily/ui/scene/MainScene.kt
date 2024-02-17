@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -34,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
+import com.holix.android.bottomsheetdialog.compose.BottomSheetDialogProperties
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -57,6 +61,10 @@ fun MainScreen(navController: NavController) {
         Banner()
         GridLayout(navController)
     }
+
+    UpdateDialog()
+
+
 
 }
 
@@ -120,25 +128,72 @@ private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
     val updateDialogText by viewModel.updateDialogText.collectAsState()
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsState()
     if (showUpdateDialog) {
-        me.teble.xposed.autodaily.ui.UpdateDialog(
-            title = "版本更新",
-            text = updateDialogText,
-            onGithub = {
-//            navController.context.startActivity(Intent().apply {
-//                action = Intent.ACTION_VIEW
-//                data = Uri.parse(GITHUB_RELEASE_URL)
-//            })
-            },
-            onLanzou = {
-//            navController.context.startActivity(Intent().apply {
-//                action = Intent.ACTION_VIEW
-//                data = Uri.parse(PAN_URL)
-//            })
-            },
-            onDismiss = {
+        BottomSheetDialog(
+            onDismissRequest = {
                 viewModel.dismissDialogState()
+            },
+            properties = BottomSheetDialogProperties(
+                dismissWithAnimation = true,
+                enableEdgeToEdge = true
+            ),
+
+            ) {
+            Column(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .background(Color(0xFFFFFFFF))
+                    .padding(start = 32.dp, end = 32.dp, bottom = 24.dp)
+            ) {
+                Text(
+                    text = "公告",
+                    style = TextStyle(
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFF202124),
+                        textAlign = TextAlign.Center
+                    ),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 20.dp)
+                )
+
+                Text(
+                    text = "",
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .height(1.dp)
+                        .fillMaxWidth()
+                        .background(Color(0xFFF7F7F7))
+                )
+
+                Text(
+                    text = "最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有",
+                    modifier = Modifier.padding(top = 24.dp),
+                    style = TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF4F5355),
+                    )
+                )
+
+                Text(
+                    text = "确定",
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
+                        .clip(SmootherShape(12.dp))
+                        .background(Color(0x0F0095FF))
+                        .padding(vertical = 16.dp),
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFF0095FF),
+                        textAlign = TextAlign.Center,
+                    )
+                )
             }
-        )
+        }
     }
 
 }

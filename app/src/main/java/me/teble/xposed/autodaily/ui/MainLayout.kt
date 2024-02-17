@@ -59,7 +59,6 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Main
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Other
 import me.teble.xposed.autodaily.ui.XAutoDailyApp.Sign
-import me.teble.xposed.autodaily.ui.utils.RippleCustomTheme
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor.EXEC_TASK
 import me.teble.xposed.autodaily.utils.TaskExecutor.handler
@@ -348,11 +347,6 @@ fun BackgroundView() {
             }
             LineSpacer()
             CompositionLocalProvider(
-                LocalRippleTheme provides RippleCustomTheme(
-                    color = Color(
-                        0xFF409EFF
-                    )
-                )
             ) {
                 Button(
                     onClick = {
