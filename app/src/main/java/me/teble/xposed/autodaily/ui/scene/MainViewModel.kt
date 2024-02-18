@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -59,7 +58,7 @@ class MainViewModel : ViewModel() {
             }
             meta?.let {
                 _notice.value = it.notice?.trimEnd() ?: "暂无公告"
-            } ?: run{
+            } ?: run {
                 ToastUtil.send("拉取公告失败")
             }
 

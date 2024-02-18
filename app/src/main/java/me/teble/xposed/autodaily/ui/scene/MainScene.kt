@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import me.teble.xposed.autodaily.ui.icon.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,6 +41,7 @@ import com.holix.android.bottomsheetdialog.compose.BottomSheetDialogProperties
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
+import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.About
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.Configuration
@@ -54,6 +55,8 @@ import me.teble.xposed.autodaily.ui.navigate
 fun MainScreen(navController: NavController) {
     Column(
         modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
     ) {
         TopBar(text = "XAutoDaily", endIcon = Icons.Notice, backClick = {
             navController.popBackStack()
@@ -63,7 +66,6 @@ fun MainScreen(navController: NavController) {
     }
 
     UpdateDialog()
-
 
 
 }

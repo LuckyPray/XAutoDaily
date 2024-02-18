@@ -1,7 +1,5 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +19,7 @@ class SignViewModel : ViewModel() {
         _taskGroupsState.value = ConfigUtil.loadSaveConf().taskGroups
     }
 
-    fun updateGlobalEnable(boolean: Boolean){
+    fun updateGlobalEnable(boolean: Boolean) {
         ConfUnit.globalEnable = boolean
         _globalEnable.value = boolean
     }
