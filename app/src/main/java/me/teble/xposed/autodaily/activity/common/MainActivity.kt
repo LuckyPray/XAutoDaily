@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.view.Window
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,7 +12,6 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
@@ -42,15 +41,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import dagger.hilt.android.AndroidEntryPoint
+import com.agoines.system.common.navigationBarLightOldMode
+import com.agoines.system.common.setNavigationBarTranslation
+import com.agoines.system.common.setStatusBarTranslation
+import com.agoines.system.common.statusBarLightOldMode
 import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
-import me.teble.xposed.autodaily.activity.module.colors
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
@@ -65,31 +67,31 @@ import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
 import me.teble.xposed.autodaily.utils.toJsonString
 import rikka.shizuku.Shizuku
 import java.io.File
-@AndroidEntryPoint
+
 class MainActivity : ComponentActivity() {
     private val viewmodel : MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        setStatusBarTranslation()
+        setNavigationBarTranslation()
         super.onCreate(savedInstanceState)
 
         lifecycleScope.launch(Main) {
-            repeatOnLifecycle(Lifecycle.State.CREATED){
-                viewmodel.toastText.collect{
+            repeatOnLifecycle(Lifecycle.State.CREATED) {
+                viewmodel.toastText.collect {
                     Toast.makeText(application, it, Toast.LENGTH_SHORT).show()
                 }
             }
         }
-
+        window.apply {
+            statusBarLightOldMode()
+            navigationBarLightOldMode()
+        }
+        // 状态栏和导航栏沉浸
+        requestWindowFeature(Window.FEATURE_NO_TITLE)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            MaterialTheme(colors = colors()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Gray)
-                ) {
-                    ModuleView()
-                }
-            }
+            ModuleScene()
         }
     }
 }

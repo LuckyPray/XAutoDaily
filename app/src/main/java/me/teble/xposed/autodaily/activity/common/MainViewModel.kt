@@ -13,7 +13,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -25,33 +24,34 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
+import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
 import me.teble.xposed.autodaily.data.KeepAlive
 import me.teble.xposed.autodaily.data.QKeepAlive
 import me.teble.xposed.autodaily.data.TimKeepAlive
 import me.teble.xposed.autodaily.data.UntrustedTouchEvents
+import me.teble.xposed.autodaily.data.dataStore
 import me.teble.xposed.autodaily.hook.JumpActivityHook
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
-import javax.inject.Inject
 
-@HiltViewModel
-class MainViewModel @Inject constructor(private val dataStore: DataStore<Preferences>) :
+class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataStore) :
     ViewModel() {
     private val _shizukuDaemonRunning = MutableStateFlow(false)
     val shizukuDaemonRunning = _shizukuDaemonRunning.asStateFlow()
     private val _shizukuErrInfo = MutableStateFlow("")
     val shizukuErrInfo = _shizukuErrInfo.asStateFlow()
 
-
     val keepAlive = dataStore.data.map {
         it[KeepAlive] ?: false
     }
+
     val qqKeepAlive = dataStore.data.map {
         it[QKeepAlive] ?: false
     }
+
     val timKeepAlive = dataStore.data.map {
         it[TimKeepAlive] ?: false
     }
@@ -134,15 +134,15 @@ class MainViewModel @Inject constructor(private val dataStore: DataStore<Prefere
 
 
     private val userServiceArgs = Shizuku.UserServiceArgs(
-            ComponentName(
-                BuildConfig.APPLICATION_ID,
-                UserService::class.java.name
-            )
+        ComponentName(
+            BuildConfig.APPLICATION_ID,
+            UserService::class.java.name
         )
-            .daemon(true)
-            .processNameSuffix("service")
-            .debuggable(BuildConfig.DEBUG)
-            .version(BuildConfig.VERSION_CODE)
+    )
+        .daemon(true)
+        .processNameSuffix("service")
+        .debuggable(BuildConfig.DEBUG)
+        .version(BuildConfig.VERSION_CODE)
 
 
     fun rebindUserService() {

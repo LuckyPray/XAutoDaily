@@ -27,8 +27,6 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.serialization)
-    alias(libs.plugins.google.devtools.ksp)
-    alias(libs.plugins.google.dagger.hilt.android)
 }
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
@@ -317,9 +315,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     // jetpack compose
     implementation(libs.androidx.activity.compose)
-
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
 
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.material)

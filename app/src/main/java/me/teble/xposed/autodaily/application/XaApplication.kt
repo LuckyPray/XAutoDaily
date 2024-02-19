@@ -7,12 +7,9 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.content.pm.PackageManager.GET_META_DATA
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
-import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.MainScope
@@ -28,7 +25,6 @@ lateinit var xaApp: XaApplication
 val xaAppIsInit get() = ::xaApp.isInitialized
 lateinit var context: Context
 
-@HiltAndroidApp
 class XaApplication : MultiDexApplication() {
 
     companion object {
@@ -37,7 +33,7 @@ class XaApplication : MultiDexApplication() {
 
     lateinit var prefs: SharedPreferences
 
-    var qPackageState by mutableStateOf(mutableMapOf<String, Boolean>())
+    var qPackageState = mutableStateMapOf<String, Boolean>()
 
 
     override fun onCreate() {

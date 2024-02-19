@@ -16,8 +16,6 @@ flatbuffersJava = "23.5.26"
 kaml = "0.55.0"
 hutoolCore = "5.8.0.M1"
 kotlin = "1.9.22"
-ksp = "1.9.22-1.0.17"
-hilt = "2.50"
 compose = "1.7.0-alpha02"
 kotlinxSerializationJson = "1.6.2"
 lifecycle= "2.7.0"
@@ -69,8 +67,6 @@ androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "mult
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "apiVersion" }
 
-hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
-hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 
 androidx-compose-animation = { module = "androidx.compose.animation:animation",version.ref = "compose" }
 androidx-compose-foundation = { module = "androidx.compose.foundation:foundation",version.ref = "compose" }
@@ -89,5 +85,3 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-google-dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-google-devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

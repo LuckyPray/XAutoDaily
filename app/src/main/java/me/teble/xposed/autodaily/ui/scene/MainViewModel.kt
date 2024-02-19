@@ -20,7 +20,6 @@ class MainViewModel : ViewModel() {
     val execTaskNum = _execTaskNum.asStateFlow()
 
     private val _notice = MutableStateFlow("暂无公告")
-
     val notice = _notice.asStateFlow()
 
 
