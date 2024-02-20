@@ -152,23 +152,27 @@ private fun ShizukuCard(
 
 @Composable
 private fun EntryLayout() {
-    SmallTitle(
-        title = "模块入口",
-        modifier = Modifier
-            .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
-    )
-
-    Column(
-        Modifier
-            .fillMaxWidth()
-            .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF))
+    if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)
+        || xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)
     ) {
-        if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
-            EntryItem(Icons.QQ, "QQ Logo", "QQ", "QQ 侧滑 > 设置 > XAutoDaily")
-        }
-        if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
-            EntryItem(Icons.TIM, "Tim Logo", "Tim", "TIM 侧滑 > 设置 > XAutoDaily")
+        SmallTitle(
+            title = "模块入口",
+            modifier = Modifier
+                .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
+        )
+
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .clip(SmootherShape(12.dp))
+                .background(Color(0xFFFFFFFF))
+        ) {
+            if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
+                EntryItem(Icons.QQ, "QQ Logo", "QQ", "QQ 侧滑 > 设置 > XAutoDaily")
+            }
+            if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
+                EntryItem(Icons.TIM, "Tim Logo", "Tim", "TIM 侧滑 > 设置 > XAutoDaily")
+            }
         }
     }
 }
@@ -193,7 +197,7 @@ private fun SettingLayout(
             .background(Color(0xFFFFFFFF)),
         enable = untrustedTouchEvents,
         text = "取消安卓 12 不受信触摸",
-        infoText = "安卓 12 后启用对 toast 弹窗等事件触摸不可穿透，勾选此项可关闭",
+        infoText = "安卓 12 后启用对 Toast 弹窗等事件触摸不可穿透，勾选此项可关闭",
         onClick = {
             viewmodel.updateUntrustedTouchEvents(it)
         }
@@ -237,7 +241,7 @@ private fun SettingLayout(
         }
 
         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
-            val timKeepAlive by viewmodel.qqKeepAlive.collectAsStateWithLifecycle(false)
+            val timKeepAlive by viewmodel.timKeepAlive.collectAsStateWithLifecycle(false)
             SwitchInfoDivideItem(
                 modifier = Modifier
                     .fillMaxWidth()
