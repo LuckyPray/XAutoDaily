@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.NavigationItem
+import me.teble.xposed.autodaily.ui.composable.SmallTitle
+import me.teble.xposed.autodaily.ui.composable.SwitchButton
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -91,17 +93,12 @@ fun GroupColumn(navController: NavController, signViewModel: SignViewModel = vie
                     taskGroup.id
                 }
             }
-            Text(
-                text = groupTitle,
+
+            SmallTitle(
+                title = groupTitle,
                 modifier = Modifier
                     .padding(bottom = 8.dp, start = 16.dp),
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight(400),
-                    color = Color(0xFF7F98AF)
-                )
             )
-
 
             val tasks by remember {
                 derivedStateOf {
@@ -234,7 +231,12 @@ fun SwitchTextItem(
             )
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = "占位", modifier = Modifier.defaultMinSize(minWidth = 36.dp, minHeight = 24.dp))
+        SwitchButton(
+            enable,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .clickable(role = Role.Switch, onClick = { onClick(!enable) })
+        )
     }
 }
 
@@ -270,7 +272,13 @@ fun SwitchTextDivideItem(
                 .background(color = Color(0xff202124), SmootherShape(2.dp)),
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = "占位", modifier = Modifier.defaultMinSize(minWidth = 36.dp, minHeight = 24.dp))
+
+        SwitchButton(
+            enable,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .clickable(role = Role.Switch, onClick = { onClick(!enable) })
+        )
     }
 }
 
@@ -280,13 +288,13 @@ fun SwitchInfoItem(
     text: String,
     infoText: String,
     onClick: (Boolean) -> Unit,
-    enable: Boolean,
+    enable: Boolean
 
-    ) {
+) {
 
     Row(
         modifier
-            .clickable(role = Role.Switch, onClick = { onClick(!enable) })
+            .clickable(role = Role.Button, onClick = { onClick(!enable) })
             .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -314,7 +322,12 @@ fun SwitchInfoItem(
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
-        Text(text = "占位", modifier = Modifier.defaultMinSize(minWidth = 36.dp, minHeight = 24.dp))
+        SwitchButton(
+            enable,
+            modifier = Modifier
+                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .clickable(role = Role.Switch, onClick = { onClick(!enable) })
+        )
     }
 }
 
@@ -337,7 +350,7 @@ fun SwitchInfoDivideItem(
             modifier = Modifier
                 .weight(1f)
                 .clip(SmootherShape(12.dp))
-                .clickable(role = Role.Switch, onClick = { onClick(!enable) })
+                .clickable(role = Role.Button, onClick = { onClick(!enable) })
                 .padding(vertical = 20.dp, horizontal = 16.dp),
         ) {
             Text(
@@ -371,10 +384,12 @@ fun SwitchInfoDivideItem(
             text = ""
         )
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = "占位", modifier = Modifier
+        SwitchButton(
+            enable,
+            modifier = Modifier
                 .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
                 .padding(end = 16.dp)
+                .clickable(role = Role.Switch, onClick = { onClick(!enable) })
         )
     }
 }

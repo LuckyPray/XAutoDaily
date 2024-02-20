@@ -59,15 +59,15 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
     val untrustedTouchEvents = dataStore.data.map {
         it[UntrustedTouchEvents] ?: false
     }
-    private val _toastText = MutableSharedFlow<String>()
-    val toastText = _toastText.asSharedFlow()
+    private val _snackbarText = MutableSharedFlow<String>()
+    val snackbarText = _snackbarText.asSharedFlow()
 
     private val peekServiceJob = viewModelScope.launch(IO) {
-        while (!_shizukuDaemonRunning.value) {
-            _shizukuDaemonRunning.value = peekUserService()
-            delay(1000)
-        }
-        bindUserService()
+//        while (!_shizukuDaemonRunning.value) {
+//            _shizukuDaemonRunning.value = peekUserService()
+//            delay(1000)
+//        }
+//        bindUserService()
     }
 
     fun updateKeepAliveChecked(bool: Boolean) {
@@ -208,7 +208,7 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
 
     private fun sendToastText(text: String) {
         viewModelScope.launch {
-            _toastText.emit(text)
+            _snackbarText.emit(text)
         }
     }
 
