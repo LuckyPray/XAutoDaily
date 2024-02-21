@@ -2,6 +2,8 @@ package me.teble.xposed.autodaily.ui.scene
 
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,6 +51,8 @@ import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
 import me.teble.xposed.autodaily.ui.navigate
+import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
+import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 
 @Composable
@@ -258,20 +262,9 @@ private fun RowScope.CardItem(
     enable: Boolean = true,
     onClick: () -> Unit = {}
 ) {
-
-    val cardBackground by animateColorAsState(
-        targetValue =
-        Color(if (enable) 0xFFFFFFFF else 0x99FFFFFF),
-        label = ""
-    )
-
-    val contentColor by animateColorAsState(
-        targetValue = Color(0xffffffff).copy(alpha = if (enable) 1f else 0.6f),
-        label = ""
-    )
-    val iconBackgroundColor by animateColorAsState(
-        targetValue = iconColor.copy(alpha = if (enable) 1f else 0.6f),
-        label = ""
+    val colorAlpha: Float by animateFloatAsState(
+        targetValue = if (enable) DefaultAlpha else DisabledAlpha,
+        animationSpec = spring(), label = "switch item"
     )
     val textColor by animateColorAsState(
         targetValue =
@@ -289,7 +282,7 @@ private fun RowScope.CardItem(
         Modifier
             .weight(1f)
             .clip(SmootherShape(12.dp))
-            .background(color = cardBackground)
+            .background(color = Color(0xFFFFFFFF).copy(alpha = colorAlpha))
             .clickable(role = Role.Button, enabled = enable, onClick = onClick)
             .padding(top = 24.dp, start = 16.dp, bottom = 24.dp)
     ) {
@@ -298,8 +291,8 @@ private fun RowScope.CardItem(
             contentDescription = "",
             modifier = Modifier
                 .size(32.dp)
-                .background(iconBackgroundColor, CircleShape),
-            tint = contentColor
+                .background(iconColor.copy(alpha = colorAlpha), CircleShape),
+            tint = Color(0xffffffff).copy(alpha = colorAlpha)
         )
 
         Text(

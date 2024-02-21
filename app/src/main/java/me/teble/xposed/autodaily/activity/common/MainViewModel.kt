@@ -190,6 +190,8 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
 
     /**
      * 打开对应应用的设置
+     * @param context 上下文
+     * @param type 对应的 QQ 类型
      */
     fun openHostSetting(context: Context, type: QQTypeEnum) {
         val intent = Intent().apply {
@@ -199,14 +201,18 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
         }
         runCatching {
             Log.d("XALog", "启动 ${type.appName} 设置")
-            context.startActivity(intent)
+            showSnackbar("启动失败，请确定 ${type.appName} 已安装并未被停用（冻结）")
         }.onFailure {
             Log.e("XALog", "启动失败 ${type.appName} ", it)
-            sendToastText("启动失败，请确定 ${type.appName} 已安装并未被停用（冻结）")
+            showSnackbar("启动失败，请确定 ${type.appName} 已安装并未被停用（冻结）")
         }
     }
 
-    private fun sendToastText(text: String) {
+    /**
+     * 展示对应 Snackbar
+     * @param text 文本内容
+     */
+    private fun showSnackbar(text: String) {
         viewModelScope.launch {
             _snackbarText.emit(text)
         }
@@ -228,13 +234,13 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
         }
         viewModelScope.launch(IO) {
             if (!keepAlive.first()) {
-                sendToastText("未启用保活，无需启动守护进程")
+                showSnackbar("未启用保活，无需启动守护进程")
                 return@launch
             }
             if (!shizukuDaemonRunning.value) {
                 bindUserService()
                 peekServiceJob.start()
-                sendToastText("正在启动守护进程，请稍后")
+                showSnackbar("正在启动守护进程，请稍后")
             } else {
                 unbindUserService()
             }

@@ -12,8 +12,7 @@ enum class QQTypeEnum(
     QQ(PACKAGE_NAME_QQ, "QQ"),
     TIM(PACKAGE_NAME_TIM, "TIM"),
     INTERNATIONAL(PACKAGE_NAME_QQ_INTERNATIONAL, "QQ国际版"),
-    LITE(PACKAGE_NAME_QQ_LITE, "QQ极速版"),
-    ;
+    LITE(PACKAGE_NAME_QQ_LITE, "QQ极速版");
 
     companion object {
         fun valueOfPackage(packageName: String): QQTypeEnum {

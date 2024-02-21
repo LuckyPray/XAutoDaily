@@ -5,7 +5,6 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.Window
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -32,7 +30,6 @@ import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -57,7 +53,6 @@ import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
-import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.ShizukuConf
 import me.teble.xposed.autodaily.ui.LineCheckBox
@@ -87,20 +82,19 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
+                // 展示对应 snackbarText
                 LaunchedEffect(snackbarHostState) {
                     viewmodel.snackbarText.collect {
-                        Toast.makeText(application, it, Toast.LENGTH_SHORT).show()
+                        snackbarHostState.showSnackbar(it)
                     }
                 }
                 Scaffold(
                     snackbarHost = {
                         SnackbarHost(hostState = snackbarHostState)
                     },
-
-                    ) { contentPadding ->
+                ) { contentPadding ->
                     // Screen content
                     Box(modifier = Modifier.padding(contentPadding)) {
-
                         ModuleScene()
                     }
 
@@ -180,43 +174,7 @@ private fun ShizukuCard(
 
 @Composable
 private fun SettingCard(
-    viewmodel: MainViewModel = viewModel()
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color.White, shape = RoundedCornerShape(6.dp))
-            .padding(24.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(Icons.Outlined.Settings, "设置")
-        Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
-            Text(
-                text = "模块设置",
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "请在 QQ/TIM 内进行操作")
-            Text(text = "APP 侧滑 > 设置 > XAutoDaily")
-            Spacer(modifier = Modifier.height(10.dp))
-            Row {
-                val context = LocalContext.current
-                Text(text = "QQ",
-                    color = Color(0xFF409EFF),
-                    modifier = Modifier.clickable {
-                        viewmodel.openHostSetting(context, QQTypeEnum.QQ)
-                    }
-                )
-                Spacer(modifier = Modifier.width(20.dp))
-                Text(text = "TIM",
-                    color = Color(0xFF409EFF),
-                    modifier = Modifier.clickable {
-                        viewmodel.openHostSetting(context, QQTypeEnum.TIM)
-                    }
-                )
-            }
-        }
-    }
 }
 
 @SuppressLint("MutableCollectionMutableState")
@@ -332,7 +290,6 @@ fun ModuleView(
                                 )
                             },
                             onChange = {
-
                                 viewmodel.updateQQKeepAlive(it)
                             }
                         )
@@ -359,9 +316,6 @@ fun ModuleView(
                     }
                 }
             }
-        }
-        item {
-            SettingCard()
         }
     }
 }
