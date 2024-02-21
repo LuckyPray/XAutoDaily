@@ -10,13 +10,13 @@ import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.composable.TopBar
 
 @Composable
-fun EditEnvScene(navController: NavController, groupId: String, taskId: String) {
+fun SettingScene(navController: NavController) {
     Column(
         Modifier
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
     ) {
-        TopBar(text = taskId, backClick = {
+        TopBar(text = "设置", backClick = {
             navController.popBackStack()
         })
     }

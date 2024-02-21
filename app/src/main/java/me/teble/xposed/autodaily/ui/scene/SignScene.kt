@@ -42,10 +42,12 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
     ) {
-        TopBar(text = "签到配置", hasBack = true, endIcon = Icons.Info,
+        TopBar(
+            text = "签到配置", endIcon = Icons.Info,
             backClick = {
                 navController.popBackStack()
             })
+
         val globalEnable by signViewModel.globalEnable.collectAsState()
         SwitchTextItem(
             modifier = Modifier

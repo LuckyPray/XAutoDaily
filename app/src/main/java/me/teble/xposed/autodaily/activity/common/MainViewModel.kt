@@ -201,7 +201,7 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
         }
         runCatching {
             Log.d("XALog", "启动 ${type.appName} 设置")
-            showSnackbar("启动失败，请确定 ${type.appName} 已安装并未被停用（冻结）")
+            context.startActivity(intent)
         }.onFailure {
             Log.e("XALog", "启动失败 ${type.appName} ", it)
             showSnackbar("启动失败，请确定 ${type.appName} 已安装并未被停用（冻结）")

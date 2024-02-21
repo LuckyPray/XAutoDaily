@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
@@ -41,7 +41,7 @@ import androidx.navigation.NavController
 import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
 import com.holix.android.bottomsheetdialog.compose.BottomSheetDialogProperties
 import me.teble.xposed.autodaily.ui.NavigationItem
-import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.About
@@ -51,6 +51,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
 import me.teble.xposed.autodaily.ui.navigate
+import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
@@ -61,10 +62,18 @@ fun MainScreen(navController: NavController) {
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
+            .padding(horizontal = 16.dp)
     ) {
-        TopBar(text = "XAutoDaily", endIcon = Icons.Notice, backClick = {
-            navController.popBackStack()
-        })
+        XAutoDailyTopBar(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(vertical = 20.dp)
+                .padding(start = 16.dp),
+            icon = Icons.Notice, contentDescription = "更多",
+            iconClick = {
+
+            }
+        )
         Banner()
         GridLayout(navController)
     }
@@ -79,8 +88,7 @@ private fun GridLayout(navController: NavController, viewModel: MainViewModel = 
     val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
-            .padding(top = 32.dp)
-            .padding(horizontal = 16.dp),
+            .padding(top = 32.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Row(
@@ -113,13 +121,19 @@ private fun GridLayout(navController: NavController, viewModel: MainViewModel = 
             TextItem(
                 iconColor = Color(0xFF60D893),
                 Icons.Setting,
-                "设置"
+                "设置",
+                onClick = {
+                    navController.navigate(NavigationItem.Setting, NavigationItem.Main)
+                }
 
             )
             TextItem(
                 iconColor = Color(0xFFFFBC04),
                 Icons.About,
-                "关于"
+                "关于",
+                onClick = {
+                    navController.navigate(NavigationItem.About, NavigationItem.Main)
+                }
             )
 
         }
@@ -262,27 +276,20 @@ private fun RowScope.CardItem(
     enable: Boolean = true,
     onClick: () -> Unit = {}
 ) {
-    val colorAlpha: Float by animateFloatAsState(
-        targetValue = if (enable) DefaultAlpha else DisabledAlpha,
+    val cardColorAlpha: Float by animateFloatAsState(
+        targetValue = if (enable) DefaultAlpha else CardDisabledAlpha,
         animationSpec = spring(), label = "switch item"
     )
-    val textColor by animateColorAsState(
-        targetValue =
-        Color(if (enable) 0xFF202124 else 0x61202124),
-        label = ""
-    )
-
-    val subtextColor by animateColorAsState(
-        targetValue =
-        Color(if (enable) 0xFF4F5355 else 0x614F5355),
-        label = ""
+    val textColorAlpha: Float by animateFloatAsState(
+        targetValue = if (enable) DefaultAlpha else DisabledAlpha,
+        animationSpec = spring(), label = "switch item color"
     )
 
     Column(
         Modifier
             .weight(1f)
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xFFFFFFFF).copy(alpha = colorAlpha))
+            .background(color = Color(0xFFFFFFFF).copy(alpha = cardColorAlpha))
             .clickable(role = Role.Button, enabled = enable, onClick = onClick)
             .padding(top = 24.dp, start = 16.dp, bottom = 24.dp)
     ) {
@@ -291,8 +298,8 @@ private fun RowScope.CardItem(
             contentDescription = "",
             modifier = Modifier
                 .size(32.dp)
-                .background(iconColor.copy(alpha = colorAlpha), CircleShape),
-            tint = Color(0xffffffff).copy(alpha = colorAlpha)
+                .background(iconColor.copy(alpha = cardColorAlpha), CircleShape),
+            tint = Color(0xffffffff).copy(alpha = cardColorAlpha)
         )
 
         Text(
@@ -300,7 +307,7 @@ private fun RowScope.CardItem(
                 fontSize = 18.sp,
                 lineHeight = 21.6.sp,
                 fontWeight = FontWeight(700),
-                color = textColor,
+                color = Color(0xFF202124).copy(textColorAlpha),
             )
         )
         Text(
@@ -308,7 +315,7 @@ private fun RowScope.CardItem(
                 fontSize = 12.sp,
                 lineHeight = 14.4.sp,
                 fontWeight = FontWeight(400),
-                color = subtextColor,
+                color = Color(0xFF4F5355).copy(textColorAlpha),
             )
         )
     }
@@ -318,13 +325,14 @@ private fun RowScope.CardItem(
 private fun TextItem(
     iconColor: Color,
     imageVector: ImageVector,
-    text: String
+    text: String,
+    onClick: () -> Unit
 ) {
     Row(
         Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .clickable(role = Role.Button, onClick = {})
+            .clickable(role = Role.Button, onClick = onClick)
             .padding(vertical = 15.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

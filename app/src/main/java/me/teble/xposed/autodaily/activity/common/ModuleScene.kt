@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -50,6 +48,7 @@ import me.teble.xposed.autodaily.shizuku.ShizukuConf
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
+import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Activated
@@ -57,8 +56,6 @@ import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.More
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
-import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
-
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.utils.TaskExecutor
@@ -73,11 +70,10 @@ fun ModuleScene() {
         Modifier
             .fillMaxSize()
             .background(Color(0xFFF7F7F7))
-            .statusBarsPadding()
             .padding(horizontal = 16.dp)
 
     ) {
-        TopBar()
+        ModuleTopBar()
 
         Column(
             Modifier
@@ -97,30 +93,16 @@ fun ModuleScene() {
 }
 
 @Composable
-private fun TopBar() {
-    Row() {
-        Image(
-            imageVector = Icons.XAutoDaily,
-            contentDescription = "logo",
-            Modifier
-                .padding(vertical = 20.dp)
-                .padding(start = 16.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Image(
-            imageVector = Icons.More,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .padding(end = 10.dp)
-                .size(36.dp)
-                .clip(CircleShape)
-                .clickable(role = Role.Button) {
+private fun ModuleTopBar() {
+    XAutoDailyTopBar(
+        modifier = Modifier
+            .statusBarsPadding()
+            .padding(vertical = 20.dp)
+            .padding(start = 16.dp),
+        icon = Icons.More, contentDescription = "更多", iconClick = {
 
-                }
-                .padding(6.dp),
-            contentDescription = "logo"
-        )
-    }
+        }
+    )
 }
 
 @Composable

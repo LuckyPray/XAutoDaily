@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.ui.composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -24,16 +23,46 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Back
-import me.teble.xposed.autodaily.ui.icon.icons.Notice
+import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
+
+@Composable
+fun XAutoDailyTopBar(
+    modifier: Modifier,
+    icon: ImageVector,
+    contentDescription: String,
+
+    iconClick: () -> Unit = {}
+) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            tint = Color(0xFF202124),
+            imageVector = Icons.XAutoDaily,
+            contentDescription = "logo"
+        )
+        Spacer(modifier = Modifier.weight(1f))
+
+        Icon(
+            imageVector = icon,
+            tint = Color(0xFF202124),
+            modifier = Modifier
+                .padding(end = 10.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = iconClick)
+                .padding(6.dp),
+            contentDescription = contentDescription
+        )
+
+    }
+}
 
 @Composable
 fun TopBar(
-    text : String,
+    text: String,
     modifier: Modifier = Modifier,
-    hasBack: Boolean = false,
-    backClick: () ->Unit = {},
+    backClick: () -> Unit = {},
     endIcon: ImageVector? = null,
-    endIconClick: () ->Unit = {}
+    endIconClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -41,37 +70,36 @@ fun TopBar(
             .padding(bottom = 20.dp, top = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Icon(
+            imageVector = Icons.Back,
+            modifier = Modifier
+                .padding(start = 26.dp)
+                .size(36.dp)
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = backClick)
+                .padding(6.dp),
+            contentDescription = "",
+            tint = Color(0xFF202124)
+        )
+        Spacer(modifier = Modifier.weight(1f))
 
-        if(hasBack){
-            Icon(
-                imageVector = Icons.Back,
-                modifier = Modifier
-                    .padding(start = 26.dp)
-                    .size(32.dp)
-                    .clip(CircleShape)
-                    .clickable(role = Role.Button, onClick = backClick)
-                    .padding(6.dp),
-                contentDescription = "",
-                tint = Color(0xFF202124)
-            )
-        }
-        Spacer(modifier = Modifier.width(if(hasBack) 16.dp else 32.dp))
         Text(
             text = text,
             style = TextStyle(
                 color = Color(0xFF202124),
                 fontWeight = FontWeight(700),
-                fontSize = 20.sp
+                fontSize = 20.sp,
             )
         )
         Spacer(modifier = Modifier.weight(1f))
 
+        Spacer(modifier = Modifier.width(if (endIcon == null) 62.dp else 0.dp))
         endIcon?.let {
             Icon(
                 imageVector = it,
                 modifier = Modifier
                     .padding(end = 26.dp)
-                    .size(32.dp)
+                    .size(36.dp)
                     .clip(CircleShape)
                     .clickable(role = Role.Button, onClick = endIconClick)
                     .padding(6.dp),
