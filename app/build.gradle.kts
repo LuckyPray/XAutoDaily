@@ -46,7 +46,6 @@ val updateLog = """
 
 android {
     namespace = "me.teble.xposed.autodaily"
-
     compileSdk = libs.versions.compileSdk.get().toInt()
     buildToolsVersion = libs.versions.buildTool.get()
     ndkVersion = libs.versions.ndk.get()
@@ -162,8 +161,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_11)
-        targetCompatibility(JavaVersion.VERSION_11)
+        sourceCompatibility(JavaVersion.VERSION_17)
+        targetCompatibility(JavaVersion.VERSION_17)
         isCoreLibraryDesugaringEnabled = true
     }
 
