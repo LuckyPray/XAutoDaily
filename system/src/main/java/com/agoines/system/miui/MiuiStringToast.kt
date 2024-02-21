@@ -17,7 +17,7 @@ import com.highcapable.betterandroid.system.extension.tool.SystemVersion
 
 
 object MiuiStringToast {
-    fun isSupported(): Boolean {
+    private fun isSupported(): Boolean {
         return SystemVersion.isHighOrEqualsTo(SystemVersion.T) && SystemKind.current == HYPEROS
     }
 
@@ -71,7 +71,7 @@ object MiuiStringToast {
         }
     }
 
-    fun colorToInt(color: String?): Int {
+    private fun colorToInt(color: String?): Int {
         val color1 = Color.parseColor(color)
         val color2 = Color.parseColor("#FFFFFF")
         val color3 = color1 xor color2

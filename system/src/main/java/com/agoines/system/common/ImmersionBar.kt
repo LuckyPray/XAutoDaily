@@ -10,8 +10,6 @@ import android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
 import android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
 import android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION
 import android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import com.highcapable.betterandroid.system.extension.tool.SystemKind
 import com.highcapable.betterandroid.system.extension.tool.SystemVersion
 
@@ -104,26 +102,6 @@ fun Window.statusBarLightOldMode(enable: Boolean = true) {
         else
             systemUiVisibility and SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.inv()
     }
-}
-
-context(Activity)
-fun navigationBarHide() {
-    window.navigationBarHide()
-}
-
-fun Window.navigationBarHide() {
-    val windowInsetsController = WindowCompat.getInsetsController(this, this.decorView)
-    windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
-}
-
-context(Activity)
-fun navigationBarShow() {
-    window.navigationBarShow()
-}
-
-fun Window.navigationBarShow() {
-    val windowInsetsController = WindowCompat.getInsetsController(this, this.decorView)
-    windowInsetsController.show(WindowInsetsCompat.Type.navigationBars())
 }
 
 

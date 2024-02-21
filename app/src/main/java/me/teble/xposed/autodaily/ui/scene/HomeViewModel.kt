@@ -37,8 +37,14 @@ class HomeViewModel : ViewModel() {
     fun showDialog() {
         _showUpdateDialog.value = true
     }
-    fun dismissDialogState() {
+    fun dismissDialog() {
         _showUpdateDialog.value = false
+    }
+
+    fun updateDialogState(boolean: Boolean) {
+        if (_showUpdateDialog.value != boolean) {
+            _showUpdateDialog.value = boolean
+        }
     }
 
     private fun initUpdate() {
@@ -90,4 +96,6 @@ class HomeViewModel : ViewModel() {
         lastClickTime = currentTime
         TaskExecutor.handler.sendEmptyMessage(TaskExecutor.EXEC_TASK)
     }
+
+
 }

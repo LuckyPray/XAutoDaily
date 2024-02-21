@@ -43,6 +43,5 @@ kotlin {
 
 dependencies {
     api(libs.kotlinx.serialization.json)
-    api(libs.androidx.appcompat)
     implementation(libs.system.extension)
 }

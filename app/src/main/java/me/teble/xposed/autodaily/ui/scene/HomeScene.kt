@@ -22,9 +22,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,8 +46,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import com.holix.android.bottomsheetdialog.compose.BottomSheetDialog
-import com.holix.android.bottomsheetdialog.compose.BottomSheetDialogProperties
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -92,11 +95,7 @@ fun MainScreen(navController: NavController, viewModel: HomeViewModel = viewMode
 
     }
 
-
-
-
     UpdateDialog()
-
 
 }
 
@@ -160,23 +159,35 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
 }
 
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun UpdateDialog(
     viewModel: HomeViewModel = viewModel()
 ) {
-    val showUpdateDialog by viewModel.showUpdateDialog.collectAsState()
-    val updateDialogText by viewModel.updateDialogText.collectAsState()
-    if (showUpdateDialog) {
-        BottomSheetDialog(
-            onDismissRequest = {
-                viewModel.dismissDialogState()
-            },
-            properties = BottomSheetDialogProperties(
-                dismissWithAnimation = true,
-                enableEdgeToEdge = true
-            ),
 
-            ) {
+    val updateDialogText by viewModel.updateDialogText.collectAsState()
+
+    val bottomSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.showUpdateDialog.collect {
+            if (it) {
+                bottomSheetState.show()
+            } else {
+                bottomSheetState.hide()
+            }
+        }
+    }
+    LaunchedEffect(bottomSheetState.currentValue) {
+        viewModel.updateDialogState(bottomSheetState.isVisible)
+    }
+
+    ModalBottomSheetLayout(
+        sheetState = bottomSheetState,
+        sheetContent = {
             Column(
                 modifier = Modifier
                     .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
@@ -225,7 +236,7 @@ private fun UpdateDialog(
                         .background(Color(0x0F0095FF))
                         .clickable(
                             role = Role.Button,
-                            onClick = viewModel::dismissDialogState
+                            onClick = viewModel::dismissDialog
                         )
                         .padding(vertical = 16.dp),
                     style = TextStyle(
@@ -236,9 +247,13 @@ private fun UpdateDialog(
                     )
                 )
             }
-        }
+        },
+        content = {
+        },
+        scrimColor = Color.Black.copy(alpha = 0.5f),
+        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
+    )
 
-    }
 
 }
 

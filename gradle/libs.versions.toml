@@ -5,8 +5,6 @@ agp = "8.2.2"
 ahoCorasickDoubleArrayTrie = "1.2.3"
 annotation = "1.7.1"
 apiVersion = "13.1.5"
-appcompat = "1.6.1"
-bottomsheetdialogCompose = "1.5.0"
 byteBuddyAndroid = "1.14.12"
 datastorePreferences = "1.1.0-beta01"
 desugar_jdk_libs = "2.0.4"
@@ -43,12 +41,11 @@ jvm-target = "17"
 aho-corasick-double-array-trie = { module = "com.hankcs:aho-corasick-double-array-trie", version.ref = "ahoCorasickDoubleArrayTrie" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
-androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-bottomsheetdialog-compose = { module = "com.holix.android:bottomsheetdialog-compose", version.ref = "bottomsheetdialogCompose" }
+
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
