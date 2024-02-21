@@ -24,6 +24,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +61,7 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 @Composable
 fun MainScreen(navController: NavController) {
+    var notice by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -69,16 +73,23 @@ fun MainScreen(navController: NavController) {
                 .statusBarsPadding()
                 .padding(vertical = 20.dp)
                 .padding(start = 16.dp),
-            icon = Icons.Notice, contentDescription = "更多",
+            icon = Icons.Notice,
+            contentDescription = "公告",
             iconClick = {
-
+                notice = true
             }
         )
         Banner()
         GridLayout(navController)
     }
 
-    UpdateDialog()
+
+
+
+    UpdateDialog(
+        notice, {
+            notice = !notice
+        })
 
 
 }
@@ -144,12 +155,17 @@ private fun GridLayout(navController: NavController, viewModel: MainViewModel = 
 
 
 @Composable
-private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
-    val updateDialogText by viewModel.updateDialogText.collectAsState()
+private fun UpdateDialog(
+    isShow: Boolean,
+    onDismissRequest: () -> Unit,
+    viewModel: MainViewModel = viewModel()
+) {
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsState()
-    if (showUpdateDialog) {
+    val updateDialogText by viewModel.updateDialogText.collectAsState()
+    if (showUpdateDialog || isShow) {
         BottomSheetDialog(
             onDismissRequest = {
+                onDismissRequest()
                 viewModel.dismissDialogState()
             },
             properties = BottomSheetDialogProperties(
@@ -168,7 +184,7 @@ private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
                     text = "公告",
                     style = TextStyle(
                         fontSize = 18.sp,
-                        fontWeight = FontWeight(600),
+                        fontWeight = FontWeight.Bold,
                         color = Color(0xFF202124),
                         textAlign = TextAlign.Center
                     ),
@@ -191,7 +207,7 @@ private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
                     modifier = Modifier.padding(top = 24.dp),
                     style = TextStyle(
                         fontSize = 14.sp,
-                        fontWeight = FontWeight(400),
+                        fontWeight = FontWeight.Normal,
                         color = Color(0xFF4F5355),
                     )
                 )
@@ -204,16 +220,21 @@ private fun UpdateDialog(viewModel: MainViewModel = viewModel()) {
                         .fillMaxWidth()
                         .clip(SmootherShape(12.dp))
                         .background(Color(0x0F0095FF))
+                        .clickable(
+                            role = Role.Button,
+                            onClick = onDismissRequest
+                        )
                         .padding(vertical = 16.dp),
                     style = TextStyle(
                         fontSize = 16.sp,
-                        fontWeight = FontWeight(600),
+                        fontWeight = FontWeight.Bold,
                         color = Color(0xFF0095FF),
                         textAlign = TextAlign.Center,
                     )
                 )
             }
         }
+
     }
 
 }
@@ -231,7 +252,7 @@ private fun ColumnScope.Banner() {
             text = "16",
             style = TextStyle(
                 fontSize = 64.sp,
-                fontWeight = FontWeight(300),
+                fontWeight = FontWeight.Light,
                 color = Color(0xFF2ECC71),
                 textAlign = TextAlign.Center,
             )
@@ -240,7 +261,7 @@ private fun ColumnScope.Banner() {
             text = "今日执行",
             style = TextStyle(
                 color = Color(0xFF4F5355),
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
@@ -250,13 +271,13 @@ private fun ColumnScope.Banner() {
             modifier = Modifier
                 .padding(top = 16.dp)
                 .clip(shape = SmootherShape(radius = 24.dp))
-                .background(color = Color(0x290095FF))
+                .background(color = Color(0x0F0095FF))
                 .clickable(role = Role.Button, onClick = {})
                 .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
             style = TextStyle(
                 fontSize = 14.sp,
                 lineHeight = 16.sp,
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFF0095FF),
 
                 textAlign = TextAlign.Center,
@@ -306,7 +327,7 @@ private fun RowScope.CardItem(
             text = text, Modifier.padding(top = 16.dp), style = TextStyle(
                 fontSize = 18.sp,
                 lineHeight = 21.6.sp,
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFF202124).copy(textColorAlpha),
             )
         )
@@ -314,7 +335,7 @@ private fun RowScope.CardItem(
             text = subText, Modifier.padding(top = 4.dp), style = TextStyle(
                 fontSize = 12.sp,
                 lineHeight = 14.4.sp,
-                fontWeight = FontWeight(400),
+                fontWeight = FontWeight.Normal,
                 color = Color(0xFF4F5355).copy(textColorAlpha),
             )
         )
@@ -350,7 +371,7 @@ private fun TextItem(
             Modifier.padding(start = 16.dp),
             style = TextStyle(
                 fontSize = 18.sp,
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFF202124)
             )
         )

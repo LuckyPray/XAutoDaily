@@ -33,8 +33,6 @@ import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.icon.Icons
-import me.teble.xposed.autodaily.ui.icon.icons.Info
 import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
@@ -47,7 +45,7 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
             .background(Color(0xFFF7F7F7))
     ) {
         TopBar(
-            text = "签到配置", endIcon = Icons.Info,
+            text = "签到配置",
             backClick = {
                 navController.popBackStack()
             })

@@ -29,7 +29,6 @@ class ModuleActivity : BaseActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-
         setContent {
             MaterialTheme {
                 XAutoDailyApp()

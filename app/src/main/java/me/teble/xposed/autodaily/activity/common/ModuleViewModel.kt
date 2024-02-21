@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
+import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
@@ -26,6 +28,7 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
+import me.teble.xposed.autodaily.data.HiddenAppIcon
 import me.teble.xposed.autodaily.data.KeepAlive
 import me.teble.xposed.autodaily.data.QKeepAlive
 import me.teble.xposed.autodaily.data.TimKeepAlive
@@ -37,7 +40,7 @@ import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
 
-class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataStore) :
+class ModuleViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataStore) :
     ViewModel() {
     private val _shizukuDaemonRunning = MutableStateFlow(false)
     val shizukuDaemonRunning = _shizukuDaemonRunning.asStateFlow()
@@ -58,6 +61,10 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
 
     val untrustedTouchEvents = dataStore.data.map {
         it[UntrustedTouchEvents] ?: false
+    }
+
+    val hiddenAppIcon = dataStore.data.map {
+        it[HiddenAppIcon] ?: false
     }
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
@@ -102,6 +109,20 @@ class MainViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataSt
                 it[UntrustedTouchEvents] = bool
             }
         }
+    }
+
+
+    fun updateHiddenAppIcon(bool: Boolean) {
+        viewModelScope.launch(IO) {
+            dataStore.edit {
+                it[HiddenAppIcon] = bool
+            }
+        }
+        xaApp.packageManager.setComponentEnabledSetting(
+            ComponentName(xaApp, MainActivity::class.java.name + "Alias"),
+            if (bool) COMPONENT_ENABLED_STATE_DISABLED else COMPONENT_ENABLED_STATE_ENABLED,
+            PackageManager.DONT_KILL_APP
+        )
     }
 
     /**

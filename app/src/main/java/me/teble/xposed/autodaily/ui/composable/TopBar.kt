@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui.composable
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -30,7 +31,7 @@ fun XAutoDailyTopBar(
     modifier: Modifier,
     icon: ImageVector,
     contentDescription: String,
-
+    dropdownMenu: @Composable () -> Unit = {},
     iconClick: () -> Unit = {}
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -41,17 +42,23 @@ fun XAutoDailyTopBar(
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        Icon(
-            imageVector = icon,
-            tint = Color(0xFF202124),
-            modifier = Modifier
-                .padding(end = 10.dp)
-                .size(36.dp)
-                .clip(CircleShape)
-                .clickable(role = Role.Button, onClick = iconClick)
-                .padding(6.dp),
-            contentDescription = contentDescription
-        )
+        Box {
+            Icon(
+                imageVector = icon,
+                tint = Color(0xFF202124),
+                modifier = Modifier
+                    .padding(end = 10.dp)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = iconClick)
+                    .padding(6.dp),
+                contentDescription = contentDescription
+            )
+            dropdownMenu()
+
+        }
+
+
 
     }
 }
@@ -61,8 +68,6 @@ fun TopBar(
     text: String,
     modifier: Modifier = Modifier,
     backClick: () -> Unit = {},
-    endIcon: ImageVector? = null,
-    endIconClick: () -> Unit = {}
 ) {
     Row(
         modifier = modifier
@@ -87,26 +92,13 @@ fun TopBar(
             text = text,
             style = TextStyle(
                 color = Color(0xFF202124),
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
             )
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.width(if (endIcon == null) 62.dp else 0.dp))
-        endIcon?.let {
-            Icon(
-                imageVector = it,
-                modifier = Modifier
-                    .padding(end = 26.dp)
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .clickable(role = Role.Button, onClick = endIconClick)
-                    .padding(6.dp),
-                contentDescription = "",
-                tint = Color(0xFF202124)
-            )
-        }
+        Spacer(modifier = Modifier.width(62.dp))
 
     }
 

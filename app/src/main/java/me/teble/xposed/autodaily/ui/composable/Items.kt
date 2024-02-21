@@ -50,7 +50,7 @@ fun SwitchTextItem(
             maxLines = 1,
             style = TextStyle(
                 fontSize = 18.sp,
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFF202124)
             )
         )
@@ -88,7 +88,7 @@ fun SwitchTextDivideItem(
             maxLines = 1,
             style = TextStyle(
                 fontSize = 18.sp,
-                fontWeight = FontWeight(700),
+                fontWeight = FontWeight.Bold,
                 color = Color(0xFF202124)
             )
         )
@@ -143,7 +143,7 @@ fun SwitchInfoItem(
                 maxLines = 1,
                 style = TextStyle(
                     fontSize = 18.sp,
-                    fontWeight = FontWeight(700),
+                    fontWeight = FontWeight.Bold,
                     color = Color(0xFF202124)
                 )
             )
@@ -152,7 +152,7 @@ fun SwitchInfoItem(
                 text = infoText,
                 style = TextStyle(
                     fontSize = 12.sp,
-                    fontWeight = FontWeight(400),
+                    fontWeight = FontWeight.Normal,
                     color = Color(0xFF4F5355)
                 )
             )
@@ -205,7 +205,7 @@ fun SwitchInfoDivideItem(
                 maxLines = 1,
                 style = TextStyle(
                     fontSize = 18.sp,
-                    fontWeight = FontWeight(700),
+                    fontWeight = FontWeight.Bold,
                     color = Color(0xFF202124)
                 )
             )
@@ -215,7 +215,7 @@ fun SwitchInfoDivideItem(
                 text = infoText,
                 style = TextStyle(
                     fontSize = 12.sp,
-                    fontWeight = FontWeight(400),
+                    fontWeight = FontWeight.Normal,
                     color = Color(0xFF4F5355)
                 )
             )

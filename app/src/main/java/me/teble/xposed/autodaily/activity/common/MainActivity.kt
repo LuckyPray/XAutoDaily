@@ -64,7 +64,7 @@ import rikka.shizuku.Shizuku
 import java.io.File
 
 class MainActivity : ComponentActivity() {
-    private val viewmodel: MainViewModel by viewModels()
+    private val viewmodel: ModuleViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         setStatusBarTranslation()
@@ -109,7 +109,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun ShizukuCard(
-    viewmodel: MainViewModel = viewModel()
+    viewmodel: ModuleViewModel = viewModel()
 ) {
 
     val shizukuDaemonRunning by viewmodel.shizukuDaemonRunning.collectAsStateWithLifecycle()
@@ -180,7 +180,7 @@ private fun SettingCard(
 @SuppressLint("MutableCollectionMutableState")
 @Composable
 fun ModuleView(
-    viewmodel: MainViewModel = viewModel()
+    viewmodel: ModuleViewModel = viewModel()
 ) {
 
     var infoList by remember { mutableStateOf(listOf<String>()) }

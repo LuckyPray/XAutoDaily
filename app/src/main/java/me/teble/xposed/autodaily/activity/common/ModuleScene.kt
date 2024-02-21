@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -74,7 +77,6 @@ fun ModuleScene() {
 
     ) {
         ModuleTopBar()
-
         Column(
             Modifier
                 .clip(SmootherShape(12.dp))
@@ -93,21 +95,54 @@ fun ModuleScene() {
 }
 
 @Composable
-private fun ModuleTopBar() {
+private fun ModuleTopBar(
+    viewmodel: ModuleViewModel = viewModel()
+) {
+    var expanded by remember { mutableStateOf(false) }
     XAutoDailyTopBar(
         modifier = Modifier
             .statusBarsPadding()
             .padding(vertical = 20.dp)
             .padding(start = 16.dp),
-        icon = Icons.More, contentDescription = "更多", iconClick = {
+        icon = Icons.More,
+        contentDescription = "更多",
+        iconClick = {
+            expanded = !expanded
+        },
+        dropdownMenu = {
+            DropdownMenu(
+                expanded = expanded,
+                offset = DpOffset((-16).dp, 0.dp),
+                modifier = Modifier.clip(SmootherShape(8.dp)),
+                onDismissRequest = { expanded = false }
+            ) {
+                val hiddenAppIcon by viewmodel.hiddenAppIcon.collectAsStateWithLifecycle(false)
 
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
+                    }
+                ) {
+                    Text(
+                        if (hiddenAppIcon) "显示应用图标" else "隐藏应用图标", style = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF3C4043),
+                        )
+                    )
+                }
+
+            }
         }
     )
+
+
 }
 
 @Composable
 private fun ShizukuCard(
-    viewmodel: MainViewModel = viewModel()
+    viewmodel: ModuleViewModel = viewModel()
 ) {
     Row(
         Modifier
@@ -152,7 +187,7 @@ private fun ShizukuCard(
 }
 
 @Composable
-private fun EntryLayout(viewmodel: MainViewModel = viewModel()) {
+private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
     if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)
         || xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)
     ) {
@@ -196,7 +231,7 @@ private fun EntryLayout(viewmodel: MainViewModel = viewModel()) {
 
 @Composable
 private fun SettingLayout(
-    viewmodel: MainViewModel = viewModel()
+    viewmodel: ModuleViewModel = viewModel()
 ) {
 
     SmallTitle(

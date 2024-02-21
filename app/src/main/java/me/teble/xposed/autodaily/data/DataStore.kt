@@ -12,3 +12,5 @@ val KeepAlive = booleanPreferencesKey("keep_alive")
 val QKeepAlive = booleanPreferencesKey("q_keep_alive")
 val TimKeepAlive = booleanPreferencesKey("tim_keep_alive")
 val UntrustedTouchEvents = booleanPreferencesKey("untrusted_touch_events")
+
+val HiddenAppIcon = booleanPreferencesKey("hidden_app_icon")
