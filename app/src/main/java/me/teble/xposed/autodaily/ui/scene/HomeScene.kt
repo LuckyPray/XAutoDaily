@@ -27,9 +27,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -63,8 +60,7 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 
 @Composable
-fun MainScreen(navController: NavController) {
-    var notice by remember { mutableStateOf(false) }
+fun MainScreen(navController: NavController, viewModel: HomeViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -79,7 +75,7 @@ fun MainScreen(navController: NavController) {
             icon = Icons.Notice,
             contentDescription = "公告",
             iconClick = {
-                notice = true
+                viewModel.showDialog()
             }
         )
         Column(
@@ -99,16 +95,13 @@ fun MainScreen(navController: NavController) {
 
 
 
-    UpdateDialog(
-        notice, {
-            notice = !notice
-        })
+    UpdateDialog()
 
 
 }
 
 @Composable
-private fun GridLayout(navController: NavController, viewModel: MainViewModel = viewModel()) {
+private fun GridLayout(navController: NavController, viewModel: HomeViewModel = viewModel()) {
     val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
@@ -169,16 +162,13 @@ private fun GridLayout(navController: NavController, viewModel: MainViewModel = 
 
 @Composable
 private fun UpdateDialog(
-    isShow: Boolean,
-    onDismissRequest: () -> Unit,
-    viewModel: MainViewModel = viewModel()
+    viewModel: HomeViewModel = viewModel()
 ) {
     val showUpdateDialog by viewModel.showUpdateDialog.collectAsState()
     val updateDialogText by viewModel.updateDialogText.collectAsState()
-    if (showUpdateDialog || isShow) {
+    if (showUpdateDialog) {
         BottomSheetDialog(
             onDismissRequest = {
-                onDismissRequest()
                 viewModel.dismissDialogState()
             },
             properties = BottomSheetDialogProperties(
@@ -235,7 +225,7 @@ private fun UpdateDialog(
                         .background(Color(0x0F0095FF))
                         .clickable(
                             role = Role.Button,
-                            onClick = onDismissRequest
+                            onClick = viewModel::dismissDialogState
                         )
                         .padding(vertical = 16.dp),
                     style = TextStyle(

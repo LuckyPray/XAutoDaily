@@ -12,7 +12,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.TaskExecutor
 
-class MainViewModel : ViewModel() {
+class HomeViewModel : ViewModel() {
 
     private var lastClickTime = 0L
 
@@ -34,6 +34,9 @@ class MainViewModel : ViewModel() {
         initUpdate()
     }
 
+    fun showDialog() {
+        _showUpdateDialog.value = true
+    }
     fun dismissDialogState() {
         _showUpdateDialog.value = false
     }

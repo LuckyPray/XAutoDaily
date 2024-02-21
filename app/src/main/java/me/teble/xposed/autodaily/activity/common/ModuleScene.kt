@@ -6,7 +6,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,7 +18,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,9 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
@@ -48,6 +44,7 @@ import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.ShizukuConf
+import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -55,7 +52,6 @@ import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Activated
-import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.More
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
@@ -205,7 +201,7 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
         ) {
             val context = LocalContext.current
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
-                EntryItem(
+                ImageItem(
                     icon = Icons.QQ,
                     contentDescription = "QQ Logo",
                     title = "QQ",
@@ -215,14 +211,15 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
                     })
             }
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
-                EntryItem(
+                ImageItem(
                     icon = Icons.TIM,
                     contentDescription = "Tim Logo",
                     title = "Tim",
                     info = "TIM 侧滑 > 设置 > XAutoDaily",
                     onClick = {
                         viewmodel.openHostSetting(context, QQTypeEnum.TIM)
-                    })
+                    }
+                )
             }
         }
     }
@@ -345,62 +342,6 @@ private fun SettingLayout(
 
 }
 
-@Composable
-private fun EntryItem(
-    icon: ImageVector,
-    contentDescription: String,
-    title: String,
-    info: String,
-    onClick: () -> Unit = {}
-) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(SmootherShape(12.dp))
-            .clickable(role = Role.Button) {
-                onClick()
-            }
-            .padding(16.dp)
-    ) {
-        Image(
-            imageVector = icon,
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .size(40.dp),
-            contentDescription = contentDescription
-        )
-        Column(
-            Modifier
-                .padding(start = 10.dp)
-                .weight(1f)
-        ) {
-
-            Text(
-                text = title, style = TextStyle(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202124),
-                )
-            )
-            Text(
-                text = info, Modifier.padding(top = 4.dp), style = TextStyle(
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color(0xFF5F6368),
-                )
-            )
-        }
-
-        Icon(
-            imageVector = Icons.ChevronRight,
-            contentDescription = "",
-            modifier = Modifier
-                .align(Alignment.CenterVertically)
-                .size(24.dp),
-            tint = Color(0xFFE6E6E6)
-        )
-    }
-}
 
 /**
  * @param hostPackage 被保活的包名
