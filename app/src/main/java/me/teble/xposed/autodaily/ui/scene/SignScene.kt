@@ -1,5 +1,7 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -34,6 +36,8 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Info
 import me.teble.xposed.autodaily.ui.navigate
+import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
+import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 @Composable
 fun SignScene(navController: NavController, signViewModel: SignViewModel = viewModel()) {
@@ -59,14 +63,19 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
             onClick = {
                 signViewModel.updateGlobalEnable(it)
             },
+            clickEnabled = true,
             enable = globalEnable
         )
-        GroupColumn(navController)
+        GroupColumn(navController, enable = globalEnable)
     }
 }
 
 @Composable
-fun GroupColumn(navController: NavController, signViewModel: SignViewModel = viewModel()) {
+fun GroupColumn(
+    navController: NavController,
+    signViewModel: SignViewModel = viewModel(),
+    enable: Boolean
+) {
 
     val taskGroups by signViewModel.taskGroupsState.collectAsState()
     LazyColumn(
@@ -98,11 +107,16 @@ fun GroupColumn(navController: NavController, signViewModel: SignViewModel = vie
                 }
             }
 
+            val itemAlpha: Float by animateFloatAsState(
+                targetValue = if (enable) DefaultAlpha else DisabledAlpha,
+                animationSpec = spring(), label = "switch item"
+            )
+
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp))
-                    .background(color = Color(0xffffffff)),
+                    .background(color = Color(0xffffffff).copy(alpha = itemAlpha)),
             ) {
                 tasks.forEach { task ->
 
@@ -136,6 +150,7 @@ fun GroupColumn(navController: NavController, signViewModel: SignViewModel = vie
                                 enable = checked.value,
                                 text = title,
                                 infoText = desc,
+                                clickEnabled = enable,
                                 onClick = {
                                     navController.navigate(
                                         NavigationItem.EditEnv(
@@ -155,6 +170,7 @@ fun GroupColumn(navController: NavController, signViewModel: SignViewModel = vie
                                     .fillMaxWidth()
                                     .clip(SmootherShape(12.dp)),
                                 enable = checked.value,
+                                clickEnabled = enable,
                                 text = title,
                                 infoText = desc,
                                 onClick = {
@@ -172,6 +188,7 @@ fun GroupColumn(navController: NavController, signViewModel: SignViewModel = vie
                                     .clip(SmootherShape(12.dp)),
                                 enable = checked.value,
                                 text = title,
+                                clickEnabled = enable,
                                 onClick = {
 
                                 }
@@ -183,6 +200,7 @@ fun GroupColumn(navController: NavController, signViewModel: SignViewModel = vie
                                     .clip(SmootherShape(12.dp)),
                                 enable = checked.value,
                                 text = title,
+                                clickEnabled = enable,
                                 onClick = {
 
                                 }

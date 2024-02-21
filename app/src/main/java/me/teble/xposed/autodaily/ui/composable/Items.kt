@@ -34,7 +34,7 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 fun SwitchTextItem(
     modifier: Modifier = Modifier,
     text: String,
-    clickEnabled: Boolean = true,
+    clickEnabled: Boolean,
     onClick: (Boolean) -> Unit,
     enable: Boolean
 ) {
@@ -71,7 +71,7 @@ fun SwitchTextItem(
 fun SwitchTextDivideItem(
     modifier: Modifier = Modifier,
     text: String,
-    clickEnabled: Boolean = true,
+    clickEnabled: Boolean,
     onClick: (Boolean) -> Unit,
     enable: Boolean
 ) {
@@ -118,7 +118,7 @@ fun SwitchInfoItem(
     modifier: Modifier = Modifier,
     text: String,
     infoText: String,
-    clickEnabled: Boolean = true,
+    clickEnabled: Boolean,
     onClick: (Boolean) -> Unit,
     enable: Boolean
 
@@ -175,7 +175,7 @@ fun SwitchInfoDivideItem(
     modifier: Modifier = Modifier,
     text: String,
     infoText: String,
-    clickEnabled: Boolean = true,
+    clickEnabled: Boolean,
     enable: Boolean,
     onClick: () -> Unit,
     onChange: (Boolean) -> Unit
