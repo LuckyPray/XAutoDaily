@@ -6,6 +6,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Activated
 import me.teble.xposed.autodaily.ui.icon.icons.Back
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.Configuration
+import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.Info
 import me.teble.xposed.autodaily.ui.icon.icons.More
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
@@ -13,6 +14,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
+import me.teble.xposed.autodaily.ui.icon.icons.Warn
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
 import kotlin.collections.List as ____KtList
@@ -28,7 +30,7 @@ public val Icons.AllIcons: ____KtList<ImageVector>
     }
       __AllIcons = listOf(
           Configuration, About, Setting, Script, Notice, ChevronRight, Back, Info, TIM,
-          XAutoDaily, QQ, More, Activated, XAutoDailyRound
+          XAutoDaily, QQ, More, Activated, XAutoDailyRound, Error, Warn
       )
     return __AllIcons!!
   }

@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui.composable
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
@@ -29,9 +28,8 @@ import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 @Composable
 fun XAutoDailyTopBar(
     modifier: Modifier,
-    icon: ImageVector,
-    contentDescription: String,
-    dropdownMenu: @Composable () -> Unit = {},
+    icon: ImageVector? = null,
+    contentDescription: String = "",
     iconClick: () -> Unit = {}
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
@@ -42,7 +40,7 @@ fun XAutoDailyTopBar(
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        Box {
+        if (icon != null) {
             Icon(
                 imageVector = icon,
                 tint = Color(0xFF202124),
@@ -54,10 +52,8 @@ fun XAutoDailyTopBar(
                     .padding(6.dp),
                 contentDescription = contentDescription
             )
-            dropdownMenu()
 
         }
-
 
 
     }

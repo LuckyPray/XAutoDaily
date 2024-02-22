@@ -74,6 +74,5 @@ fun XAutoDailyApp() {
                 backStackEntry.arguments!!.getString("taskId", "")
             )
         }
-
     }
 }

@@ -5,14 +5,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.pm.PackageManager
-import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-import android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -28,11 +25,7 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
-import me.teble.xposed.autodaily.data.HiddenAppIcon
 import me.teble.xposed.autodaily.data.KeepAlive
-import me.teble.xposed.autodaily.data.QKeepAlive
-import me.teble.xposed.autodaily.data.TimKeepAlive
-import me.teble.xposed.autodaily.data.UntrustedTouchEvents
 import me.teble.xposed.autodaily.data.dataStore
 import me.teble.xposed.autodaily.hook.JumpActivityHook
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
@@ -40,90 +33,29 @@ import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
 
-class ModuleViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataStore) :
+class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
     ViewModel() {
     private val _shizukuDaemonRunning = MutableStateFlow(false)
     val shizukuDaemonRunning = _shizukuDaemonRunning.asStateFlow()
     private val _shizukuErrInfo = MutableStateFlow("")
     val shizukuErrInfo = _shizukuErrInfo.asStateFlow()
 
-    val keepAlive = dataStore.data.map {
+    private val keepAlive = dataStore.data.map {
         it[KeepAlive] ?: false
     }
 
-    val qqKeepAlive = dataStore.data.map {
-        it[QKeepAlive] ?: false
-    }
 
-    val timKeepAlive = dataStore.data.map {
-        it[TimKeepAlive] ?: false
-    }
-
-    val untrustedTouchEvents = dataStore.data.map {
-        it[UntrustedTouchEvents] ?: false
-    }
-
-    val hiddenAppIcon = dataStore.data.map {
-        it[HiddenAppIcon] ?: false
-    }
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
     private val peekServiceJob = viewModelScope.launch(IO) {
-//        while (!_shizukuDaemonRunning.value) {
-//            _shizukuDaemonRunning.value = peekUserService()
-//            delay(1000)
-//        }
-//        bindUserService()
-    }
-
-    fun updateKeepAliveChecked(bool: Boolean) {
-        viewModelScope.launch(IO) {
-            dataStore.edit {
-                it[KeepAlive] = bool
-            }
+        while (!_shizukuDaemonRunning.value) {
+            _shizukuDaemonRunning.value = peekUserService()
+            delay(1000)
         }
-
+        bindUserService()
     }
 
-    fun updateQQKeepAlive(bool: Boolean) {
-        viewModelScope.launch(IO) {
-            dataStore.edit {
-                it[QKeepAlive] = bool
-            }
-        }
-    }
-
-
-    fun updateTimKeepAlive(bool: Boolean) {
-        viewModelScope.launch(IO) {
-            dataStore.edit {
-                it[TimKeepAlive] = bool
-            }
-        }
-    }
-
-    fun updateUntrustedTouchEvents(bool: Boolean) {
-        viewModelScope.launch(IO) {
-            dataStore.edit {
-                it[UntrustedTouchEvents] = bool
-            }
-        }
-    }
-
-
-    fun updateHiddenAppIcon(bool: Boolean) {
-        viewModelScope.launch(IO) {
-            dataStore.edit {
-                it[HiddenAppIcon] = bool
-            }
-        }
-        xaApp.packageManager.setComponentEnabledSetting(
-            ComponentName(xaApp, MainActivity::class.java.name + "Alias"),
-            if (bool) COMPONENT_ENABLED_STATE_DISABLED else COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP
-        )
-    }
 
     /**
      * 用于与Shizuku服务的连接和断开
@@ -265,6 +197,24 @@ class ModuleViewModel(private val dataStore: DataStore<Preferences> = xaApp.data
             } else {
                 unbindUserService()
             }
+        }
+    }
+
+    fun getShizukuState(): ShisukuState {
+        return if (ShizukuApi.binderAvailable) {
+            if (!ShizukuApi.isPermissionGranted) {
+                ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
+            } else if (!shizukuDaemonRunning.value) {
+                ShisukuState.Warn(
+                    Shizuku.getVersion(),
+                    if (shizukuErrInfo.value.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
+                )
+            } else {
+                ShisukuState.Activated(Shizuku.getVersion())
+            }
+
+        } else {
+            ShisukuState.Error
         }
     }
 }

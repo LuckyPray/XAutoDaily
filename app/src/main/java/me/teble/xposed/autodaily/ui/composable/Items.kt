@@ -83,7 +83,7 @@ fun TextInfoItem(
     text: String,
     infoText: String,
     clickEnabled: Boolean,
-    onClick: () -> Unit,
+    onClick: () -> Unit
 ) {
     val itemAlpha: Float by animateFloatAsState(
         targetValue = if (clickEnabled) DefaultAlpha else DisabledAlpha,
@@ -136,8 +136,9 @@ fun SwitchTextItem(
     modifier: Modifier = Modifier,
     text: String,
     clickEnabled: Boolean,
+    enable: Boolean,
     onClick: (Boolean) -> Unit,
-    enable: Boolean
+
 ) {
     Row(
         modifier
@@ -173,8 +174,8 @@ fun SwitchTextDivideItem(
     modifier: Modifier = Modifier,
     text: String,
     clickEnabled: Boolean,
-    onClick: (Boolean) -> Unit,
-    enable: Boolean
+    enable: Boolean,
+    onClick: (Boolean) -> Unit
 ) {
 
     Row(
@@ -220,8 +221,8 @@ fun SwitchInfoItem(
     text: String,
     infoText: String,
     clickEnabled: Boolean,
-    onClick: (Boolean) -> Unit,
-    enable: Boolean
+    enable: Boolean,
+    onClick: (Boolean) -> Unit
 
 ) {
     val itemAlpha: Float by animateFloatAsState(
