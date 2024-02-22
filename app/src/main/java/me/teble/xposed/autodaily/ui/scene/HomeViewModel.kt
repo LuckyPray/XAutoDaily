@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
@@ -19,14 +22,13 @@ class HomeViewModel : ViewModel() {
     private val _execTaskNum = MutableStateFlow(0)
     val execTaskNum = _execTaskNum.asStateFlow()
 
-    private val _notice = MutableStateFlow("暂无公告")
-    val notice = _notice.asStateFlow()
+    private val _showNoticeDialog = MutableStateFlow(false)
+    val showUpdateDialog = _showNoticeDialog.asStateFlow()
+    private val _noticeText = MutableStateFlow("")
+    val noticeText = _noticeText.asStateFlow()
 
-
-    private val _showUpdateDialog = MutableStateFlow(false)
-    val showUpdateDialog = _showUpdateDialog.asStateFlow()
-    private val _updateDialogText = MutableStateFlow("")
-    val updateDialogText = _updateDialogText.asStateFlow()
+    private val _snackbarText = MutableSharedFlow<String>()
+    val snackbarText = _snackbarText.asSharedFlow()
 
     init {
         initExecTaskNum()
@@ -34,26 +36,41 @@ class HomeViewModel : ViewModel() {
         initUpdate()
     }
 
-    fun showDialog() {
-        _showUpdateDialog.value = true
-    }
-    fun dismissDialog() {
-        _showUpdateDialog.value = false
+    fun showNoticeDialog() {
+        _showNoticeDialog.value = true
     }
 
-    fun updateDialogState(boolean: Boolean) {
-        if (_showUpdateDialog.value != boolean) {
-            _showUpdateDialog.value = boolean
+    fun dismissNoticeDialog() {
+        _showNoticeDialog.value = false
+    }
+
+    fun updateNoticeDialogState(boolean: Boolean) {
+        if (_showNoticeDialog.value != boolean) {
+            _showNoticeDialog.value = boolean
         }
     }
 
     private fun initUpdate() {
         viewModelScope.launch(IO) {
-            val res = ConfigUtil.checkUpdate(true)
-            if (res) {
-                _showUpdateDialog.value = true
-                _updateDialogText.value = ConfUnit.metaInfoCache?.app?.updateLog ?: ""
+            val info = ConfigUtil.fetchMeta()
+            info?.let {
+                val currConfVer = ConfigUtil.loadSaveConf().version
+                if (currConfVer < info.config.version) {
+                    if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
+                        return@launch
+                    } else {
+//                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
+                        return@launch
+                    }
+                }
+                if (BuildConfig.VERSION_CODE < info.app.versionCode) {
+
+                    showSnackbar("插件版本存在更新")
+                    return@launch
+                }
             }
+            showSnackbar("当前插件与配置均是最新版本")
+
         }
     }
 
@@ -65,9 +82,9 @@ class HomeViewModel : ViewModel() {
                 ConfigUtil.fetchMeta()
             }
             meta?.let {
-                _notice.value = it.notice?.trimEnd() ?: "暂无公告"
+                _noticeText.value = it.notice?.trimEnd() ?: "暂无公告"
             } ?: run {
-                ToastUtil.send("拉取公告失败")
+                showSnackbar("拉取公告失败")
             }
 
         }
@@ -90,12 +107,21 @@ class HomeViewModel : ViewModel() {
     fun signClick() {
         val currentTime = System.currentTimeMillis()
         if (currentTime - lastClickTime < 5000L) {
-            ToastUtil.send("点那么快怎么不上天呢")
+            showSnackbar("点那么快怎么不上天呢")
             return
         }
         lastClickTime = currentTime
         TaskExecutor.handler.sendEmptyMessage(TaskExecutor.EXEC_TASK)
     }
 
+    /**
+     * 展示对应 Snackbar
+     * @param text 文本内容
+     */
+    private fun showSnackbar(text: String) {
+        viewModelScope.launch {
+            _snackbarText.emit(text)
+        }
+    }
 
 }

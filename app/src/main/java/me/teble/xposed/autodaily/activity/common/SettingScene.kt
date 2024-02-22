@@ -6,16 +6,18 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -46,15 +48,26 @@ import java.io.File
 fun SettingScene(
     navController: NavController
 ) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
-    ) {
-        TopBar(text = "设置", backClick = {
-            navController.popBackStack()
-        })
-        SettingLayout()
+
+    Scaffold(
+        topBar = {
+            TopBar(text = "设置", backClick = {
+                navController.popBackStack()
+            })
+        },
+        backgroundColor = Color(0xFFF7F7F7)
+    ) { contentPadding ->
+
+        SettingLayout(
+            Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(horizontal = 16.dp)
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 24.dp)
+                .navigationBarsPadding()
+        )
 
     }
 
@@ -62,7 +75,7 @@ fun SettingScene(
 
 
 @Composable
-private fun ColumnScope.SettingLayout(viewmodel: SettingViewModel = viewModel()) {
+private fun SettingLayout(modifier: Modifier, viewmodel: SettingViewModel = viewModel()) {
 
     val shizukuState by viewmodel.shizukuState.collectAsStateWithLifecycle(false)
 
@@ -71,13 +84,7 @@ private fun ColumnScope.SettingLayout(viewmodel: SettingViewModel = viewModel())
         animationSpec = spring(), label = "switch item"
     )
     Column(
-        Modifier
-            .padding(horizontal = 16.dp)
-            .clip(SmootherShape(12.dp))
-            .verticalScroll(rememberScrollState())
-            .weight(weight = 1f, fill = false)
-            .padding(bottom = 24.dp)
-            .navigationBarsPadding()
+        modifier = modifier
     ) {
 
         CommonLayout(shizukuEnable = shizukuState)
@@ -87,7 +94,7 @@ private fun ColumnScope.SettingLayout(viewmodel: SettingViewModel = viewModel())
 }
 
 @Composable
-fun CommonLayout(
+private fun CommonLayout(
     shizukuEnable: Boolean,
     viewmodel: SettingViewModel = viewModel()
 ) {
@@ -105,8 +112,13 @@ fun CommonLayout(
     ) {
 
         val hiddenAppIcon by viewmodel.hiddenAppIcon.collectAsStateWithLifecycle(false)
+        val hideText by remember {
+            derivedStateOf {
+                if (hiddenAppIcon) "显示应用图标" else "隐藏应用图标"
+            }
+        }
         SwitchTextItem(
-            text = if (hiddenAppIcon) "显示应用图标" else "隐藏应用图标",
+            text = hideText,
             clickEnabled = true,
             enable = hiddenAppIcon,
             onClick = {
@@ -135,7 +147,7 @@ fun CommonLayout(
 }
 
 @Composable
-fun ShizukuLayout(
+private fun ShizukuLayout(
     itemAlpha: Float,
     shizukuEnable: Boolean,
     viewmodel: SettingViewModel = viewModel()

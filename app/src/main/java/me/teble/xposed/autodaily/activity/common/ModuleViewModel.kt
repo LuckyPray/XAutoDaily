@@ -41,7 +41,6 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
         it[KeepAlive] ?: false
     }
 
-
     val shizukuState =
         combine(
             ShizukuApi.isPermissionGranted,

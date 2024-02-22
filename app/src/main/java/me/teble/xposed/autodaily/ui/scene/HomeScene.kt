@@ -26,12 +26,16 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.NavigationItem
+import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -63,40 +68,105 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 
 @Composable
-fun MainScreen(navController: NavController, viewModel: HomeViewModel = viewModel()) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
-            .padding(horizontal = 16.dp)
-    ) {
-        XAutoDailyTopBar(
-            modifier = Modifier
-                .statusBarsPadding()
-                .padding(vertical = 20.dp)
-                .padding(start = 16.dp),
-            icon = Icons.Notice,
-            contentDescription = "公告",
-            iconClick = {
-                viewModel.showDialog()
+fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewModel()) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // 展示对应 snackbarText
+    LaunchedEffect(Unit) {
+        viewmodel.snackbarText.collect {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+    NoticeDialog()
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) {
+                RoundedSnackbar(it)
             }
-        )
+        },
+        topBar = {
+            XAutoDailyTopBar(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp)
+                    .padding(vertical = 20.dp)
+                    .padding(start = 16.dp),
+                icon = Icons.Notice,
+                contentDescription = "公告",
+                iconClick = {
+                    viewmodel.showNoticeDialog()
+                }
+            )
+        },
+        backgroundColor = Color(0xFFF7F7F7)
+    ) { contentPadding ->
         Column(
-            Modifier
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .weight(weight = 1f, fill = false)
                 .padding(bottom = 24.dp)
                 .navigationBarsPadding()
         ) {
+
             Banner()
             GridLayout(navController)
         }
 
     }
 
-    UpdateDialog()
 
+}
+
+@Composable
+private fun ColumnScope.Banner() {
+    Column(
+        modifier = Modifier
+            .padding(top = 24.dp)
+            .align(alignment = Alignment.CenterHorizontally),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "16",
+            style = TextStyle(
+                fontSize = 64.sp,
+                fontWeight = FontWeight.Light,
+                color = Color(0xFF2ECC71),
+                textAlign = TextAlign.Center,
+            )
+        )
+        Text(
+            text = "今日执行",
+            style = TextStyle(
+                color = Color(0xFF4F5355),
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+        )
+        Text(
+            text = "立即签到",
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .clip(shape = SmootherShape(radius = 24.dp))
+                .background(color = Color(0x0F0095FF))
+                .clickable(role = Role.Button, onClick = {})
+                .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
+            style = TextStyle(
+                fontSize = 14.sp,
+                lineHeight = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF0095FF),
+
+                textAlign = TextAlign.Center,
+            )
+        )
+
+
+    }
 }
 
 @Composable
@@ -161,11 +231,11 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun UpdateDialog(
+private fun NoticeDialog(
     viewModel: HomeViewModel = viewModel()
 ) {
 
-    val updateDialogText by viewModel.updateDialogText.collectAsState()
+    val noticeText by viewModel.noticeText.collectAsState()
 
     val bottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -182,7 +252,7 @@ private fun UpdateDialog(
         }
     }
     LaunchedEffect(bottomSheetState.currentValue) {
-        viewModel.updateDialogState(bottomSheetState.isVisible)
+        viewModel.updateNoticeDialogState(bottomSheetState.isVisible)
     }
 
     ModalBottomSheetLayout(
@@ -236,7 +306,7 @@ private fun UpdateDialog(
                         .background(Color(0x0F0095FF))
                         .clickable(
                             role = Role.Button,
-                            onClick = viewModel::dismissDialog
+                            onClick = viewModel::dismissNoticeDialog
                         )
                         .padding(vertical = 16.dp),
                     style = TextStyle(
@@ -257,54 +327,6 @@ private fun UpdateDialog(
 
 }
 
-
-@Composable
-private fun ColumnScope.Banner() {
-    Column(
-        modifier = Modifier
-            .padding(top = 24.dp)
-            .align(alignment = Alignment.CenterHorizontally),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "16",
-            style = TextStyle(
-                fontSize = 64.sp,
-                fontWeight = FontWeight.Light,
-                color = Color(0xFF2ECC71),
-                textAlign = TextAlign.Center,
-            )
-        )
-        Text(
-            text = "今日执行",
-            style = TextStyle(
-                color = Color(0xFF4F5355),
-                fontWeight = FontWeight.Normal,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center
-            )
-        )
-        Text(
-            text = "立即签到",
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .clip(shape = SmootherShape(radius = 24.dp))
-                .background(color = Color(0x0F0095FF))
-                .clickable(role = Role.Button, onClick = {})
-                .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
-            style = TextStyle(
-                fontSize = 14.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF0095FF),
-
-                textAlign = TextAlign.Center,
-            )
-        )
-
-
-    }
-}
 
 @Composable
 private fun RowScope.CardItem(

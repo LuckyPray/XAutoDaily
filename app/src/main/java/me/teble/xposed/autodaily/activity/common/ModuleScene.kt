@@ -14,8 +14,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -37,6 +41,7 @@ import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.ui.composable.ImageItem
+import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
@@ -50,23 +55,39 @@ import me.teble.xposed.autodaily.ui.icon.icons.Warn
 
 
 @Composable
-fun ModuleScene(navController: NavController) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
-            .padding(horizontal = 16.dp)
+fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewModel()) {
 
-    ) {
-        ModuleTopBar()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // 展示对应 snackbarText
+    LaunchedEffect(Unit) {
+        viewmodel.snackbarText.collect {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) {
+                RoundedSnackbar(it)
+            }
+        },
+        topBar = {
+            ModuleTopBar()
+        },
+        backgroundColor = Color(0xFFF7F7F7)
+    ) { contentPadding ->
         Column(
             Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .weight(weight = 1f, fill = false)
                 .padding(bottom = 24.dp)
                 .navigationBarsPadding()
         ) {
+
             ShizukuCard()
 
             EntryLayout()
@@ -83,7 +104,6 @@ fun ModuleScene(navController: NavController) {
             }
 
         }
-
     }
 
 }
@@ -93,6 +113,7 @@ private fun ModuleTopBar() {
     XAutoDailyTopBar(
         modifier = Modifier
             .statusBarsPadding()
+            .padding(horizontal = 16.dp)
             .padding(vertical = 20.dp)
             .padding(start = 16.dp),
     )
@@ -103,7 +124,6 @@ private fun ShizukuCard(
     viewmodel: ModuleViewModel = viewModel()
 ) {
     val shizukuState by viewmodel.shizukuState.collectAsStateWithLifecycle(ShisukuState.Error)
-
 
 
     val backgroundColor by animateColorAsState(

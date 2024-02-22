@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
@@ -41,35 +42,32 @@ fun SettingScene(navController: NavController, viewmodel: SettingViewModel = vie
     }
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
+            SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
         },
+        topBar = {
+            TopBar(text = "设置", backClick = {
+                navController.popBackStack()
+            })
+        },
+        backgroundColor = Color(0xFFF7F7F7)
     ) { contentPadding ->
         // Screen content
         Column(
             Modifier
                 .fillMaxSize()
 
-                .background(Color(0xFFF7F7F7))
                 .padding(contentPadding)
+                .padding(horizontal = 16.dp)
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .padding(bottom = 24.dp)
+                .navigationBarsPadding()
         ) {
-            TopBar(text = "设置", backClick = {
-                navController.popBackStack()
-            })
 
-            Column(
-                Modifier
-                    .padding(horizontal = 16.dp)
-                    .clip(SmootherShape(12.dp))
-                    .verticalScroll(rememberScrollState())
-                    .weight(weight = 1f, fill = false)
-                    .padding(bottom = 24.dp)
-                    .navigationBarsPadding()
-            ) {
-                EntryLayout()
-                ConfigLayout()
-                CommonLayout()
-                BackupLayout()
-            }
+            EntryLayout()
+            ConfigLayout()
+            CommonLayout()
+            BackupLayout()
         }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -39,37 +40,43 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 @Composable
 fun SignScene(navController: NavController, signViewModel: SignViewModel = viewModel()) {
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF7F7F7))
-    ) {
-        TopBar(
-            text = "签到配置",
-            backClick = {
-                navController.popBackStack()
-            })
-
-        val globalEnable by signViewModel.globalEnable.collectAsState()
-        SwitchTextItem(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth()
-                .clip(SmootherShape(12.dp))
-                .background(color = Color(0xffffffff)),
-            text = "总开关",
-            onClick = {
-                signViewModel.updateGlobalEnable(it)
-            },
-            clickEnabled = true,
-            enable = globalEnable
-        )
-        GroupColumn(navController, enable = globalEnable)
+    Scaffold(
+        topBar = {
+            TopBar(
+                text = "签到配置",
+                backClick = {
+                    navController.popBackStack()
+                })
+        },
+        backgroundColor = Color(0xFFF7F7F7)
+    ) { contentPadding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .background(Color(0xFFF7F7F7))
+                .padding(contentPadding)
+        ) {
+            val globalEnable by signViewModel.globalEnable.collectAsState()
+            SwitchTextItem(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .clip(SmootherShape(12.dp))
+                    .background(color = Color(0xffffffff)),
+                text = "总开关",
+                onClick = {
+                    signViewModel.updateGlobalEnable(it)
+                },
+                clickEnabled = true,
+                enable = globalEnable
+            )
+            GroupColumn(navController, enable = globalEnable)
+        }
     }
 }
 
 @Composable
-fun GroupColumn(
+private fun GroupColumn(
     navController: NavController,
     signViewModel: SignViewModel = viewModel(),
     enable: Boolean

@@ -3,13 +3,11 @@ package me.teble.xposed.autodaily.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
@@ -23,7 +21,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Text
-import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -35,8 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -45,7 +40,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
 import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
 import me.teble.xposed.autodaily.config.PAN_URL
@@ -230,7 +224,7 @@ fun MainLayout(navController: NavHostController) {
                 LineButton(
                     title = "检测更新",
                     otherInfoList = listOf(
-                        "当前模块版本：${moduleVersionName}(${moduleVersionCode})",
+                        "当前模块版本：",
                         "当前宿主版本：${qqVersionName}(${qqVersionCode})",
                         "当前配置版本：${configVersion}"
                     ),
@@ -301,12 +295,7 @@ fun BackgroundView() {
             .clip(RoundedCornerShape(13.dp)),
         backgroundColor = Color.Unspecified
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_bc),
-            contentScale = ContentScale.FillWidth,
-            contentDescription = "",
-            modifier = Modifier.fillMaxSize()
-        )
+
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
