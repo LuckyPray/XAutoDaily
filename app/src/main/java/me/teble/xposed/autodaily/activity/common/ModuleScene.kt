@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -52,6 +51,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
+import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
 
 
 @Composable
@@ -84,8 +84,7 @@ fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewM
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 24.dp)
-                .navigationBarsPadding()
+                .verticalScrollPadding()
         ) {
 
             ShizukuCard()

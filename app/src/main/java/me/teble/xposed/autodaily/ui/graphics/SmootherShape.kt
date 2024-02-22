@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.graphics
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Outline
@@ -16,7 +17,7 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlin.math.tan
 
-
+@Immutable
 class SmootherShape(
     private val radius: Dp = 13.dp,
     private val smoothness: Float = 0.6f, // iOS Figma default

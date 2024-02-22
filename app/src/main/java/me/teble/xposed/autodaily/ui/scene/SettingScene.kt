@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,6 +28,7 @@ import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
+import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
 
 @Composable
 fun SettingScene(navController: NavController, viewmodel: SettingViewModel = viewModel()) {
@@ -60,8 +60,7 @@ fun SettingScene(navController: NavController, viewmodel: SettingViewModel = vie
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 24.dp)
-                .navigationBarsPadding()
+                .verticalScrollPadding()
         ) {
 
             EntryLayout()

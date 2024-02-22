@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.activity.module
 import android.os.Bundle
 import android.view.Window
 import androidx.activity.compose.setContent
-import androidx.compose.material.MaterialTheme
 import androidx.core.view.WindowCompat
 import com.agoines.system.common.navigationBarLightOldMode
 import com.agoines.system.common.setNavigationBarTranslation
@@ -11,6 +10,7 @@ import com.agoines.system.common.setStatusBarTranslation
 import com.agoines.system.common.statusBarLightOldMode
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class ModuleActivity : BaseActivity() {
 
@@ -27,7 +27,7 @@ class ModuleActivity : BaseActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            MaterialTheme {
+            XAutodailyTheme {
                 XAutoDailyApp()
             }
 

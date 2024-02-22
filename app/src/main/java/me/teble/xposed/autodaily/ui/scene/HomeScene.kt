@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -61,6 +60,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
+import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
 import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
@@ -108,8 +108,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 24.dp)
-                .navigationBarsPadding()
+                .verticalScrollPadding()
         ) {
 
             Banner()
