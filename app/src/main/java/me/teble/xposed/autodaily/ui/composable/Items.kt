@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -160,7 +159,7 @@ fun SwitchTextItem(
         SwitchButton(
             enable,
             modifier = Modifier
-                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .size(width = 48.dp, height = 24.dp)
                 .clickable(
                     role = Role.Switch,
                     enabled = clickEnabled,
@@ -206,7 +205,7 @@ fun SwitchTextDivideItem(
         SwitchButton(
             enable,
             modifier = Modifier
-                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .size(width = 48.dp, height = 24.dp)
                 .clickable(
                     role = Role.Switch,
                     enabled = clickEnabled,
@@ -263,7 +262,7 @@ fun SwitchInfoItem(
         SwitchButton(
             enable,
             modifier = Modifier
-                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .size(width = 48.dp, height = 24.dp)
                 .clickable(
                     role = Role.Switch,
                     enabled = clickEnabled,
@@ -338,7 +337,7 @@ fun SwitchInfoDivideItem(
         SwitchButton(
             enable,
             modifier = Modifier
-                .defaultMinSize(minWidth = 36.dp, minHeight = 24.dp)
+                .size(width = 48.dp, height = 24.dp)
                 .padding(end = 16.dp)
                 .clickable(
                     role = Role.Switch,
