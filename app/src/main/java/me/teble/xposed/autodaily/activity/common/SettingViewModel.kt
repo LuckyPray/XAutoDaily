@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.application.xaApp
@@ -21,6 +22,12 @@ import me.teble.xposed.autodaily.shizuku.ShizukuApi
 
 class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataStore) :
     ViewModel() {
+
+    val shizukuState =
+        ShizukuApi.isPermissionGranted.combine(ShizukuApi.binderAvailable) { isPermissionGranted, binderAvailable ->
+            isPermissionGranted && binderAvailable
+        }
+
     val keepAlive = dataStore.data.map {
         it[KeepAlive] ?: false
     }
@@ -75,6 +82,7 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
                 it[UntrustedTouchEvents] = bool
             }
         }
+        ShizukuApi.setUntrustedTouchEvents(bool)
     }
 
 
@@ -91,7 +99,4 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
         )
     }
 
-    fun getShizukuEnable(): Boolean {
-        return ShizukuApi.isPermissionGranted && ShizukuApi.isPermissionGranted
-    }
 }

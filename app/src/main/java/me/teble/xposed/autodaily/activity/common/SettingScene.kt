@@ -6,14 +6,16 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -44,60 +46,74 @@ import java.io.File
 fun SettingScene(
     navController: NavController
 ) {
-    TopBar(text = "设置", backClick = {
-        navController.popBackStack()
-    })
-    SettingLayout()
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Color(0xFFF7F7F7))
+    ) {
+        TopBar(text = "设置", backClick = {
+            navController.popBackStack()
+        })
+        SettingLayout()
+
+    }
+
 }
 
 
 @Composable
-private fun SettingLayout(viewmodel: SettingViewModel = viewModel()) {
-    var shizukuEnable by remember { mutableStateOf(viewmodel.getShizukuEnable()) }
-    LaunchedEffect(ShizukuApi.isPermissionGranted, ShizukuApi.isPermissionGranted) {
-        shizukuEnable = viewmodel.getShizukuEnable()
-    }
+private fun ColumnScope.SettingLayout(viewmodel: SettingViewModel = viewModel()) {
+
+    val shizukuState by viewmodel.shizukuState.collectAsStateWithLifecycle(false)
 
     val itemAlpha: Float by animateFloatAsState(
-        targetValue = if (shizukuEnable) DefaultAlpha else DisabledAlpha,
+        targetValue = if (shizukuState) DefaultAlpha else DisabledAlpha,
         animationSpec = spring(), label = "switch item"
     )
-    SmallTitle(
-        title = "通用设置",
-        modifier = Modifier
-            .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
-    )
+    Column(
+        Modifier
+            .padding(horizontal = 16.dp)
+            .clip(SmootherShape(12.dp))
+            .verticalScroll(rememberScrollState())
+            .weight(weight = 1f, fill = false)
+            .padding(bottom = 24.dp)
+            .navigationBarsPadding()
+    ) {
 
-
-    CommonLayout(shizukuEnable = shizukuEnable, itemAlpha = itemAlpha)
-    ShizukuLayout(shizukuEnable = shizukuEnable, itemAlpha = itemAlpha)
-
+        CommonLayout(shizukuEnable = shizukuState)
+        ShizukuLayout(shizukuEnable = shizukuState, itemAlpha = itemAlpha)
+    }
 
 }
 
 @Composable
 fun CommonLayout(
-    itemAlpha: Float,
     shizukuEnable: Boolean,
     viewmodel: SettingViewModel = viewModel()
 ) {
+    SmallTitle(
+        title = "通用",
+        modifier = Modifier
+            .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
+    )
+
     Column(
         Modifier
-            .padding(bottom = 8.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF).copy(alpha = itemAlpha))
+            .background(Color(0xFFFFFFFF))
     ) {
+
         val hiddenAppIcon by viewmodel.hiddenAppIcon.collectAsStateWithLifecycle(false)
         SwitchTextItem(
             text = if (hiddenAppIcon) "显示应用图标" else "隐藏应用图标",
-            clickEnabled = shizukuEnable,
+            clickEnabled = true,
             enable = hiddenAppIcon,
             onClick = {
-
+                viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
             })
-        TextItem(text = "主题颜色", clickEnabled = shizukuEnable, onClick = {
-            viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
+        TextItem(text = "主题颜色", clickEnabled = true, onClick = {
+
         })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -127,11 +143,10 @@ fun ShizukuLayout(
     SmallTitle(
         title = "Shizuku 保活",
         modifier = Modifier
-            .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
+            .padding(bottom = 8.dp, start = 16.dp, top = 24.dp)
     )
     Column(
         modifier = Modifier
-            .padding(top = 16.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
             .background(Color(0xFFFFFFFF).copy(alpha = itemAlpha))

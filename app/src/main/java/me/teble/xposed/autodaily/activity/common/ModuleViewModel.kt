@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
-import android.content.pm.PackageManager
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
@@ -17,7 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -35,22 +34,45 @@ import rikka.shizuku.Shizuku
 
 class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
     ViewModel() {
-    private val _shizukuDaemonRunning = MutableStateFlow(false)
-    val shizukuDaemonRunning = _shizukuDaemonRunning.asStateFlow()
-    private val _shizukuErrInfo = MutableStateFlow("")
-    val shizukuErrInfo = _shizukuErrInfo.asStateFlow()
+    private val shizukuDaemonRunning = MutableStateFlow(false)
+    private val shizukuErrInfo = MutableStateFlow("")
 
     private val keepAlive = dataStore.data.map {
         it[KeepAlive] ?: false
     }
 
 
+    val shizukuState =
+        combine(
+            ShizukuApi.isPermissionGranted,
+            ShizukuApi.binderAvailable,
+            shizukuErrInfo,
+            shizukuDaemonRunning,
+        ) { isPermissionGranted, binderAvailable, errInfo, daemonRunning ->
+            if (binderAvailable) {
+                if (isPermissionGranted) {
+                    ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
+                } else if (!daemonRunning) {
+                    ShisukuState.Warn(
+                        Shizuku.getVersion(),
+                        if (errInfo.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
+                    )
+                } else {
+                    ShisukuState.Activated(Shizuku.getVersion())
+                }
+
+            } else {
+                ShisukuState.Error
+            }
+        }
+
+
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
     private val peekServiceJob = viewModelScope.launch(IO) {
-        while (!_shizukuDaemonRunning.value) {
-            _shizukuDaemonRunning.value = peekUserService()
+        while (!shizukuDaemonRunning.value) {
+            shizukuDaemonRunning.value = peekUserService()
             delay(1000)
         }
         bindUserService()
@@ -67,21 +89,21 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
                 ShizukuApi.initBinder(binder)
                 try {
                     if (service.isRunning) {
-                        _shizukuErrInfo.value = ""
-                        _shizukuDaemonRunning.value = true
+                        shizukuErrInfo.value = ""
+                        shizukuDaemonRunning.value = true
                     }
                 } catch (e: RemoteException) {
                     Log.e("XALog", e.stackTraceToString())
-                    _shizukuErrInfo.value = "守护进程连接失败"
+                    shizukuErrInfo.value = "守护进程连接失败"
                 }
             } else {
-                _shizukuErrInfo.value = "invalid binder for $name received"
+                shizukuErrInfo.value = "invalid binder for $name received"
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            _shizukuErrInfo.value = ""
-            _shizukuDaemonRunning.value = false
+            shizukuErrInfo.value = ""
+            shizukuDaemonRunning.value = false
         }
     }
 
@@ -121,7 +143,7 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
                 userServiceArgs,
                 userServiceConnection, true
             )
-            _shizukuDaemonRunning.value = false
+            shizukuDaemonRunning.value = false
             return true
         } catch (e: Throwable) {
             Log.e("XALog", e.stackTraceToString())
@@ -172,13 +194,12 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
     }
 
     fun shizukuClickable() {
-        if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
+        if (ShizukuApi.binderAvailable.value && !ShizukuApi.isPermissionGranted.value) {
             Shizuku.requestPermission(1101)
 
             viewModelScope.launch(IO) {
-                while (!ShizukuApi.isPermissionGranted) {
-                    ShizukuApi.isPermissionGranted =
-                        Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                while (!ShizukuApi.isPermissionGranted.value) {
+                    ShizukuApi.checkSelfPermission()
                     delay(500)
                 }
             }
@@ -197,24 +218,6 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
             } else {
                 unbindUserService()
             }
-        }
-    }
-
-    fun getShizukuState(): ShisukuState {
-        return if (ShizukuApi.binderAvailable) {
-            if (!ShizukuApi.isPermissionGranted) {
-                ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
-            } else if (!shizukuDaemonRunning.value) {
-                ShisukuState.Warn(
-                    Shizuku.getVersion(),
-                    if (shizukuErrInfo.value.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
-                )
-            } else {
-                ShisukuState.Activated(Shizuku.getVersion())
-            }
-
-        } else {
-            ShisukuState.Error
         }
     }
 }

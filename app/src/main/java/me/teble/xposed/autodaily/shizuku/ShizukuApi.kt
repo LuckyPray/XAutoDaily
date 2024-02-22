@@ -5,42 +5,53 @@ import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.application.xaApp
 import rikka.shizuku.Shizuku
 
 object ShizukuApi {
-    var binderAvailable = false
-    var serviceBinderAvailable = false
-    var isPermissionGranted by mutableStateOf(false)
+    private val _binderAvailable = MutableStateFlow(false)
+    var binderAvailable = _binderAvailable.asStateFlow()
+
+    private val _serviceBinderAvailable = MutableStateFlow(false)
+    private var serviceBinderAvailable = _serviceBinderAvailable.asStateFlow()
+
+    private val _isPermissionGranted = MutableStateFlow(false)
+    var isPermissionGranted = _isPermissionGranted.asStateFlow()
     private lateinit var service: IUserService
 
     fun initBinder(binder: IBinder) {
-        if (serviceBinderAvailable && ShizukuApi::service.isInitialized) return
+        if (serviceBinderAvailable.value && ShizukuApi::service.isInitialized) return
         service = IUserService.Stub.asInterface(binder)
-        serviceBinderAvailable = true
+        _serviceBinderAvailable.value = true
         binder.linkToDeath({
-            serviceBinderAvailable = false
+            _serviceBinderAvailable.value = false
             Log.w("XALog", "UserService binderDied")
         }, 0)
     }
 
     fun init() {
         Shizuku.addBinderReceivedListenerSticky {
-            binderAvailable = true
-            isPermissionGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            _binderAvailable.value = true
+            _isPermissionGranted.value =
+                Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         }
         Shizuku.addBinderDeadListener {
-            binderAvailable = false
-            isPermissionGranted = false
+            _binderAvailable.value = false
+            _isPermissionGranted.value = false
         }
     }
 
+
+    fun checkSelfPermission() {
+        _isPermissionGranted.value =
+            Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+    }
+
     fun startService(packageName: String, className: String, args: Array<String>) {
-        if (!isPermissionGranted) return
+        if (!isPermissionGranted.value) return
         val arg = args.joinToString(" ")
         val command =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) "start-foreground-service"
@@ -49,12 +60,12 @@ object ShizukuApi {
     }
 
     fun setUntrustedTouchEvents(disabled: Boolean) {
-        if (!isPermissionGranted) return
+        if (!isPermissionGranted.value) return
         shizukuShell("settings put global block_untrusted_touches ${if (disabled) 0 else 2}")
     }
 
     private fun shizukuShell(shellStr: String): String {
-        if (serviceBinderAvailable && ShizukuApi::service.isInitialized) {
+        if (serviceBinderAvailable.value && ShizukuApi::service.isInitialized) {
             return service.execShell(shellStr)
         }
         Toast.makeText(xaApp, "Shizuku is not available", Toast.LENGTH_SHORT).show()

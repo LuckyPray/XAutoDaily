@@ -16,12 +16,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +36,6 @@ import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
-import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.TextItem
@@ -83,7 +79,7 @@ fun ModuleScene(navController: NavController) {
                     .background(Color(0xFFFFFFFF)),
                 clickEnabled = true
             ) {
-                navController.navigate(NavigationItem.Module, NavigationItem.Setting)
+                navController.navigate(NavigationItem.Setting, NavigationItem.Module)
             }
 
         }
@@ -106,23 +102,9 @@ private fun ModuleTopBar() {
 private fun ShizukuCard(
     viewmodel: ModuleViewModel = viewModel()
 ) {
+    val shizukuState by viewmodel.shizukuState.collectAsStateWithLifecycle(ShisukuState.Error)
 
-    val shizukuDaemonRunning by viewmodel.shizukuDaemonRunning.collectAsStateWithLifecycle()
-    val shizukuErrInfo by viewmodel.shizukuErrInfo.collectAsStateWithLifecycle()
-    var shizukuState by remember {
-        mutableStateOf(
-            viewmodel.getShizukuState()
-        )
-    }
 
-    LaunchedEffect(
-        ShizukuApi.binderAvailable,
-        ShizukuApi.isPermissionGranted,
-        shizukuDaemonRunning,
-        shizukuErrInfo
-    ) {
-        shizukuState = viewmodel.getShizukuState()
-    }
 
     val backgroundColor by animateColorAsState(
 
