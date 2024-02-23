@@ -24,10 +24,11 @@ object MiuiStringToast {
     @SuppressLint("WrongConstant")
     fun showStringToast(
         context: Context,
-        packageName: String,
+        packageName: String = context.packageName,
         colorType: Int = 1,
         iconResName: String = "ic_check_circle", // if (colorType == 1) "ic_check_circle" else "ic_error",
         text: String?,
+        longDuration: Boolean
     ) {
         runCatching {
             if (isSupported()) {
@@ -49,7 +50,7 @@ object MiuiStringToast {
                     .setPackageName(packageName)
                     .setStrongToastCategory(StrongToastCategory.TEXT_BITMAP.value)
                     .setTarget(null)
-                    .setDuration(2500L)
+                    .setDuration(if (longDuration) 3500L else 2000L)
                     .setLevel(0.0f)
                     .setRapidRate(0.0f)
                     .setCharge(null)
@@ -66,7 +67,11 @@ object MiuiStringToast {
                 )
                     .invoke(service, 1, "strong_toast_action", bundle)
             } else {
-                Toast.makeText(context, text, Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    context,
+                    text,
+                    if (longDuration) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
