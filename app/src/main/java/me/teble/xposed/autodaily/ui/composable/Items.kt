@@ -139,7 +139,7 @@ fun SwitchTextItem(
     enable: Boolean,
     onClick: (Boolean) -> Unit,
 
-) {
+    ) {
     Row(
         modifier
             .clickable(role = Role.Switch, enabled = clickEnabled, onClick = { onClick(!enable) })
@@ -338,8 +338,8 @@ fun SwitchInfoDivideItem(
         SwitchButton(
             enable,
             modifier = Modifier
-                .size(width = 48.dp, height = 24.dp)
                 .padding(end = 16.dp)
+                .size(width = 48.dp, height = 24.dp)
                 .clickable(
                     role = Role.Switch,
                     enabled = clickEnabled,
