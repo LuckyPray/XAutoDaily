@@ -34,6 +34,7 @@ ndk = "25.0.8775105"
 compose-compiler = "1.5.9"
 jvm-target = "17"
 
+browser = "1.7.0"
 
 [libraries]
 
@@ -74,7 +75,11 @@ androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling",versio
 androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose"  }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 
+
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+
 system-extension = { module = "com.highcapable.betterandroid:system-extension", version.ref = "systemExtension" }
+
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

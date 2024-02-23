@@ -298,6 +298,7 @@ configurations.all {
 dependencies {
     implementation(project(":dexkit"))
     implementation(project(":mmkv"))
+    implementation(libs.androidx.browser)
 
     compileOnly(project(":stub"))
     implementation(project(":system"))

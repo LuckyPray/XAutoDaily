@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -242,7 +243,7 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
             val context = LocalContext.current
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
                 ImageItem(
-                    icon = Icons.QQ,
+                    icon = rememberVectorPainter(Icons.QQ),
                     contentDescription = "QQ Logo",
                     title = "QQ",
                     info = "QQ 侧滑 > 设置 > XAutoDaily",
@@ -252,7 +253,7 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
             }
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
                 ImageItem(
-                    icon = Icons.TIM,
+                    icon = rememberVectorPainter(Icons.TIM),
                     contentDescription = "Tim Logo",
                     title = "Tim",
                     info = "TIM 侧滑 > 设置 > XAutoDaily",

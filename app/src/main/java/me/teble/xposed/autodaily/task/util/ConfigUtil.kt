@@ -66,6 +66,7 @@ object ConfigUtil {
         }
     }
 
+    // todo 需要拆分一个给 UI，也就是没有 Toast
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchMeta()
         info?.let {

@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
+import android.webkit.URLUtil
+import androidx.browser.customtabs.CustomTabsIntent
 import me.teble.xposed.autodaily.hook.base.moduleClassLoader
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
@@ -74,16 +76,29 @@ fun getTextFromModuleAssets(fileName: String): String {
 
 fun Context.openUrl(url: String) {
     val contentUrl = Uri.parse(url)
-    val intent = Intent()
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-    intent.action = Intent.ACTION_VIEW
-    intent.data = contentUrl
-    runCatching {
-        this.startActivity(intent)
-    }.onFailure {
-        LogUtil.e(it)
-        throw it
+    if (URLUtil.isNetworkUrl(url)) {
+        CustomTabsIntent.Builder().build().launchUrl(this, contentUrl)
+    } else if (url.istOtherUrl()) {
+        val intent = Intent().apply {
+            setAction(Intent.ACTION_VIEW)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            setData(contentUrl)
+        }
+        runCatching {
+            this@openUrl.startActivity(intent)
+        }.onFailure {
+            LogUtil.e(it)
+            throw it
+        }
+
     }
+}
+
+fun String.istOtherUrl(): Boolean {
+    return startsWith("weixin://")
+            || startsWith("alipays://")
+            || startsWith("mqqapi://")
+            || startsWith("alipayqr://")
 }
 
 

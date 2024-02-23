@@ -23,7 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -349,12 +350,13 @@ fun SwitchInfoDivideItem(
 
 @Composable
 fun ImageItem(
-    icon: ImageVector,
+    icon: Painter,
     contentDescription: String,
     title: String,
     info: String,
     clickEnabled: Boolean = true,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    shape: Shape = SmootherShape(0.dp)
 ) {
     val itemAlpha: Float by animateFloatAsState(
         targetValue = if (clickEnabled) DefaultAlpha else DisabledAlpha,
@@ -371,10 +373,11 @@ fun ImageItem(
             .padding(16.dp)
     ) {
         Image(
-            imageVector = icon,
+            painter = icon,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .size(40.dp),
+                .size(40.dp)
+                .clip(shape),
             contentDescription = contentDescription
         )
         Column(
