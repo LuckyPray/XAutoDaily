@@ -24,6 +24,7 @@ multidex = "2.0.1"
 provider = "13.1.5"
 systemExtension = "1.0.1"
 window-size = "1.2.0"
+licenses = "4.7.0"
 
 # @keep
 compileSdk = "34"
@@ -86,3 +87,4 @@ androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+licenses = { id = "com.cmgapps.licenses", version.ref = "licenses" }

@@ -27,6 +27,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.licenses)
 }
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
@@ -43,6 +44,18 @@ val updateLog = """
     2. 更新内置配置版本为 v44
     fix. 修复模块在 QQ 8.9.68 上加载异常的问题
 """.trimIndent()
+
+// 执行 gradle licenseReleaseReport
+licenses {
+    additionalProjects(":dexkit", ":mmkv", ":stub", ":system")
+    reports {
+        html.enabled = false
+        json {
+            enabled = true
+            destination = file("./src/main/assets/licenses.json")
+        }
+    }
+}
 
 android {
     namespace = "me.teble.xposed.autodaily"
@@ -129,7 +142,7 @@ android {
                 }
             }
         }
-        val release by getting  {
+        val release by getting {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles("proguard-rules.pro")
@@ -242,11 +255,15 @@ abstract class CopyApksTask : DefaultTask() {
 
 androidComponents.onVariants { variant ->
     if (variant.name != "release") return@onVariants
-    val updateArtifact = project.tasks.register<CopyApksTask>("copy${variant.name.replaceFirstChar {
-        if (it.isLowerCase()) it.titlecase(
-            Locale.getDefault()
-        ) else it.toString()
-    }}Apk")
+    val updateArtifact = project.tasks.register<CopyApksTask>(
+        "copy${
+            variant.name.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(
+                    Locale.getDefault()
+                ) else it.toString()
+            }
+        }Apk"
+    )
     val transformationRequest = variant.artifacts.use(updateArtifact)
         .wiredWithDirectories(CopyApksTask::apkFolder, CopyApksTask::outFolder)
         .toTransformMany(SingleArtifact.APK)
@@ -264,9 +281,17 @@ androidComponents.onVariants { variant ->
             workingDir = project.rootDir
 
             val cmdLine = if (OperatingSystem.current().isWindows) {
-                arrayOf("cmd", "/c", "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G")
+                arrayOf(
+                    "cmd",
+                    "/c",
+                    "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G"
+                )
             } else {
-                arrayOf("sh", "-c", "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'")
+                arrayOf(
+                    "sh",
+                    "-c",
+                    "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'"
+                )
             }
             commandLine(*cmdLine)
             standardOutput = stdout
@@ -278,14 +303,16 @@ androidComponents.onVariants { variant ->
             val versionJson = File(project.rootDir, "app-meta.json")
             val formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .format(LocalDateTime.now())
-            versionJson.writeText("""
+            versionJson.writeText(
+                """
                 {
                     "versionName": "$appVerName",
                     "versionCode": $appVerCode,
                     "updateTime": "$formatTime",
                     "updateLog": "${updateLog.replace("\n", "\\n")}"
                 }
-            """.trimIndent())
+            """.trimIndent()
+            )
         }
     }
 }
@@ -298,7 +325,7 @@ configurations.all {
 dependencies {
     implementation(project(":dexkit"))
     implementation(project(":mmkv"))
-    implementation(libs.androidx.browser)
+
 
     compileOnly(project(":stub"))
     implementation(project(":system"))
@@ -313,6 +340,8 @@ dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     implementation(libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.browser)
     // jetpack compose
     implementation(libs.androidx.activity.compose)
 
@@ -397,6 +426,7 @@ tasks.whenTaskAdded {
         "optimizeReleaseResources" -> {
             finalizedBy(optimizeReleaseRes)
         }
+
         "installDebug" -> {
             finalizedBy(restartTim)
         }
