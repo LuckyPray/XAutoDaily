@@ -21,7 +21,7 @@ public val Icons.More: ImageVector
             viewportWidth = 24.0f, viewportHeight = 24.0f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFF202124)), stroke = null, strokeLineWidth = 0.0f,
+                fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                 strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                 pathFillType = NonZero
             ) {

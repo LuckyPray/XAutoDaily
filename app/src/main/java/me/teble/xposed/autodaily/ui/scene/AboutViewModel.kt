@@ -47,6 +47,9 @@ class AboutViewModel : ViewModel() {
     private val _updateDialogText = MutableStateFlow("")
     val updateDialogText = _updateDialogText.asStateFlow()
 
+    private val _hasUpdate = MutableStateFlow(false)
+    val hasUpdate = _hasUpdate.asStateFlow()
+
     val lastClickTime = MutableStateFlow(0L)
 
     init {
@@ -55,6 +58,13 @@ class AboutViewModel : ViewModel() {
         _qqVersionName.value = hostVersionName
         _qqVersionCode.value = hostVersionCode
         _configVersion.value = ConfigUtil.loadSaveConf().version
+
+        ConfigUtil.fetchMeta()?.let {
+            // 检查新版本
+            if (BuildConfig.VERSION_CODE < it.app.versionCode) {
+                _hasUpdate.value = true
+            }
+        }
     }
 
     fun updateApp() {

@@ -129,6 +129,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
     val qqVersionName by viewmodel.qqVersionName.collectAsStateWithLifecycle()
     val qqVersionCode by viewmodel.qqVersionCode.collectAsStateWithLifecycle()
     val configVersion by viewmodel.configVersion.collectAsStateWithLifecycle()
+    val hasUpdate by viewmodel.hasUpdate.collectAsStateWithLifecycle()
 
     Row(
         Modifier
@@ -166,14 +167,17 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = "有新版本",
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                color = Color(0xFF0095FF)
+        if (hasUpdate) {
+            Text(
+                text = "有新版本",
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF0095FF)
+                )
             )
-        )
+        }
+
         Icon(
             imageVector = Icons.ChevronRight,
             contentDescription = "",

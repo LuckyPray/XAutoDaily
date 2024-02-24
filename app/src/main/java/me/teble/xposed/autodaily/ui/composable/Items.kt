@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
+import me.teble.xposed.autodaily.ui.icon.icons.ChevronDown
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
@@ -72,6 +73,47 @@ fun TextItem(
             contentDescription = "",
             modifier = Modifier.size(24.dp),
             tint = Color(0xFFE6E6E6)
+        )
+    }
+}
+
+
+@Composable
+fun SelectionItem(
+    modifier: Modifier = Modifier,
+    text: String,
+    clickEnabled: Boolean,
+    onClick: () -> Unit
+) {
+    val itemAlpha: Float by animateFloatAsState(
+        targetValue = if (clickEnabled) DefaultAlpha else DisabledAlpha,
+        animationSpec = spring(), label = "textInfoItem"
+    )
+
+    Row(
+        modifier
+            .clickable(role = Role.Switch, enabled = clickEnabled, onClick = { onClick() })
+            .padding(vertical = 20.dp, horizontal = 16.dp)
+            .alpha(itemAlpha),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.weight(1f),
+            maxLines = 1,
+            style = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF202124)
+            )
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+
+        Icon(
+            imageVector = Icons.ChevronDown,
+            contentDescription = "",
+            modifier = Modifier.size(24.dp),
+            tint = Color(0xFFD6DDE7)
         )
     }
 }
@@ -409,6 +451,65 @@ fun ImageItem(
                 .align(Alignment.CenterVertically)
                 .size(24.dp),
             tint = Color(0xFFE6E6E6)
+        )
+    }
+}
+
+
+@Composable
+fun SelectInfoItem(
+    modifier: Modifier = Modifier,
+    text: String,
+    infoText: String,
+    clickEnabled: Boolean,
+    enable: Boolean,
+    onClick: (Boolean) -> Unit
+
+) {
+    val itemAlpha: Float by animateFloatAsState(
+        targetValue = if (clickEnabled) DefaultAlpha else DisabledAlpha,
+        animationSpec = spring(), label = "select item"
+    )
+
+    Row(
+        modifier
+            .clickable(role = Role.Button, enabled = clickEnabled, onClick = { onClick(!enable) })
+            .padding(all = 16.dp)
+            .alpha(itemAlpha),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                text = text,
+                maxLines = 1,
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF3C4043)
+                )
+            )
+
+            Text(
+                text = infoText,
+                style = TextStyle(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Normal,
+                    color = Color(0xFF4F5355)
+                ),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        SelectButton(
+            enable,
+            modifier = Modifier
+                .size(24.dp)
+                .clickable(
+                    role = Role.RadioButton,
+                    enabled = clickEnabled,
+                    onClick = { onClick(!enable) })
         )
     }
 }

@@ -344,7 +344,7 @@ dependencies {
     implementation(libs.androidx.browser)
     // jetpack compose
     implementation(libs.androidx.activity.compose)
-
+    implementation(libs.sheets)
     implementation(libs.androidx.compose.animation)
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.materialWindow)

@@ -30,6 +30,7 @@ import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.ShizukuConf
+import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -123,7 +124,7 @@ private fun CommonLayout(
             onClick = {
                 viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
             })
-        TextItem(text = "主题颜色", clickEnabled = true, onClick = {
+        SelectionItem(text = "主题颜色", clickEnabled = true, onClick = {
 
         })
 

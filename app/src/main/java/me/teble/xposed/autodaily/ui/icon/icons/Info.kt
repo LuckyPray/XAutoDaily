@@ -18,7 +18,8 @@ public val Icons.Info: ImageVector
         }
         _info = Builder(name = "Info", defaultWidth = 24.0.dp, defaultHeight = 24.0.dp,
                 viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
-            path(fill = SolidColor(Color(0xFF202124)), stroke = null, strokeLineWidth = 0.0f,
+            path(
+                fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
                 moveTo(12.0f, 3.0f)
@@ -50,7 +51,8 @@ public val Icons.Info: ImageVector
                 curveTo(13.927f, 19.18f, 12.968f, 19.368f, 12.0f, 19.364f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFF202124)), stroke = null, strokeLineWidth = 0.0f,
+            path(
+                fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
                 moveTo(11.999f, 11.181f)

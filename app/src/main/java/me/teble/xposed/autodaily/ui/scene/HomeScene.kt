@@ -6,6 +6,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -35,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,6 +52,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.dokar.sheets.BottomSheet
+import com.dokar.sheets.BottomSheetLayout
+import com.dokar.sheets.BottomSheetValue
+import com.dokar.sheets.SheetBehaviors
+import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
@@ -64,6 +72,8 @@ import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
 import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
+import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
+import me.teble.xposed.autodaily.ui.theme.DefaultSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 
@@ -77,44 +87,46 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
             snackbarHostState.showSnackbar(it)
         }
     }
-    NoticeDialog()
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) {
-                RoundedSnackbar(it)
-            }
-        },
-        topBar = {
-            XAutoDailyTopBar(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = 16.dp)
-                    .padding(vertical = 20.dp)
-                    .padding(start = 16.dp),
-                icon = Icons.Notice,
-                contentDescription = "公告",
-                iconClick = {
-                    viewmodel.showNoticeDialog()
+    Box {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) {
+                    RoundedSnackbar(it)
                 }
-            )
-        },
-        backgroundColor = Color(0xFFF7F7F7)
-    ) { contentPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
-                .clip(SmootherShape(12.dp))
-                .verticalScroll(rememberScrollState())
-                .verticalScrollPadding()
-        ) {
+            },
+            topBar = {
+                XAutoDailyTopBar(
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .padding(horizontal = 16.dp)
+                        .padding(vertical = 20.dp)
+                        .padding(start = 16.dp),
+                    icon = Icons.Notice,
+                    contentDescription = "公告",
+                    iconClick = {
+                        viewmodel.showNoticeDialog()
+                    }
+                )
+            },
+            backgroundColor = Color(0xFFF7F7F7)
+        ) { contentPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(horizontal = 16.dp)
+                    .clip(SmootherShape(12.dp))
+                    .verticalScroll(rememberScrollState())
+                    .verticalScrollPadding()
+            ) {
 
-            Banner()
-            GridLayout(navController)
+                Banner()
+                GridLayout(navController)
+            }
+
         }
-
+        NoticeDialog()
     }
 
 
@@ -228,7 +240,6 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
 }
 
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun NoticeDialog(
     viewModel: HomeViewModel = viewModel()
@@ -236,32 +247,35 @@ private fun NoticeDialog(
 
     val noticeText by viewModel.noticeText.collectAsState()
 
-    val bottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
+    val state = rememberBottomSheetState()
 
     LaunchedEffect(Unit) {
         viewModel.showUpdateDialog.collect {
             if (it) {
-                bottomSheetState.show()
+                state.expand()
             } else {
-                bottomSheetState.hide()
+                state.collapse()
             }
         }
     }
-    LaunchedEffect(bottomSheetState.currentValue) {
-        viewModel.updateNoticeDialogState(bottomSheetState.isVisible)
+    LaunchedEffect(state.visible) {
+        viewModel.updateNoticeDialogState(state.visible)
     }
 
-    ModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetContent = {
+
+    if (state.visible) {
+        BottomSheet(
+            state = state,
+            skipPeeked = true,
+            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+            backgroundColor = Color(0xFFFFFFFF),
+            behaviors = DefaultDialogSheetBehaviors,
+            dragHandle = {}
+        ) {
             Column(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
-                    .background(Color(0xFFFFFFFF))
-                    .padding(start = 32.dp, end = 32.dp, bottom = 24.dp)
+                    .padding(horizontal = 32.dp)
+                    .verticalScrollPadding()
             ) {
                 Text(
                     text = "公告",
@@ -276,6 +290,7 @@ private fun NoticeDialog(
                         .padding(top = 20.dp)
                 )
 
+                // 其他的有渲染问题，有时间解决
                 Text(
                     text = "",
                     modifier = Modifier
@@ -316,13 +331,9 @@ private fun NoticeDialog(
                     )
                 )
             }
-        },
-        content = {
-        },
-        scrimColor = Color.Black.copy(alpha = 0.5f),
-        sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
-    )
 
+        }
+    }
 
 }
 

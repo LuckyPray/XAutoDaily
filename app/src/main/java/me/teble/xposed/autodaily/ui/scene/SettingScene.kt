@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
+import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
@@ -219,7 +220,7 @@ private fun CommonLayout() {
             .padding(bottom = 8.dp, start = 16.dp, top = 24.dp)
     )
 
-    TextItem(
+    SelectionItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
