@@ -22,6 +22,7 @@ navigationCompose = "2.7.7"
 protoc = "3.25.3"
 multidex = "2.0.1"
 provider = "13.1.5"
+sheets = "0.5.5"
 systemExtension = "1.0.1"
 window-size = "1.2.0"
 licenses = "4.7.0"
@@ -63,6 +64,7 @@ ezxhelper = { module = "com.github.kyuubiran:EzXHelper", version.ref = "ezxhelpe
 api = { module = "de.robv.android.xposed:api", version.ref = "api" }
 androidx-multidex = { module = "androidx.multidex:multidex", version.ref = "multidex" }
 provider = { module = "dev.rikka.shizuku:provider", version.ref = "provider" }
+sheets = { module = "io.github.dokar3:sheets", version.ref = "sheets" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "apiVersion" }
 
 
