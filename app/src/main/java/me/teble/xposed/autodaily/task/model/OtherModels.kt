@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.model
 
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
 
@@ -23,6 +24,7 @@ data class VoterInfo(
     val availableCnt: Short,
 )
 
+@Immutable
 @Serializable
 data class Friend(
     val uin: String,

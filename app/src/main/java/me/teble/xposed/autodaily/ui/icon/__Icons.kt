@@ -8,11 +8,13 @@ import me.teble.xposed.autodaily.ui.icon.icons.ChevronDown
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.Configuration
+import me.teble.xposed.autodaily.ui.icon.icons.Edit
 import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.Info
 import me.teble.xposed.autodaily.ui.icon.icons.More
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
+import me.teble.xposed.autodaily.ui.icon.icons.Save
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Search
 import me.teble.xposed.autodaily.ui.icon.icons.SelectNormal
@@ -36,7 +38,7 @@ public val Icons.AllIcons: ____KtList<ImageVector>
       __AllIcons = listOf(
           Configuration, About, Setting, Notice, ChevronRight, Info, TIM, XAutoDaily,
           QQ, More, Activated, XAutoDailyRound, Error, Warn, Script, Back, SelectNormal,
-          SelectSelectd, ChevronDown, Close, Search
+          SelectSelectd, ChevronDown, Close, Search, Save, Edit
       )
     return __AllIcons!!
   }

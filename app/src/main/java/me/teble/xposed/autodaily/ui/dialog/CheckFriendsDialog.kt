@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.ui.composable.HintEditText
 import me.teble.xposed.autodaily.ui.composable.SelectInfoItem
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -99,7 +99,6 @@ fun CheckFriendsDialog(
                 Divider(
                     color = Color(0xFFF7F7F7),
                     modifier = Modifier
-                        .padding(top = 20.dp)
                         .height(1.dp)
                         .fillMaxWidth()
                 )
@@ -117,20 +116,24 @@ fun CheckFriendsDialog(
                         tint = Color(0xFF919191),
                         contentDescription = ""
                     )
-                    BasicTextField(
+                    HintEditText(
                         modifier = Modifier.padding(start = 12.dp),
                         value = searchText,
                         onValueChange = {
                             searchText = it
                         },
-                        singleLine = true,
                         textStyle = TextStyle(
-                            fontSize = 12.sp,
+                            fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
                             color = Color(0xFF202124),
                         ),
-
+                        hintText = "你好",
+                        hintTextStyle = TextStyle(
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color(0xFF919191),
                         )
+                    )
                 }
 
                 Row(

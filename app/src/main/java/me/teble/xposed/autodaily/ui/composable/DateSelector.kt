@@ -43,22 +43,32 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledFontAlpha
 import java.util.Locale
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 
 @Composable
 fun DatePicker(
     modifier: Modifier = Modifier,
+    hour: Int = 0,
+    minute: Int = 0,
+    onScrollFinish: (time: Duration) -> Unit = { },
 ) {
 
-
     Row(
-        modifier = Modifier.height(IntrinsicSize.Min),
+        modifier = modifier.height(IntrinsicSize.Min),
         verticalAlignment = Alignment.CenterVertically
     ) {
 
         TextPicker(
-            count = 24, modifier = Modifier
-                .padding(start = 60.dp, top = 36.dp, bottom = 36.dp, end = 8.dp)
+            count = 24,
+            startIndex = hour,
+            modifier = Modifier
+                .padding(start = 60.dp, top = 36.dp, bottom = 36.dp, end = 8.dp),
+            onScrollFinish = {
+                onScrollFinish(it.hours + minute.minutes)
+            }
         )
 
         Text(
@@ -78,8 +88,13 @@ fun DatePicker(
                 .clip(SmootherShape(1.dp)),
         )
         TextPicker(
-            count = 60, modifier = Modifier
-                .padding(start = 48.dp, top = 36.dp, bottom = 36.dp, end = 8.dp)
+            count = 60,
+            startIndex = minute,
+            modifier = Modifier
+                .padding(start = 48.dp, top = 36.dp, bottom = 36.dp, end = 8.dp),
+            onScrollFinish = {
+                onScrollFinish(hour.hours + it.minutes)
+            }
         )
         Text(
             text = "分",
@@ -103,11 +118,11 @@ internal fun TextPicker(
     count: Int,
     itemHeight: Dp = 77.dp,
     visibleItemCount: Int = 3,
-    onScrollFinish: (snappedIndex: Int) -> Int? = { null },
+    onScrollFinish: (snappedIndex: Int) -> Unit = { }
 ) {
 
     val state = rememberLazyListState(startIndex)
-    val isScrollInProgress = state.isScrollInProgress
+    val isScrollInProgress by remember { derivedStateOf(state::isScrollInProgress) }
 
     val snappingLayout = remember(state) { SnapLayoutInfoProvider(state) }
     val flingBehavior = rememberSnapFlingBehavior(snappingLayout)
@@ -119,15 +134,19 @@ internal fun TextPicker(
 
     val itemHalfHeightToPx = with(LocalDensity.current) { itemHeight.toPx() / 2 }
 
-    LaunchedEffect(state.isScrollInProgress) {
-        if (!state.isScrollInProgress && state.firstVisibleItemScrollOffset != 0) {
+    LaunchedEffect(isScrollInProgress) {
+        if (!isScrollInProgress && currentIndex != 0) {
             if (state.firstVisibleItemScrollOffset < itemHalfHeightToPx) {
-                state.animateScrollToItem(state.firstVisibleItemIndex)
+                state.animateScrollToItem(currentIndex)
             } else if (state.firstVisibleItemScrollOffset > itemHalfHeightToPx) {
-                state.animateScrollToItem(state.firstVisibleItemIndex + 1)
-
+                state.animateScrollToItem(currentIndex + 1)
             }
         }
+
+    }
+
+    LaunchedEffect(currentIndex) {
+        currentOnScrollFinish(currentIndex)
     }
 
     LazyColumn(
@@ -199,7 +218,9 @@ internal fun TextPicker(
 @Composable
 fun PreviewSignLayout() {
     Box(modifier = Modifier.background(Color(0xFFFFFFFF))) {
-        DatePicker(modifier = Modifier.width(328.dp))
+        DatePicker(modifier = Modifier.width(328.dp)) {
+
+        }
     }
 
 }
