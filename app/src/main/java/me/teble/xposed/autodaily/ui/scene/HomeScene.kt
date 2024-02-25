@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,21 +22,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,9 +48,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetLayout
-import com.dokar.sheets.BottomSheetValue
-import com.dokar.sheets.SheetBehaviors
 import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
@@ -73,7 +65,6 @@ import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
-import me.teble.xposed.autodaily.ui.theme.DefaultSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 
@@ -290,16 +281,13 @@ private fun NoticeDialog(
                         .padding(top = 20.dp)
                 )
 
-                // 其他的有渲染问题，有时间解决
-                Text(
-                    text = "",
+                Divider(
+                    color = Color(0xFFF7F7F7),
                     modifier = Modifier
                         .padding(top = 20.dp)
                         .height(1.dp)
                         .fillMaxWidth()
-                        .background(Color(0xFFF7F7F7))
                 )
-
                 Text(
                     text = "最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有",
                     modifier = Modifier.padding(top = 24.dp),

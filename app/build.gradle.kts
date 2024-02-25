@@ -339,6 +339,8 @@ dependencies {
     compileOnly(libs.protoc)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    implementation(libs.kotlinx.datetime)
+
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.browser)

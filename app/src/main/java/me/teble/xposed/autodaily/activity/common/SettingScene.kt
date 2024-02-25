@@ -35,7 +35,6 @@ import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
-import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
@@ -118,21 +117,31 @@ private fun CommonLayout(
             }
         }
         SwitchTextItem(
+            Modifier
+                .fillMaxWidth()
+                .clip(SmootherShape(12.dp)),
             text = hideText,
             clickEnabled = true,
             enable = hiddenAppIcon,
             onClick = {
                 viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
             })
-        SelectionItem(text = "主题颜色", clickEnabled = true, onClick = {
+        SelectionItem(
+            Modifier
+                .fillMaxWidth()
+                .clip(SmootherShape(12.dp)),
+            text = "主题颜色", clickEnabled = true, onClick = {
 
-        })
+            })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val untrustedTouchEvents by viewmodel.untrustedTouchEvents.collectAsStateWithLifecycle(
                 false
             )
             SwitchInfoItem(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(SmootherShape(12.dp)),
                 enable = untrustedTouchEvents,
                 text = "取消安卓 12 不受信触摸",
                 infoText = "安卓 12 后启用对 Toast 弹窗等事件触摸不可穿透，勾选此项可关闭",

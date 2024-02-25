@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,17 +15,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ExposedDropdownMenuDefaults.textFieldColors
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.SnackbarDefaults.backgroundColor
-import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -43,12 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetLayout
 import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.task.model.Friend
-import me.teble.xposed.autodaily.ui.LineSpacer
 import me.teble.xposed.autodaily.ui.composable.SelectInfoItem
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -56,9 +44,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.Search
 import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
-import me.teble.xposed.autodaily.ui.theme.DefaultSheetBehaviors
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CheckFriendsDialog(
     state: BottomSheetState,
@@ -110,16 +96,13 @@ fun CheckFriendsDialog(
                 Modifier
                     .padding(horizontal = 32.dp)
             ) {
-                // 其他的有渲染问题，有时间解决
-                Text(
-                    text = searchText,
+                Divider(
+                    color = Color(0xFFF7F7F7),
                     modifier = Modifier
+                        .padding(top = 20.dp)
                         .height(1.dp)
                         .fillMaxWidth()
-                        .background(Color(0xFFF7F7F7))
                 )
-
-                // Color(0xFFF2F2F2)
 
                 Row(
                     Modifier

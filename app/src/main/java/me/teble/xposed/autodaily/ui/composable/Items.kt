@@ -7,13 +7,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -328,11 +331,13 @@ fun SwitchInfoDivideItem(
         targetValue = if (clickEnabled) DefaultAlpha else DisabledAlpha,
         animationSpec = spring(), label = "switch item"
     )
+
     Row(
-        modifier.alpha(itemAlpha),
+        modifier = modifier
+            .height(IntrinsicSize.Min)
+            .alpha(itemAlpha),
         verticalAlignment = Alignment.CenterVertically
     ) {
-
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -364,17 +369,12 @@ fun SwitchInfoDivideItem(
                 )
             )
         }
-
-        // 其他不渲染，先使用 Text 占位
-        Text(
+        Divider(
+            color = Color(0xFFD6DDE7),
             modifier = Modifier
-                .fillMaxHeight()
+                .height(26.dp)
                 .width(2.dp)
-                .background(
-                    color = Color(0xFFE6E6E6),
-                    SmootherShape(1.dp)
-                ),
-            text = ""
+                .clip(SmootherShape(1.dp)),
         )
         Spacer(modifier = Modifier.width(16.dp))
         SwitchButton(
