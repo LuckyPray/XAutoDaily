@@ -55,6 +55,7 @@ import androidx.navigation.NavController
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.NavigationItem
+import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -322,25 +323,13 @@ private fun NoticeDialog(
                     )
                 )
 
-                Text(
+                DialogButton(
                     text = "确定",
                     modifier = Modifier
                         .padding(top = 24.dp)
                         .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth()
-                        .clip(SmootherShape(12.dp))
-                        .background(Color(0x0F0095FF))
-                        .clickable(
-                            role = Role.Button,
-                            onClick = viewModel::dismissNoticeDialog
-                        )
-                        .padding(vertical = 16.dp),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colors.themeColor,
-                        textAlign = TextAlign.Center,
-                    )
+                        .fillMaxWidth(),
+                    onClick = viewModel::dismissNoticeDialog
                 )
             }
 
