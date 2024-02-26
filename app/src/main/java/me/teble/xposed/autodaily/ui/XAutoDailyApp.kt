@@ -16,13 +16,6 @@ import me.teble.xposed.autodaily.ui.scene.SignScene
 import me.teble.xposed.autodaily.ui.scene.SignStateScene
 import me.teble.xposed.autodaily.utils.openUrl
 
-object XAutoDailyApp {
-    const val Main = "MainLayout"
-    const val Sign = "SignLayout"
-    const val Other = "OtherLayout"
-    const val EditEnv = "EditEnvLayout"
-}
-
 @Keep
 enum class Screen {
     Main,
