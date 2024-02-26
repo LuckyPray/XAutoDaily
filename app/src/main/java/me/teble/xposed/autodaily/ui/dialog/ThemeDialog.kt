@@ -67,7 +67,7 @@ fun ThemeDialog(
                 color = Color(0xFFF7F7F7),
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 18.dp)
                     .height(1.dp)
                     .fillMaxWidth()
             )

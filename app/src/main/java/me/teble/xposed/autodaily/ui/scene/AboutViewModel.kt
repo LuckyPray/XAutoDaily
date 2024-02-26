@@ -11,10 +11,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
+import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
+import me.teble.xposed.autodaily.config.PAN_URL
 import me.teble.xposed.autodaily.hook.base.hostVersionCode
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.dialog.UpdateType
 import me.teble.xposed.autodaily.ui.navigateUrl
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
@@ -67,6 +70,20 @@ class AboutViewModel : ViewModel() {
         }
     }
 
+    fun showUpdateDialog() {
+        updateUpdateDialogState(true)
+    }
+
+    fun dismissUpdateDialog() {
+        updateUpdateDialogState(false)
+    }
+
+    fun updateUpdateDialogState(boolean: Boolean) {
+        if (_showUpdateDialog.value != boolean) {
+            _showUpdateDialog.value = boolean
+        }
+    }
+
     fun updateApp() {
         val time = TimeUtil.cnTimeMillis()
         if (time - lastClickTime.value < 15_000) {
@@ -91,9 +108,11 @@ class AboutViewModel : ViewModel() {
                         }
                     }
                     if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-                        _showUpdateDialog.value = true
+                        _hasUpdate.value = true
                         _updateDialogText.value =
                             ConfUnit.metaInfoCache?.app?.updateLog ?: ""
+                        showUpdateDialog()
+
                         showSnackbar("插件版本存在更新")
                         return@launch
                     }
@@ -105,6 +124,29 @@ class AboutViewModel : ViewModel() {
             _configVersion.value = ConfigUtil.loadSaveConf().version
         }
     }
+
+    fun updateConfirm(navController: NavController, type: UpdateType) {
+        when (type) {
+            UpdateType.Ignore -> {
+                dismissUpdateDialog()
+                ConfUnit.skipUpdateVersion = "${ConfUnit.metaInfoCache?.app?.versionCode}"
+                showSnackbar("已忽略版本号为 ${ConfUnit.skipUpdateVersion} 的更新")
+            }
+
+            UpdateType.Drive -> {
+                dismissUpdateDialog()
+                showSnackbar("正在跳转，请稍后")
+                navController.navigateUrl(PAN_URL)
+            }
+
+            UpdateType.Github -> {
+                dismissUpdateDialog()
+                showSnackbar("正在跳转，请稍后")
+                navController.navigateUrl(GITHUB_RELEASE_URL)
+            }
+        }
+    }
+
 
     fun openGithub(navController: NavController) {
         showSnackbar("正在跳转，请稍后")

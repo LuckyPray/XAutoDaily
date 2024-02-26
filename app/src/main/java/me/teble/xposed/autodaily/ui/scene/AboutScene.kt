@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.ui.scene
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -35,11 +36,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.dialog.UpdateDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
@@ -60,34 +63,65 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopBar(text = "关于", backClick = {
-                navController.popBackStack()
-            })
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) {
-                RoundedSnackbar(it)
+    Box {
+
+
+        Scaffold(
+            topBar = {
+                TopBar(text = "关于", backClick = {
+                    navController.popBackStack()
+                })
+            },
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) {
+                    RoundedSnackbar(it)
+                }
+            },
+            backgroundColor = Color(0xFFF7F7F7)
+        ) { contentPadding ->
+            Column(
+                Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(horizontal = 16.dp)
+                    .clip(SmootherShape(12.dp))
+                    .verticalScroll(rememberScrollState())
+                    .defaultNavigationBarPadding(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                BuildConfigLayout()
+                UpdateLayout()
+                LicenseLayout(navController)
+                OthterLayout(navController)
             }
-        },
-        backgroundColor = Color(0xFFF7F7F7)
-    ) { contentPadding ->
-        Column(
-            Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
-                .clip(SmootherShape(12.dp))
-                .verticalScroll(rememberScrollState())
-                .defaultNavigationBarPadding(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            BuildConfigLayout()
-            UpdateLayout()
-            LicenseLayout(navController)
-            OthterLayout(navController)
         }
+        val state = rememberBottomSheetState()
+
+        val updateText by viewmodel.updateDialogText.collectAsStateWithLifecycle()
+        LaunchedEffect(Unit) {
+            viewmodel.showUpdateDialog.collect {
+                if (it) {
+                    state.expand()
+                } else {
+                    state.collapse()
+                }
+            }
+        }
+        LaunchedEffect(state.visible) {
+            viewmodel.updateUpdateDialogState(state.visible)
+        }
+
+        UpdateDialog(
+            state,
+            text = "新版本",
+            info = updateText,
+            onDismiss = {
+                viewmodel.dismissUpdateDialog()
+            },
+            onConfirm = {
+                viewmodel.updateConfirm(navController, it)
+            }
+        )
     }
 }
 

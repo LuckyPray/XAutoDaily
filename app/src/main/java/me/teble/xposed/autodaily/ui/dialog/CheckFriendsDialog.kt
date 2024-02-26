@@ -73,6 +73,7 @@ fun CheckFriendsDialog(
                 color = Color(0xFFF7F7F7),
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
+                    .padding(bottom = 16.dp)
                     .height(1.dp)
                     .fillMaxWidth()
             )

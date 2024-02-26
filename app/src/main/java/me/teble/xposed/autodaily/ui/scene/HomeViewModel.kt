@@ -35,11 +35,11 @@ class HomeViewModel : ViewModel() {
     }
 
     fun showNoticeDialog() {
-        _showNoticeDialog.value = true
+        updateNoticeDialogState(true)
     }
 
     fun dismissNoticeDialog() {
-        _showNoticeDialog.value = false
+        updateNoticeDialogState(false)
     }
 
     fun updateNoticeDialogState(boolean: Boolean) {
