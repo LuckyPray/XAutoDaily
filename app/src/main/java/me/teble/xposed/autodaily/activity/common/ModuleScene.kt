@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.Text
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
@@ -52,11 +51,12 @@ import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 
 
 @Composable
-fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewModel()) {
+fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewModel()) {
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -68,6 +68,7 @@ fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewM
     }
 
     Scaffold(
+        contentWindowInsets = contentWindowInsets,
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) {
                 RoundedSnackbar(it)
@@ -76,7 +77,7 @@ fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewM
         topBar = {
             ModuleTopBar()
         },
-        backgroundColor = Color(0xFFF7F7F7)
+        containerColor = Color(0xFFF7F7F7)
     ) { contentPadding ->
         Column(
             Modifier
@@ -98,10 +99,9 @@ fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewM
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp))
                     .background(Color(0xFFFFFFFF)),
-                clickEnabled = true
-            ) {
-                navController.navigate(NavigationItem.Setting, NavigationItem.Module)
-            }
+                clickEnabled = true,
+                onClick = onSettingClick
+            )
 
         }
     }

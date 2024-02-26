@@ -346,18 +346,24 @@ dependencies {
     implementation(libs.androidx.browser)
     // jetpack compose
     implementation(libs.androidx.activity.compose)
-    implementation(libs.sheets)
+
     implementation(libs.androidx.compose.animation)
-    implementation(libs.androidx.compose.material)
-    implementation(libs.androidx.compose.materialWindow)
+
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui.tooling)
 
-    implementation(libs.compose.shadows.plus)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.materialWindow)
+
     implementation(libs.androidx.navigation.compose)
+
+    implementation("androidx.compose.material3:material3-adaptive:1.0.0-alpha06")
+    implementation(libs.sheets)
+    implementation(libs.compose.shadows.plus)
+
 
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)

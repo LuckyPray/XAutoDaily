@@ -2,11 +2,11 @@ package me.teble.xposed.autodaily.ui.theme
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
@@ -46,7 +46,8 @@ object XAutodailyTheme {
 
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun XAutodailyTheme(content: @Composable () -> Unit) {
 
@@ -81,7 +82,7 @@ fun XAutodailyTheme(content: @Composable () -> Unit) {
         LocalRippleConfiguration provides rippleConfiguration
     ) {
         MaterialTheme(
-            colors = MaterialTheme.colors.copy(primary = colors.themeColor)
+            colorScheme = MaterialTheme.colorScheme.copy(primary = colors.themeColor)
         ) {
             content()
         }

@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -52,7 +52,7 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
                 RoundedSnackbar(it)
             }
         },
-        backgroundColor = Color(0xFFF7F7F7)
+        containerColor = Color(0xFFF7F7F7)
     ) { contentPadding ->
         Column(
             Modifier

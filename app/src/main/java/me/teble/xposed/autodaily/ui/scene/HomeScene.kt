@@ -22,16 +22,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalRippleConfiguration
-import androidx.compose.material.RippleConfiguration
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.Text
 import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -107,7 +107,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
                     }
                 )
             },
-            backgroundColor = Color(0xFFF7F7F7)
+            containerColor = Color(0xFFF7F7F7)
         ) { contentPadding ->
             Column(
                 modifier = Modifier
@@ -130,7 +130,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
 
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
     val execTaskNum by viewmodel.execTaskNum.collectAsStateWithLifecycle()

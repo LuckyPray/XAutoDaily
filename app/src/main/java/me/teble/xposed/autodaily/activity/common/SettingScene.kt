@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Scaffold
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
@@ -40,6 +39,7 @@ import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.dialog.ThemeDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
@@ -49,7 +49,7 @@ import java.io.File
 
 @Composable
 fun SettingScene(
-    navController: NavController,
+    onBackClick: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
     val state = rememberBottomSheetState()
@@ -66,28 +66,25 @@ fun SettingScene(
         viewmodel.updateNoticeDialogState(state.visible)
     }
     Box {
+        Scaffold(
+            topBar = {
+                TopBar(text = "设置", backClick = onBackClick)
+            },
+            contentWindowInsets = contentWindowInsets,
+            containerColor = Color(0xFFF7F7F7)
+        ) { contentPadding ->
 
+            SettingLayout(
+                Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(horizontal = 16.dp)
+                    .clip(SmootherShape(12.dp))
+                    .verticalScroll(rememberScrollState())
+                    .defaultNavigationBarPadding()
+            )
 
-    Scaffold(
-        topBar = {
-            TopBar(text = "设置", backClick = {
-                navController.popBackStack()
-            })
-        },
-        backgroundColor = Color(0xFFF7F7F7)
-    ) { contentPadding ->
-
-        SettingLayout(
-            Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
-                .clip(SmootherShape(12.dp))
-                .verticalScroll(rememberScrollState())
-                .defaultNavigationBarPadding()
-        )
-
-    }
+        }
         ThemeDialog(
             state,
             onConfirm = {

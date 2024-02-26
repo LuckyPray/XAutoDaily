@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,7 +39,7 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
                 navController.popBackStack()
             })
         },
-        backgroundColor = Color(0xFFF7F7F7)
+        containerColor = Color(0xFFF7F7F7)
     ) { contentPadding ->
 
         val context = LocalContext.current

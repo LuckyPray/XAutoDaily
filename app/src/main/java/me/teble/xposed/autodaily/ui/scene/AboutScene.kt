@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +48,7 @@ import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
@@ -75,7 +76,8 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
                     RoundedSnackbar(it)
                 }
             },
-            backgroundColor = Color(0xFFF7F7F7)
+            containerColor = Color(0xFFF7F7F7),
+            contentWindowInsets = contentWindowInsets
         ) { contentPadding ->
             Column(
                 Modifier
