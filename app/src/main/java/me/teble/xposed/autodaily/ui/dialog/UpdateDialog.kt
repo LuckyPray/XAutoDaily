@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.dialog
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.ui.graphics.SmootherShape
+import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
@@ -93,51 +92,25 @@ fun updateLayout() {
                 .padding(top = 24.dp)
                 .padding(horizontal = 32.dp)
         ) {
-
-            Text(
+            DialogButton(
                 text = "忽略",
-                modifier = Modifier
-                    .weight(3f)
-                    .clip(SmootherShape(12.dp))
-                    .background(Color(0x0F0095FF))
-                    .padding(vertical = 16.dp),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0095FF),
-                    textAlign = TextAlign.Center,
-                )
+                modifier = Modifier.weight(3f),
+                onClick = {}
             )
 
-            Text(
+            DialogButton(
                 text = "123 盘",
                 modifier = Modifier
                     .weight(4f)
-                    .padding(horizontal = 16.dp)
-                    .clip(SmootherShape(12.dp))
-                    .background(Color(0x0F0095FF))
-                    .padding(vertical = 16.dp),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0095FF),
-                    textAlign = TextAlign.Center,
-                )
+                    .padding(horizontal = 16.dp),
+                onClick = {}
             )
 
-            Text(
+
+            DialogButton(
                 text = "GitHub",
-                modifier = Modifier
-                    .weight(4f)
-                    .clip(SmootherShape(12.dp))
-                    .background(Color(0x0F0095FF))
-                    .padding(vertical = 16.dp),
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF0095FF),
-                    textAlign = TextAlign.Center,
-                )
+                modifier = Modifier.weight(4f),
+                onClick = {}
             )
         }
 

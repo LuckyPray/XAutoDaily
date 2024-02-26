@@ -23,12 +23,17 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalRippleConfiguration
+import androidx.compose.material.RippleConfiguration
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
+import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,6 +71,7 @@ import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
 @Composable
@@ -123,16 +129,19 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
 
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun ColumnScope.Banner() {
+private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
+    val execTaskNum by viewmodel.execTaskNum.collectAsStateWithLifecycle()
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
             .align(alignment = Alignment.CenterHorizontally),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+
         Text(
-            text = "16",
+            text = execTaskNum.toString(),
             style = TextStyle(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Light,
@@ -149,23 +158,34 @@ private fun ColumnScope.Banner() {
                 textAlign = TextAlign.Center
             )
         )
-        Text(
-            text = "立即签到",
-            modifier = Modifier
-                .padding(top = 16.dp)
-                .clip(shape = SmootherShape(radius = 24.dp))
-                .background(color = Color(0x0F0095FF))
-                .clickable(role = Role.Button, onClick = {})
-                .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
-            style = TextStyle(
-                fontSize = 14.sp,
-                lineHeight = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF0095FF),
 
-                textAlign = TextAlign.Center,
+        val fabColor = RippleConfiguration(
+            color = colors.themeColor, rippleAlpha = RippleAlpha(
+                pressedAlpha = 0.32f,
+                focusedAlpha = 0.32f,
+                draggedAlpha = 0.24f,
+                hoveredAlpha = 0.16f
             )
         )
+        CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
+            Text(
+                text = "立即签到",
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .clip(shape = SmootherShape(radius = 24.dp))
+                    .background(color = colors.themeColor.copy(alpha = 0.06f))
+                    .clickable(role = Role.Button, onClick = {})
+                    .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
+                style = TextStyle(
+                    fontSize = 14.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = colors.themeColor,
+
+                    textAlign = TextAlign.Center,
+                )
+            )
+        }
 
 
     }
@@ -289,8 +309,11 @@ private fun NoticeDialog(
                         .fillMaxWidth()
                 )
                 Text(
-                    text = "最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有一个，珍爱这朵花儿的人。有一个人就足够了。最后呢，在这片沙漠之中，至少我能知道还会有",
-                    modifier = Modifier.padding(top = 24.dp),
+                    text = noticeText,
+                    modifier = Modifier
+                        .padding(top = 24.dp)
+                        .weight(1f, false)
+                        .verticalScroll(rememberScrollState()),
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
@@ -314,7 +337,7 @@ private fun NoticeDialog(
                     style = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0095FF),
+                        color = colors.themeColor,
                         textAlign = TextAlign.Center,
                     )
                 )

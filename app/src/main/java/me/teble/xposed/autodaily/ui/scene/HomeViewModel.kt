@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
@@ -33,7 +32,6 @@ class HomeViewModel : ViewModel() {
     init {
         initExecTaskNum()
         initNotice()
-        initUpdate()
     }
 
     fun showNoticeDialog() {
@@ -49,31 +47,6 @@ class HomeViewModel : ViewModel() {
             _showNoticeDialog.value = boolean
         }
     }
-
-    private fun initUpdate() {
-        viewModelScope.launch(IO) {
-            val info = ConfigUtil.fetchMeta()
-            info?.let {
-                val currConfVer = ConfigUtil.loadSaveConf().version
-                if (currConfVer < info.config.version) {
-                    if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
-                        return@launch
-                    } else {
-//                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
-                        return@launch
-                    }
-                }
-                if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-
-                    showSnackbar("插件版本存在更新")
-                    return@launch
-                }
-            }
-            showSnackbar("当前插件与配置均是最新版本")
-
-        }
-    }
-
 
     private fun initNotice() {
         viewModelScope.launch(IO) {

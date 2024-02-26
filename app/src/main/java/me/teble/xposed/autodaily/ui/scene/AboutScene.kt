@@ -47,6 +47,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.navigate
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewModel()) {
@@ -173,7 +174,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF0095FF)
+                    color = colors.themeColor
                 )
             )
         }

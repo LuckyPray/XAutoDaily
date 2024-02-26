@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.HintEditText
 import me.teble.xposed.autodaily.ui.composable.SelectInfoItem
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -45,6 +45,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.Search
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
 fun CheckFriendsDialog(
@@ -158,7 +159,7 @@ fun CheckFriendsDialog(
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Normal,
-                            color = Color(0xFF0095FF),
+                            color = XAutodailyTheme.colors.themeColor,
                         )
                     )
 
@@ -174,7 +175,7 @@ fun CheckFriendsDialog(
                         style = TextStyle(
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Normal,
-                            color = Color(0xFF0095FF),
+                            color = XAutodailyTheme.colors.themeColor,
                         )
                     )
                 }
@@ -207,27 +208,15 @@ fun CheckFriendsDialog(
 
 
                 }
-                Text(
+
+                DialogButton(
                     text = "保存",
-                    modifier = Modifier
+                    Modifier
                         .defaultNavigationBarPadding()
                         .padding(top = 24.dp)
                         .align(Alignment.CenterHorizontally)
-
-                        .fillMaxWidth()
-                        .clip(SmootherShape(12.dp))
-                        .background(Color(0x0F0095FF))
-                        .clickable(
-                            role = Role.Button,
-                            onClick = onConfirm
-                        )
-                        .padding(vertical = 16.dp),
-                    style = TextStyle(
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF0095FF),
-                        textAlign = TextAlign.Center,
-                    )
+                        .fillMaxWidth(),
+                    onClick = onConfirm
                 )
 
             }

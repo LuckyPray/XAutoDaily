@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,6 +34,7 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Edit
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun HintEditText(
@@ -52,7 +52,7 @@ fun HintEditText(
         onValueChange = onValueChange,
         textStyle = textStyle,
         singleLine = singleLine,
-        cursorBrush = SolidColor(Color(0xFF0095FF)),
+        cursorBrush = SolidColor(colors.themeColor),
         decorationBox = { innerTextField ->
             Box(
                 modifier = Modifier,
@@ -128,7 +128,7 @@ fun IconEditText(
                 }
                 .padding(8.dp)
                 .size(24.dp),
-            contentDescription = "", tint = Color(0xFF0095FF)
+            contentDescription = "", tint = colors.themeColor
         )
     }
 
