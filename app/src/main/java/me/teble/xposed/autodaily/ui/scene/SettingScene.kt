@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
@@ -30,6 +31,7 @@ import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.navigate
 
 @Composable
 fun SettingScene(navController: NavController, viewmodel: SettingViewModel = viewModel()) {
@@ -64,7 +66,7 @@ fun SettingScene(navController: NavController, viewmodel: SettingViewModel = vie
                 .defaultNavigationBarPadding()
         ) {
 
-            EntryLayout()
+            EntryLayout(navController)
             ConfigLayout()
             CommonLayout()
             BackupLayout()
@@ -73,11 +75,11 @@ fun SettingScene(navController: NavController, viewmodel: SettingViewModel = vie
 }
 
 @Composable
-private fun EntryLayout() {
+private fun EntryLayout(navController: NavController) {
     SmallTitle(
         title = "模块入口",
         modifier = Modifier
-            .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
+            .padding(bottom = 8.dp, start = 16.dp, top = 8.dp)
     )
     TextItem(
         modifier = Modifier
@@ -87,7 +89,7 @@ private fun EntryLayout() {
             .background(color = Color(0xffffffff)),
         text = "签到状态", clickEnabled = true,
         onClick = {
-
+            navController.navigate(NavigationItem.SignState, NavigationItem.About)
         })
 }
 

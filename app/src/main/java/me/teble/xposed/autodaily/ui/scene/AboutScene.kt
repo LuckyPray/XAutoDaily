@@ -64,8 +64,6 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
     }
 
     Box {
-
-
         Scaffold(
             topBar = {
                 TopBar(text = "关于", backClick = {

@@ -13,6 +13,7 @@ import me.teble.xposed.autodaily.ui.scene.LicenseScene
 import me.teble.xposed.autodaily.ui.scene.MainScreen
 import me.teble.xposed.autodaily.ui.scene.SettingScene
 import me.teble.xposed.autodaily.ui.scene.SignScene
+import me.teble.xposed.autodaily.ui.scene.SignStateScene
 import me.teble.xposed.autodaily.utils.openUrl
 
 object XAutoDailyApp {
@@ -30,7 +31,8 @@ enum class Screen {
     Setting,
     Developer,
     License,
-    EditEnv
+    EditEnv,
+    SignState
 }
 
 sealed class NavigationItem(val route: String) {
@@ -40,6 +42,8 @@ sealed class NavigationItem(val route: String) {
     data object Setting : NavigationItem(Screen.Setting.name)
     data object Developer : NavigationItem(Screen.Developer.name)
     data object License : NavigationItem(Screen.License.name)
+
+    data object SignState : NavigationItem(Screen.SignState.name)
     data class EditEnv(val taskGroup: String, val taskId: String) :
         NavigationItem("${Screen.EditEnv.name}/$taskGroup/$taskId")
 }
@@ -83,6 +87,10 @@ fun XAutoDailyApp() {
 
         composable(NavigationItem.License.route) {
             LicenseScene(navController)
+        }
+
+        composable(NavigationItem.SignState.route) {
+            SignStateScene(navController)
         }
 
         composable("${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->

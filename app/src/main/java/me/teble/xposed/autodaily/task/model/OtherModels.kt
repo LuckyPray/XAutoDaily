@@ -3,13 +3,14 @@ package me.teble.xposed.autodaily.task.model
 import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
-
+@Immutable
 @Serializable
 data class TroopInfo(
     val name: String,
     val uin: String,
 )
 
+@Immutable
 @Serializable
 data class VoterInfo(
     // qq
@@ -32,12 +33,14 @@ data class Friend(
     val remark: String?,
 )
 
+@Immutable
 @Serializable
 data class MiniProfile(
     val avatar: String,
     val nick: String
 )
 
+@Immutable
 @Serializable
 data class AppMeta(
     val versionName: String,
@@ -46,6 +49,7 @@ data class AppMeta(
     val updateLog: String?,
 )
 
+@Immutable
 @Serializable
 data class ConfigMeta(
     val version: Int,
@@ -55,6 +59,7 @@ data class ConfigMeta(
     val updateTime: String,
 )
 
+@Immutable
 @Serializable
 data class MetaInfo(
     val app: AppMeta,
