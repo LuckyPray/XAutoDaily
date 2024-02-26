@@ -308,6 +308,7 @@ private fun NoticeDialog(
                         .height(1.dp)
                         .fillMaxWidth()
                 )
+
                 Text(
                     text = noticeText,
                     modifier = Modifier

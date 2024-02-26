@@ -4,13 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
@@ -26,20 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.ui.composable.DialogButton
+import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Android
 import me.teble.xposed.autodaily.ui.icon.icons.Chosen
-import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.Moon
 import me.teble.xposed.autodaily.ui.icon.icons.Sun
 import me.teble.xposed.autodaily.ui.icon.icons.Text
@@ -65,30 +58,11 @@ fun ThemeDialog(
     ) {
         Column {
 
-            Row(
-                modifier = Modifier
-                    .padding(start = 32.dp, end = 26.dp)
-                    .padding(vertical = 21.dp)
-            ) {
-                Text(
-                    text = "主题风格",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202124),
-                        textAlign = TextAlign.Center
-                    )
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Close, contentDescription = "关闭",
-                    Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .clickable(role = Role.Button, onClick = onDismiss)
-                        .padding(6.dp)
-                )
-            }
+            DialogTopBar(
+                text = "主题风格",
+                iconClick = onDismiss
+            )
+
             Divider(
                 color = Color(0xFFF7F7F7),
                 modifier = Modifier

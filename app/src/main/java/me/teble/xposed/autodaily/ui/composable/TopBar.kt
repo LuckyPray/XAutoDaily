@@ -19,10 +19,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Back
+import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 
 @Composable
@@ -54,8 +56,6 @@ fun XAutoDailyTopBar(
             )
 
         }
-
-
     }
 }
 
@@ -97,5 +97,36 @@ fun TopBar(
         Spacer(modifier = Modifier.width(62.dp))
 
     }
+}
 
+@Composable
+fun DialogTopBar(
+    text: String,
+    modifier: Modifier = Modifier,
+    iconClick: () -> Unit = {},
+) {
+    Row(
+        modifier = modifier
+            .padding(start = 32.dp, end = 26.dp)
+            .padding(vertical = 21.dp)
+    ) {
+        Text(
+            text = text,
+            style = TextStyle(
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF202124),
+                textAlign = TextAlign.Center
+            )
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Icon(
+            imageVector = Icons.Close, contentDescription = "关闭",
+            Modifier
+                .size(36.dp)
+                .clip(CircleShape)
+                .clickable(role = Role.Button, onClick = iconClick)
+                .padding(6.dp)
+        )
+    }
 }

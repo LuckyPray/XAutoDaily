@@ -5,14 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -30,18 +27,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.ui.composable.DialogButton
+import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.HintEditText
 import me.teble.xposed.autodaily.ui.composable.SelectInfoItem
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
-import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.Search
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
@@ -68,30 +64,11 @@ fun CheckFriendsDialog(
     ) {
         Column {
 
-            Row(
-                modifier = Modifier
-                    .padding(start = 32.dp, end = 26.dp)
-                    .padding(vertical = 21.dp)
-            ) {
-                Text(
-                    text = "群组列表（${friends.size}）",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202124),
-                        textAlign = TextAlign.Center
-                    )
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    imageVector = Icons.Close, contentDescription = "关闭",
-                    Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .clickable(role = Role.Button, onClick = onDismiss)
-                        .padding(6.dp)
-                )
-            }
+            DialogTopBar(
+                text = "好友列表（${friends.size}）",
+                iconClick = onDismiss
+            )
+
             Divider(
                 color = Color(0xFFF7F7F7),
                 modifier = Modifier
@@ -106,38 +83,10 @@ fun CheckFriendsDialog(
 
             ) {
 
-
-                Row(
-                    Modifier
-                        .padding(top = 16.dp)
-                        .fillMaxWidth()
-                        .clip(SmootherShape(100.dp))
-                        .background(Color(0xFFF2F2F2))
-                        .padding(vertical = 13.dp, horizontal = 12.dp)
+                SearchBar(
+                    text = searchText,
                 ) {
-                    Icon(
-                        imageVector = Icons.Search,
-                        tint = Color(0xFF919191),
-                        contentDescription = ""
-                    )
-                    HintEditText(
-                        modifier = Modifier.padding(start = 12.dp),
-                        value = searchText,
-                        onValueChange = {
-                            searchText = it
-                        },
-                        textStyle = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF202124),
-                        ),
-                        hintText = "你好",
-                        hintTextStyle = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color(0xFF919191),
-                        )
-                    )
+                    searchText = it
                 }
 
                 Row(
@@ -226,3 +175,36 @@ fun CheckFriendsDialog(
     }
 }
 
+@Composable
+private fun SearchBar(text: String, onValueChange: (String) -> Unit) {
+    Row(
+        Modifier
+            .padding(top = 16.dp)
+            .fillMaxWidth()
+            .clip(SmootherShape(100.dp))
+            .background(Color(0xFFF2F2F2))
+            .padding(vertical = 13.dp, horizontal = 12.dp)
+    ) {
+        Icon(
+            imageVector = Icons.Search,
+            tint = Color(0xFF919191),
+            contentDescription = ""
+        )
+        HintEditText(
+            modifier = Modifier.padding(start = 12.dp),
+            value = text,
+            onValueChange = onValueChange,
+            textStyle = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF202124),
+            ),
+            hintText = "你好",
+            hintTextStyle = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF919191),
+            )
+        )
+    }
+}
