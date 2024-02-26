@@ -18,6 +18,6 @@ val bottomPaddingValue: PaddingValues
     @Composable
     get() = WindowInsets.navigationBars.add(WindowInsets(bottom = 24.dp)).asPaddingValues()
 
-fun Modifier.verticalScrollPadding() = this
+fun Modifier.defaultNavigationBarPadding() = this
     .padding(bottom = 24.dp)
     .navigationBarsPadding()

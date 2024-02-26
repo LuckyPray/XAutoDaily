@@ -8,6 +8,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -40,6 +42,9 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
         it[TimKeepAlive] ?: false
     }
 
+
+    private val _showThemeDialog = MutableStateFlow(false)
+    val showThemeDialog = _showThemeDialog.asStateFlow()
 
     val untrustedTouchEvents = dataStore.data.map {
         it[UntrustedTouchEvents] ?: false
@@ -97,6 +102,20 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
             if (bool) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
             PackageManager.DONT_KILL_APP
         )
+    }
+
+    fun showThemeDialog() {
+        _showThemeDialog.value = true
+    }
+
+    fun dismissNoticeDialog() {
+        _showThemeDialog.value = false
+    }
+
+    fun updateNoticeDialogState(boolean: Boolean) {
+        if (_showThemeDialog.value != boolean) {
+            _showThemeDialog.value = boolean
+        }
     }
 
 }

@@ -60,7 +60,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
@@ -109,7 +109,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
                     .padding(horizontal = 16.dp)
                     .clip(SmootherShape(12.dp))
                     .verticalScroll(rememberScrollState())
-                    .verticalScrollPadding()
+                    .defaultNavigationBarPadding()
             ) {
 
                 Banner()
@@ -266,7 +266,7 @@ private fun NoticeDialog(
             Column(
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
-                    .verticalScrollPadding()
+                    .defaultNavigationBarPadding()
             ) {
                 Text(
                     text = "公告",

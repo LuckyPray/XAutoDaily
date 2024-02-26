@@ -18,7 +18,8 @@ public val Icons.Edit: ImageVector
         }
         _edit = Builder(name = "Edit", defaultWidth = 24.0.dp, defaultHeight = 24.0.dp,
                 viewportWidth = 24.0f, viewportHeight = 24.0f).apply {
-            path(fill = SolidColor(Color(0xFF3C4043)), stroke = null, strokeLineWidth = 0.0f,
+            path(
+                fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
                 moveTo(17.818f, 13.236f)
@@ -42,7 +43,8 @@ public val Icons.Edit: ImageVector
                 curveTo(18.545f, 13.527f, 18.254f, 13.236f, 17.818f, 13.236f)
                 close()
             }
-            path(fill = SolidColor(Color(0xFF3C4043)), stroke = null, strokeLineWidth = 0.0f,
+            path(
+                fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                     strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                     pathFillType = NonZero) {
                 moveTo(19.782f, 7.127f)

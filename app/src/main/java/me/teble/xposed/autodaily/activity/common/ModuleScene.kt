@@ -52,7 +52,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 
 
 @Composable
@@ -85,7 +85,7 @@ fun ModuleScene(navController: NavController, viewmodel: ModuleViewModel = viewM
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .verticalScrollPadding()
+                .defaultNavigationBarPadding()
         ) {
 
             ShizukuCard()

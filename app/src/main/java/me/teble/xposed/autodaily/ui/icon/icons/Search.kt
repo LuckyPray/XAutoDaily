@@ -21,7 +21,7 @@ public val Icons.Search: ImageVector
             viewportWidth = 16.0f, viewportHeight = 16.0f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFF919191)), stroke = null, strokeLineWidth = 0.0f,
+                fill = SolidColor(Color(0xFFffffff)), stroke = null, strokeLineWidth = 0.0f,
                 strokeLineCap = Butt, strokeLineJoin = Miter, strokeLineMiter = 4.0f,
                 pathFillType = NonZero
             ) {

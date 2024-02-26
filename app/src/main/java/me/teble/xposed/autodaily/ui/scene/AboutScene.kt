@@ -45,7 +45,7 @@ import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.navigate
 
 @Composable
@@ -79,7 +79,7 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .verticalScrollPadding(),
+                .defaultNavigationBarPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             BuildConfigLayout()

@@ -27,7 +27,7 @@ import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 
 
 @Composable
@@ -61,7 +61,7 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .verticalScrollPadding(),
+                .defaultNavigationBarPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AuthorLayout(navController)

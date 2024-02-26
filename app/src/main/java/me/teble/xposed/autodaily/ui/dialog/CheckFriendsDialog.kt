@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,7 +43,7 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.Search
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 
 @Composable
@@ -58,15 +59,13 @@ fun CheckFriendsDialog(
     BottomSheet(
         state = state,
         skipPeeked = true,
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         backgroundColor = Color(0xFFFFFFFF),
         behaviors = DefaultDialogSheetBehaviors,
         showAboveKeyboard = true,
         dragHandle = {}
     ) {
-        Column(
-            Modifier.verticalScrollPadding()
-        ) {
+        Column {
 
             Row(
                 modifier = Modifier
@@ -92,16 +91,20 @@ fun CheckFriendsDialog(
                         .padding(6.dp)
                 )
             }
+            Divider(
+                color = Color(0xFFF7F7F7),
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .height(1.dp)
+                    .fillMaxWidth()
+            )
+
             Column(
                 Modifier
                     .padding(horizontal = 32.dp)
+
             ) {
-                Divider(
-                    color = Color(0xFFF7F7F7),
-                    modifier = Modifier
-                        .height(1.dp)
-                        .fillMaxWidth()
-                )
+
 
                 Row(
                     Modifier
@@ -177,10 +180,12 @@ fun CheckFriendsDialog(
                 }
 
 
+
+
                 LazyColumn(
                     modifier = Modifier
+                        .weight(1f, false)
                         .fillMaxWidth()
-
                 ) {
                     items(
                         items = friends,
@@ -200,12 +205,15 @@ fun CheckFriendsDialog(
                             })
                     }
 
+
                 }
                 Text(
                     text = "保存",
                     modifier = Modifier
+                        .defaultNavigationBarPadding()
                         .padding(top = 24.dp)
                         .align(Alignment.CenterHorizontally)
+
                         .fillMaxWidth()
                         .clip(SmootherShape(12.dp))
                         .background(Color(0x0F0095FF))
@@ -221,6 +229,7 @@ fun CheckFriendsDialog(
                         textAlign = TextAlign.Center,
                     )
                 )
+
             }
         }
 

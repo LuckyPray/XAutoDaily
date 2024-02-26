@@ -356,7 +356,7 @@ dependencies {
     implementation(libs.androidx.compose.runtime)
     implementation(libs.androidx.compose.ui.tooling)
 
-
+    implementation("com.github.GIGAMOLE:ComposeShadowsPlus:1.0.4")
     implementation(libs.androidx.navigation.compose)
 
     // ViewModel

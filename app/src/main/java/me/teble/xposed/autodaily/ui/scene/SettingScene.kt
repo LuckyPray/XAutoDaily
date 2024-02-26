@@ -29,7 +29,7 @@ import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 
 @Composable
 fun SettingScene(navController: NavController, viewmodel: SettingViewModel = viewModel()) {
@@ -61,7 +61,7 @@ fun SettingScene(navController: NavController, viewmodel: SettingViewModel = vie
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .verticalScrollPadding()
+                .defaultNavigationBarPadding()
         ) {
 
             EntryLayout()

@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
@@ -36,8 +38,9 @@ import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.dialog.ThemeDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.layout.verticalScrollPadding
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.utils.TaskExecutor
@@ -46,8 +49,24 @@ import java.io.File
 
 @Composable
 fun SettingScene(
-    navController: NavController
+    navController: NavController,
+    viewmodel: SettingViewModel = viewModel()
 ) {
+    val state = rememberBottomSheetState()
+    LaunchedEffect(Unit) {
+        viewmodel.showThemeDialog.collect {
+            if (it) {
+                state.expand()
+            } else {
+                state.collapse()
+            }
+        }
+    }
+    LaunchedEffect(state.visible) {
+        viewmodel.updateNoticeDialogState(state.visible)
+    }
+    Box {
+
 
     Scaffold(
         topBar = {
@@ -65,9 +84,19 @@ fun SettingScene(
                 .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
-                .verticalScrollPadding()
+                .defaultNavigationBarPadding()
         )
 
+    }
+        ThemeDialog(
+            state,
+            onConfirm = {
+
+            },
+            onDismiss = {
+                viewmodel.dismissNoticeDialog()
+            }
+        )
     }
 
 }
@@ -131,7 +160,7 @@ private fun CommonLayout(
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
             text = "主题颜色", clickEnabled = true, onClick = {
-
+                viewmodel.showThemeDialog()
             })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
