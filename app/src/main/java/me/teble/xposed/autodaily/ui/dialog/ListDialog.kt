@@ -5,12 +5,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
@@ -51,13 +50,12 @@ fun ListDialog(
             iconClick = onDismiss
         )
 
-        Divider(
+        HorizontalDivider(
             color = Color(0xFFF7F7F7),
+            thickness = 1.dp,
             modifier = Modifier
                 .padding(horizontal = 32.dp)
                 .padding(bottom = 16.dp)
-                .height(1.dp)
-                .fillMaxWidth()
         )
 
         LazyColumn(

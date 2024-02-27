@@ -11,15 +11,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -79,12 +78,11 @@ fun DatePicker(
                 fontSize = 16.sp,
             )
         )
-        Divider(
+        VerticalDivider(
             color = Color(0xFFE6E6E6),
+            thickness = 2.dp,
             modifier = Modifier
-                .fillMaxHeight()
                 .padding(vertical = 66.dp)
-                .width(2.dp)
                 .clip(SmootherShape(1.dp)),
         )
         TextPicker(

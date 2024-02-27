@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
@@ -63,13 +63,12 @@ fun ThemeDialog(
                 iconClick = onDismiss
             )
 
-            Divider(
+            HorizontalDivider(
                 color = Color(0xFFF7F7F7),
+                thickness = 1.dp,
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
                     .padding(bottom = 18.dp)
-                    .height(1.dp)
-                    .fillMaxWidth()
             )
             Column(
                 Modifier
@@ -104,12 +103,11 @@ fun ThemeDialog(
                     }
                 )
 
-                Divider(
+                HorizontalDivider(
                     color = Color(0xFFF7F7F7),
                     modifier = Modifier
                         .padding(vertical = 12.dp)
                         .height(1.dp)
-                        .fillMaxWidth()
                 )
                 ThemeItem(
                     text = "使用纯黑色深色主题",

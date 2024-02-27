@@ -4,13 +4,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -57,13 +56,12 @@ fun UpdateDialog(
                 iconClick = onDismiss
             )
 
-            Divider(
+            HorizontalDivider(
                 color = Color(0xFFF7F7F7),
+                thickness = 1.dp,
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
                     .padding(bottom = 24.dp)
-                    .height(1.dp)
-                    .fillMaxWidth()
             )
 
 

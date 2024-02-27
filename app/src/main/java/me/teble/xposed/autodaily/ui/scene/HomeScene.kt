@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -23,8 +22,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
@@ -302,12 +301,11 @@ private fun NoticeDialog(
                         .padding(top = 20.dp)
                 )
 
-                Divider(
+                HorizontalDivider(
                     color = Color(0xFFF7F7F7),
+                    thickness = 1.dp,
                     modifier = Modifier
                         .padding(top = 20.dp)
-                        .height(1.dp)
-                        .fillMaxWidth()
                 )
 
                 Text(
