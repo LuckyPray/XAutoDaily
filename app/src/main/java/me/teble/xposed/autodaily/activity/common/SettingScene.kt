@@ -12,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -24,7 +26,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
@@ -37,7 +38,7 @@ import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
-import me.teble.xposed.autodaily.ui.dialog.ThemeDialog
+import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
@@ -47,23 +48,26 @@ import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.toJsonString
 import java.io.File
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
     onBackClick: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
-    val state = rememberBottomSheetState()
+    val showThemeDialog by viewmodel.showThemeDialog.collectAsStateWithLifecycle()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
     LaunchedEffect(Unit) {
         viewmodel.showThemeDialog.collect {
             if (it) {
-                state.expand()
+                sheetState.expand()
             } else {
-                state.collapse()
+                sheetState.hide()
             }
         }
     }
-    LaunchedEffect(state.visible) {
-        viewmodel.updateNoticeDialogState(state.visible)
+    LaunchedEffect(sheetState.isVisible) {
+        viewmodel.updateNoticeDialogState(sheetState.isVisible)
     }
     Box {
         Scaffold(
@@ -85,15 +89,28 @@ fun SettingScene(
             )
 
         }
-        ThemeDialog(
-            state,
-            onConfirm = {
+        if (sheetState.isVisible || showThemeDialog) {
+            ThemeModelDialog(
+                state = sheetState,
+                onDismiss = {
+                    viewmodel.dismissNoticeDialog()
+                },
 
-            },
-            onDismiss = {
-                viewmodel.dismissNoticeDialog()
-            }
-        )
+                onConfirm = {
+
+                }
+            )
+        }
+
+//        ThemeDialog(
+//            state,
+//            onConfirm = {
+//
+//            },
+//            onDismiss = {
+//                viewmodel.dismissNoticeDialog()
+//            }
+//        )
     }
 
 }

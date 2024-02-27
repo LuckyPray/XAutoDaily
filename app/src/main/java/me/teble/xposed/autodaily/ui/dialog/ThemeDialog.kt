@@ -14,7 +14,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -25,8 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -36,25 +36,24 @@ import me.teble.xposed.autodaily.ui.icon.icons.Chosen
 import me.teble.xposed.autodaily.ui.icon.icons.Moon
 import me.teble.xposed.autodaily.ui.icon.icons.Sun
 import me.teble.xposed.autodaily.ui.icon.icons.Text
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ThemeDialog(
-    state: BottomSheetState,
-
+fun ThemeModelDialog(
+    state: SheetState,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    BottomSheet(
-        state = state,
-        skipPeeked = true,
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = state,
+        containerColor = Color(0xFFFFFFFF),
+        windowInsets = contentWindowInsets,
+        dragHandle = {},
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        backgroundColor = Color(0xFFFFFFFF),
-        behaviors = DefaultDialogSheetBehaviors,
-        showAboveKeyboard = true,
-        dragHandle = {}
     ) {
         Column {
 
@@ -129,7 +128,6 @@ fun ThemeDialog(
                 onClick = onConfirm
             )
         }
-
     }
 }
 
