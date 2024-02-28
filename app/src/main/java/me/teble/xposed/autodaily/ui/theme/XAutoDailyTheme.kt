@@ -94,6 +94,10 @@ fun XAutodailyTheme(
         animationSpec = tween(600), label = "ripple color"
     )
 
+    val colorAboutText by animateColorAsState(
+        targetValue = targetColors.colorAboutText,
+        animationSpec = tween(600), label = "ripple color"
+    )
     val colorTextSmallTitle by animateColorAsState(
         targetValue = targetColors.colorTextSmallTitle,
         animationSpec = tween(600), label = "ripple color"
@@ -110,6 +114,11 @@ fun XAutodailyTheme(
 
     val colorBgMask by animateColorAsState(
         targetValue = targetColors.colorBgMask,
+        animationSpec = tween(600), label = "ripple color"
+    )
+
+    val colorBgEdit by animateColorAsState(
+        targetValue = targetColors.colorBgEdit,
         animationSpec = tween(600), label = "ripple color"
     )
     val colorSwitch by animateColorAsState(
@@ -136,6 +145,8 @@ fun XAutodailyTheme(
         targetValue = targetColors.colorTextSearch,
         animationSpec = tween(600), label = "ripple color"
     )
+
+
     val colors = XAutodailyColors(
         themeColor = themeColor,
         rippleColor = rippleColor,
@@ -146,17 +157,19 @@ fun XAutodailyTheme(
         colorBgDialog = colorBgDialog,
         colorBgSearch = colorBgSearch,
         colorBgMask = colorBgMask,
+        colorBgEdit = colorBgEdit,
 
         colorText = colorText,
         colorTextSecondary = colorTextSecondary,
         colorTextTheme = colorTextTheme,
         colorTextSmallTitle = colorTextSmallTitle,
         colorTextSearch = colorTextSearch,
+        colorAboutText = colorAboutText,
 
         colorSwitch = colorSwitch,
         colorIcon = colorSwitch,
         colorSelection = colorSelection,
-        colorDialogDivider = colorDialogDivider
+        colorDialogDivider = colorDialogDivider,
 
     )
     val rippleConfiguration = RippleConfiguration(

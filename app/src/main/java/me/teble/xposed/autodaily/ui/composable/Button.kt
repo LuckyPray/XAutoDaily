@@ -2,8 +2,10 @@ package me.teble.xposed.autodaily.ui.composable
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -11,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
@@ -29,9 +30,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.icon.Icons
-import me.teble.xposed.autodaily.ui.icon.icons.SelectNormal
-import me.teble.xposed.autodaily.ui.icon.icons.SelectSelectd
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -92,17 +90,65 @@ fun SwitchButton(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SelectButton(boolean: Boolean, modifier: Modifier = Modifier) {
+fun SelectButton(
+    boolean: Boolean, modifier: Modifier = Modifier, clickEnabled: Boolean,
+    onClick: () -> Unit
+) {
     val selectColor by animateColorAsState(
         targetValue = if (boolean) colors.themeColor else colors.colorSwitch, label = "SelectButton"
     )
-    Icon(
-        imageVector = if (boolean) Icons.SelectSelectd else Icons.SelectNormal,
-        tint = selectColor,
-        contentDescription = "选中开关",
-        modifier = modifier
+    val fabColor = RippleConfiguration(
+        color = selectColor, rippleAlpha = RippleAlpha(
+            pressedAlpha = 0.36f,
+            focusedAlpha = 0.36f,
+            draggedAlpha = 0.24f,
+            hoveredAlpha = 0.16f
+        )
     )
+    CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
+        Box(
+            modifier = modifier
+                .clip(CircleShape)
+                .border(width = 1.5.dp, color = selectColor, shape = CircleShape)
+                .clickable(
+                    role = Role.Switch,
+                    enabled = clickEnabled,
+                    onClick = onClick
+                )
+                .padding(4.dp)
+        ) {
+
+
+            val scale by animateFloatAsState(
+                targetValue = if (boolean) {
+                    1f
+                } else {
+                    0f
+                },
+                animationSpec = spring(),
+                label = "startPadding"
+            )
+            Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        this.scaleY = scale
+                        this.scaleX = scale
+                    }
+                    .size(10.dp)
+                    .clip(CircleShape)
+                    .background(selectColor)
+            )
+        }
+    }
+
+//    Icon(
+//        imageVector = if (boolean) Icons.SelectSelectd else Icons.SelectNormal,
+//        tint = selectColor,
+//        contentDescription = "选中开关",
+//        modifier = modifier
+//    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

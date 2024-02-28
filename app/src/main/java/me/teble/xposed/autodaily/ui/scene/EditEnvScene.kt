@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,6 +43,7 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun EditEnvScene(navController: NavController, groupId: String?, taskId: String) {
@@ -107,7 +107,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                     value = editText,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFF7F7F7), SmootherShape(12.dp)),
+                        .background(colors.colorBgEdit, SmootherShape(12.dp)),
                     hintText = "好友清单",
                     iconClick = {
                         scope.launch {
@@ -117,6 +117,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                 ) {
                     editText = it
                 }
+
 
                 var fireText by remember { mutableStateOf("") }
                 SmallTitle(
@@ -129,7 +130,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                 HintEditText(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFF7F7F7), SmootherShape(12.dp))
+                        .background(colors.colorBgEdit, SmootherShape(12.dp))
                         .padding(vertical = 18.dp, horizontal = 16.dp),
                     value = fireText,
                     onValueChange = {
@@ -138,14 +139,14 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                     textStyle = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202124)
+                        color = colors.colorText
                     ),
                     singleLine = true,
                     hintText = "例如 早啊|早安|早上好",
                     hintTextStyle = TextStyle(
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202124).copy(alpha = DisabledAlpha)
+                        color = colors.colorText.copy(alpha = DisabledAlpha)
                     ),
                 )
 

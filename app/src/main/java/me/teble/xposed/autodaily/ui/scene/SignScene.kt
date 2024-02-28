@@ -161,7 +161,6 @@ private fun GroupColumn(
                                     )
                                 },
                                 onChange = {
-
                                 }
                             )
                         } else {

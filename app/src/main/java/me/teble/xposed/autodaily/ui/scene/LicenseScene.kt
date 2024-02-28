@@ -15,7 +15,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -78,7 +77,7 @@ fun DependencyItem(navController: NavController, dependency: Dependency) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF))
+            .background(XAutodailyTheme.colors.colorBgContainer)
             .clickable(role = Role.Button, onClick = {
                 navController.navigateUrl(dependency.mavenCoordinates.groupId)
             })
@@ -90,7 +89,7 @@ fun DependencyItem(navController: NavController, dependency: Dependency) {
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = XAutodailyTheme.colors.colorText
             )
         )
 
@@ -102,7 +101,7 @@ fun DependencyItem(navController: NavController, dependency: Dependency) {
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(0xFF4F5355)
+                color = XAutodailyTheme.colors.colorTextSecondary
             )
         )
 

@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -94,37 +99,18 @@ fun CheckFriendsDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
 
-                    Text(
-                        text = "反选",
-                        modifier = Modifier
-                            .clip(SmootherShape(4.dp))
-                            .clickable(
-                                role = Role.Button,
-                                onClick = onConfirm
-                            )
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = colors.themeColor,
-                        )
-                    )
+                    TextButton(
+                        text = "反选"
+                    ) {
 
-                    Text(
-                        text = "全选",
-                        modifier = Modifier
-                            .clip(SmootherShape(4.dp))
-                            .clickable(
-                                role = Role.Button,
-                                onClick = onConfirm
-                            )
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                        style = TextStyle(
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = colors.themeColor,
-                        )
-                    )
+                    }
+
+                    TextButton(
+                        text = "全选"
+                    ) {
+
+                    }
+
                 }
 
 
@@ -139,6 +125,9 @@ fun CheckFriendsDialog(
                         items = friends,
                         key = { it.uin },
                         contentType = { it.remark == null }) { friend ->
+                        var enable by remember {
+                            mutableStateOf(false)
+                        }
                         SelectInfoItem(
                             text = friend.remark ?: friend.nike,
                             infoText = friend.uin,
@@ -146,9 +135,9 @@ fun CheckFriendsDialog(
                                 .fillMaxWidth()
                                 .clip(SmootherShape(12.dp)),
                             clickEnabled = true,
-                            enable = false,
+                            enable = enable,
                             onClick = {
-
+                                enable = !enable
                             })
                     }
 
@@ -169,6 +158,37 @@ fun CheckFriendsDialog(
         }
 
 
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TextButton(text: String, onClick: () -> Unit) {
+    val fabColor = RippleConfiguration(
+        color = colors.themeColor, rippleAlpha = RippleAlpha(
+            pressedAlpha = 0.36f,
+            focusedAlpha = 0.36f,
+            draggedAlpha = 0.24f,
+            hoveredAlpha = 0.16f
+        )
+    )
+
+    CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
+        Text(
+            text = text,
+            modifier = Modifier
+                .clip(SmootherShape(4.dp))
+                .clickable(
+                    role = Role.Button,
+                    onClick = onClick
+                )
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                color = colors.themeColor,
+            )
+        )
     }
 }
 
@@ -196,7 +216,7 @@ private fun SearchBar(text: String, onValueChange: (String) -> Unit) {
                 fontWeight = FontWeight.Normal,
                 color = colors.colorText,
             ),
-            hintText = "你好",
+            hintText = "关键词",
             hintTextStyle = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,

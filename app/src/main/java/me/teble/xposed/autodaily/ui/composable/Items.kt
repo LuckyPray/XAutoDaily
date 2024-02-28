@@ -368,7 +368,7 @@ fun SwitchInfoDivideItem(
             )
         }
         VerticalDivider(
-            color = Color(0xFFD6DDE7),
+            color = colors.colorSwitch,
             thickness = 2.dp,
             modifier = Modifier
                 .height(26.dp)
@@ -500,12 +500,10 @@ fun SelectInfoItem(
         Spacer(modifier = Modifier.width(16.dp))
         SelectButton(
             enable,
-            modifier = Modifier
-                .size(24.dp)
-                .clickable(
-                    role = Role.RadioButton,
-                    enabled = clickEnabled,
-                    onClick = { onClick(!enable) })
+            clickEnabled = clickEnabled,
+            onClick = {
+                onClick(!enable)
+            }
         )
     }
 }

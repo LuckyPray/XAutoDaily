@@ -26,7 +26,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -140,7 +139,7 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
     )
 
     Icon(
-        tint = Color(0xFF202124),
+        tint = colors.colorText,
         imageVector = Icons.XAutoDaily,
         contentDescription = "text logo",
         modifier = Modifier.padding(top = 16.dp)
@@ -152,7 +151,7 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
         style = TextStyle(
             fontSize = 12.sp,
             fontWeight = FontWeight.Normal,
-            color = Color(0xFF5F6368),
+            color = colors.colorAboutText,
             textAlign = TextAlign.Center,
         )
     )
@@ -171,7 +170,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF))
+            .background(colors.colorBgContainer)
             .clickable(role = Role.Button, onClick = {
                 viewmodel.updateApp()
             })
@@ -187,7 +186,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202124)
+                    color = colors.colorText
                 )
             )
 
@@ -197,7 +196,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF4F5355)
+                    color = colors.colorTextSecondary
                 )
             )
         }
@@ -217,7 +216,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
             imageVector = Icons.ChevronRight,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = Color(0xFFE6E6E6)
+            tint = colors.colorIcon
         )
     }
 }
@@ -230,7 +229,7 @@ private fun LicenseLayout(navController: NavController) {
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF)),
+            .background(colors.colorBgContainer),
         clickEnabled = true
     ) {
         navController.navigate(NavigationItem.License, NavigationItem.About)
@@ -244,7 +243,7 @@ private fun OthterLayout(navController: NavController, viewmodel: AboutViewModel
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xffffffff)),
+            .background(colors.colorBgContainer),
     ) {
         TextItem(
             text = "开发者",
