@@ -14,7 +14,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -26,6 +25,7 @@ import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Back
 import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun XAutoDailyTopBar(
@@ -36,7 +36,7 @@ fun XAutoDailyTopBar(
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            tint = Color(0xFF202124),
+            tint = colors.colorText,
             imageVector = Icons.XAutoDaily,
             contentDescription = "logo"
         )
@@ -45,7 +45,7 @@ fun XAutoDailyTopBar(
         if (icon != null) {
             Icon(
                 imageVector = icon,
-                tint = Color(0xFF202124),
+                tint = colors.colorText,
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(36.dp)
@@ -80,14 +80,14 @@ fun TopBar(
                 .clickable(role = Role.Button, onClick = backClick)
                 .padding(6.dp),
             contentDescription = "",
-            tint = Color(0xFF202124)
+            tint = colors.colorText
         )
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
             text = text,
             style = TextStyle(
-                color = Color(0xFF202124),
+                color = colors.colorText,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
             )
@@ -115,14 +115,16 @@ fun DialogTopBar(
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124),
+                color = colors.colorText,
                 textAlign = TextAlign.Center
             )
         )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
-            imageVector = Icons.Close, contentDescription = "关闭",
-            Modifier
+            imageVector = Icons.Close,
+            contentDescription = "关闭",
+            tint = colors.colorText,
+            modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)
                 .clickable(role = Role.Button, onClick = iconClick)

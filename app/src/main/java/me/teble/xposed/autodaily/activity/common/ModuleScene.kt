@@ -53,6 +53,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
 @Composable
@@ -77,7 +78,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
         topBar = {
             ModuleTopBar()
         },
-        containerColor = Color(0xFFF7F7F7)
+        containerColor = colors.colorBgLayout
     ) { contentPadding ->
         Column(
             Modifier
@@ -98,7 +99,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
                     .padding(top = 24.dp)
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp))
-                    .background(Color(0xFFFFFFFF)),
+                    .background(colors.colorBgContainer),
                 clickEnabled = true,
                 onClick = onSettingClick
             )
@@ -238,7 +239,7 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
             Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp))
-                .background(Color(0xFFFFFFFF))
+                .background(colors.colorBgContainer)
         ) {
             val context = LocalContext.current
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {

@@ -51,7 +51,7 @@ fun ListDialog(
         )
 
         HorizontalDivider(
-            color = Color(0xFFF7F7F7),
+            color = colors.colorBgDialog,
             thickness = 1.dp,
             modifier = Modifier
                 .padding(horizontal = 32.dp)

@@ -30,6 +30,7 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
             isPermissionGranted && binderAvailable
         }
 
+
     val keepAlive = dataStore.data.map {
         it[KeepAlive] ?: false
     }
@@ -105,17 +106,16 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
     }
 
     fun showThemeDialog() {
-        _showThemeDialog.value = true
+        updateThemeDialogState(true)
     }
 
-    fun dismissNoticeDialog() {
-        _showThemeDialog.value = false
+    fun dismissThemeDialog() {
+        updateThemeDialogState(false)
     }
 
-    fun updateNoticeDialogState(boolean: Boolean) {
+    fun updateThemeDialogState(boolean: Boolean) {
         if (_showThemeDialog.value != boolean) {
             _showThemeDialog.value = boolean
         }
     }
-
 }

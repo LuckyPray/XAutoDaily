@@ -39,6 +39,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.ChevronDown
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun TextItem(
@@ -66,7 +67,7 @@ fun TextItem(
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = colors.colorText
             )
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -107,7 +108,7 @@ fun SelectionItem(
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = colors.colorText
             )
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -151,7 +152,7 @@ fun TextInfoItem(
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202124)
+                    color = colors.colorText
                 )
             )
 
@@ -160,7 +161,7 @@ fun TextInfoItem(
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF4F5355)
+                    color = colors.colorTextSecondary
                 )
             )
         }
@@ -198,7 +199,7 @@ fun SwitchTextItem(
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = colors.colorText
             )
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -236,7 +237,7 @@ fun SwitchTextDivideItem(
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = colors.colorText
             )
         )
         Spacer(modifier = Modifier.width(16.dp))
@@ -291,7 +292,7 @@ fun SwitchInfoItem(
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202124)
+                    color = colors.colorText
                 )
             )
 
@@ -300,7 +301,7 @@ fun SwitchInfoItem(
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF4F5355)
+                    color = colors.colorTextSecondary
                 )
             )
         }
@@ -355,7 +356,7 @@ fun SwitchInfoDivideItem(
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202124)
+                    color = colors.colorText
                 )
             )
 
@@ -365,7 +366,7 @@ fun SwitchInfoDivideItem(
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF4F5355)
+                    color = colors.colorTextSecondary
                 )
             )
         }
@@ -432,14 +433,14 @@ fun ImageItem(
                 text = title, style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF202124),
+                    color = colors.colorText,
                 )
             )
             Text(
                 text = info, Modifier.padding(top = 4.dp), style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF5F6368),
+                    color = colors.colorTextSecondary
                 )
             )
         }
@@ -487,7 +488,7 @@ fun SelectInfoItem(
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF3C4043)
+                    color = colors.colorText
                 )
             )
 
@@ -496,7 +497,7 @@ fun SelectInfoItem(
                 style = TextStyle(
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color(0xFF4F5355)
+                    color = colors.colorTextSecondary
                 ),
                 modifier = Modifier.padding(top = 4.dp)
             )

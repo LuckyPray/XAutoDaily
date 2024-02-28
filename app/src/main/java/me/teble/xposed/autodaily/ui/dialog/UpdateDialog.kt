@@ -24,6 +24,7 @@ import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
 enum class UpdateType {
@@ -45,7 +46,7 @@ fun UpdateDialog(
         state = state,
         skipPeeked = true,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        backgroundColor = Color(0xFFFFFFFF),
+        backgroundColor = colors.colorBgDialog,
         behaviors = DefaultDialogSheetBehaviors,
         showAboveKeyboard = true,
         dragHandle = {}

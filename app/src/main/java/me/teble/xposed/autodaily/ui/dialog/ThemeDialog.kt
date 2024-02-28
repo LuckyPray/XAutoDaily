@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.dialog
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,10 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,19 +43,30 @@ import me.teble.xposed.autodaily.ui.icon.icons.Sun
 import me.teble.xposed.autodaily.ui.icon.icons.Text
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeModelDialog(
     state: SheetState,
-    onConfirm: () -> Unit,
+    targetTheme: XAutodailyTheme.Theme,
+    isBlack: Boolean,
+    onConfirm: (XAutodailyTheme.Theme, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
+
+    var theme by remember {
+        mutableStateOf(targetTheme)
+    }
+    var black by remember {
+        mutableStateOf(isBlack)
+    }
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = state,
-        containerColor = Color(0xFFFFFFFF),
+        containerColor = colors.colorBgDialog,
         windowInsets = contentWindowInsets,
         dragHandle = {},
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
@@ -80,25 +96,25 @@ fun ThemeModelDialog(
                 ThemeItem(
                     text = "亮色模式",
                     imageVector = Icons.Sun,
-                    checked = true,
+                    checked = theme == XAutodailyTheme.Theme.Light,
                     onClick = {
-
+                        theme = XAutodailyTheme.Theme.Light
                     }
                 )
                 ThemeItem(
                     text = "暗色模式",
                     imageVector = Icons.Moon,
-                    checked = false,
+                    checked = theme == XAutodailyTheme.Theme.Dark,
                     onClick = {
-
+                        theme = XAutodailyTheme.Theme.Dark
                     }
                 )
                 ThemeItem(
                     text = "跟随系统",
                     imageVector = Icons.Android,
-                    checked = false,
+                    checked = theme == XAutodailyTheme.Theme.System,
                     onClick = {
-
+                        theme = XAutodailyTheme.Theme.System
                     }
                 )
 
@@ -111,9 +127,9 @@ fun ThemeModelDialog(
                 ThemeItem(
                     text = "使用纯黑色深色主题",
                     imageVector = Icons.Text,
-                    checked = false,
+                    checked = black,
                     onClick = {
-
+                        black = !black
                     }
                 )
             }
@@ -125,7 +141,11 @@ fun ThemeModelDialog(
                     .defaultNavigationBarPadding()
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
-                onClick = onConfirm
+                clickEnabled = theme != targetTheme
+                        || isBlack != black,
+                onClick = {
+                    onConfirm(theme, black)
+                }
             )
         }
     }
@@ -141,9 +161,12 @@ private fun ThemeItem(
     checked: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    // 如果添加 animateColorAsState 动画，则在点击确定的时候有概率闪退，我也不知道什么问题，不过这个加不加点击动画都那样不管他
-    val backgroundColor = if (checked) Color(0xFFF5FBFF) else Color.Transparent
-    val textColor = if (checked) colors.themeColor else Color(0xFF4F5355)
+    val backgroundColor by animateColorAsState(
+        if (checked) colors.themeColor.copy(0.08f) else Color.Transparent, label = ""
+    )
+    val textColor by animateColorAsState(
+        if (checked) colors.themeColor else Color(0xFF4F5355), label = ""
+    )
 
     val fabColor =
         RippleConfiguration(color = if (checked) colors.themeColor else Color.Unspecified)

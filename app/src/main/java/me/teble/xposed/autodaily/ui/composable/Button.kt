@@ -57,26 +57,46 @@ fun SelectButton(boolean: Boolean, modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DialogButton(text: String, modifier: Modifier, onClick: () -> Unit) {
+fun DialogButton(
+    text: String,
+    modifier: Modifier,
+    clickEnabled: Boolean = false,
+    onClick: () -> Unit
+) {
 
     val buttonColor = RippleConfiguration(color = XAutodailyTheme.colors.themeColor)
     CompositionLocalProvider(LocalRippleConfiguration provides buttonColor) {
+
+        val backgroundColor by animateColorAsState(
+            if (clickEnabled) XAutodailyTheme.colors.themeColor.copy(0.06f) else XAutodailyTheme.colors.themeColor.copy(
+                0.04f
+            ), label = ""
+        )
+
+        val textColor by animateColorAsState(
+            if (clickEnabled) XAutodailyTheme.colors.themeColor else XAutodailyTheme.colors.themeColor.copy(
+                0.6f
+            ), label = ""
+        )
+
         Text(
             text = text,
             modifier = modifier
                 .clip(SmootherShape(12.dp))
-                .background(Color(0x0F0095FF))
+                .background(color = backgroundColor)
                 .clickable(
                     role = Role.Button,
+                    enabled = clickEnabled,
                     onClick = onClick
                 )
                 .padding(vertical = 16.dp),
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = XAutodailyTheme.colors.themeColor,
+                color = textColor,
                 textAlign = TextAlign.Center,
             )
         )
+
     }
 }

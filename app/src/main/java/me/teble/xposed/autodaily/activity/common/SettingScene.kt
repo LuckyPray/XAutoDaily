@@ -22,7 +22,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -44,6 +43,8 @@ import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.toJsonString
 import java.io.File
@@ -51,23 +52,27 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
+
     onBackClick: () -> Unit,
+    themeViewModel: ModuleThemeViewModel = viewModel(),
     viewmodel: SettingViewModel = viewModel()
 ) {
-    val showThemeDialog by viewmodel.showThemeDialog.collectAsStateWithLifecycle()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val theme by themeViewModel.theme.collectAsStateWithLifecycle(initialValue = Theme.Light)
+    val isBlack by themeViewModel.blackTheme.collectAsStateWithLifecycle(initialValue = false)
 
-    LaunchedEffect(Unit) {
-        viewmodel.showThemeDialog.collect {
-            if (it) {
-                sheetState.expand()
-            } else {
-                sheetState.hide()
-            }
+
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val showThemeDialog by viewmodel.showThemeDialog.collectAsStateWithLifecycle()
+
+    LaunchedEffect(showThemeDialog) {
+        if (showThemeDialog) {
+            sheetState.expand()
+        } else {
+            sheetState.hide()
         }
     }
     LaunchedEffect(sheetState.isVisible) {
-        viewmodel.updateNoticeDialogState(sheetState.isVisible)
+        viewmodel.updateThemeDialogState(sheetState.isVisible)
     }
     Box {
         Scaffold(
@@ -75,7 +80,7 @@ fun SettingScene(
                 TopBar(text = "设置", backClick = onBackClick)
             },
             contentWindowInsets = contentWindowInsets,
-            containerColor = Color(0xFFF7F7F7)
+            containerColor = colors.colorBgLayout
         ) { contentPadding ->
 
             SettingLayout(
@@ -92,25 +97,20 @@ fun SettingScene(
         if (sheetState.isVisible || showThemeDialog) {
             ThemeModelDialog(
                 state = sheetState,
+                targetTheme = theme,
+                isBlack = isBlack,
                 onDismiss = {
-                    viewmodel.dismissNoticeDialog()
+                    viewmodel.dismissThemeDialog()
                 },
 
-                onConfirm = {
-
+                onConfirm = { themeCode, isBlack ->
+                    themeViewModel.updateBlack(isBlack)
+                    themeViewModel.updateTheme(themeCode)
+                    viewmodel.dismissThemeDialog()
                 }
             )
         }
 
-//        ThemeDialog(
-//            state,
-//            onConfirm = {
-//
-//            },
-//            onDismiss = {
-//                viewmodel.dismissNoticeDialog()
-//            }
-//        )
     }
 
 }
@@ -150,7 +150,7 @@ private fun CommonLayout(
         Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF))
+            .background(colors.colorBgContainer)
     ) {
 
         val hiddenAppIcon by viewmodel.hiddenAppIcon.collectAsStateWithLifecycle(false)
@@ -213,7 +213,7 @@ private fun ShizukuLayout(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(Color(0xFFFFFFFF).copy(alpha = itemAlpha))
+            .background(colors.colorBgContainer.copy(alpha = itemAlpha))
 
     ) {
         val keepAlive by viewmodel.keepAlive.collectAsStateWithLifecycle(false)

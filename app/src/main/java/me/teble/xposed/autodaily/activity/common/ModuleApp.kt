@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.activity.common
 
 import androidx.activity.compose.BackHandler
-import androidx.annotation.Keep
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.adaptive.AnimatedPane
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
@@ -14,52 +14,17 @@ import androidx.compose.material3.adaptive.rememberListDetailPaneScaffoldNavigat
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
-@Keep
-enum class Screen {
-    Module,
-    Setting
-}
-
-sealed class NavigationItem(val route: String) {
-    data object Module : NavigationItem(Screen.Module.name)
-    data object Setting : NavigationItem(Screen.Setting.name)
-}
-
-fun NavController.navigate(item: NavigationItem, popUpToItem: NavigationItem) {
-    this.navigate(item.route) {
-        popUpTo(popUpToItem.route)
-        launchSingleTop = true
-    }
-
-}
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun ModuleApp() {
-//    val navController = rememberNavController()
-//    NavHost(
-//        navController = navController,
-//        startDestination = NavigationItem.Module.route
-//    ) {
-//        composable(NavigationItem.Module.route) {
-//            ModuleScene(navController)
-//        }
-//
-//        composable(NavigationItem.Setting.route) {
-//            SettingScene(navController)
-//        }
-//
-//    }
-
 
 // Create the ListDetailPaneScaffoldState
 
     val systemDirective = calculateDensePaneScaffoldDirective(currentWindowAdaptiveInfo())
-
-
     val customDirective = PaneScaffoldDirective(
         contentPadding = PaddingValues(0.dp),
         maxHorizontalPartitions = systemDirective.maxHorizontalPartitions,
@@ -78,6 +43,7 @@ fun ModuleApp() {
 
     ListDetailPaneScaffold(
         scaffoldState = scaffoldNavigator.scaffoldState,
+        modifier = Modifier.background(color = colors.colorBgLayout),
         windowInsets = contentWindowInsets,
         listPane = {
             AnimatedPane(Modifier) {

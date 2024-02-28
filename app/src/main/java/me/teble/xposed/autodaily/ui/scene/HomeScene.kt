@@ -86,27 +86,22 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
     }
 
     Box {
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState) {
-                    RoundedSnackbar(it)
-                }
-            },
-            topBar = {
-                XAutoDailyTopBar(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp)
-                        .padding(vertical = 20.dp)
-                        .padding(start = 16.dp),
-                    icon = Icons.Notice,
-                    contentDescription = "公告",
-                    iconClick = {
-                        viewmodel.showNoticeDialog()
-                    }
-                )
-            },
-            containerColor = Color(0xFFF7F7F7)
+        Scaffold(snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState) {
+                RoundedSnackbar(it)
+            }
+        }, topBar = {
+            XAutoDailyTopBar(modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp)
+                .padding(vertical = 20.dp)
+                .padding(start = 16.dp),
+                icon = Icons.Notice,
+                contentDescription = "公告",
+                iconClick = {
+                    viewmodel.showNoticeDialog()
+                })
+        }, containerColor = Color(0xFFF7F7F7)
         ) { contentPadding ->
             Column(
                 modifier = Modifier
@@ -141,8 +136,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
     ) {
 
         Text(
-            text = execTaskNum.toString(),
-            style = TextStyle(
+            text = execTaskNum.toString(), style = TextStyle(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Light,
                 color = Color(0xFF2ECC71),
@@ -150,8 +144,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
             )
         )
         Text(
-            text = "今日执行",
-            style = TextStyle(
+            text = "今日执行", style = TextStyle(
                 color = Color(0xFF4F5355),
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
@@ -195,14 +188,10 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
 private fun GridLayout(navController: NavController, viewModel: HomeViewModel = viewModel()) {
     val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
     Column(
-        modifier = Modifier
-            .padding(top = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
+        modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CardItem(
                 iconColor = Color(0xFF47B6FF),
@@ -214,11 +203,7 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
                 navController.navigate(NavigationItem.Sign, NavigationItem.Main)
             }
             CardItem(
-                iconColor = Color(0xFF8286FF),
-                Icons.Script,
-                "自定义脚本",
-                "敬请期待",
-                false
+                iconColor = Color(0xFF8286FF), Icons.Script, "自定义脚本", "敬请期待", false
             )
         }
         Column(
@@ -226,23 +211,14 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
                 .fillMaxWidth()
                 .background(color = Color(0xFFFFFFFF), SmootherShape(12.dp)),
         ) {
-            TextItem(
-                iconColor = Color(0xFF60D893),
-                Icons.Setting,
-                "设置",
-                onClick = {
-                    navController.navigate(NavigationItem.Setting, NavigationItem.Main)
-                }
+            TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onClick = {
+                navController.navigate(NavigationItem.Setting, NavigationItem.Main)
+            }
 
             )
-            TextItem(
-                iconColor = Color(0xFFFFBC04),
-                Icons.About,
-                "关于",
-                onClick = {
-                    navController.navigate(NavigationItem.About, NavigationItem.Main)
-                }
-            )
+            TextItem(iconColor = Color(0xFFFFBC04), Icons.About, "关于", onClick = {
+                navController.navigate(NavigationItem.About, NavigationItem.Main)
+            })
 
         }
     }
@@ -275,28 +251,24 @@ private fun NoticeDialog(
 
 
     if (state.visible) {
-        BottomSheet(
-            state = state,
+        BottomSheet(state = state,
             skipPeeked = true,
             shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            backgroundColor = Color(0xFFFFFFFF),
+            backgroundColor = colors.colorBgDialog,
             behaviors = DefaultDialogSheetBehaviors,
-            dragHandle = {}
-        ) {
+            dragHandle = {}) {
             Column(
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
                     .defaultNavigationBarPadding()
             ) {
                 Text(
-                    text = "公告",
-                    style = TextStyle(
+                    text = "公告", style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFF202124),
                         textAlign = TextAlign.Center
-                    ),
-                    modifier = Modifier
+                    ), modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(top = 20.dp)
                 )
@@ -304,8 +276,7 @@ private fun NoticeDialog(
                 HorizontalDivider(
                     color = Color(0xFFF7F7F7),
                     thickness = 1.dp,
-                    modifier = Modifier
-                        .padding(top = 20.dp)
+                    modifier = Modifier.padding(top = 20.dp)
                 )
 
                 Text(
@@ -348,11 +319,13 @@ private fun RowScope.CardItem(
 ) {
     val cardColorAlpha: Float by animateFloatAsState(
         targetValue = if (enable) DefaultAlpha else CardDisabledAlpha,
-        animationSpec = spring(), label = "switch item"
+        animationSpec = spring(),
+        label = "switch item"
     )
     val textColorAlpha: Float by animateFloatAsState(
         targetValue = if (enable) DefaultAlpha else DisabledAlpha,
-        animationSpec = spring(), label = "switch item color"
+        animationSpec = spring(),
+        label = "switch item color"
     )
 
     Column(
@@ -393,10 +366,7 @@ private fun RowScope.CardItem(
 
 @Composable
 private fun TextItem(
-    iconColor: Color,
-    imageVector: ImageVector,
-    text: String,
-    onClick: () -> Unit
+    iconColor: Color, imageVector: ImageVector, text: String, onClick: () -> Unit
 ) {
     Row(
         Modifier
@@ -416,12 +386,8 @@ private fun TextItem(
         )
 
         Text(
-            text = text,
-            Modifier.padding(start = 16.dp),
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+            text = text, Modifier.padding(start = 16.dp), style = TextStyle(
+                fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF202124)
             )
         )
 
