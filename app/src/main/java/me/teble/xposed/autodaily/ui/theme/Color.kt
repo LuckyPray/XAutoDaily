@@ -6,7 +6,7 @@ import androidx.compose.ui.graphics.Color
 val LightColorPalette = XAutodailyColors(
     themeColor = Color(0xFF0095FF),
     rippleColor = Color(0xFF3C4043),
-
+    colorSuccess = Color(0xFF2ECC71),
 
     colorBgLayout = Color(0xFFF7F7F7),
     colorBgContainer = Color(0xFFFFFFFF),
@@ -34,7 +34,7 @@ val LightColorPalette = XAutodailyColors(
 val DarkColorPalette = XAutodailyColors(
     themeColor = Color(0xFF47B6FF),
     rippleColor = Color(0xFFFFFFFF),
-
+    colorSuccess = Color(0xFF60D893),
 
     colorBgLayout = Color(0xFF202124),
     colorBgContainer = Color(0xFF303134),
@@ -59,7 +59,7 @@ val DarkColorPalette = XAutodailyColors(
 val BlackColorPalette = XAutodailyColors(
     themeColor = Color(0xFF47B6FF),
     rippleColor = Color(0xFFFFFFFF),
-
+    colorSuccess = Color(0xFF60D893),
 
     colorBgLayout = Color(0xFF202124),
     colorBgContainer = Color(0xFF303134),
@@ -89,6 +89,7 @@ val BlackColorPalette = XAutodailyColors(
 data class XAutodailyColors(
     val themeColor: Color,
     val rippleColor: Color,
+    val colorSuccess: Color,
 
     val colorBgLayout: Color,
     val colorBgContainer: Color,

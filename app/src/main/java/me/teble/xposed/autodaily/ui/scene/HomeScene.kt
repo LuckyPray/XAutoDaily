@@ -145,7 +145,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
         )
         Text(
             text = "今日执行", style = TextStyle(
-                color = Color(0xFF4F5355),
+                color = colors.colorTextSecondary,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
