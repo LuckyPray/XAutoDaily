@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledFontAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 import java.util.Locale
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
@@ -79,7 +80,7 @@ fun DatePicker(
             )
         )
         VerticalDivider(
-            color = Color(0xFFE6E6E6),
+            color = colors.colorDialogDivider,
             thickness = 2.dp,
             modifier = Modifier
                 .padding(vertical = 66.dp)
@@ -188,7 +189,7 @@ internal fun TextPicker(
             ) {
                 AutoSizeText(
                     text = String.format(Locale.getDefault(), "%02d", index),
-                    color = Color(0xFF202124),
+                    color = colors.colorText,
                     maxLines = 1,
                     modifier = Modifier.graphicsLayer {
                         this.scaleX = fontScale

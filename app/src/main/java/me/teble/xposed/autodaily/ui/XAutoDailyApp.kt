@@ -6,6 +6,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.scene.AboutScene
 import me.teble.xposed.autodaily.ui.scene.DeveloperScene
 import me.teble.xposed.autodaily.ui.scene.EditEnvScene
@@ -53,7 +54,7 @@ fun NavController.navigateUrl(uri: String) {
 }
 
 @Composable
-fun XAutoDailyApp() {
+fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
     val navController = rememberNavController()
     NavHost(
         navController = navController,
@@ -71,7 +72,7 @@ fun XAutoDailyApp() {
         }
 
         composable(NavigationItem.Setting.route) {
-            SettingScene(navController)
+            SettingScene(navController, themeViewModel)
         }
 
         composable(NavigationItem.Developer.route) {

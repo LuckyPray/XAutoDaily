@@ -6,6 +6,7 @@ import me.teble.xposed.autodaily.hook.config.Config.accountConfig
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.MetaInfo
 import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.task.util.Const.BLACK_THEME
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_VERSION
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
@@ -26,19 +27,24 @@ import me.teble.xposed.autodaily.task.util.Const.RETRY_COUNT
 import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXEC_STATUS
+import me.teble.xposed.autodaily.task.util.Const.THEME
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.utils.parse
+import me.teble.xposed.autodaily.utils.toCode
 import me.teble.xposed.autodaily.utils.toJsonString
+import me.teble.xposed.autodaily.utils.toTheme
 
 object ConfUnit {
-    val needUpdate: Boolean get() {
-        metaInfoCache?.let {
-            if (BuildConfig.VERSION_CODE < it.app.versionCode) {
-                return true
+    val needUpdate: Boolean
+        get() {
+            metaInfoCache?.let {
+                if (BuildConfig.VERSION_CODE < it.app.versionCode) {
+                    return true
+                }
             }
+            return false
         }
-        return false
-    }
 
     // -------------------------------------------------- //\
     var metaInfoCache: MetaInfo?
@@ -92,6 +98,15 @@ object ConfUnit {
     var globalEnable: Boolean
         get() = accountConfig.getBoolean(GLOBAL_ENABLE, false)
         set(value) = accountConfig.putBoolean(GLOBAL_ENABLE, value)
+
+    var theme: XAutodailyTheme.Theme
+        get() = xaConfig.getInt(THEME, 0).toTheme()
+        set(value) = xaConfig.putInt(THEME, value.toCode())
+
+
+    var blackTheme: Boolean
+        get() = xaConfig.getBoolean(BLACK_THEME, false)
+        set(value) = xaConfig.putBoolean(BLACK_THEME, value)
 }
 
 // -------------------------------------------------- //
@@ -176,6 +191,7 @@ data class TaskErrorInfo(
     override fun toString(): String {
         return "${dateStr}|${count}"
     }
+
     companion object {
         fun valueOf(str: String): TaskErrorInfo {
             runCatching {

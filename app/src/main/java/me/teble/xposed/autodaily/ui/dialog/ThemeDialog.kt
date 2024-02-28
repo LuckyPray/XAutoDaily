@@ -69,6 +69,7 @@ fun ThemeModelDialog(
         containerColor = colors.colorBgDialog,
         windowInsets = contentWindowInsets,
         dragHandle = {},
+        scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {
         Column {
@@ -79,7 +80,7 @@ fun ThemeModelDialog(
             )
 
             HorizontalDivider(
-                color = Color(0xFFF7F7F7),
+                color = colors.colorDialogDivider,
                 thickness = 1.dp,
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
@@ -119,7 +120,7 @@ fun ThemeModelDialog(
                 )
 
                 HorizontalDivider(
-                    color = Color(0xFFF7F7F7),
+                    color = colors.colorDialogDivider,
                     modifier = Modifier
                         .padding(vertical = 12.dp)
                         .height(1.dp)
@@ -165,7 +166,7 @@ private fun ThemeItem(
         if (checked) colors.themeColor.copy(0.08f) else Color.Transparent, label = ""
     )
     val textColor by animateColorAsState(
-        if (checked) colors.themeColor else Color(0xFF4F5355), label = ""
+        if (checked) colors.themeColor else colors.colorTextTheme, label = ""
     )
 
     val fabColor =

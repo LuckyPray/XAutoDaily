@@ -89,17 +89,53 @@ fun XAutodailyTheme(
         animationSpec = tween(600), label = "ripple color"
     )
 
+    val colorTextTheme by animateColorAsState(
+        targetValue = targetColors.colorTextTheme,
+        animationSpec = tween(600), label = "ripple color"
+    )
+
+    val colorTextSmallTitle by animateColorAsState(
+        targetValue = targetColors.colorTextSmallTitle,
+        animationSpec = tween(600), label = "ripple color"
+    )
+
     val colorBgDialog by animateColorAsState(
         targetValue = targetColors.colorBgDialog,
         animationSpec = tween(600), label = "ripple color"
     )
+    val colorBgSearch by animateColorAsState(
+        targetValue = targetColors.colorBgSearch,
+        animationSpec = tween(600), label = "ripple color"
+    )
 
+    val colorBgMask by animateColorAsState(
+        targetValue = targetColors.colorBgMask,
+        animationSpec = tween(600), label = "ripple color"
+    )
     val colorSwitch by animateColorAsState(
         targetValue = targetColors.colorSwitch,
         animationSpec = tween(600), label = "ripple color"
     )
 
+    val colorIcon by animateColorAsState(
+        targetValue = targetColors.colorIcon,
+        animationSpec = tween(600), label = "ripple color"
+    )
 
+    val colorSelection by animateColorAsState(
+        targetValue = targetColors.colorSelection,
+        animationSpec = tween(600), label = "ripple color"
+    )
+
+    val colorDialogDivider by animateColorAsState(
+        targetValue = targetColors.colorDialogDivider,
+        animationSpec = tween(600), label = "ripple color"
+    )
+
+    val colorTextSearch by animateColorAsState(
+        targetValue = targetColors.colorTextSearch,
+        animationSpec = tween(600), label = "ripple color"
+    )
     val colors = XAutodailyColors(
         themeColor = themeColor,
         rippleColor = rippleColor,
@@ -108,11 +144,19 @@ fun XAutodailyTheme(
         colorBgLayout = colorBgLayout,
         colorBgContainer = colorBgContainer,
         colorBgDialog = colorBgDialog,
+        colorBgSearch = colorBgSearch,
+        colorBgMask = colorBgMask,
 
         colorText = colorText,
         colorTextSecondary = colorTextSecondary,
+        colorTextTheme = colorTextTheme,
+        colorTextSmallTitle = colorTextSmallTitle,
+        colorTextSearch = colorTextSearch,
 
-        colorSwitch = colorSwitch
+        colorSwitch = colorSwitch,
+        colorIcon = colorSwitch,
+        colorSelection = colorSelection,
+        colorDialogDivider = colorDialogDivider
 
     )
     val rippleConfiguration = RippleConfiguration(

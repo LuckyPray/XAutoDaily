@@ -94,7 +94,7 @@ fun IconEditText(
             textStyle = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = colors.colorText
             ),
 
             singleLine = false,
@@ -103,7 +103,7 @@ fun IconEditText(
             hintTextStyle = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124).copy(alpha = DisabledAlpha)
+                color = colors.colorText.copy(alpha = DisabledAlpha)
             ),
         )
 

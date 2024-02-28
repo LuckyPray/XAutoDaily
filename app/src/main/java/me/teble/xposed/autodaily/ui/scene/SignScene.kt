@@ -5,7 +5,6 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -35,6 +33,7 @@ import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
 import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
 fun SignScene(navController: NavController, signViewModel: SignViewModel = viewModel()) {
@@ -46,12 +45,10 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
                     navController.popBackStack()
                 })
         },
-        containerColor = Color(0xFFF7F7F7)
+        containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
         Column(
             Modifier
-                .fillMaxSize()
-                .background(Color(0xFFF7F7F7))
                 .padding(contentPadding)
         ) {
             val globalEnable by signViewModel.globalEnable.collectAsState()
@@ -60,7 +57,7 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
                     .padding(horizontal = 16.dp)
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp))
-                    .background(color = Color(0xffffffff)),
+                    .background(color = XAutodailyTheme.colors.colorBgContainer),
                 text = "总开关",
                 onClick = {
                     signViewModel.updateGlobalEnable(it)
@@ -119,7 +116,7 @@ private fun GroupColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp))
-                    .background(color = Color(0xffffffff).copy(alpha = itemAlpha)),
+                    .background(color = XAutodailyTheme.colors.colorBgContainer.copy(alpha = itemAlpha)),
             ) {
                 tasks.forEach { task ->
 

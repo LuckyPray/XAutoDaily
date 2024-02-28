@@ -22,7 +22,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,7 +68,7 @@ fun CheckFriendsDialog(
             )
 
             HorizontalDivider(
-                color = Color(0xFFF7F7F7),
+                color = colors.colorDialogDivider,
                 thickness = 1.dp,
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
@@ -145,8 +144,7 @@ fun CheckFriendsDialog(
                             infoText = friend.uin,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(SmootherShape(12.dp))
-                                .background(Color(0xFFFFFFFF)),
+                                .clip(SmootherShape(12.dp)),
                             clickEnabled = true,
                             enable = false,
                             onClick = {
@@ -181,12 +179,12 @@ private fun SearchBar(text: String, onValueChange: (String) -> Unit) {
             .padding(top = 16.dp)
             .fillMaxWidth()
             .clip(SmootherShape(100.dp))
-            .background(Color(0xFFF2F2F2))
+            .background(colors.colorBgSearch)
             .padding(vertical = 13.dp, horizontal = 12.dp)
     ) {
         Icon(
             imageVector = Icons.Search,
-            tint = Color(0xFF919191),
+            tint = colors.colorTextSearch,
             contentDescription = ""
         )
         HintEditText(
@@ -196,13 +194,13 @@ private fun SearchBar(text: String, onValueChange: (String) -> Unit) {
             textStyle = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(0xFF202124),
+                color = colors.colorText,
             ),
             hintText = "你好",
             hintTextStyle = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(0xFF919191),
+                color = colors.colorTextSearch,
             )
         )
     }

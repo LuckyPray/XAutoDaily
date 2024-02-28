@@ -30,6 +30,7 @@ import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
 import me.teble.xposed.autodaily.ui.navigateUrl
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
 fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = viewModel()) {
@@ -39,7 +40,7 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
                 navController.popBackStack()
             })
         },
-        containerColor = Color(0xFFF7F7F7)
+        containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
 
         val context = LocalContext.current

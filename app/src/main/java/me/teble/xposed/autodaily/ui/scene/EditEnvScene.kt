@@ -43,6 +43,7 @@ import me.teble.xposed.autodaily.ui.dialog.CheckFriendsDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
 fun EditEnvScene(navController: NavController, groupId: String?, taskId: String) {
@@ -82,7 +83,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                     }
                 )
             },
-            containerColor = Color(0xFFFFFFFF)
+            containerColor = XAutodailyTheme.colors.colorBgContainer
         ) { contentPadding ->
 
             Column(

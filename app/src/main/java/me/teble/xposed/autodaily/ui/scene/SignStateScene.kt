@@ -17,7 +17,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -31,6 +30,7 @@ import me.teble.xposed.autodaily.ui.lastExecMsg
 import me.teble.xposed.autodaily.ui.lastExecTime
 import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
 fun SignStateScene(
@@ -45,7 +45,7 @@ fun SignStateScene(
                     navController.popBackStack()
                 })
         },
-        containerColor = Color(0xFFF7F7F7)
+        containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
         val tasksState by signStateViewModel.tasksState.collectAsState()
 
@@ -68,7 +68,7 @@ fun SignStateScene(
                 modifier = Modifier
                     .padding(contentPadding)
                     .clip(SmootherShape(12.dp))
-                    .background(Color(0xFFFFFFFF)),
+                    .background(XAutodailyTheme.colors.colorBgContainer),
                 contentPadding = bottomPaddingValue,
             ) {
 
@@ -116,7 +116,7 @@ private fun StateItem(
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124)
+                color = XAutodailyTheme.colors.colorText
             )
         )
 
@@ -125,7 +125,7 @@ private fun StateItem(
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(0xFF4F5355)
+                color = XAutodailyTheme.colors.colorTextSecondary
             )
         )
     }

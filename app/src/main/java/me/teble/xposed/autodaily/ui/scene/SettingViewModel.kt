@@ -34,6 +34,24 @@ class SettingViewModel : ViewModel() {
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
+
+    private val _showThemeDialog = MutableStateFlow(false)
+    val showThemeDialog = _showThemeDialog.asStateFlow()
+
+    fun showThemeDialog() {
+        updateThemeDialogState(true)
+    }
+
+    fun dismissThemeDialog() {
+        updateThemeDialogState(false)
+    }
+
+    fun updateThemeDialogState(boolean: Boolean) {
+        if (_showThemeDialog.value != boolean) {
+            _showThemeDialog.value = boolean
+        }
+    }
+
     fun showSnackbar(text: String) {
         viewModelScope.launch {
             _snackbarText.emit(text)

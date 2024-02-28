@@ -101,7 +101,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
                 iconClick = {
                     viewmodel.showNoticeDialog()
                 })
-        }, containerColor = Color(0xFFF7F7F7)
+        }, containerColor = colors.colorBgLayout
         ) { contentPadding ->
             Column(
                 modifier = Modifier
@@ -166,7 +166,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .clip(shape = SmootherShape(radius = 24.dp))
-                    .background(color = colors.themeColor.copy(alpha = 0.06f))
+                    .background(color = colors.themeColor.copy(alpha = 0.08f))
                     .clickable(role = Role.Button, onClick = {})
                     .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
                 style = TextStyle(
@@ -209,7 +209,7 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color(0xFFFFFFFF), SmootherShape(12.dp)),
+                .background(color = colors.colorBgContainer, SmootherShape(12.dp)),
         ) {
             TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onClick = {
                 navController.navigate(NavigationItem.Setting, NavigationItem.Main)
@@ -332,7 +332,7 @@ private fun RowScope.CardItem(
         Modifier
             .weight(1f)
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xFFFFFFFF).copy(alpha = cardColorAlpha))
+            .background(color = colors.colorBgContainer.copy(alpha = cardColorAlpha))
             .clickable(role = Role.Button, enabled = enable, onClick = onClick)
             .padding(top = 24.dp, start = 16.dp, bottom = 24.dp)
     ) {
@@ -350,7 +350,7 @@ private fun RowScope.CardItem(
                 fontSize = 18.sp,
                 lineHeight = 21.6.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF202124).copy(textColorAlpha),
+                color = colors.colorText.copy(textColorAlpha),
             )
         )
         Text(
@@ -358,7 +358,7 @@ private fun RowScope.CardItem(
                 fontSize = 12.sp,
                 lineHeight = 14.4.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(0xFF4F5355).copy(textColorAlpha),
+                color = colors.colorTextSecondary.copy(textColorAlpha),
             )
         )
     }
@@ -387,7 +387,7 @@ private fun TextItem(
 
         Text(
             text = text, Modifier.padding(start = 16.dp), style = TextStyle(
-                fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color(0xFF202124)
+                fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colors.colorText
             )
         )
 
@@ -397,7 +397,7 @@ private fun TextItem(
             imageVector = Icons.ChevronRight,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = Color(0xFFE6E6E6)
+            tint = colors.colorIcon
         )
     }
 }

@@ -10,7 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.navigationBarLightOldMode
 import com.agoines.system.common.setNavigationBarTranslation
@@ -21,7 +20,7 @@ import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class MainActivity : ComponentActivity() {
-    val themeViewmodel: ModuleThemeViewModel by viewModels()
+    private val viewModel: ModuleThemeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         setStatusBarTranslation()
         setNavigationBarTranslation()
@@ -37,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
 
         lifecycleScope.launch {
-            themeViewmodel.theme.collect {
+            viewModel.theme.collect {
                 when (it) {
                     XAutodailyTheme.Theme.Light -> {
                         window.statusBarLightMode()
@@ -59,9 +58,8 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
-            val themeViewModel: ModuleThemeViewModel = viewModel()
-            val theme by themeViewModel.theme.collectAsStateWithLifecycle(XAutodailyTheme.Theme.Light)
-            val isBlack by themeViewModel.blackTheme.collectAsStateWithLifecycle(false)
+            val theme by viewModel.theme.collectAsStateWithLifecycle(XAutodailyTheme.Theme.Light)
+            val isBlack by viewModel.blackTheme.collectAsStateWithLifecycle(false)
             XAutodailyTheme(isBlack = isBlack, colorTheme = theme) {
                 ModuleApp()
             }

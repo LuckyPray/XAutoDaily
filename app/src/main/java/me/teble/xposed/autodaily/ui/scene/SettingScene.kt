@@ -1,15 +1,18 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -17,10 +20,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
@@ -29,12 +33,20 @@ import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.navigate
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingScene(navController: NavController, viewmodel: SettingViewModel = viewModel()) {
+fun SettingScene(
+    navController: NavController,
+    themeViewModel: MainThemeViewModel,
+    viewmodel: SettingViewModel = viewModel()
+) {
 
     val snackbarHostState = remember { SnackbarHostState() }
     // 展示对应 snackbarText
@@ -43,35 +55,73 @@ fun SettingScene(navController: NavController, viewmodel: SettingViewModel = vie
             snackbarHostState.showSnackbar(it)
         }
     }
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
-        },
-        topBar = {
-            TopBar(text = "设置", backClick = {
-                navController.popBackStack()
-            })
-        },
-        containerColor = Color(0xFFF7F7F7)
-    ) { contentPadding ->
-        // Screen content
-        Column(
-            Modifier
-                .fillMaxSize()
 
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
-                .clip(SmootherShape(12.dp))
-                .verticalScroll(rememberScrollState())
-                .defaultNavigationBarPadding()
-        ) {
+    Box {
+        val theme by themeViewModel.theme.collectAsStateWithLifecycle(initialValue = XAutodailyTheme.Theme.Light)
+        val isBlack by themeViewModel.blackTheme.collectAsStateWithLifecycle(initialValue = false)
 
-            EntryLayout(navController)
-            ConfigLayout()
-            CommonLayout()
-            BackupLayout()
+
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val showThemeDialog by viewmodel.showThemeDialog.collectAsStateWithLifecycle()
+
+        LaunchedEffect(showThemeDialog) {
+            if (showThemeDialog) {
+                sheetState.expand()
+            } else {
+                sheetState.hide()
+            }
         }
+
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
+            },
+            topBar = {
+                TopBar(text = "设置", backClick = {
+                    navController.popBackStack()
+                })
+            },
+            containerColor = XAutodailyTheme.colors.colorBgLayout
+        ) { contentPadding ->
+            // Screen content
+            Column(
+                Modifier
+                    .fillMaxSize()
+
+                    .padding(contentPadding)
+                    .padding(horizontal = 16.dp)
+                    .clip(SmootherShape(12.dp))
+                    .verticalScroll(rememberScrollState())
+                    .defaultNavigationBarPadding()
+            ) {
+
+                EntryLayout(navController)
+                ConfigLayout()
+                CommonLayout()
+                BackupLayout()
+            }
+        }
+
+
+        if (sheetState.isVisible || showThemeDialog) {
+            ThemeModelDialog(
+                state = sheetState,
+                targetTheme = theme,
+                isBlack = isBlack,
+                onDismiss = {
+                    viewmodel.dismissThemeDialog()
+                },
+
+                onConfirm = { themeCode, black ->
+                    themeViewModel.updateBlack(black)
+                    themeViewModel.updateTheme(themeCode)
+                    viewmodel.dismissThemeDialog()
+                }
+            )
+        }
+
     }
+
 }
 
 @Composable
@@ -86,7 +136,7 @@ private fun EntryLayout(navController: NavController) {
 
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xffffffff)),
+            .background(color = colors.colorBgContainer),
         text = "签到状态", clickEnabled = true,
         onClick = {
             navController.navigate(NavigationItem.SignState, NavigationItem.About)
@@ -105,7 +155,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xffffffff)),
+            .background(color = colors.colorBgContainer),
     ) {
 
         val showTaskToast by viewmodel.showTaskToast.collectAsState()
@@ -215,7 +265,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
 }
 
 @Composable
-private fun CommonLayout() {
+private fun CommonLayout(viewmodel: SettingViewModel = viewModel()) {
     SmallTitle(
         title = "模块配置",
         modifier = Modifier
@@ -226,10 +276,10 @@ private fun CommonLayout() {
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xffffffff)),
+            .background(color = colors.colorBgContainer),
         text = "主题风格", clickEnabled = true,
         onClick = {
-
+            viewmodel.showThemeDialog()
         })
 }
 
@@ -245,7 +295,7 @@ private fun BackupLayout(viewmodel: SettingViewModel = viewModel()) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xffffffff)),
+            .background(color = colors.colorBgContainer),
     ) {
         TextInfoItem(
             modifier = Modifier

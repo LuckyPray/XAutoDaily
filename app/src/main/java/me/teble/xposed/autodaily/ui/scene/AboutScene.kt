@@ -76,7 +76,7 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
                     RoundedSnackbar(it)
                 }
             },
-            containerColor = Color(0xFFF7F7F7),
+            containerColor = colors.colorBgLayout,
             contentWindowInsets = contentWindowInsets
         ) { contentPadding ->
             Column(

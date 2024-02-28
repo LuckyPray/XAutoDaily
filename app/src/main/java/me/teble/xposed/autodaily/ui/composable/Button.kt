@@ -32,7 +32,6 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.SelectNormal
 import me.teble.xposed.autodaily.ui.icon.icons.SelectSelectd
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,7 +47,7 @@ fun SwitchButton(
         if (boolean) colors.themeColor else colors.colorSwitch, label = ""
     )
     val fabColor = RippleConfiguration(
-        color = Color(0xFFFFFFFF), rippleAlpha = RippleAlpha(
+        color = Color.White, rippleAlpha = RippleAlpha(
             pressedAlpha = 0.36f,
             focusedAlpha = 0.36f,
             draggedAlpha = 0.24f,
@@ -96,9 +95,7 @@ fun SwitchButton(
 @Composable
 fun SelectButton(boolean: Boolean, modifier: Modifier = Modifier) {
     val selectColor by animateColorAsState(
-        targetValue = if (boolean) XAutodailyTheme.colors.themeColor else Color(
-            0xFFE6E6E6
-        ), label = "SelectButton"
+        targetValue = if (boolean) colors.themeColor else colors.colorSwitch, label = "SelectButton"
     )
     Icon(
         imageVector = if (boolean) Icons.SelectSelectd else Icons.SelectNormal,
@@ -117,17 +114,17 @@ fun DialogButton(
     onClick: () -> Unit
 ) {
 
-    val buttonColor = RippleConfiguration(color = XAutodailyTheme.colors.themeColor)
+    val buttonColor = RippleConfiguration(color = colors.themeColor)
     CompositionLocalProvider(LocalRippleConfiguration provides buttonColor) {
 
         val backgroundColor by animateColorAsState(
-            if (clickEnabled) XAutodailyTheme.colors.themeColor.copy(0.06f) else XAutodailyTheme.colors.themeColor.copy(
+            if (clickEnabled) colors.themeColor.copy(0.06f) else colors.themeColor.copy(
                 0.04f
             ), label = ""
         )
 
         val textColor by animateColorAsState(
-            if (clickEnabled) XAutodailyTheme.colors.themeColor else XAutodailyTheme.colors.themeColor.copy(
+            if (clickEnabled) colors.themeColor else colors.themeColor.copy(
                 0.6f
             ), label = ""
         )

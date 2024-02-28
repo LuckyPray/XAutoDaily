@@ -13,7 +13,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -58,7 +57,7 @@ fun UpdateDialog(
             )
 
             HorizontalDivider(
-                color = Color(0xFFF7F7F7),
+                color = colors.colorDialogDivider,
                 thickness = 1.dp,
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
@@ -74,7 +73,7 @@ fun UpdateDialog(
                     .padding(horizontal = 32.dp)
                     .verticalScroll(rememberScrollState()),
                 style = TextStyle(
-                    color = Color(0xFF4F5355),
+                    color = colors.colorTextSecondary,
                     fontWeight = FontWeight.Normal,
                     fontSize = 14.sp
                 )

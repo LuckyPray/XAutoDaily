@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.dialog
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -98,9 +100,13 @@ private fun ListItem(
     checked: Boolean = false,
     onClick: () -> Unit = {}
 ) {
-    // 如果添加 animateColorAsState 动画，则在点击确定的时候有概率闪退，我也不知道什么问题，不过这个加不加点击动画都那样不管他
-    val backgroundColor = if (checked) Color(0xFFF5FBFF) else Color.Transparent
-    val textColor = if (checked) colors.themeColor else Color(0xFF4F5355)
+
+    val backgroundColor by animateColorAsState(
+        if (checked) colors.themeColor.copy(0.08f) else Color.Transparent, label = ""
+    )
+    val textColor by animateColorAsState(
+        if (checked) colors.themeColor else colors.colorTextTheme, label = ""
+    )
 
     val fabColor =
         RippleConfiguration(color = if (checked) colors.themeColor else Color.Unspecified)

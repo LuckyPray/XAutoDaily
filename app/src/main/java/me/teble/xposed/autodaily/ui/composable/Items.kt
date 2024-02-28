@@ -76,7 +76,7 @@ fun TextItem(
             imageVector = Icons.ChevronRight,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = Color(0xFFE6E6E6)
+            tint = colors.colorIcon
         )
     }
 }
@@ -117,7 +117,7 @@ fun SelectionItem(
             imageVector = Icons.ChevronDown,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = Color(0xFFD6DDE7)
+            tint = colors.colorSelection
         )
     }
 }
@@ -171,7 +171,7 @@ fun TextInfoItem(
             imageVector = Icons.ChevronRight,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = Color(0xFFE6E6E6)
+            tint = colors.colorIcon
         )
     }
 }
@@ -446,7 +446,7 @@ fun ImageItem(
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .size(24.dp),
-            tint = Color(0xFFE6E6E6)
+            tint = colors.colorIcon
         )
     }
 }

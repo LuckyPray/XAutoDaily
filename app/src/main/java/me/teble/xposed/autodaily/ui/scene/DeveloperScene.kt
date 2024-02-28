@@ -28,6 +28,7 @@ import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 
 @Composable
@@ -52,7 +53,7 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
                 RoundedSnackbar(it)
             }
         },
-        containerColor = Color(0xFFF7F7F7)
+        containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
         Column(
             Modifier

@@ -11,45 +11,70 @@ val LightColorPalette = XAutodailyColors(
     colorBgLayout = Color(0xFFF7F7F7),
     colorBgContainer = Color(0xFFFFFFFF),
     colorBgDialog = Color(0xFFFFFFFF),
+    colorBgSearch = Color(0xFFF2F2F2),
+    colorBgMask = Color(0xFF202124).copy(0.38f),
 
     colorText = Color(0xFF202124),
     colorTextSecondary = Color(0xFF4F5355),
+    colorTextTheme = Color(0xFF3C4043),
+    colorTextSmallTitle = Color(0xFF7F98AF),
+    colorTextSearch = Color(0xFF999999),
 
-    colorSwitch = Color(0xFFE6E6E6)
+    colorSwitch = Color(0xFFE6E6E6),
+    colorIcon = Color(0xFFE6E6E6),
+    colorSelection = Color(0xFFD6DDE7),
+    colorDialogDivider = Color(0xFFF7F7F7),
 
-)
+    )
 
 
 val DarkColorPalette = XAutodailyColors(
     themeColor = Color(0xFF47B6FF),
-    rippleColor = Color(0xFF3C4043),
+    rippleColor = Color(0xFFFFFFFF),
 
 
     colorBgLayout = Color(0xFF202124),
     colorBgContainer = Color(0xFF303134),
     colorBgDialog = Color(0xFF3C4043),
+    colorBgSearch = Color(0xFF4F5355),
+    colorBgMask = Color(0xFFFFFFFF).copy(0.18f),
 
     colorText = Color(0xFFFFFFFF),
     colorTextSecondary = Color(0xFFFFFFFF).copy(0.6f),
+    colorTextTheme = Color(0xFFFFFFFF).copy(0.87f),
+    colorTextSmallTitle = Color(0xFFFFFFFF).copy(0.6f),
+    colorTextSearch = Color(0xFFFFFFFF).copy(0.38f),
 
-
-    colorSwitch = Color(0xFF4F5355)
+    colorSwitch = Color(0xFF4F5355),
+    colorIcon = Color(0xFFFFFFFF).copy(0.38f),
+    colorSelection = Color(0xFF5F6368),
+    colorDialogDivider = Color(0xFF474C4F),
 )
 
 val BlackColorPalette = XAutodailyColors(
     themeColor = Color(0xFF47B6FF),
-    rippleColor = Color(0xFF3C4043),
+    rippleColor = Color(0xFFFFFFFF),
 
 
     colorBgLayout = Color(0xFF202124),
     colorBgContainer = Color(0xFF303134),
     colorBgDialog = Color(0xFF3C4043),
+    colorBgSearch = Color(0xFF4F5355),
+    colorBgMask = Color(0xFFFFFFFF).copy(0.18f),
+
 
     colorText = Color(0xFFFFFFFF),
     colorTextSecondary = Color(0xFFFFFFFF).copy(0.6f),
+    colorTextTheme = Color(0xFFFFFFFF).copy(0.87f),
+    colorTextSmallTitle = Color(0xFFFFFFFF).copy(0.6f),
+    colorTextSearch = Color(0xFFFFFFFF).copy(0.38f),
 
 
-    colorSwitch = Color(0xFF4F5355)
+    colorSwitch = Color(0xFF4F5355),
+    colorIcon = Color(0xFFFFFFFF).copy(0.38f),
+
+    colorSelection = Color(0xFF5F6368),
+    colorDialogDivider = Color(0xFF474C4F),
 )
 
 /**
@@ -59,10 +84,21 @@ val BlackColorPalette = XAutodailyColors(
 data class XAutodailyColors(
     val themeColor: Color,
     val rippleColor: Color,
+
     val colorBgLayout: Color,
     val colorBgContainer: Color,
     val colorBgDialog: Color,
+    val colorBgSearch: Color,
+    val colorBgMask: Color,
+
     val colorText: Color,
     val colorTextSecondary: Color,
-    val colorSwitch: Color
+    val colorTextTheme: Color,
+    val colorTextSmallTitle: Color,
+    val colorTextSearch: Color,
+
+    val colorSwitch: Color,
+    val colorIcon: Color,
+    val colorSelection: Color,
+    val colorDialogDivider: Color,
 )
