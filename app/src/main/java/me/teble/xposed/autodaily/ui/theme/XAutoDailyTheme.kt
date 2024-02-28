@@ -94,6 +94,12 @@ fun XAutodailyTheme(
         animationSpec = tween(600), label = "ripple color"
     )
 
+    val colorSwitch by animateColorAsState(
+        targetValue = targetColors.colorSwitch,
+        animationSpec = tween(600), label = "ripple color"
+    )
+
+
     val colors = XAutodailyColors(
         themeColor = themeColor,
         rippleColor = rippleColor,
@@ -104,7 +110,9 @@ fun XAutodailyTheme(
         colorBgDialog = colorBgDialog,
 
         colorText = colorText,
-        colorTextSecondary = colorTextSecondary
+        colorTextSecondary = colorTextSecondary,
+
+        colorSwitch = colorSwitch
 
     )
     val rippleConfiguration = RippleConfiguration(

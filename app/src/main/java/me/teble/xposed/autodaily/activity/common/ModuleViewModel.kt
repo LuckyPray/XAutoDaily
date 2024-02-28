@@ -49,7 +49,7 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
             shizukuDaemonRunning,
         ) { isPermissionGranted, binderAvailable, errInfo, daemonRunning ->
             if (binderAvailable) {
-                if (isPermissionGranted) {
+                if (!isPermissionGranted) {
                     ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
                 } else if (!daemonRunning) {
                     ShisukuState.Warn(

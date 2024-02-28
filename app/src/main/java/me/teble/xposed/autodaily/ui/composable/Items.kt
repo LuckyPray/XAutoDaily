@@ -204,13 +204,12 @@ fun SwitchTextItem(
         )
         Spacer(modifier = Modifier.width(16.dp))
         SwitchButton(
-            enable,
-            modifier = Modifier
-                .size(width = 48.dp, height = 24.dp)
-                .clickable(
-                    role = Role.Switch,
-                    enabled = clickEnabled,
-                    onClick = { onClick(!enable) })
+            boolean = enable,
+            modifier = Modifier,
+            clickEnabled = clickEnabled,
+            onClick = {
+                onClick(!enable)
+            }
         )
     }
 }
@@ -250,13 +249,12 @@ fun SwitchTextDivideItem(
         Spacer(modifier = Modifier.width(16.dp))
 
         SwitchButton(
-            enable,
-            modifier = Modifier
-                .size(width = 48.dp, height = 24.dp)
-                .clickable(
-                    role = Role.Switch,
-                    enabled = clickEnabled,
-                    onClick = { onClick(!enable) })
+            boolean = enable,
+            modifier = Modifier,
+            clickEnabled = clickEnabled,
+            onClick = {
+                onClick(!enable)
+            }
         )
     }
 }
@@ -307,13 +305,12 @@ fun SwitchInfoItem(
         }
         Spacer(modifier = Modifier.width(16.dp))
         SwitchButton(
-            enable,
-            modifier = Modifier
-                .size(width = 48.dp, height = 24.dp)
-                .clickable(
-                    role = Role.Switch,
-                    enabled = clickEnabled,
-                    onClick = { onClick(!enable) })
+            boolean = enable,
+            modifier = Modifier,
+            clickEnabled = clickEnabled,
+            onClick = {
+                onClick(!enable)
+            }
         )
     }
 }
@@ -379,14 +376,12 @@ fun SwitchInfoDivideItem(
         )
         Spacer(modifier = Modifier.width(16.dp))
         SwitchButton(
-            enable,
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .size(width = 48.dp, height = 24.dp)
-                .clickable(
-                    role = Role.Switch,
-                    enabled = clickEnabled,
-                    onClick = { onChange(!enable) })
+            boolean = enable,
+            modifier = Modifier.padding(end = 16.dp),
+            clickEnabled = clickEnabled,
+            onClick = {
+                onChange(!enable)
+            }
         )
     }
 }
