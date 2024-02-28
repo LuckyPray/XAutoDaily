@@ -266,7 +266,7 @@ private fun NoticeDialog(
                     text = "公告", style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF202124),
+                        color = colors.colorText,
                         textAlign = TextAlign.Center
                     ), modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -274,7 +274,7 @@ private fun NoticeDialog(
                 )
 
                 HorizontalDivider(
-                    color = Color(0xFFF7F7F7),
+                    color = colors.colorDialogDivider,
                     thickness = 1.dp,
                     modifier = Modifier.padding(top = 20.dp)
                 )
@@ -288,7 +288,7 @@ private fun NoticeDialog(
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
-                        color = Color(0xFF4F5355),
+                        color = colors.colorTextSecondary,
                     )
                 )
 
