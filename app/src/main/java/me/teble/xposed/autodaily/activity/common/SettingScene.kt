@@ -43,7 +43,6 @@ import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.toJsonString
@@ -57,8 +56,6 @@ fun SettingScene(
     themeViewModel: ModuleThemeViewModel = viewModel(),
     viewmodel: SettingViewModel = viewModel()
 ) {
-    val theme by themeViewModel.theme.collectAsStateWithLifecycle(initialValue = Theme.Light)
-    val isBlack by themeViewModel.blackTheme.collectAsStateWithLifecycle(initialValue = false)
 
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -97,8 +94,8 @@ fun SettingScene(
         if (sheetState.isVisible || showThemeDialog) {
             ThemeModelDialog(
                 state = sheetState,
-                targetTheme = theme,
-                isBlack = isBlack,
+                targetTheme = themeViewModel.currentTheme,
+                isBlack = themeViewModel.blackTheme,
                 onDismiss = {
                     viewmodel.dismissThemeDialog()
                 },

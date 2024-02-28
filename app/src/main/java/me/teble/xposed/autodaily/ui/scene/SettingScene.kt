@@ -57,8 +57,8 @@ fun SettingScene(
     }
 
     Box {
-        val theme by themeViewModel.theme.collectAsStateWithLifecycle(initialValue = XAutodailyTheme.Theme.Light)
-        val isBlack by themeViewModel.blackTheme.collectAsStateWithLifecycle(initialValue = false)
+        val theme = themeViewModel.currentTheme
+        val isBlack = themeViewModel.blackTheme
 
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)

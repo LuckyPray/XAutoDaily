@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import me.teble.xposed.autodaily.activity.common.AppConfUnit
+import me.teble.xposed.autodaily.ui.ConfUnit
 
 val LocalXAutodailyShapes = compositionLocalOf {
     XAutodailyShapes
@@ -38,6 +40,26 @@ object XAutodailyTheme {
         System;
     }
 
+    @JvmStatic
+    fun getCurrentTheme(): Theme {
+        return ConfUnit.theme
+    }
+
+    @JvmStatic
+    fun getCurrentBlack(): Boolean {
+        return ConfUnit.blackTheme
+    }
+
+    @JvmStatic
+    fun getAppTheme(): Theme {
+        return AppConfUnit.theme
+    }
+
+    @JvmStatic
+    fun getAppBlack(): Boolean {
+        return AppConfUnit.blackTheme
+    }
+
 }
 
 
@@ -60,7 +82,7 @@ fun XAutodailyTheme(
 
     val themeColor by animateColorAsState(
         targetValue = targetColors.themeColor,
-        animationSpec = tween(600), label = "theme color"
+        animationSpec = tween(600), label = "currentTheme color"
     )
 
     val rippleColor by animateColorAsState(
@@ -70,7 +92,7 @@ fun XAutodailyTheme(
 
     val colorSuccess by animateColorAsState(
         targetValue = targetColors.colorSuccess,
-        animationSpec = tween(600), label = "ripple color"
+        animationSpec = tween(600), label = "color color"
     )
 
     val colorBgLayout by animateColorAsState(

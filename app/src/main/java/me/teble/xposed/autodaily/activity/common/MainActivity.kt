@@ -6,17 +6,13 @@ import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.lifecycleScope
 import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.navigationBarLightOldMode
 import com.agoines.system.common.setNavigationBarTranslation
 import com.agoines.system.common.setStatusBarTranslation
 import com.agoines.system.common.statusBarLightMode
 import com.agoines.system.common.statusBarLightOldMode
-import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class MainActivity : ComponentActivity() {
@@ -26,40 +22,49 @@ class MainActivity : ComponentActivity() {
         setNavigationBarTranslation()
         super.onCreate(savedInstanceState)
 
-        window.apply {
-            statusBarLightOldMode()
-            navigationBarLightOldMode()
+        when (XAutodailyTheme.getCurrentTheme()) {
+            XAutodailyTheme.Theme.Light -> {
+                window.statusBarLightOldMode()
+                window.navigationBarLightOldMode()
+            }
+
+            XAutodailyTheme.Theme.Dark -> {
+                window.statusBarLightOldMode(false)
+                window.navigationBarLightOldMode(false)
+            }
+
+            XAutodailyTheme.Theme.System -> {
+                window.statusBarLightOldMode(!isNightMode())
+                window.navigationBarLightOldMode(!isNightMode())
+            }
         }
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
 
-        lifecycleScope.launch {
-            viewModel.theme.collect {
-                when (it) {
-                    XAutodailyTheme.Theme.Light -> {
-                        window.statusBarLightMode()
-                        window.navigationBarLightMode()
-                    }
+        setContent {
 
-                    XAutodailyTheme.Theme.Dark -> {
-                        window.statusBarLightMode(false)
-                        window.navigationBarLightMode(false)
-                    }
 
-                    XAutodailyTheme.Theme.System -> {
-                        window.statusBarLightMode(!isNightMode())
-                        window.navigationBarLightMode(!isNightMode())
-                    }
+            when (viewModel.currentTheme) {
+                XAutodailyTheme.Theme.Light -> {
+                    window.statusBarLightMode()
+                    window.navigationBarLightMode()
+                }
+
+                XAutodailyTheme.Theme.Dark -> {
+                    window.statusBarLightMode(false)
+                    window.navigationBarLightMode(false)
+                }
+
+                XAutodailyTheme.Theme.System -> {
+                    window.statusBarLightMode(!isNightMode())
+                    window.navigationBarLightMode(!isNightMode())
                 }
             }
-        }
 
-
-        setContent {
-            val theme by viewModel.theme.collectAsStateWithLifecycle(XAutodailyTheme.Theme.Light)
-            val isBlack by viewModel.blackTheme.collectAsStateWithLifecycle(false)
+            val theme = viewModel.currentTheme
+            val isBlack = viewModel.blackTheme
             XAutodailyTheme(isBlack = isBlack, colorTheme = theme) {
                 ModuleApp()
             }
