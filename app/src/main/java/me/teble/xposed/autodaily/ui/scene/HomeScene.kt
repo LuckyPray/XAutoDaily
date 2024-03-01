@@ -34,7 +34,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -126,7 +125,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
-    val execTaskNum by viewmodel.execTaskNum.collectAsState()
+    val execTaskNum = viewmodel.execTaskNum
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
@@ -187,7 +186,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
 
 @Composable
 private fun GridLayout(navController: NavController, viewModel: HomeViewModel = viewModel()) {
-    val execTaskNum by viewModel.execTaskNum.collectAsState()
+    val execTaskNum = viewModel.execTaskNum
     Column(
         modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -233,7 +232,7 @@ private fun NoticeDialog(
     viewModel: HomeViewModel = viewModel()
 ) {
 
-    val noticeText by viewModel.noticeText.collectAsState()
+    val noticeText = viewModel.noticeText
     val state = rememberBottomSheetState()
 
     LaunchedEffect(viewModel.noticeDialog) {

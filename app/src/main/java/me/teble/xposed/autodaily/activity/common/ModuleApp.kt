@@ -35,7 +35,7 @@ fun ModuleApp() {
     )
 
     val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator<Nothing>(customDirective)
+        rememberListDetailPaneScaffoldNavigator<Nothing>(scaffoldDirective = customDirective)
 
     BackHandler(scaffoldNavigator.canNavigateBack()) {
         scaffoldNavigator.navigateBack()

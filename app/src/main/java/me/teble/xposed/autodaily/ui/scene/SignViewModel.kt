@@ -4,11 +4,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
@@ -22,7 +23,12 @@ class SignViewModel : ViewModel() {
 
     init {
         viewModelScope.launch(IO) {
-            taskGroupsState = ConfigUtil.loadSaveConf().taskGroups.toMutableStateList()
+            val taskGroups = ConfigUtil.loadSaveConf().taskGroups
+            withContext(Main) {
+                taskGroupsState.clear()
+                taskGroupsState.addAll(taskGroups)
+            }
+
         }
 
     }

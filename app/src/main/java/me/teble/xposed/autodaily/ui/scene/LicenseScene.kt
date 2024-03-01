@@ -45,9 +45,6 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
             viewmodel.readJson(context)
         }
 
-        val dependencies = viewmodel.dependencies
-
-
         LazyColumn(
             modifier = Modifier
                 .padding(contentPadding)
@@ -59,12 +56,14 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             items(
-                items = dependencies,
+                items = viewmodel.dependencies,
                 key = { it.name },
                 contentType = { it.name }) { dependency ->
                 DependencyItem(navController, dependency)
             }
         }
+
+
     }
 }
 
