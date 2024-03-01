@@ -16,7 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -81,7 +80,7 @@ private fun AuthorLayout(
             .padding(top = 16.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = Color(0xffffffff)),
+            .background(color = XAutodailyTheme.colors.colorBgContainer),
     ) {
         AuthorItem(
             icon = painterResource(id = R.drawable.teble),
