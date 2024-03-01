@@ -7,76 +7,65 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
-import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
-import me.teble.xposed.autodaily.data.KeepAlive
-import me.teble.xposed.autodaily.data.dataStore
 import me.teble.xposed.autodaily.hook.JumpActivityHook
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
 
-class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
+class ModuleViewModel() :
     ViewModel() {
-    private val shizukuDaemonRunning = MutableStateFlow(false)
-    private val shizukuErrInfo = MutableStateFlow("")
+    private var shizukuDaemonRunning by mutableStateOf(false)
+    private var shizukuErrInfo by mutableStateOf("")
 
-    private val keepAlive = dataStore.data.map {
-        it[KeepAlive] ?: false
-    }
+    private val keepAlive by mutableStateOf(AppConfUnit.keepAlive)
 
-    val shizukuState =
-        combine(
-            ShizukuApi.isPermissionGranted,
-            ShizukuApi.binderAvailable,
-            shizukuErrInfo,
-            shizukuDaemonRunning,
-        ) { isPermissionGranted, binderAvailable, errInfo, daemonRunning ->
-            if (binderAvailable) {
-                if (!isPermissionGranted) {
-                    ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
-                } else if (!daemonRunning) {
-                    ShisukuState.Warn(
-                        Shizuku.getVersion(),
-                        if (errInfo.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
-                    )
-                } else {
-                    ShisukuState.Activated(Shizuku.getVersion())
-                }
+    val shizukuState by derivedStateOf {
 
+        if (ShizukuApi.binderAvailable) {
+            if (!ShizukuApi.isPermissionGranted) {
+                ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
+            } else if (!shizukuDaemonRunning) {
+                ShisukuState.Warn(
+                    Shizuku.getVersion(),
+                    if (shizukuErrInfo.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
+                )
             } else {
-                ShisukuState.Error
+                ShisukuState.Activated(Shizuku.getVersion())
             }
+
+        } else {
+            ShisukuState.Error
         }
+    }
 
 
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
-    private val peekServiceJob = viewModelScope.launch(IO) {
-        while (!shizukuDaemonRunning.value) {
-            shizukuDaemonRunning.value = peekUserService()
-            delay(1000)
+    private val peekServiceJob by lazy {
+        viewModelScope.launch(IO) {
+            while (!shizukuDaemonRunning) {
+                shizukuDaemonRunning = peekUserService()
+                delay(1000)
+            }
+            bindUserService()
         }
-        bindUserService()
     }
-
 
     /**
      * 用于与Shizuku服务的连接和断开
@@ -88,21 +77,21 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
                 ShizukuApi.initBinder(binder)
                 try {
                     if (service.isRunning) {
-                        shizukuErrInfo.value = ""
-                        shizukuDaemonRunning.value = true
+                        shizukuErrInfo = ""
+                        shizukuDaemonRunning = true
                     }
                 } catch (e: RemoteException) {
                     Log.e("XALog", e.stackTraceToString())
-                    shizukuErrInfo.value = "守护进程连接失败"
+                    shizukuErrInfo = "守护进程连接失败"
                 }
             } else {
-                shizukuErrInfo.value = "invalid binder for $name received"
+                shizukuErrInfo = "invalid binder for $name received"
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            shizukuErrInfo.value = ""
-            shizukuDaemonRunning.value = false
+            shizukuErrInfo = ""
+            shizukuDaemonRunning = false
         }
     }
 
@@ -142,7 +131,7 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
                 userServiceArgs,
                 userServiceConnection, true
             )
-            shizukuDaemonRunning.value = false
+            shizukuDaemonRunning = false
             return true
         } catch (e: Throwable) {
             Log.e("XALog", e.stackTraceToString())
@@ -193,11 +182,11 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
     }
 
     fun shizukuClickable() {
-        if (ShizukuApi.binderAvailable.value && !ShizukuApi.isPermissionGranted.value) {
+        if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
             Shizuku.requestPermission(1101)
 
             viewModelScope.launch(IO) {
-                while (!ShizukuApi.isPermissionGranted.value) {
+                while (!ShizukuApi.isPermissionGranted) {
                     ShizukuApi.checkSelfPermission()
                     delay(500)
                 }
@@ -206,11 +195,11 @@ class ModuleViewModel(dataStore: DataStore<Preferences> = xaApp.dataStore) :
             return
         }
         viewModelScope.launch(IO) {
-            if (!keepAlive.first()) {
+            if (!keepAlive) {
                 showSnackbar("未启用保活，无需启动守护进程")
                 return@launch
             }
-            if (!shizukuDaemonRunning.value) {
+            if (!shizukuDaemonRunning) {
                 bindUserService()
                 peekServiceJob.start()
                 showSnackbar("正在启动守护进程，请稍后")

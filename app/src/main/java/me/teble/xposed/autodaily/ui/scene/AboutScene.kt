@@ -21,7 +21,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.dokar.sheets.rememberBottomSheetState
@@ -96,15 +94,13 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
         }
         val state = rememberBottomSheetState()
 
-        val updateText by viewmodel.updateDialogText.collectAsStateWithLifecycle()
-        LaunchedEffect(Unit) {
-            viewmodel.showUpdateDialog.collect {
-                if (it) {
-                    state.expand()
-                } else {
-                    state.collapse()
-                }
+        LaunchedEffect(viewmodel.showUpdateDialog) {
+            if (viewmodel.showUpdateDialog) {
+                state.expand()
+            } else {
+                state.collapse()
             }
+
         }
         LaunchedEffect(state.visible) {
             viewmodel.updateUpdateDialogState(state.visible)
@@ -113,7 +109,7 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
         UpdateDialog(
             state,
             text = "新版本",
-            info = updateText,
+            info = viewmodel.updateDialogText,
             onDismiss = {
                 viewmodel.dismissUpdateDialog()
             },
@@ -127,8 +123,8 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
 @Composable
 private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
 
-    val moduleVersionName by viewmodel.moduleVersionName.collectAsStateWithLifecycle()
-    val moduleVersionCode by viewmodel.moduleVersionCode.collectAsStateWithLifecycle()
+    val moduleVersionName = viewmodel.moduleVersionName
+    val moduleVersionCode = viewmodel.moduleVersionCode
 
     Image(
         Icons.XAutoDailyRound,
@@ -160,10 +156,10 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
 @Composable
 private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
 
-    val qqVersionName by viewmodel.qqVersionName.collectAsStateWithLifecycle()
-    val qqVersionCode by viewmodel.qqVersionCode.collectAsStateWithLifecycle()
-    val configVersion by viewmodel.configVersion.collectAsStateWithLifecycle()
-    val hasUpdate by viewmodel.hasUpdate.collectAsStateWithLifecycle()
+    val qqVersionName = viewmodel.qqVersionName
+    val qqVersionCode = viewmodel.qqVersionCode
+    val configVersion = viewmodel.configVersion
+    val hasUpdate = viewmodel.hasUpdate
 
     Row(
         Modifier

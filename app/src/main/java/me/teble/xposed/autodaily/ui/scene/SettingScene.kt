@@ -15,13 +15,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
@@ -62,10 +59,10 @@ fun SettingScene(
 
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val showThemeDialog by viewmodel.showThemeDialog.collectAsStateWithLifecycle()
+        val themeDialog = viewmodel.themeDialog
 
-        LaunchedEffect(showThemeDialog) {
-            if (showThemeDialog) {
+        LaunchedEffect(themeDialog) {
+            if (viewmodel.themeDialog) {
                 sheetState.expand()
             } else {
                 sheetState.hide()
@@ -103,7 +100,7 @@ fun SettingScene(
         }
 
 
-        if (sheetState.isVisible || showThemeDialog) {
+        if (sheetState.isVisible || themeDialog) {
             ThemeModelDialog(
                 state = sheetState,
                 targetTheme = theme,
@@ -158,7 +155,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
             .background(color = colors.colorBgContainer),
     ) {
 
-        val showTaskToast by viewmodel.showTaskToast.collectAsState()
+        val showTaskToast = viewmodel.showTaskToast
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
@@ -173,7 +170,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
         )
 
 
-        val usedThreadPool by viewmodel.usedThreadPool.collectAsState()
+        val usedThreadPool = viewmodel.usedThreadPool
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
@@ -187,7 +184,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
             }
         )
 
-        val taskNotification by viewmodel.taskNotification.collectAsState()
+        val taskNotification = viewmodel.taskNotification
 
 
         SwitchInfoItem(
@@ -203,7 +200,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
             }
         )
 
-        val taskExceptionNotification by viewmodel.taskExceptionNotification.collectAsState()
+        val taskExceptionNotification = viewmodel.taskExceptionNotification
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
@@ -217,7 +214,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
             }
         )
 
-        val logToXposed by viewmodel.logToXposed.collectAsState()
+        val logToXposed = viewmodel.logToXposed
 
         SwitchInfoItem(
             modifier = Modifier
@@ -231,7 +228,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
                 viewmodel.updateLogToXposed(it)
             }
         )
-        val debugLog by viewmodel.debugLog.collectAsState()
+        val debugLog = viewmodel.debugLog
 
         SwitchInfoItem(
             modifier = Modifier

@@ -2,102 +2,64 @@ package me.teble.xposed.autodaily.activity.common
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.application.xaApp
-import me.teble.xposed.autodaily.data.HiddenAppIcon
-import me.teble.xposed.autodaily.data.KeepAlive
-import me.teble.xposed.autodaily.data.QKeepAlive
-import me.teble.xposed.autodaily.data.TimKeepAlive
-import me.teble.xposed.autodaily.data.UntrustedTouchEvents
-import me.teble.xposed.autodaily.data.dataStore
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 
-class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dataStore) :
-    ViewModel() {
+class SettingViewModel() : ViewModel() {
 
-    val shizukuState =
-        ShizukuApi.isPermissionGranted.combine(ShizukuApi.binderAvailable) { isPermissionGranted, binderAvailable ->
-            isPermissionGranted && binderAvailable
-        }
-
-
-    val keepAlive = dataStore.data.map {
-        it[KeepAlive] ?: false
-    }
-
-    val qqKeepAlive = dataStore.data.map {
-        it[QKeepAlive] ?: false
-    }
-
-    val timKeepAlive = dataStore.data.map {
-        it[TimKeepAlive] ?: false
+    val shizukuState by derivedStateOf {
+        ShizukuApi.isPermissionGranted && ShizukuApi.binderAvailable
     }
 
 
-    private val _showThemeDialog = MutableStateFlow(false)
-    val showThemeDialog = _showThemeDialog.asStateFlow()
+    var keepAlive by mutableStateOf(AppConfUnit.keepAlive)
 
-    val untrustedTouchEvents = dataStore.data.map {
-        it[UntrustedTouchEvents] ?: false
-    }
 
-    val hiddenAppIcon = dataStore.data.map {
-        it[HiddenAppIcon] ?: false
-    }
+    var qqKeepAlive by mutableStateOf(AppConfUnit.qKeepAlive)
+
+    var timKeepAlive by mutableStateOf(AppConfUnit.timKeepAlive)
+
+
+    var showThemeDialog by mutableStateOf(false)
+
+    var untrustedTouchEvents by mutableStateOf(AppConfUnit.untrustedTouchEvents)
+
+    var hiddenAppIcon by mutableStateOf(AppConfUnit.hiddenAppIcon)
 
     fun updateKeepAliveChecked(bool: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit {
-                it[KeepAlive] = bool
-            }
-        }
+
+        AppConfUnit.keepAlive = bool
+        keepAlive = bool
 
     }
 
     fun updateQQKeepAlive(bool: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit {
-                it[QKeepAlive] = bool
-            }
-        }
+        AppConfUnit.qKeepAlive = bool
+        qqKeepAlive = bool
     }
 
 
     fun updateTimKeepAlive(bool: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit {
-                it[TimKeepAlive] = bool
-            }
-        }
+        AppConfUnit.timKeepAlive = bool
+        timKeepAlive = bool
     }
 
 
     fun updateUntrustedTouchEvents(bool: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit {
-                it[UntrustedTouchEvents] = bool
-            }
-        }
+        AppConfUnit.untrustedTouchEvents = bool
+        untrustedTouchEvents = bool
         ShizukuApi.setUntrustedTouchEvents(bool)
     }
 
 
     fun updateHiddenAppIcon(bool: Boolean) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit {
-                it[HiddenAppIcon] = bool
-            }
-        }
+        AppConfUnit.hiddenAppIcon = bool
+        hiddenAppIcon = bool
         xaApp.packageManager.setComponentEnabledSetting(
             ComponentName(xaApp, MainActivity::class.java.name + "Alias"),
             if (bool) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -114,8 +76,8 @@ class SettingViewModel(private val dataStore: DataStore<Preferences> = xaApp.dat
     }
 
     fun updateThemeDialogState(boolean: Boolean) {
-        if (_showThemeDialog.value != boolean) {
-            _showThemeDialog.value = boolean
+        if (showThemeDialog != boolean) {
+            showThemeDialog = boolean
         }
     }
 }

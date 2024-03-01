@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
@@ -59,7 +58,7 @@ fun SettingScene(
 
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val showThemeDialog by viewmodel.showThemeDialog.collectAsStateWithLifecycle()
+    val showThemeDialog = viewmodel.showThemeDialog
 
     LaunchedEffect(showThemeDialog) {
         if (showThemeDialog) {
@@ -116,7 +115,7 @@ fun SettingScene(
 @Composable
 private fun SettingLayout(modifier: Modifier, viewmodel: SettingViewModel = viewModel()) {
 
-    val shizukuState by viewmodel.shizukuState.collectAsStateWithLifecycle(false)
+    val shizukuState = viewmodel.shizukuState
 
     val itemAlpha: Float by animateFloatAsState(
         targetValue = if (shizukuState) DefaultAlpha else DisabledAlpha,
@@ -150,7 +149,7 @@ private fun CommonLayout(
             .background(colors.colorBgContainer)
     ) {
 
-        val hiddenAppIcon by viewmodel.hiddenAppIcon.collectAsStateWithLifecycle(false)
+        val hiddenAppIcon = viewmodel.hiddenAppIcon
         val hideText by remember {
             derivedStateOf {
                 if (hiddenAppIcon) "显示应用图标" else "隐藏应用图标"
@@ -175,9 +174,7 @@ private fun CommonLayout(
             })
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val untrustedTouchEvents by viewmodel.untrustedTouchEvents.collectAsStateWithLifecycle(
-                false
-            )
+            val untrustedTouchEvents = viewmodel.untrustedTouchEvents
             SwitchInfoItem(
                 Modifier
                     .fillMaxWidth()
@@ -213,7 +210,7 @@ private fun ShizukuLayout(
             .background(colors.colorBgContainer.copy(alpha = itemAlpha))
 
     ) {
-        val keepAlive by viewmodel.keepAlive.collectAsStateWithLifecycle(false)
+        val keepAlive = viewmodel.keepAlive
 
         SwitchInfoItem(
             modifier = Modifier
@@ -229,7 +226,7 @@ private fun ShizukuLayout(
         )
         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
 
-            val qqKeepAlive by viewmodel.qqKeepAlive.collectAsStateWithLifecycle(false)
+            val qqKeepAlive = viewmodel.qqKeepAlive
 
             KeepTimeItem(
                 title = "启用 QQ 保活",
@@ -254,7 +251,7 @@ private fun ShizukuLayout(
         }
 
         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
-            val timKeepAlive by viewmodel.timKeepAlive.collectAsStateWithLifecycle(false)
+            val timKeepAlive = viewmodel.timKeepAlive
 
             KeepTimeItem(
                 title = "启用 TIM 保活",

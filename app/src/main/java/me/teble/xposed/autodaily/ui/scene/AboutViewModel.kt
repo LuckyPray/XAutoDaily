@@ -1,13 +1,16 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
@@ -25,47 +28,42 @@ import kotlin.concurrent.thread
 
 class AboutViewModel : ViewModel() {
 
-    private val _moduleVersionName = MutableStateFlow("")
-    val moduleVersionName = _moduleVersionName.asStateFlow()
+    var moduleVersionName by mutableStateOf("")
 
-    private val _moduleVersionCode = MutableStateFlow(0)
-    val moduleVersionCode = _moduleVersionCode.asStateFlow()
+    var moduleVersionCode by mutableIntStateOf(0)
 
 
-    private val _qqVersionName = MutableStateFlow("")
-    val qqVersionName = _qqVersionName.asStateFlow()
+    var qqVersionName by mutableStateOf("")
 
-    private val _qqVersionCode = MutableStateFlow(0L)
-    val qqVersionCode = _qqVersionCode.asStateFlow()
+    var qqVersionCode by mutableLongStateOf(0L)
 
-    private val _configVersion = MutableStateFlow(0)
-    val configVersion = _configVersion.asStateFlow()
+
+    var configVersion by mutableIntStateOf(0)
 
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
-    private val _showUpdateDialog = MutableStateFlow(false)
-    val showUpdateDialog = _showUpdateDialog.asStateFlow()
+    var showUpdateDialog by mutableStateOf(false)
 
-    private val _updateDialogText = MutableStateFlow("")
-    val updateDialogText = _updateDialogText.asStateFlow()
 
-    private val _hasUpdate = MutableStateFlow(false)
-    val hasUpdate = _hasUpdate.asStateFlow()
+    var updateDialogText by mutableStateOf("")
 
-    val lastClickTime = MutableStateFlow(0L)
+
+    var hasUpdate by mutableStateOf(false)
+
+    private var lastClickTime by mutableLongStateOf(0L)
 
     init {
-        _moduleVersionName.value = BuildConfig.VERSION_NAME
-        _moduleVersionCode.value = BuildConfig.VERSION_CODE
-        _qqVersionName.value = hostVersionName
-        _qqVersionCode.value = hostVersionCode
-        _configVersion.value = ConfigUtil.loadSaveConf().version
+        moduleVersionName = BuildConfig.VERSION_NAME
+        moduleVersionCode = BuildConfig.VERSION_CODE
+        qqVersionName = hostVersionName
+        qqVersionCode = hostVersionCode
+        configVersion = ConfigUtil.loadSaveConf().version
 
         ConfigUtil.fetchMeta()?.let {
             // 检查新版本
             if (BuildConfig.VERSION_CODE < it.app.versionCode) {
-                _hasUpdate.value = true
+                hasUpdate = true
             }
         }
     }
@@ -79,18 +77,18 @@ class AboutViewModel : ViewModel() {
     }
 
     fun updateUpdateDialogState(boolean: Boolean) {
-        if (_showUpdateDialog.value != boolean) {
-            _showUpdateDialog.value = boolean
+        if (showUpdateDialog != boolean) {
+            showUpdateDialog = boolean
         }
     }
 
     fun updateApp() {
         val time = TimeUtil.cnTimeMillis()
-        if (time - lastClickTime.value < 15_000) {
+        if (time - lastClickTime < 15_000) {
             showSnackbar("不要频繁点击哦~")
             return
         }
-        lastClickTime.value = time
+        lastClickTime = time
         thread {
             showSnackbar("正在检测更新")
 
@@ -108,8 +106,8 @@ class AboutViewModel : ViewModel() {
                         }
                     }
                     if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-                        _hasUpdate.value = true
-                        _updateDialogText.value =
+                        hasUpdate = true
+                        updateDialogText =
                             ConfUnit.metaInfoCache?.app?.updateLog ?: ""
                         showUpdateDialog()
 
@@ -121,7 +119,7 @@ class AboutViewModel : ViewModel() {
 
             }
 
-            _configVersion.value = ConfigUtil.loadSaveConf().version
+            configVersion = ConfigUtil.loadSaveConf().version
         }
     }
 

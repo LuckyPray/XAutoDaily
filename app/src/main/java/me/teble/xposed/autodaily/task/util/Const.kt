@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.task.util
 
+
 object Const {
     const val CONFIG_VERSION = "config_version"
     const val NEED_SHOW_LOG = "need_show_log"
@@ -22,8 +23,17 @@ object Const {
     const val ENABLE_DEBUG_LOG = "enable_debug_log"
     const val RETRY_COUNT = "retry_count"
 
+    // 共用部分
     const val THEME = "theme"
     const val BLACK_THEME = "black_theme"
+
+    // app 本体
+    const val KEEP_ALIVE = "keep_alive"
+    const val Q_KEEP_ALIVE = "q_keep_alive"
+    const val TIM_KEEP_ALIVE = "tim_keep_alive"
+    const val UNTRUSTED_TOUCH_EVENTS = "untrusted_touch_events"
+
+    const val HIDDEN_APP_ICON = "hidden_app_icon"
 
     // -------------------------------------------------- //
     const val MOST_RECENT_EXEC_TIME = "most_recent_exec_time"

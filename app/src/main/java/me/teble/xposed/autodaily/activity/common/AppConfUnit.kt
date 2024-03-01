@@ -12,6 +12,23 @@ object AppConfUnit {
         ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.MULTI_PROCESS_MODE))
     }
 
+    var keepAlive: Boolean
+        get() = xaConfig.getBoolean(Const.KEEP_ALIVE, false)
+        set(value) = xaConfig.putBoolean(Const.KEEP_ALIVE, value)
+    var qKeepAlive: Boolean
+        get() = xaConfig.getBoolean(Const.Q_KEEP_ALIVE, false)
+        set(value) = xaConfig.putBoolean(Const.Q_KEEP_ALIVE, value)
+    var timKeepAlive: Boolean
+        get() = xaConfig.getBoolean(Const.TIM_KEEP_ALIVE, false)
+        set(value) = xaConfig.putBoolean(Const.TIM_KEEP_ALIVE, value)
+    var untrustedTouchEvents: Boolean
+        get() = xaConfig.getBoolean(Const.UNTRUSTED_TOUCH_EVENTS, false)
+        set(value) = xaConfig.putBoolean(Const.UNTRUSTED_TOUCH_EVENTS, value)
+    var hiddenAppIcon: Boolean
+        get() = xaConfig.getBoolean(Const.HIDDEN_APP_ICON, false)
+        set(value) = xaConfig.putBoolean(Const.HIDDEN_APP_ICON, value)
+
+
     var theme: XAutodailyTheme.Theme
         get() = xaConfig.getInt(Const.THEME, 0).toTheme()
         set(value) = xaConfig.putInt(Const.THEME, value.toCode())

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -51,7 +50,7 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
             Modifier
                 .padding(contentPadding)
         ) {
-            val globalEnable by signViewModel.globalEnable.collectAsState()
+            val globalEnable = signViewModel.globalEnable
             SwitchTextItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -77,7 +76,6 @@ private fun GroupColumn(
     enable: Boolean
 ) {
 
-    val taskGroups by signViewModel.taskGroupsState.collectAsState()
     LazyColumn(
         modifier = Modifier
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
@@ -87,7 +85,10 @@ private fun GroupColumn(
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
 
-        items(items = taskGroups, key = { it.id }, contentType = { it.id }) { taskGroup ->
+        items(
+            items = signViewModel.taskGroupsState,
+            key = { it.id },
+            contentType = { it.id }) { taskGroup ->
 
             val groupTitle by remember {
                 derivedStateOf {

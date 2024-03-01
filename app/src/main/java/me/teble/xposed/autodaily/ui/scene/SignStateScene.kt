@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -47,7 +46,7 @@ fun SignStateScene(
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
-        val tasksState by signStateViewModel.tasksState.collectAsState()
+        val tasksState = signStateViewModel.tasksState
 
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {

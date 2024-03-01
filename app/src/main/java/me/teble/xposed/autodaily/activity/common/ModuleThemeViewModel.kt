@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class ModuleThemeViewModel : ViewModel() {
@@ -14,12 +13,12 @@ class ModuleThemeViewModel : ViewModel() {
     var currentTheme by mutableStateOf(AppConfUnit.theme)
 
     fun updateBlack(black: Boolean) {
-        ConfUnit.blackTheme = black
+        AppConfUnit.blackTheme = black
         blackTheme = black
     }
 
     fun updateTheme(theme: XAutodailyTheme.Theme) {
-        ConfUnit.theme = theme
+        AppConfUnit.theme = theme
         currentTheme = theme
     }
 

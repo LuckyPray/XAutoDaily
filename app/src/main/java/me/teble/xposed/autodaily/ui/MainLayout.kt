@@ -64,7 +64,7 @@
 //@Composable
 //fun MainLayout(navController: NavHostController) {
 //    val notice = remember { mutableStateOf("") }
-//    val showUpdateDialog = remember { mutableStateOf(false) }
+//    val updateDialog = remember { mutableStateOf(false) }
 //    val updateDialogText = remember { mutableStateOf("") }
 //    val lastClickTime = remember { mutableStateOf(0L) }
 //    LaunchedEffect(notice) {
@@ -77,7 +77,7 @@
 //            notice.value = meta?.notice?.trimEnd() ?: ""
 //        }
 //    }
-//    if (showUpdateDialog.value) {
+//    if (updateDialog.value) {
 //        UpdateDialog(
 //            title = "版本更新",
 //            text = updateDialogText.value,
@@ -94,7 +94,7 @@
 //                })
 //            },
 //            onDismiss = {
-//                showUpdateDialog.value = false
+//                updateDialog.value = false
 //            }
 //        )
 //    }
@@ -239,7 +239,7 @@
 //                            ToastUtil.send("正在检测更新")
 //                            val res = ConfigUtil.checkUpdate(true)
 //                            if (res) {
-//                                showUpdateDialog.value = true
+//                                updateDialog.value = true
 //                                updateDialogText.value =
 //                                    ConfUnit.metaInfoCache?.app?.updateLog ?: ""
 //                            }

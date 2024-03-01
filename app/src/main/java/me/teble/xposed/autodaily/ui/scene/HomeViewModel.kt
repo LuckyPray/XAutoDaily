@@ -1,5 +1,8 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -18,11 +21,13 @@ class HomeViewModel : ViewModel() {
 
     private var lastClickTime = 0L
 
+    // todo 替换为 mutableStateOf 后有问题
     private val _execTaskNum = MutableStateFlow(0)
     val execTaskNum = _execTaskNum.asStateFlow()
 
-    private val _showNoticeDialog = MutableStateFlow(false)
-    val showUpdateDialog = _showNoticeDialog.asStateFlow()
+    var noticeDialog by mutableStateOf(false)
+
+    // todo 替换为 mutableStateOf 后有问题
     private val _noticeText = MutableStateFlow("")
     val noticeText = _noticeText.asStateFlow()
 
@@ -43,8 +48,8 @@ class HomeViewModel : ViewModel() {
     }
 
     fun updateNoticeDialogState(boolean: Boolean) {
-        if (_showNoticeDialog.value != boolean) {
-            _showNoticeDialog.value = boolean
+        if (noticeDialog != boolean) {
+            noticeDialog = boolean
         }
     }
 
@@ -55,7 +60,7 @@ class HomeViewModel : ViewModel() {
                 ConfigUtil.fetchMeta()
             }
             meta?.let {
-                _noticeText.value = it.notice?.trimEnd() ?: "暂无公告"
+//                noticeText = it.notice?.trimEnd() ?: "暂无公告"
             } ?: run {
                 showSnackbar("拉取公告失败")
             }

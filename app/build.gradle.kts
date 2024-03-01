@@ -341,7 +341,6 @@ dependencies {
 
     implementation(libs.kotlinx.datetime)
 
-    implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.androidx.browser)
     // jetpack compose
@@ -360,7 +359,7 @@ dependencies {
 
     implementation(libs.androidx.navigation.compose)
 
-    implementation("androidx.compose.material3:material3-adaptive:1.0.0-alpha06")
+    implementation(libs.androidx.material3.adaptive)
     implementation(libs.sheets)
     implementation(libs.compose.shadows.plus)
 

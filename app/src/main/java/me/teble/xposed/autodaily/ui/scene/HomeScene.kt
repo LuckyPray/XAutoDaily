@@ -48,7 +48,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.dokar.sheets.BottomSheet
@@ -127,7 +126,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
-    val execTaskNum by viewmodel.execTaskNum.collectAsStateWithLifecycle()
+    val execTaskNum by viewmodel.execTaskNum.collectAsState()
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
@@ -167,7 +166,9 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
                     .padding(top = 16.dp)
                     .clip(shape = SmootherShape(radius = 24.dp))
                     .background(color = colors.themeColor.copy(alpha = 0.08f))
-                    .clickable(role = Role.Button, onClick = {})
+                    .clickable(role = Role.Button, onClick = {
+                        viewmodel.signClick()
+                    })
                     .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
                 style = TextStyle(
                     fontSize = 14.sp,
@@ -186,7 +187,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
 
 @Composable
 private fun GridLayout(navController: NavController, viewModel: HomeViewModel = viewModel()) {
-    val execTaskNum by viewModel.execTaskNum.collectAsStateWithLifecycle()
+    val execTaskNum by viewModel.execTaskNum.collectAsState()
     Column(
         modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -233,17 +234,15 @@ private fun NoticeDialog(
 ) {
 
     val noticeText by viewModel.noticeText.collectAsState()
-
     val state = rememberBottomSheetState()
 
-    LaunchedEffect(Unit) {
-        viewModel.showUpdateDialog.collect {
-            if (it) {
-                state.expand()
-            } else {
-                state.collapse()
-            }
+    LaunchedEffect(viewModel.noticeDialog) {
+        if (viewModel.noticeDialog) {
+            state.expand()
+        } else {
+            state.collapse()
         }
+
     }
     LaunchedEffect(state.visible) {
         viewModel.updateNoticeDialogState(state.visible)

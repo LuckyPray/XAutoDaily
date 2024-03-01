@@ -33,7 +33,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
@@ -124,7 +123,7 @@ private fun ModuleTopBar() {
 private fun ShizukuCard(
     viewmodel: ModuleViewModel = viewModel()
 ) {
-    val shizukuState by viewmodel.shizukuState.collectAsStateWithLifecycle(ShisukuState.Error)
+    val shizukuState = viewmodel.shizukuState
 
 
     val backgroundColor by animateColorAsState(
@@ -160,8 +159,8 @@ private fun ShizukuCard(
     val versionText by remember {
         derivedStateOf {
             when (shizukuState) {
-                is ShisukuState.Activated -> "${(shizukuState as ShisukuState.Activated).version}"
-                is ShisukuState.Warn -> "${(shizukuState as ShisukuState.Warn).version}"
+                is ShisukuState.Activated -> "${shizukuState.version}"
+                is ShisukuState.Warn -> "${shizukuState.version}"
                 ShisukuState.Error -> "Unknown"
             }
         }
@@ -171,7 +170,7 @@ private fun ShizukuCard(
         derivedStateOf {
             when (shizukuState) {
                 is ShisukuState.Activated -> "守护进程正在运行，点击停止运行"
-                is ShisukuState.Warn -> (shizukuState as ShisukuState.Warn).info
+                is ShisukuState.Warn -> shizukuState.info
                 ShisukuState.Error -> "部分功能无法运行"
             }
         }

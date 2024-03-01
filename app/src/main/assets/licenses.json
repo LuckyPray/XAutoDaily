@@ -1,466 +1,514 @@
 [
-  {
-    "mavenCoordinates": {
-      "groupId": "cn.hutool",
-      "artifactId": "hutool-core",
-      "version": "5.8.26"
+    {
+        "mavenCoordinates": {
+            "groupId": "cn.hutool",
+            "artifactId": "hutool-core",
+            "version": "5.8.26"
+        },
+        "name": "${project.artifactId}",
+        "description": "Hutool核心，包括集合、字符串、Bean等工具",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": null,
+                "name": "Mulan Permissive Software License，Version 2",
+                "url": "https://license.coscl.org.cn/MulanPSL2"
+            }
+        ]
     },
-    "name": "${project.artifactId}",
-    "description": "Hutool核心，包括集合、字符串、Bean等工具",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": null,
-        "name": "Mulan Permissive Software License，Version 2",
-        "url": "https://license.coscl.org.cn/MulanPSL2"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.activity",
-      "artifactId": "activity-compose",
-      "version": "1.8.2"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.activity",
+            "artifactId": "activity-compose",
+            "version": "1.8.2"
+        },
+        "name": "Activity Compose",
+        "description": "Compose integration with Activity",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Activity Compose",
-    "description": "Compose integration with Activity",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.hankcs",
-      "artifactId": "aho-corasick-double-array-trie",
-      "version": "1.2.3"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.hankcs",
+            "artifactId": "aho-corasick-double-array-trie",
+            "version": "1.2.3"
+        },
+        "name": "AhoCorasickDoubleArrayTrie",
+        "description": "An extremely fast implementation of Aho Corasick algorithm based on Double Array Trie.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": null,
+                "name": "Apache License Version 2.0",
+                "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+            }
+        ]
     },
-    "name": "AhoCorasickDoubleArrayTrie",
-    "description": "An extremely fast implementation of Aho Corasick algorithm based on Double Array Trie.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": null,
-        "name": "Apache License Version 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.multidex",
-      "artifactId": "multidex",
-      "version": "2.0.1"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.multidex",
+            "artifactId": "multidex",
+            "version": "2.0.1"
+        },
+        "name": "Android Multi-Dex Library",
+        "description": "Library for legacy multi-dex support",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Android Multi-Dex Library",
-    "description": "Library for legacy multi-dex support",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.highcapable.betterandroid",
-      "artifactId": "system-extension",
-      "version": "1.0.1"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.highcapable.betterandroid",
+            "artifactId": "system-extension",
+            "version": "1.0.1"
+        },
+        "name": "BetterAndroid",
+        "description": "Create more useful tool extensions for Android.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": null,
+                "name": "Apache License 2.0",
+                "url": "https://github.com/BetterAndroid/BetterAndroid/blob/main/LICENSE"
+            }
+        ]
     },
-    "name": "BetterAndroid",
-    "description": "Create more useful tool extensions for Android.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": null,
-        "name": "Apache License 2.0",
-        "url": "https://github.com/BetterAndroid/BetterAndroid/blob/main/LICENSE"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.browser",
-      "artifactId": "browser",
-      "version": "1.7.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.browser",
+            "artifactId": "browser",
+            "version": "1.7.0"
+        },
+        "name": "Browser",
+        "description": "Provides support for embedding Custom Tabs in an app.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Browser",
-    "description": "Provides support for embedding Custom Tabs in an app.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "net.bytebuddy",
-      "artifactId": "byte-buddy-android",
-      "version": "1.14.12"
+    {
+        "mavenCoordinates": {
+            "groupId": "net.bytebuddy",
+            "artifactId": "byte-buddy-android",
+            "version": "1.14.12"
+        },
+        "name": "Byte Buddy for Android",
+        "description": "Byte Buddy Android allows for limited support of code generation on an Android runtime.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "Apache License, Version 2.0",
+                "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Byte Buddy for Android",
-    "description": "Byte Buddy Android allows for limited support of code generation on an Android runtime.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "Apache License, Version 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.animation",
-      "artifactId": "animation",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.animation",
+            "artifactId": "animation",
+            "version": "1.7.0-alpha03"
+        },
+        "name": "Compose Animation",
+        "description": "Compose animation library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Animation",
-    "description": "Compose animation library",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.foundation",
-      "artifactId": "foundation",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.foundation",
+            "artifactId": "foundation",
+            "version": "1.7.0-alpha03"
+        },
+        "name": "Compose Foundation",
+        "description": "Higher level abstractions of the Compose UI primitives. This library is design system agnostic, providing the high-level building blocks for both application and design-system developers",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Foundation",
-    "description": "Higher level abstractions of the Compose UI primitives. This library is design system agnostic, providing the high-level building blocks for both application and design-system developers",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.foundation",
-      "artifactId": "foundation-layout",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.foundation",
+            "artifactId": "foundation-layout",
+            "version": "1.7.0-alpha03"
+        },
+        "name": "Compose Layouts",
+        "description": "Compose layout implementations",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Layouts",
-    "description": "Compose layout implementations",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.material3",
-      "artifactId": "material3-window-size-class",
-      "version": "1.2.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.material3",
+            "artifactId": "material3-window-size-class",
+            "version": "1.3.0-alpha01"
+        },
+        "name": "Compose Material 3 Window Size Class",
+        "description": "Provides window size classes for building responsive UIs",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Material 3 Window Size Class",
-    "description": "Provides window size classes for building responsive UIs",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.material",
-      "artifactId": "material",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.material3",
+            "artifactId": "material3",
+            "version": "1.3.0-alpha01"
+        },
+        "name": "Compose Material3 Components",
+        "description": "Compose Material You Design Components library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Material Components",
-    "description": "Compose Material Design Components library",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.navigation",
-      "artifactId": "navigation-compose",
-      "version": "2.7.7"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.navigation",
+            "artifactId": "navigation-compose",
+            "version": "2.7.7"
+        },
+        "name": "Compose Navigation",
+        "description": "Compose integration with Navigation",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Navigation",
-    "description": "Compose integration with Navigation",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.runtime",
-      "artifactId": "runtime",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.runtime",
+            "artifactId": "runtime",
+            "version": "1.7.0-alpha03"
+        },
+        "name": "Compose Runtime",
+        "description": "Tree composition support for code generated by the Compose compiler plugin and corresponding public API",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Runtime",
-    "description": "Tree composition support for code generated by the Compose compiler plugin and corresponding public API",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.ui",
-      "artifactId": "ui-tooling",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.ui",
+            "artifactId": "ui-tooling",
+            "version": "1.7.0-alpha03"
+        },
+        "name": "Compose Tooling",
+        "description": "Compose tooling library. This library exposes information to our tools for better IDE support.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose Tooling",
-    "description": "Compose tooling library. This library exposes information to our tools for better IDE support.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.compose.ui",
-      "artifactId": "ui",
-      "version": "1.7.0-alpha02"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.ui",
+            "artifactId": "ui",
+            "version": "1.7.0-alpha03"
+        },
+        "name": "Compose UI",
+        "description": "Compose UI primitives. This library contains the primitives that form the Compose UI Toolkit, such as drawing, measurement and layout.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Compose UI",
-    "description": "Compose UI primitives. This library contains the primitives that form the Compose UI Toolkit, such as drawing, measurement and layout.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.github.kyuubiran",
-      "artifactId": "EzXHelper",
-      "version": "1.0.3"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.github.kyuubiran",
+            "artifactId": "EzXHelper",
+            "version": "1.0.3"
+        },
+        "name": "EzXHelper",
+        "description": "一个使Xposed模块开发变的更轻松的kotlin库",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "Apache-2.0",
+                "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "EzXHelper",
-    "description": "一个使Xposed模块开发变的更轻松的kotlin库",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "Apache-2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.google.flatbuffers",
-      "artifactId": "flatbuffers-java",
-      "version": "23.5.26"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.google.flatbuffers",
+            "artifactId": "flatbuffers-java",
+            "version": "23.5.26"
+        },
+        "name": "FlatBuffers Java API",
+        "description": "Memory Efficient Serialization Library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": null,
+                "name": "Apache License V2.0",
+                "url": "https://raw.githubusercontent.com/google/flatbuffers/master/LICENSE"
+            }
+        ]
     },
-    "name": "FlatBuffers Java API",
-    "description": "Memory Efficient Serialization Library",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": null,
-        "name": "Apache License V2.0",
-        "url": "https://raw.githubusercontent.com/google/flatbuffers/master/LICENSE"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "org.jetbrains.kotlin",
-      "artifactId": "kotlin-stdlib",
-      "version": "1.9.22"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.github.GIGAMOLE",
+            "artifactId": "ComposeShadowsPlus",
+            "version": "1.0.4"
+        },
+        "name": "GIGAMOLE/ComposeShadowsPlus",
+        "description": "ComposeShadowsPlus: Elevate your Android Compose UI with stunning custom shadows",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "MIT",
+                "name": "MIT License",
+                "url": "https://api.github.com/licenses/mit"
+            }
+        ]
     },
-    "name": "Kotlin Stdlib",
-    "description": "Kotlin Standard Library",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.lifecycle",
-      "artifactId": "lifecycle-runtime-compose",
-      "version": "2.7.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "org.jetbrains.kotlin",
+            "artifactId": "kotlin-stdlib",
+            "version": "1.9.22"
+        },
+        "name": "Kotlin Stdlib",
+        "description": "Kotlin Standard Library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Lifecycle Runtime Compose",
-    "description": "Compose integration with Lifecycle",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.lifecycle",
-      "artifactId": "lifecycle-viewmodel-compose",
-      "version": "2.7.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.lifecycle",
+            "artifactId": "lifecycle-runtime-compose",
+            "version": "2.7.0"
+        },
+        "name": "Lifecycle Runtime Compose",
+        "description": "Compose integration with Lifecycle",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Lifecycle ViewModel Compose",
-    "description": "Compose integration with Lifecycle ViewModel",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.lifecycle",
-      "artifactId": "lifecycle-viewmodel-ktx",
-      "version": "2.7.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.lifecycle",
+            "artifactId": "lifecycle-viewmodel-compose",
+            "version": "2.7.0"
+        },
+        "name": "Lifecycle ViewModel Compose",
+        "description": "Compose integration with Lifecycle ViewModel",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Lifecycle ViewModel Kotlin Extensions",
-    "description": "Kotlin extensions for 'viewmodel' artifact",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "androidx.datastore",
-      "artifactId": "datastore-preferences",
-      "version": "1.1.0-beta01"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.lifecycle",
+            "artifactId": "lifecycle-viewmodel-ktx",
+            "version": "2.7.0"
+        },
+        "name": "Lifecycle ViewModel Kotlin Extensions",
+        "description": "Kotlin extensions for 'viewmodel' artifact",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Preferences DataStore",
-    "description": "Android Preferences DataStore",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.google.protobuf",
-      "artifactId": "protobuf-kotlin-lite",
-      "version": "3.25.3"
+    {
+        "mavenCoordinates": {
+            "groupId": "androidx.compose.material3",
+            "artifactId": "material3-adaptive",
+            "version": "1.0.0-alpha06"
+        },
+        "name": "Material Adaptive",
+        "description": "Compose Material Design Adaptive Library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Protocol Buffers [Kotlin-Lite]",
-    "description": "Kotlin lite Protocol Buffers library. Protocol Buffers are a way of encoding structured data in an\n    efficient yet extensible format.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "BSD-3-Clause",
-        "name": "BSD-3-Clause",
-        "url": "https://opensource.org/licenses/BSD-3-Clause"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "dev.rikka.shizuku",
-      "artifactId": "api",
-      "version": "13.1.5"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.google.protobuf",
+            "artifactId": "protobuf-kotlin-lite",
+            "version": "3.25.3"
+        },
+        "name": "Protocol Buffers [Kotlin-Lite]",
+        "description": "Kotlin lite Protocol Buffers library. Protocol Buffers are a way of encoding structured data in an\n    efficient yet extensible format.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "BSD-3-Clause",
+                "name": "BSD-3-Clause",
+                "url": "https://opensource.org/licenses/BSD-3-Clause"
+            }
+        ]
     },
-    "name": "Shizuku API - API",
-    "description": "API of Shizuku and Sui.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "MIT",
-        "name": "MIT License",
-        "url": "https://github.com/RikkaApps/Shizuku-API/blob/master/LICENSE"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "dev.rikka.shizuku",
-      "artifactId": "provider",
-      "version": "13.1.5"
+    {
+        "mavenCoordinates": {
+            "groupId": "io.github.dokar3",
+            "artifactId": "sheets",
+            "version": "0.5.5"
+        },
+        "name": "Sheets",
+        "description": "Another BottomSheet in Jetpack Compose",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "Shizuku API - provider",
-    "description": "Content Provider for Shizuku.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "MIT",
-        "name": "MIT License",
-        "url": "https://github.com/RikkaApps/Shizuku-API/blob/master/LICENSE"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.charleskorn.kaml",
-      "artifactId": "kaml",
-      "version": "0.57.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "dev.rikka.shizuku",
+            "artifactId": "api",
+            "version": "13.1.5"
+        },
+        "name": "Shizuku API - API",
+        "description": "API of Shizuku and Sui.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "MIT",
+                "name": "MIT License",
+                "url": "https://github.com/RikkaApps/Shizuku-API/blob/master/LICENSE"
+            }
+        ]
     },
-    "name": "kaml",
-    "description": "YAML support for kotlinx.serialization",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "org.jetbrains.kotlinx",
-      "artifactId": "kotlinx-serialization-json",
-      "version": "1.6.3"
+    {
+        "mavenCoordinates": {
+            "groupId": "dev.rikka.shizuku",
+            "artifactId": "provider",
+            "version": "13.1.5"
+        },
+        "name": "Shizuku API - provider",
+        "description": "Content Provider for Shizuku.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "MIT",
+                "name": "MIT License",
+                "url": "https://github.com/RikkaApps/Shizuku-API/blob/master/LICENSE"
+            }
+        ]
     },
-    "name": "kotlinx-serialization-json",
-    "description": "Kotlin multiplatform serialization runtime library",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  },
-  {
-    "mavenCoordinates": {
-      "groupId": "com.squareup.okhttp3",
-      "artifactId": "okhttp",
-      "version": "4.12.0"
+    {
+        "mavenCoordinates": {
+            "groupId": "com.charleskorn.kaml",
+            "artifactId": "kaml",
+            "version": "0.57.0"
+        },
+        "name": "kaml",
+        "description": "YAML support for kotlinx.serialization",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
     },
-    "name": "okhttp",
-    "description": "Square’s meticulous HTTP client for Java and Kotlin.",
-    "licenses": [
-      {
-        "spdxLicenseIdentifier": "Apache-2.0",
-        "name": "The Apache Software License, Version 2.0",
-        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
-      }
-    ]
-  }
+    {
+        "mavenCoordinates": {
+            "groupId": "org.jetbrains.kotlinx",
+            "artifactId": "kotlinx-datetime",
+            "version": "0.5.0"
+        },
+        "name": "kotlinx-datetime",
+        "description": "Kotlin Datetime Library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "mavenCoordinates": {
+            "groupId": "org.jetbrains.kotlinx",
+            "artifactId": "kotlinx-serialization-json",
+            "version": "1.6.3"
+        },
+        "name": "kotlinx-serialization-json",
+        "description": "Kotlin multiplatform serialization runtime library",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "https://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    },
+    {
+        "mavenCoordinates": {
+            "groupId": "com.squareup.okhttp3",
+            "artifactId": "okhttp",
+            "version": "4.12.0"
+        },
+        "name": "okhttp",
+        "description": "Square’s meticulous HTTP client for Java and Kotlin.",
+        "licenses": [
+            {
+                "spdxLicenseIdentifier": "Apache-2.0",
+                "name": "The Apache Software License, Version 2.0",
+                "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        ]
+    }
 ]
