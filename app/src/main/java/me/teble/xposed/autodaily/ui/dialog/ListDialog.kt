@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -22,16 +23,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.BottomSheetState
-import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Chosen
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
@@ -44,7 +45,15 @@ fun ListDialog(
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-
+    BottomSheet(
+        state = state,
+        skipPeeked = true,
+        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+        backgroundColor = colors.colorBgDialog,
+        behaviors = DefaultDialogSheetBehaviors,
+        showAboveKeyboard = true,
+        dragHandle = {}
+    ) {
     Column() {
 
         DialogTopBar(
@@ -88,6 +97,7 @@ fun ListDialog(
             onClick = onConfirm
         )
 
+    }
     }
 
 }
@@ -141,17 +151,17 @@ private fun ListItem(
     }
 }
 
-@Preview
-@Composable
-fun Vip() {
-    val state = rememberBottomSheetState()
-
-    ListDialog(
-        state = state,
-        "超级会员每月积分",
-        listOf("Vip1", "Vip2", "Vip3"),
-        selectValue = "Vip1",
-        onConfirm = {},
-        onDismiss = {}
-    )
-}
+//@Preview
+//@Composable
+//fun Vip() {
+//    val state = rememberBottomSheetState()
+//
+//    ListDialog(
+//        state = state,
+//        "超级会员每月积分",
+//        listOf("Vip1", "Vip2", "Vip3"),
+//        selectValue = "Vip1",
+//        onConfirm = {},
+//        onDismiss = {}
+//    )
+//}
