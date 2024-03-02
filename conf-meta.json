@@ -1,7 +1,7 @@
 {
-    "version": 48,
+    "version": 49,
     "needAppVersion": 23080814,
-    "updateLog": "调整字符预请求的请求间隔",
-    "md5": "6cfd044b5594ea7e24c38e62c8a7582f",
-    "updateTime": "2024-02-19 10:19:00"
+    "updateLog": "修复一个bug",
+    "md5": "5caff549ba498be665350ecbcfc5976c",
+    "updateTime": "2024-03-03 00:37:27"
 }
