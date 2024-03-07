@@ -21,7 +21,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -33,16 +32,15 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
 fun SignStateScene(
-    navController: NavController,
+    backClick: () -> Unit,
     signStateViewModel: SignStateViewModel = viewModel()
 ) {
     Scaffold(
         topBar = {
             TopBar(
                 text = "签到状态",
-                backClick = {
-                    navController.popBackStack()
-                })
+                backClick = backClick
+            )
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->

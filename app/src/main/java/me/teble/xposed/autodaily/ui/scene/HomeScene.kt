@@ -50,7 +50,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.R
@@ -67,7 +66,6 @@ import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
@@ -76,7 +74,10 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
 @Composable
-fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewModel()) {
+fun MainScreen(
+    onItemClick: (NavigationItem) -> Unit,
+    viewmodel: HomeViewModel = viewModel()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // 展示对应 snackbarText
@@ -115,7 +116,7 @@ fun MainScreen(navController: NavController, viewmodel: HomeViewModel = viewMode
             ) {
 
                 Banner()
-                GridLayout(navController)
+                GridLayout(onItemClick)
             }
 
         }
@@ -189,7 +190,10 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
 }
 
 @Composable
-private fun GridLayout(navController: NavController, viewModel: HomeViewModel = viewModel()) {
+private fun GridLayout(
+    onItemClick: (NavigationItem) -> Unit,
+    viewModel: HomeViewModel = viewModel()
+) {
     val execTaskNum = viewModel.execTaskNum
     Column(
         modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -204,7 +208,9 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
                 "已启用 $execTaskNum 项",
                 true
             ) {
-                navController.navigate(NavigationItem.Sign, NavigationItem.Main)
+                onItemClick(
+                    NavigationItem.Sign
+                )
             }
             CardItem(
                 iconColor = Color(0xFF8286FF), Icons.Script, "自定义脚本", "敬请期待", false
@@ -216,12 +222,12 @@ private fun GridLayout(navController: NavController, viewModel: HomeViewModel = 
                 .background(color = colors.colorBgContainer, SmootherShape(12.dp)),
         ) {
             TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onClick = {
-                navController.navigate(NavigationItem.Setting, NavigationItem.Main)
+                onItemClick(NavigationItem.Setting)
             }
 
             )
             TextItem(iconColor = Color(0xFFFFBC04), Icons.About, "关于", onClick = {
-                navController.navigate(NavigationItem.About, NavigationItem.Main)
+                onItemClick(NavigationItem.About)
             })
 
         }

@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -7,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -21,9 +21,9 @@ import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.dialog.UpdateType
-import me.teble.xposed.autodaily.ui.navigateUrl
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.openUrl
 import kotlin.concurrent.thread
 
 class AboutViewModel : ViewModel() {
@@ -123,7 +123,7 @@ class AboutViewModel : ViewModel() {
         }
     }
 
-    fun updateConfirm(navController: NavController, type: UpdateType) {
+    fun updateConfirm(context: Context, type: UpdateType) {
         when (type) {
             UpdateType.Ignore -> {
                 dismissUpdateDialog()
@@ -134,38 +134,38 @@ class AboutViewModel : ViewModel() {
             UpdateType.Drive -> {
                 dismissUpdateDialog()
                 showSnackbar("正在跳转，请稍后")
-                navController.navigateUrl(PAN_URL)
+                context.openUrl(PAN_URL)
             }
 
             UpdateType.Github -> {
                 dismissUpdateDialog()
                 showSnackbar("正在跳转，请稍后")
-                navController.navigateUrl(GITHUB_RELEASE_URL)
+                context.openUrl(GITHUB_RELEASE_URL)
             }
         }
     }
 
 
-    fun openGithub(navController: NavController) {
+    fun openGithub(context: Context) {
         showSnackbar("正在跳转，请稍后")
-        navController.navigateUrl("https://github.com/LuckyPray/XAutoDaily")
+        context.openUrl("https://github.com/LuckyPray/XAutoDaily")
     }
 
-    fun openTelegram(navController: NavController) {
+    fun openTelegram(context: Context) {
         showSnackbar("正在跳转，请稍后")
-        navController.navigateUrl("https://t.me/XAutoDailyChat")
+        context.openUrl("https://t.me/XAutoDailyChat")
     }
 
-    fun openAliPay(navController: NavController) {
+    fun openAliPay(context: Context) {
         try {
             showSnackbar("正在跳转，请稍后")
-            navController.navigateUrl(
+            context.openUrl(
                 "alipayqr://platformapi/startapp?saId=10000007&clientVersion=" +
                         "3.7.0.0718&qrcode=https%3A%2F%2Fqr.alipay.com%2F$ALIPAY_QRCODE%3F_s%3Dweb-other"
             )
         } catch (e: Exception) {
             LogUtil.e(e, "open alipay qr error: ")
-            navController.navigateUrl("https://mobilecodec.alipay.com/client_download.htm?qrcode=$ALIPAY_QRCODE")
+            context.openUrl("https://mobilecodec.alipay.com/client_download.htm?qrcode=$ALIPAY_QRCODE")
         }
     }
 

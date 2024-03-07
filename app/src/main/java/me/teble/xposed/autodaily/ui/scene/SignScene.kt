@@ -18,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
@@ -29,20 +28,22 @@ import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 @Composable
-fun SignScene(navController: NavController, signViewModel: SignViewModel = viewModel()) {
+fun SignScene(
+    backClick: () -> Unit,
+    onItemClick: (NavigationItem) -> Unit,
+    signViewModel: SignViewModel = viewModel()
+) {
     Scaffold(
         topBar = {
             TopBar(
                 text = "签到配置",
-                backClick = {
-                    navController.popBackStack()
-                })
+                backClick = backClick
+            )
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
@@ -64,14 +65,14 @@ fun SignScene(navController: NavController, signViewModel: SignViewModel = viewM
                 clickEnabled = true,
                 enable = globalEnable
             )
-            GroupColumn(navController, enable = globalEnable)
+            GroupColumn(onItemClick, enable = globalEnable)
         }
     }
 }
 
 @Composable
 private fun GroupColumn(
-    navController: NavController,
+    onItemClick: (NavigationItem) -> Unit,
     signViewModel: SignViewModel = viewModel(),
     enable: Boolean
 ) {
@@ -153,12 +154,11 @@ private fun GroupColumn(
                                 infoText = desc,
                                 clickEnabled = enable,
                                 onClick = {
-                                    navController.navigate(
+                                    onItemClick(
                                         NavigationItem.EditEnv(
                                             taskGroup.id,
                                             task.id
-                                        ),
-                                        NavigationItem.Sign
+                                        )
                                     )
                                 },
                                 onChange = {

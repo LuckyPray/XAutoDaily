@@ -1,4 +1,4 @@
-<div align="center">
+<div style="text-align: center;">
     <h1> XAutoDaily </h1>
 
 [![license](https://img.shields.io/github/license/teble/XAutoDaily.svg)](https://www.gnu.org/licenses/gpl-3.0.html)

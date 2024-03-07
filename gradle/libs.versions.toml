@@ -17,7 +17,7 @@ kotlin = "1.9.22"
 compose = "1.7.0-alpha04"
 kotlinxDatetime = "0.5.0"
 kotlinxSerializationJson = "1.6.3"
-lifecycle= "2.7.0"
+lifecycle = "2.7.0"
 material3Adaptive = "1.0.0-alpha06"
 okhttp = "4.12.0"
 navigationCompose = "2.7.7"
@@ -55,7 +55,6 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 
 
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
-androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 compose-shadows-plus = { module = "com.github.GIGAMOLE:ComposeShadowsPlus", version.ref = "composeshadowsplus" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 flatbuffers-java = { module = "com.google.flatbuffers:flatbuffers-java", version.ref = "flatbuffersJava" }
@@ -75,13 +74,13 @@ sheets = { module = "io.github.dokar3:sheets", version.ref = "sheets" }
 shizuku-api = { module = "dev.rikka.shizuku:api", version.ref = "apiVersion" }
 
 
-androidx-compose-animation = { module = "androidx.compose.animation:animation",version.ref = "compose" }
-androidx-compose-foundation = { module = "androidx.compose.foundation:foundation",version.ref = "compose" }
+androidx-compose-animation = { module = "androidx.compose.animation:animation", version.ref = "compose" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 androidx-compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout", version.ref = "compose" }
 
-androidx-compose-runtime = { module = "androidx.compose.runtime:runtime",version.ref = "compose" }
-androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling",version.ref = "compose" }
-androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose"  }
+androidx-compose-runtime = { module = "androidx.compose.runtime:runtime", version.ref = "compose" }
+androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 
 androidx-material3-adaptive = { module = "androidx.compose.material3:material3-adaptive", version.ref = "material3Adaptive" }

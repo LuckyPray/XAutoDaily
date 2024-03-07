@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -32,7 +33,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
@@ -47,11 +47,14 @@ import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
-fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewModel()) {
+fun AboutScene(
+    backClick: () -> Unit,
+    onItemClick: (NavigationItem) -> Unit,
+    viewmodel: AboutViewModel = viewModel()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // 展示对应 snackbarText
@@ -64,9 +67,7 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
     Box {
         Scaffold(
             topBar = {
-                TopBar(text = "关于", backClick = {
-                    navController.popBackStack()
-                })
+                TopBar(text = "关于", backClick = backClick)
             },
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState) {
@@ -88,8 +89,8 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
             ) {
                 BuildConfigLayout()
                 UpdateLayout()
-                LicenseLayout(navController)
-                OthterLayout(navController)
+                LicenseLayout(onItemClick)
+                OthterLayout(onItemClick)
             }
         }
         val state = rememberBottomSheetState()
@@ -105,6 +106,7 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
         LaunchedEffect(state.visible) {
             viewmodel.updateUpdateDialogState(state.visible)
         }
+        val context = LocalContext.current
 
         UpdateDialog(
             state,
@@ -114,7 +116,7 @@ fun AboutScene(navController: NavController, viewmodel: AboutViewModel = viewMod
                 viewmodel.dismissUpdateDialog()
             },
             onConfirm = {
-                viewmodel.updateConfirm(navController, it)
+                viewmodel.updateConfirm(context, it)
             }
         )
     }
@@ -218,7 +220,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
 }
 
 @Composable
-private fun LicenseLayout(navController: NavController) {
+private fun LicenseLayout(onItemClick: (NavigationItem) -> Unit) {
     TextItem(
         text = "开放源代码许可",
         modifier = Modifier
@@ -228,12 +230,16 @@ private fun LicenseLayout(navController: NavController) {
             .background(colors.colorBgContainer),
         clickEnabled = true
     ) {
-        navController.navigate(NavigationItem.License, NavigationItem.About)
+        onItemClick(NavigationItem.License)
     }
 }
 
 @Composable
-private fun OthterLayout(navController: NavController, viewmodel: AboutViewModel = viewModel()) {
+private fun OthterLayout(
+    onItemClick: (NavigationItem) -> Unit,
+    viewmodel: AboutViewModel = viewModel()
+) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
@@ -248,7 +254,7 @@ private fun OthterLayout(navController: NavController, viewmodel: AboutViewModel
                 .clip(SmootherShape(12.dp)),
             clickEnabled = true
         ) {
-            navController.navigate(NavigationItem.Developer, NavigationItem.About)
+            onItemClick(NavigationItem.Developer)
         }
 
         TextItem(
@@ -258,7 +264,7 @@ private fun OthterLayout(navController: NavController, viewmodel: AboutViewModel
                 .clip(SmootherShape(12.dp)),
             clickEnabled = true
         ) {
-            viewmodel.openGithub(navController)
+            viewmodel.openGithub(context)
         }
 
         TextItem(
@@ -268,7 +274,7 @@ private fun OthterLayout(navController: NavController, viewmodel: AboutViewModel
                 .clip(SmootherShape(12.dp)),
             clickEnabled = true
         ) {
-            viewmodel.openTelegram(navController)
+            viewmodel.openTelegram(context)
         }
 
         TextInfoItem(
@@ -279,7 +285,7 @@ private fun OthterLayout(navController: NavController, viewmodel: AboutViewModel
                 .clip(SmootherShape(12.dp)),
             clickEnabled = true
         ) {
-            viewmodel.openAliPay(navController)
+            viewmodel.openAliPay(context)
         }
     }
 

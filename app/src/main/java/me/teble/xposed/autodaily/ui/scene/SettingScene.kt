@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
@@ -33,14 +32,14 @@ import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
-    navController: NavController,
+    backClick: () -> Unit,
+    onItemClick: (NavigationItem) -> Unit,
     themeViewModel: MainThemeViewModel,
     viewmodel: SettingViewModel = viewModel()
 ) {
@@ -74,9 +73,7 @@ fun SettingScene(
                 SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
             },
             topBar = {
-                TopBar(text = "设置", backClick = {
-                    navController.popBackStack()
-                })
+                TopBar(text = "设置", backClick = backClick)
             },
             containerColor = XAutodailyTheme.colors.colorBgLayout
         ) { contentPadding ->
@@ -92,7 +89,7 @@ fun SettingScene(
                     .defaultNavigationBarPadding()
             ) {
 
-                EntryLayout(navController)
+                EntryLayout(onItemClick)
                 ConfigLayout()
                 CommonLayout()
                 BackupLayout()
@@ -122,7 +119,7 @@ fun SettingScene(
 }
 
 @Composable
-private fun EntryLayout(navController: NavController) {
+private fun EntryLayout(onItemClick: (NavigationItem) -> Unit) {
     SmallTitle(
         title = "模块入口",
         modifier = Modifier
@@ -136,7 +133,7 @@ private fun EntryLayout(navController: NavController) {
             .background(color = colors.colorBgContainer),
         text = "签到状态", clickEnabled = true,
         onClick = {
-            navController.navigate(NavigationItem.SignState, NavigationItem.About)
+            onItemClick(NavigationItem.SignState)
         })
 }
 

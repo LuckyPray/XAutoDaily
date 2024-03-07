@@ -21,21 +21,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.data.Dependency
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
-import me.teble.xposed.autodaily.ui.navigateUrl
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.utils.openUrl
 
 @Composable
-fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = viewModel()) {
+fun LicenseScene(backClick: () -> Unit, viewmodel: LicenseViewModel = viewModel()) {
     Scaffold(
         topBar = {
-            TopBar(text = "开放源代码许可", backClick = {
-                navController.popBackStack()
-            })
+            TopBar(text = "开放源代码许可", backClick = backClick)
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
@@ -59,7 +56,7 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
                 items = viewmodel.dependencies,
                 key = { it.name },
                 contentType = { it.name }) { dependency ->
-                DependencyItem(navController, dependency)
+                DependencyItem(dependency)
             }
         }
 
@@ -68,15 +65,16 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
 }
 
 @Composable
-fun DependencyItem(navController: NavController, dependency: Dependency) {
+fun DependencyItem(dependency: Dependency) {
 
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
             .background(XAutodailyTheme.colors.colorBgContainer)
             .clickable(role = Role.Button, onClick = {
-                navController.navigateUrl(dependency.mavenCoordinates.groupId)
+                context.openUrl(dependency.mavenCoordinates.groupId)
             })
             .padding(vertical = 20.dp, horizontal = 16.dp),
     ) {

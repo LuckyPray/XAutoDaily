@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +14,15 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
@@ -31,7 +33,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 
 @Composable
-fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel = viewModel()) {
+fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // 展示对应 snackbarText
@@ -40,12 +42,13 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
             snackbarHostState.showSnackbar(it)
         }
     }
-
+    val backCallback = rememberUpdatedState(backClick)
+    BackHandler {
+        backCallback.value.invoke()
+    }
     Scaffold(
         topBar = {
-            TopBar(text = "开发者", backClick = {
-                navController.popBackStack()
-            })
+            TopBar(text = "开发者", backClick = backClick)
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) {
@@ -64,7 +67,7 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
                 .defaultNavigationBarPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AuthorLayout(navController)
+            AuthorLayout()
         }
     }
 }
@@ -72,9 +75,10 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
 
 @Composable
 private fun AuthorLayout(
-    navController: NavController,
+
     viewmodel: DeveloperViewModel = viewModel()
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(top = 16.dp)
@@ -88,7 +92,7 @@ private fun AuthorLayout(
             title = "韵の祈",
             info = "主要开发者"
         ) {
-            viewmodel.openAuthorGithub(navController, "https://github.com/teble")
+            viewmodel.openAuthorGithub(context, "https://github.com/teble")
         }
         AuthorItem(
             icon = painterResource(id = R.drawable.lagrio),
@@ -96,7 +100,7 @@ private fun AuthorLayout(
             title = "MaiTungTM",
             info = "UI & Icon 设计师"
         ) {
-            viewmodel.openAuthorGithub(navController, "https://github.com/Lagrio")
+            viewmodel.openAuthorGithub(context, "https://github.com/Lagrio")
         }
         AuthorItem(
             icon = painterResource(id = R.drawable.agoines),
@@ -104,7 +108,7 @@ private fun AuthorLayout(
             title = "Agoines",
             info = "UI 开发者"
         ) {
-            viewmodel.openAuthorGithub(navController, "https://github.com/agoines")
+            viewmodel.openAuthorGithub(context, "https://github.com/agoines")
         }
     }
 }

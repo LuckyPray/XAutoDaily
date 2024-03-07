@@ -357,8 +357,6 @@ dependencies {
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.materialWindow)
 
-    implementation(libs.androidx.navigation.compose)
-
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.sheets)
     implementation(libs.compose.shadows.plus)

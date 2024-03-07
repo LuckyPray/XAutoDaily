@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import com.dokar.sheets.rememberBottomSheetState
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -46,7 +45,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
-fun EditEnvScene(navController: NavController, groupId: String?, taskId: String) {
+fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
 
 
     Box {
@@ -71,9 +70,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
 //                }
             },
             topBar = {
-                TopBar(text = taskId, backClick = {
-                    navController.popBackStack()
-                })
+                TopBar(text = taskId, backClick = backClick)
             },
             floatingActionButton = {
                 FloatingButton(

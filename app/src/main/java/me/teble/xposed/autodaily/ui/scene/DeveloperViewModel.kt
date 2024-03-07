@@ -1,20 +1,20 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import me.teble.xposed.autodaily.ui.navigateUrl
+import me.teble.xposed.autodaily.utils.openUrl
 
 class DeveloperViewModel : ViewModel() {
 
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
-    fun openAuthorGithub(navController: NavController, url: String) {
+    fun openAuthorGithub(context: Context, url: String) {
         showSnackbar("正在跳转，请稍后")
-        navController.navigateUrl("https://t.me/XAutoDailyChat")
+        context.openUrl("https://t.me/XAutoDailyChat")
     }
 
     /**

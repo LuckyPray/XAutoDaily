@@ -1,12 +1,28 @@
 package me.teble.xposed.autodaily.ui
 
-import androidx.annotation.Keep
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.adaptive.AnimatedPane
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.PaneScaffoldDirective
+import androidx.compose.material3.adaptive.calculateDensePaneScaffoldDirective
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.scene.AboutScene
 import me.teble.xposed.autodaily.ui.scene.DeveloperScene
 import me.teble.xposed.autodaily.ui.scene.EditEnvScene
@@ -15,84 +31,153 @@ import me.teble.xposed.autodaily.ui.scene.MainScreen
 import me.teble.xposed.autodaily.ui.scene.SettingScene
 import me.teble.xposed.autodaily.ui.scene.SignScene
 import me.teble.xposed.autodaily.ui.scene.SignStateScene
-import me.teble.xposed.autodaily.utils.openUrl
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
-@Keep
-enum class Screen {
-    Main,
-    Sign,
-    About,
-    Setting,
-    Developer,
-    License,
-    EditEnv,
-    SignState
-}
 
-sealed class NavigationItem(val route: String) {
-    data object Main : NavigationItem(Screen.Main.name)
-    data object Sign : NavigationItem(Screen.Sign.name)
-    data object About : NavigationItem(Screen.About.name)
-    data object Setting : NavigationItem(Screen.Setting.name)
-    data object Developer : NavigationItem(Screen.Developer.name)
-    data object License : NavigationItem(Screen.License.name)
+sealed class NavigationItem {
+    data object Sign : NavigationItem()
+    data object About : NavigationItem()
+    data object Setting : NavigationItem()
+    data object Developer : NavigationItem()
+    data object License : NavigationItem()
 
-    data object SignState : NavigationItem(Screen.SignState.name)
+    data object SignState : NavigationItem()
     data class EditEnv(val taskGroup: String, val taskId: String) :
-        NavigationItem("${Screen.EditEnv.name}/$taskGroup/$taskId")
+        NavigationItem()
 }
 
-fun NavController.navigate(item: NavigationItem, popUpToItem: NavigationItem) {
-    this.navigate(item.route) {
-        popUpTo(popUpToItem.route)
-        launchSingleTop = true
+
+class XAutoDailyItem(val route: NavigationItem) {
+    companion object {
+        val Saver: Saver<XAutoDailyItem?, NavigationItem> = Saver(
+            { it?.route },
+            ::XAutoDailyItem
+        )
     }
 }
 
-fun NavController.navigateUrl(uri: String) {
-    context.openUrl(uri)
-}
-
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
-    val navController = rememberNavController()
-    NavHost(
-        navController = navController,
-        startDestination = NavigationItem.Main.route
-    ) {
-        composable(NavigationItem.Main.route) {
-            MainScreen(navController)
-        }
+    val systemDirective = calculateDensePaneScaffoldDirective(currentWindowAdaptiveInfo())
+    val customDirective = PaneScaffoldDirective(
+        contentPadding = PaddingValues(0.dp),
+        maxHorizontalPartitions = systemDirective.maxHorizontalPartitions,
+        horizontalPartitionSpacerSize = 0.dp,
+        maxVerticalPartitions = systemDirective.maxVerticalPartitions,
+        verticalPartitionSpacerSize = systemDirective.verticalPartitionSpacerSize,
+        excludedBounds = systemDirective.excludedBounds
+    )
 
-        composable(NavigationItem.Sign.route) {
-            SignScene(navController)
-        }
-        composable(NavigationItem.About.route) {
-            AboutScene(navController)
-        }
+    val navigator =
+        rememberListDetailPaneScaffoldNavigator<Nothing>(scaffoldDirective = customDirective)
 
-        composable(NavigationItem.Setting.route) {
-            SettingScene(navController, themeViewModel)
-        }
 
-        composable(NavigationItem.Developer.route) {
-            DeveloperScene(navController)
-        }
+    var selectedItem: XAutoDailyItem? by rememberSaveable(stateSaver = XAutoDailyItem.Saver) {
+        mutableStateOf(null)
+    }
 
-        composable(NavigationItem.License.route) {
-            LicenseScene(navController)
-        }
 
-        composable(NavigationItem.SignState.route) {
-            SignStateScene(navController)
-        }
+    val navigateStacks = remember {
+        mutableStateListOf<NavigationItem>()
+    }
 
-        composable("${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
-            EditEnvScene(
-                navController,
-                backStackEntry.arguments!!.getString("taskGroup", ""),
-                backStackEntry.arguments!!.getString("taskId", "")
-            )
+    val backEvent: () -> Unit = {
+        if (navigateStacks.size == 1) {
+            navigator.navigateBack()
+        }
+        navigateStacks.removeLast()
+        selectedItem = if (navigateStacks.isNotEmpty()) {
+            XAutoDailyItem(navigateStacks.last())
+        } else {
+            null
         }
     }
+
+    BackHandler(selectedItem != null || navigator.canNavigateBack()) {
+        backEvent()
+
+    }
+
+    ListDetailPaneScaffold(
+        scaffoldState = navigator.scaffoldState,
+        windowInsets = contentWindowInsets,
+        modifier = Modifier.background(colors.colorBgLayout),
+        listPane = {
+            AnimatedPane(Modifier) {
+                MainScreen(
+                    onItemClick = {
+                        navigator.navigateTo(pane = ListDetailPaneScaffoldRole.Detail)
+                        selectedItem = XAutoDailyItem(it)
+                        navigateStacks.clear()
+                        navigateStacks.add(it)
+                    })
+            }
+        },
+        detailPane = {
+            AnimatedPane(Modifier) {
+                selectedItem?.route?.let { route ->
+                    when (route) {
+                        NavigationItem.About -> {
+                            AboutScene(backClick = backEvent, onItemClick = {
+                                navigateStacks.add(it)
+                                selectedItem = XAutoDailyItem(it)
+                            })
+                        }
+
+                        NavigationItem.Developer -> {
+                            DeveloperScene(
+                                backClick = backEvent
+                            )
+                        }
+
+                        is NavigationItem.EditEnv -> {
+                            EditEnvScene(
+                                backClick = backEvent,
+                                route.taskGroup,
+                                route.taskId
+                            )
+                        }
+
+                        NavigationItem.License -> {
+                            LicenseScene(
+                                backClick = backEvent,
+                            )
+                        }
+
+
+                        NavigationItem.Setting -> {
+                            SettingScene(
+                                backClick = backEvent,
+                                onItemClick = {
+                                    selectedItem = XAutoDailyItem(it)
+                                    navigateStacks.add(it)
+                                },
+                                themeViewModel = themeViewModel
+                            )
+                        }
+
+                        NavigationItem.Sign -> {
+                            SignScene(
+                                backClick = backEvent,
+                                onItemClick = {
+                                    selectedItem = XAutoDailyItem(it)
+                                    navigateStacks.add(it)
+                                }
+                            )
+                        }
+
+                        NavigationItem.SignState -> {
+                            SignStateScene(
+                                backClick = backEvent
+                            )
+                        }
+
+                    }
+                }
+
+            }
+        }
+    )
+
 }
