@@ -435,7 +435,7 @@ tasks.whenTaskAdded {
         }
 
         "installDebug" -> {
-            finalizedBy(restartTim)
+            finalizedBy(restartQQ)
         }
     }
 }

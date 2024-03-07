@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -51,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.dokar.sheets.BottomSheet
 import com.dokar.sheets.rememberBottomSheetState
+import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
@@ -139,6 +142,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
                 fontWeight = FontWeight.Light,
                 color = Color(0xFF2ECC71),
                 textAlign = TextAlign.Center,
+                fontFamily = FontFamily(Font(R.font.tcloud_number_vf))
             )
         )
         Text(

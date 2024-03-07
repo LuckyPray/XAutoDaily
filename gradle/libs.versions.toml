@@ -1,7 +1,7 @@
 [versions]
 # 依赖版本号
 activityCompose = "1.8.2"
-agp = "8.2.2"
+agp = "8.3.0"
 ahoCorasickDoubleArrayTrie = "1.2.3"
 annotation = "1.7.1"
 apiVersion = "13.1.5"
@@ -14,7 +14,7 @@ flatbuffersJava = "23.5.26"
 kaml = "0.57.0"
 hutoolCore = "5.8.26"
 kotlin = "1.9.22"
-compose = "1.7.0-alpha03"
+compose = "1.7.0-alpha04"
 kotlinxDatetime = "0.5.0"
 kotlinxSerializationJson = "1.6.3"
 lifecycle= "2.7.0"
@@ -27,7 +27,9 @@ provider = "13.1.5"
 sheets = "0.5.5"
 systemExtension = "1.0.1"
 
-material = "1.3.0-alpha01"
+material = "1.3.0-alpha02"
+
+browser = "1.8.0"
 
 licenses = "4.7.0"
 
@@ -40,7 +42,6 @@ ndk = "25.0.8775105"
 compose-compiler = "1.5.9"
 jvm-target = "17"
 
-browser = "1.7.0"
 
 [libraries]
 

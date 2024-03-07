@@ -32,12 +32,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledFontAlpha
@@ -164,10 +167,6 @@ internal fun TextPicker(
 
             val isSelect by remember { derivedStateOf { currentIndex == index } }
 
-            val fontWeight by animateIntAsState(
-                targetValue = if (isSelect) FontWeight.Normal.weight else FontWeight.Light.weight,
-                animationSpec = spring(), label = "Picker FontWeight"
-            )
             val fontScale by animateFloatAsState(
                 targetValue = if (isSelect) 1.0f else 0.8f,
                 animationSpec = spring(), label = "Picker fontSize"
@@ -198,13 +197,13 @@ internal fun TextPicker(
                     },
                     maxTextSize = 48.sp,
                     stepGranularityTextSize = 1.sp,
-                    fontWeight = FontWeight(fontWeight),
+                    fontWeight = if (isSelect) FontWeight.Bold else FontWeight.Normal,
 
                     style = TextStyle(
-                        textAlign = TextAlign.Center
-                    ),
-
+                        textAlign = TextAlign.Center,
+                        fontFamily = FontFamily(Font(R.font.tcloud_number_vf))
                     )
+                )
             }
 
 
