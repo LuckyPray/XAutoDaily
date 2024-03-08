@@ -180,7 +180,6 @@ android {
     }
 
     kotlinOptions {
-
         freeCompilerArgs = listOf(
             "-Xno-param-assertions",
             "-Xno-call-assertions",
@@ -352,14 +351,13 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.runtime)
-    implementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.materialWindow)
 
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.compose.shadows.plus)
-
 
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
@@ -377,33 +375,37 @@ dependencies {
     // shizuku
     implementation(libs.shizuku.api)
     implementation(libs.provider)
-
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath
 
-val restartQQ = task("restartQQ").doLast {
+
+fun killApp(name: String) {
     exec {
-        commandLine(adbExecutable, "shell", "am", "force-stop", "com.tencent.mobileqq")
+        commandLine(adbExecutable, "shell", "am", "force-stop", name)
     }
+}
+
+fun startApp(name: String) {
     exec {
         commandLine(
             adbExecutable, "shell", "am", "start",
-            "$(pm resolve-activity --components com.tencent.mobileqq)"
+            "$(pm resolve-activity --components $name)"
         )
     }
 }
 
+fun restartApp(name: String) {
+    killApp(name)
+    startApp(name)
+}
+
+val restartQQ = task("restartQQ").doLast {
+    restartApp("com.tencent.mobileqq")
+}
+
 val restartTim = task("restartTim").doLast {
-    exec {
-        commandLine(adbExecutable, "shell", "am", "force-stop", "com.tencent.tim")
-    }
-    exec {
-        commandLine(
-            adbExecutable, "shell", "am", "start",
-            "$(pm resolve-activity --components com.tencent.tim)"
-        )
-    }
+    restartApp("com.tencent.tim")
 }
 
 val optimizeReleaseRes = task("optimizeReleaseRes").doLast {
@@ -412,7 +414,7 @@ val optimizeReleaseRes = task("optimizeReleaseRes").doLast {
         "build-tools", project.android.buildToolsVersion, "aapt2"
     )
     val zip = Paths.get(
-        project.buildDir.path, "intermediates",
+        project.layout.buildDirectory.asFile.get().path, "intermediates",
         "optimized_processed_res", "release", "resources-release-optimize.ap_"
     )
     val optimized = File("${zip}.opt")
@@ -428,11 +430,14 @@ val optimizeReleaseRes = task("optimizeReleaseRes").doLast {
 tasks.whenTaskAdded {
     when (name) {
         "optimizeReleaseResources" -> {
+            // 能不能让这里执行 licenseReleaseReport
             finalizedBy(optimizeReleaseRes)
         }
 
         "installDebug" -> {
+            // 不知道怎么判断，先这样写
             finalizedBy(restartTim)
+            finalizedBy(restartQQ)
         }
     }
 }

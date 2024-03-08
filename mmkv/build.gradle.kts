@@ -18,6 +18,11 @@ android {
         buildConfigField("String", "FLAVOR", "\"StaticCpp\"")
     }
 
+    compileOptions {
+        sourceCompatibility(JavaVersion.VERSION_21)
+        targetCompatibility(JavaVersion.VERSION_21)
+    }
+
     sourceSets {
         val main by getting
         main.apply {
