@@ -26,11 +26,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -50,8 +52,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.DialogButton
@@ -65,10 +65,10 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
-import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -237,34 +237,37 @@ private fun GridLayout(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NoticeDialog(
-    viewModel: HomeViewModel = viewModel()
+    viewmodel: HomeViewModel = viewModel()
 ) {
 
-    val noticeText = viewModel.noticeText
-    val state = rememberBottomSheetState()
 
-    LaunchedEffect(viewModel.noticeDialog) {
-        if (viewModel.noticeDialog) {
-            state.expand()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val noticeDialog = viewmodel.noticeDialog
+
+    LaunchedEffect(noticeDialog) {
+        if (viewmodel.noticeDialog) {
+            sheetState.expand()
         } else {
-            state.collapse()
+            sheetState.hide()
         }
-
-    }
-    LaunchedEffect(state.visible) {
-        viewModel.updateNoticeDialogState(state.visible)
     }
 
+    if (sheetState.isVisible || noticeDialog) {
 
-    if (state.visible) {
-        BottomSheet(state = state,
-            skipPeeked = true,
-            shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-            backgroundColor = colors.colorBgDialog,
-            behaviors = DefaultDialogSheetBehaviors,
-            dragHandle = {}) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                viewmodel.dismissNoticeDialog()
+            },
+            sheetState = sheetState,
+            containerColor = colors.colorBgDialog,
+            windowInsets = contentWindowInsets,
+            dragHandle = {},
+            scrimColor = colors.colorBgMask,
+            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+        ) {
             Column(
                 modifier = Modifier
                     .padding(horizontal = 32.dp)
@@ -288,7 +291,7 @@ private fun NoticeDialog(
                 )
 
                 Text(
-                    text = noticeText,
+                    text = viewmodel.noticeText,
                     modifier = Modifier
                         .padding(top = 24.dp)
                         .weight(1f, false)
@@ -306,7 +309,7 @@ private fun NoticeDialog(
                         .padding(top = 24.dp)
                         .align(Alignment.CenterHorizontally)
                         .fillMaxWidth(),
-                    onClick = viewModel::dismissNoticeDialog
+                    onClick = viewmodel::dismissNoticeDialog
                 )
             }
 

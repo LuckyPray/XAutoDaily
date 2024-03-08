@@ -14,7 +14,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -24,35 +26,34 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Chosen
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListDialog(
-    state: BottomSheetState,
+    state: SheetState,
     title: String,
     list: List<String>,
     selectValue: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    BottomSheet(
-        state = state,
-        skipPeeked = true,
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = state,
+        containerColor = colors.colorBgDialog,
+        windowInsets = contentWindowInsets,
+        dragHandle = {},
+        scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        backgroundColor = colors.colorBgDialog,
-        behaviors = DefaultDialogSheetBehaviors,
-        showAboveKeyboard = true,
-        dragHandle = {}
     ) {
     Column() {
 

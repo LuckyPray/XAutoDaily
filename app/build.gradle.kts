@@ -358,7 +358,6 @@ dependencies {
     implementation(libs.androidx.compose.materialWindow)
 
     implementation(libs.androidx.material3.adaptive)
-    implementation(libs.sheets)
     implementation(libs.compose.shadows.plus)
 
 
@@ -433,7 +432,7 @@ tasks.whenTaskAdded {
         }
 
         "installDebug" -> {
-            finalizedBy(restartQQ)
+            finalizedBy(restartTim)
         }
     }
 }

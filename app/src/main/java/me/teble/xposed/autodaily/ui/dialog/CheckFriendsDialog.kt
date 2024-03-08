@@ -15,7 +15,9 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -32,8 +34,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dokar.sheets.BottomSheet
-import com.dokar.sheets.BottomSheetState
 import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
@@ -42,13 +42,14 @@ import me.teble.xposed.autodaily.ui.composable.SelectInfoItem
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Search
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.DefaultDialogSheetBehaviors
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckFriendsDialog(
-    state: BottomSheetState,
+    state: SheetState,
     friends: List<Friend>,
     uinListStr: MutableState<String>,
 
@@ -56,14 +57,14 @@ fun CheckFriendsDialog(
     onDismiss: () -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
-    BottomSheet(
-        state = state,
-        skipPeeked = true,
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = state,
+        containerColor = colors.colorBgDialog,
+        windowInsets = contentWindowInsets,
+        dragHandle = {},
+        scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        backgroundColor = colors.colorBgDialog,
-        behaviors = DefaultDialogSheetBehaviors,
-        showAboveKeyboard = true,
-        dragHandle = {}
     ) {
         Column {
 

@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Unspecified
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -44,6 +45,9 @@ import me.teble.xposed.autodaily.ui.icon.icons.Text
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme.Dark
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme.Light
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme.System
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
@@ -97,25 +101,25 @@ fun ThemeModelDialog(
                 ThemeItem(
                     text = "亮色模式",
                     imageVector = Icons.Sun,
-                    checked = theme == XAutodailyTheme.Theme.Light,
+                    checked = theme == Light,
                     onClick = {
-                        theme = XAutodailyTheme.Theme.Light
+                        theme = Light
                     }
                 )
                 ThemeItem(
                     text = "暗色模式",
                     imageVector = Icons.Moon,
-                    checked = theme == XAutodailyTheme.Theme.Dark,
+                    checked = theme == Dark,
                     onClick = {
-                        theme = XAutodailyTheme.Theme.Dark
+                        theme = Dark
                     }
                 )
                 ThemeItem(
                     text = "跟随系统",
                     imageVector = Icons.Android,
-                    checked = theme == XAutodailyTheme.Theme.System,
+                    checked = theme == System,
                     onClick = {
-                        theme = XAutodailyTheme.Theme.System
+                        theme = System
                     }
                 )
 
@@ -159,18 +163,19 @@ private fun ThemeItem(
     modifier: Modifier = Modifier,
     imageVector: ImageVector,
     text: String,
-    checked: Boolean = false,
+    checked: Boolean,
     onClick: () -> Unit = {}
 ) {
     val backgroundColor by animateColorAsState(
         if (checked) colors.themeColor.copy(0.08f) else Color.Transparent, label = ""
     )
+
     val textColor by animateColorAsState(
         if (checked) colors.themeColor else colors.colorTextTheme, label = ""
     )
 
-    val fabColor =
-        RippleConfiguration(color = if (checked) colors.themeColor else Color.Unspecified)
+    val fabColor = RippleConfiguration(color = if (checked) colors.themeColor else Unspecified)
+
     // 替换了水波纹原本的颜色
     CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
         Row(
@@ -197,6 +202,7 @@ private fun ThemeItem(
                     .weight(1f),
                 fontWeight = FontWeight.Normal
             )
+
             if (checked) {
                 Icon(
                     Icons.Chosen,
@@ -204,6 +210,8 @@ private fun ThemeItem(
                     tint = textColor
                 )
             }
+
+
         }
     }
 }

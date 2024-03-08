@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,7 +28,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dokar.sheets.rememberBottomSheetState
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
@@ -44,15 +45,17 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
 
 
     Box {
 
-        val state = rememberBottomSheetState()
+        val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val scope = rememberCoroutineScope()
 
+        var dialogState by remember { mutableStateOf(false) }
         val friendFlag = remember { mutableStateOf(true) }
 
         val envMap = remember { mutableStateOf("") }
@@ -62,6 +65,16 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                 friends = FunctionPool.friendsManager.getFriends() ?: emptyList()
 
             }
+        }
+        LaunchedEffect(dialogState) {
+            scope.launch {
+                if (dialogState) {
+                    state.expand()
+                } else {
+                    state.hide()
+                }
+            }
+
         }
         Scaffold(
             snackbarHost = {
@@ -107,9 +120,7 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                         .background(colors.colorBgEdit, SmootherShape(12.dp)),
                     hintText = "好友清单",
                     iconClick = {
-                        scope.launch {
-                            state.expand()
-                        }
+                        dialogState = true
                     }
                 ) {
                     editText = it
@@ -170,16 +181,21 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
 
 
 
-        CheckFriendsDialog(
-            state = state,
-            friends = friends,
-            uinListStr = envMap,
+        if (state.isVisible || dialogState) {
+            CheckFriendsDialog(
+                state = state,
+                friends = friends,
+                uinListStr = envMap,
 
-            onConfirm = {
+                onConfirm = {
 
-            },
-            onDismiss = { }
-        )
+                },
+                onDismiss = {
+                    dialogState = false
+
+                }
+            )
+        }
 
 
     }

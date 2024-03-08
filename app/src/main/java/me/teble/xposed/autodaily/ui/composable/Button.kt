@@ -156,7 +156,7 @@ fun SelectButton(
 fun DialogButton(
     text: String,
     modifier: Modifier,
-    clickEnabled: Boolean = false,
+    clickEnabled: Boolean = true,
     onClick: () -> Unit
 ) {
 

@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -33,7 +35,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dokar.sheets.rememberBottomSheetState
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
@@ -49,6 +50,7 @@ import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScene(
     backClick: () -> Unit,
@@ -93,32 +95,30 @@ fun AboutScene(
                 OthterLayout(onItemClick)
             }
         }
-        val state = rememberBottomSheetState()
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
         LaunchedEffect(viewmodel.showUpdateDialog) {
             if (viewmodel.showUpdateDialog) {
-                state.expand()
+                sheetState.expand()
             } else {
-                state.collapse()
+                sheetState.hide()
             }
-
-        }
-        LaunchedEffect(state.visible) {
-            viewmodel.updateUpdateDialogState(state.visible)
         }
         val context = LocalContext.current
 
-        UpdateDialog(
-            state,
-            text = "新版本",
-            info = viewmodel.updateDialogText,
-            onDismiss = {
-                viewmodel.dismissUpdateDialog()
-            },
-            onConfirm = {
-                viewmodel.updateConfirm(context, it)
-            }
-        )
+        if (sheetState.isVisible || viewmodel.hasUpdate) {
+            UpdateDialog(
+                sheetState,
+                text = "新版本",
+                info = viewmodel.updateDialogText,
+                onDismiss = {
+                    viewmodel.dismissUpdateDialog()
+                },
+                onConfirm = {
+                    viewmodel.updateConfirm(context, it)
+                }
+            )
+        }
     }
 }
 
