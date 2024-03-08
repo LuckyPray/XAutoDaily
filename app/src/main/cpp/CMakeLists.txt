@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.4.1)
 project(xa_native)
 
+enable_language(CXX C)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_C_STANDARD 23)
+
 add_subdirectory(../../../../mmkv mmkv)
 add_subdirectory(../../../../dexkit/DexKit/Core dexkit_static)
 
