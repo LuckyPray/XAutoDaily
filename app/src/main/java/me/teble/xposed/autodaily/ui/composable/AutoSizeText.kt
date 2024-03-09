@@ -349,7 +349,7 @@ enum class SuggestedFontSizesStatus {
     VALID, INVALID, UNKNOWN;
 
     companion object {
-        val List<TextUnit>.suggestedFontSizesStatus
+        private val List<TextUnit>.suggestedFontSizesStatus
             get() = if (isNotEmpty() && all { it.isSp } && sortedBy { it.value } == this)
                 VALID
             else

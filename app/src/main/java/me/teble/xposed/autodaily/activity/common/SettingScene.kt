@@ -160,8 +160,8 @@ private fun CommonLayout(
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
             text = hideText,
-            clickEnabled = true,
-            enable = hiddenAppIcon,
+            clickEnabled = { true },
+            enable = { hiddenAppIcon },
             onClick = {
                 viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
             })
@@ -169,7 +169,7 @@ private fun CommonLayout(
             Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            text = "主题颜色", clickEnabled = true, onClick = {
+            text = "主题颜色", clickEnabled = { true }, onClick = {
                 viewmodel.showThemeDialog()
             })
 
@@ -179,10 +179,10 @@ private fun CommonLayout(
                 Modifier
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp)),
-                enable = untrustedTouchEvents,
+                enable = { untrustedTouchEvents },
                 text = "取消安卓 12 不受信触摸",
                 infoText = "安卓 12 后启用对 Toast 弹窗等事件触摸不可穿透，勾选此项可关闭",
-                clickEnabled = shizukuEnable,
+                clickEnabled = { shizukuEnable },
                 onClick = {
                     viewmodel.updateUntrustedTouchEvents(it)
                 }
@@ -216,10 +216,10 @@ private fun ShizukuLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = keepAlive,
+            enable = { keepAlive },
             text = "启用 Shizuku 保活机制",
             infoText = "通过 Shizuku 运行一个 Service，当监测到 QQ/TIM 被杀死后重新拉起进程",
-            clickEnabled = shizukuEnable,
+            clickEnabled = { shizukuEnable },
             onClick = {
                 viewmodel.updateKeepAliveChecked(it)
             }
@@ -312,10 +312,10 @@ private fun KeepTimeItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp)),
-        enable = hostKeepAlive,
+        enable = { hostKeepAlive },
         text = title,
         infoText = info,
-        clickEnabled = keepAlive,
+        clickEnabled = { keepAlive },
         onClick = onClick,
         onChange = onChange
     )

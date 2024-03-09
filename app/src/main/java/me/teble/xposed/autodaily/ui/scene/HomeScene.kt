@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.DialogButton
@@ -67,6 +68,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
@@ -75,7 +77,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun MainScreen(
-    onItemClick: (NavigationItem) -> Unit,
+    navController: NavController,
     viewmodel: HomeViewModel = viewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -116,7 +118,7 @@ fun MainScreen(
             ) {
 
                 Banner()
-                GridLayout(onItemClick)
+                GridLayout(navController)
             }
 
         }
@@ -191,7 +193,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
 
 @Composable
 private fun GridLayout(
-    onItemClick: (NavigationItem) -> Unit,
+    navController: NavController,
     viewModel: HomeViewModel = viewModel()
 ) {
     val execTaskNum = viewModel.execTaskNum
@@ -208,9 +210,7 @@ private fun GridLayout(
                 "已启用 $execTaskNum 项",
                 true
             ) {
-                onItemClick(
-                    NavigationItem.Sign
-                )
+                navController.navigate(NavigationItem.Sign, NavigationItem.Main)
             }
             CardItem(
                 iconColor = Color(0xFF8286FF), Icons.Script, "自定义脚本", "敬请期待", false
@@ -222,12 +222,12 @@ private fun GridLayout(
                 .background(color = colors.colorBgContainer, SmootherShape(12.dp)),
         ) {
             TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onClick = {
-                onItemClick(NavigationItem.Setting)
+                navController.navigate(NavigationItem.Setting, NavigationItem.Main)
             }
 
             )
             TextItem(iconColor = Color(0xFFFFBC04), Icons.About, "关于", onClick = {
-                onItemClick(NavigationItem.About)
+                navController.navigate(NavigationItem.About, NavigationItem.Main)
             })
 
         }

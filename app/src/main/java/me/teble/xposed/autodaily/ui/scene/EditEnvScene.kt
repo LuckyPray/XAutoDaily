@@ -28,6 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
@@ -47,11 +48,10 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
+fun EditEnvScene(navController: NavController, groupId: String?, taskId: String) {
 
 
     Box {
-
         val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val scope = rememberCoroutineScope()
 
@@ -83,7 +83,9 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
 //                }
             },
             topBar = {
-                TopBar(text = taskId, backClick = backClick)
+                TopBar(text = taskId, backClick = {
+                    navController.popBackStack()
+                })
             },
             floatingActionButton = {
                 FloatingButton(

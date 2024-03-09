@@ -24,7 +24,7 @@ protoc = "3.25.3"
 multidex = "2.0.1"
 provider = "13.1.5"
 systemExtension = "1.0.1"
-
+navigationCompose = "2.7.7"
 material = "1.3.0-alpha02"
 
 browser = "1.8.0"
@@ -52,6 +52,7 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 
 
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
+androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 compose-shadows-plus = { module = "com.github.GIGAMOLE:ComposeShadowsPlus", version.ref = "composeshadowsplus" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 flatbuffers-java = { module = "com.google.flatbuffers:flatbuffers-java", version.ref = "flatbuffersJava" }

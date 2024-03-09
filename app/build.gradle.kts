@@ -359,6 +359,7 @@ dependencies {
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.compose.shadows.plus)
 
+    implementation(libs.androidx.navigation.compose)
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose

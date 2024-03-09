@@ -99,7 +99,6 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp))
                     .background(colors.colorBgContainer),
-                clickEnabled = true,
                 onClick = onSettingClick
             )
 

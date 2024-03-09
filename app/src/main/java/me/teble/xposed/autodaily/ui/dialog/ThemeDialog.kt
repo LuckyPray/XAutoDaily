@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui.dialog
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,15 +9,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -28,13 +26,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Color.Companion.Unspecified
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
+import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Android
@@ -77,7 +78,6 @@ fun ThemeModelDialog(
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {
         Column {
-
             DialogTopBar(
                 text = "主题风格",
                 iconClick = onDismiss
@@ -96,12 +96,10 @@ fun ThemeModelDialog(
                     .weight(weight = 1f, fill = false)
                     .verticalScroll(rememberScrollState())
             ) {
-
-
                 ThemeItem(
                     text = "亮色模式",
                     imageVector = Icons.Sun,
-                    checked = theme == Light,
+                    checked = { theme == Light },
                     onClick = {
                         theme = Light
                     }
@@ -109,7 +107,7 @@ fun ThemeModelDialog(
                 ThemeItem(
                     text = "暗色模式",
                     imageVector = Icons.Moon,
-                    checked = theme == Dark,
+                    checked = { theme == Dark },
                     onClick = {
                         theme = Dark
                     }
@@ -117,7 +115,7 @@ fun ThemeModelDialog(
                 ThemeItem(
                     text = "跟随系统",
                     imageVector = Icons.Android,
-                    checked = theme == System,
+                    checked = { theme == System },
                     onClick = {
                         theme = System
                     }
@@ -132,7 +130,7 @@ fun ThemeModelDialog(
                 ThemeItem(
                     text = "使用纯黑色深色主题",
                     imageVector = Icons.Text,
-                    checked = black,
+                    checked = { black },
                     onClick = {
                         black = !black
                     }
@@ -146,8 +144,9 @@ fun ThemeModelDialog(
                     .defaultNavigationBarPadding()
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
-                clickEnabled = theme != targetTheme
-                        || isBlack != black,
+                clickEnabled = {
+                    theme != targetTheme || isBlack != black
+                },
                 onClick = {
                     onConfirm(theme, black)
                 }
@@ -163,18 +162,18 @@ private fun ThemeItem(
     modifier: Modifier = Modifier,
     imageVector: ImageVector,
     text: String,
-    checked: Boolean,
+    checked: () -> Boolean,
     onClick: () -> Unit = {}
 ) {
     val backgroundColor by animateColorAsState(
-        if (checked) colors.themeColor.copy(0.08f) else Color.Transparent, label = ""
+        if (checked()) colors.themeColor.copy(0.08f) else Color.Transparent, label = ""
     )
 
     val textColor by animateColorAsState(
-        if (checked) colors.themeColor else colors.colorTextTheme, label = ""
+        if (checked()) colors.themeColor else colors.colorTextTheme, label = ""
     )
 
-    val fabColor = RippleConfiguration(color = if (checked) colors.themeColor else Unspecified)
+    val fabColor = RippleConfiguration(color = if (checked()) colors.themeColor else Unspecified)
 
     // 替换了水波纹原本的颜色
     CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
@@ -182,7 +181,9 @@ private fun ThemeItem(
             modifier = modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp))
-                .background(color = backgroundColor)
+                .drawBehind {
+                    drawRect(backgroundColor)
+                }
                 .clickable(
                     onClick = onClick
                 )
@@ -191,27 +192,32 @@ private fun ThemeItem(
         ) {
             Icon(
                 imageVector = imageVector,
+                modifier = Modifier,
                 contentDescription = text + "的图标",
-                tint = textColor
+                tint = { textColor }
             )
-            Text(
+
+            BasicText(
                 text = text,
-                color = textColor,
+                color = {
+                    textColor
+                },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .weight(1f),
-                fontWeight = FontWeight.Normal
+                style = TextStyle(
+                    fontWeight = FontWeight.Normal
+                )
             )
 
-            if (checked) {
+            if (checked()) {
                 Icon(
-                    Icons.Chosen,
+                    imageVector = Icons.Chosen,
                     contentDescription = "选择图标",
-                    tint = textColor
+                    tint = { textColor }
                 )
             }
-
-
         }
+
     }
 }

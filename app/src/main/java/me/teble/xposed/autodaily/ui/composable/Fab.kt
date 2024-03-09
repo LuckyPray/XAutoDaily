@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.composable
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
@@ -16,6 +15,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.DpOffset
@@ -42,7 +42,9 @@ fun FloatingButton(
     CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
         Box(
             modifier = modifier
-                .background(color = Color(0xFF26C288), CircleShape)
+                .drawBehind {
+                    drawCircle(Color(0xFF26C288))
+                }
                 .softLayerShadow(
                     radius = 4.dp,
                     color = Color(0xFF26C288).copy(alpha = DisabledAlpha),
@@ -59,7 +61,6 @@ fun FloatingButton(
             contentAlignment = Alignment.Center
         ) {
             Icon(Icons.Save, "保存", modifier = Modifier.size(24.dp), tint = Color(0xFFFFFFFF))
-
         }
     }
 }

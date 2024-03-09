@@ -8,8 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,9 +33,10 @@ fun XAutoDailyTopBar(
     contentDescription: String = "",
     iconClick: () -> Unit = {}
 ) {
+    val colors = colors
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            tint = colors.colorText,
+            tint = { colors.colorText },
             imageVector = Icons.XAutoDaily,
             contentDescription = "logo"
         )
@@ -45,7 +45,7 @@ fun XAutoDailyTopBar(
         if (icon != null) {
             Icon(
                 imageVector = icon,
-                tint = colors.colorText,
+                tint = { colors.colorText },
                 modifier = Modifier
                     .padding(end = 10.dp)
                     .size(36.dp)
@@ -65,6 +65,7 @@ fun TopBar(
     modifier: Modifier = Modifier,
     backClick: () -> Unit = {},
 ) {
+    val colors = colors
     Row(
         modifier = modifier
             .statusBarsPadding()
@@ -80,17 +81,17 @@ fun TopBar(
                 .clickable(role = Role.Button, onClick = backClick)
                 .padding(6.dp),
             contentDescription = "",
-            tint = colors.colorText
+            tint = { colors.colorText }
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        Text(
+        BasicText(
             text = text,
             style = TextStyle(
-                color = colors.colorText,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
-            )
+            ),
+            color = { colors.colorText }
         )
         Spacer(modifier = Modifier.weight(1f))
 
@@ -105,25 +106,26 @@ fun DialogTopBar(
     modifier: Modifier = Modifier,
     iconClick: () -> Unit = {},
 ) {
+    val colors = colors
     Row(
         modifier = modifier
             .padding(start = 32.dp, end = 26.dp)
             .padding(vertical = 21.dp)
     ) {
-        Text(
+        BasicText(
             text = text,
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
-                color = colors.colorText,
                 textAlign = TextAlign.Center
-            )
+            ),
+            color = { colors.colorText }
         )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             imageVector = Icons.Close,
             contentDescription = "关闭",
-            tint = colors.colorText,
+            tint = { colors.colorText },
             modifier = Modifier
                 .size(36.dp)
                 .clip(CircleShape)

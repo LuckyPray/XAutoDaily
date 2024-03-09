@@ -135,8 +135,8 @@ fun CheckFriendsDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(SmootherShape(12.dp)),
-                            clickEnabled = true,
-                            enable = enable,
+                            clickEnabled = { true },
+                            enable = { enable },
                             onClick = {
                                 enable = !enable
                             })

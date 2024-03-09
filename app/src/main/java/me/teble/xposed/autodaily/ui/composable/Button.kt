@@ -11,16 +11,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.semantics.Role
@@ -35,14 +36,14 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwitchButton(
-    boolean: Boolean,
+    boolean: () -> Boolean,
     modifier: Modifier = Modifier,
-    clickEnabled: Boolean,
+    clickEnabled: () -> Boolean,
     onClick: () -> Unit
 ) {
     val backgroundColor by animateColorAsState(
         targetValue =
-        if (boolean) colors.themeColor else colors.colorSwitch, label = ""
+        if (boolean()) colors.themeColor else colors.colorSwitch, label = ""
     )
     val fabColor = RippleConfiguration(
         color = Color.White, rippleAlpha = RippleAlpha(
@@ -57,10 +58,12 @@ fun SwitchButton(
             modifier = modifier
                 .size(width = 48.dp, height = 24.dp)
                 .clip(SmootherShape(12.dp))
-                .background(color = backgroundColor)
+                .drawBehind {
+                    drawRect(backgroundColor)
+                }
                 .clickable(
                     role = Role.Switch,
-                    enabled = clickEnabled,
+                    enabled = clickEnabled(),
                     onClick = onClick
                 )
                 .padding(6.dp)
@@ -68,7 +71,7 @@ fun SwitchButton(
 
 
             val translationX by animateDpAsState(
-                targetValue = if (boolean) {
+                targetValue = if (boolean()) {
                     24.dp
                 } else {
                     0.dp
@@ -82,7 +85,9 @@ fun SwitchButton(
                         this.translationX = translationX.toPx()
                     }
                     .size(12.dp)
-                    .background(Color.White, shape = CircleShape)
+                    .drawBehind {
+                        drawCircle(Color.White)
+                    }
             )
         }
     }
@@ -93,11 +98,12 @@ fun SwitchButton(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectButton(
-    boolean: Boolean, modifier: Modifier = Modifier, clickEnabled: Boolean,
+    boolean: () -> Boolean, modifier: Modifier = Modifier, clickEnabled: () -> Boolean,
     onClick: () -> Unit
 ) {
     val selectColor by animateColorAsState(
-        targetValue = if (boolean) colors.themeColor else colors.colorSwitch, label = "SelectButton"
+        targetValue = if (boolean()) colors.themeColor else colors.colorSwitch,
+        label = "SelectButton"
     )
     val fabColor = RippleConfiguration(
         color = selectColor, rippleAlpha = RippleAlpha(
@@ -110,11 +116,10 @@ fun SelectButton(
     CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
         Box(
             modifier = modifier
-                .clip(CircleShape)
                 .border(width = 1.5.dp, color = selectColor, shape = CircleShape)
                 .clickable(
                     role = Role.Switch,
-                    enabled = clickEnabled,
+                    enabled = clickEnabled(),
                     onClick = onClick
                 )
                 .padding(4.dp)
@@ -122,7 +127,7 @@ fun SelectButton(
 
 
             val scale by animateFloatAsState(
-                targetValue = if (boolean) {
+                targetValue = if (boolean()) {
                     1f
                 } else {
                     0f
@@ -137,18 +142,13 @@ fun SelectButton(
                         this.scaleX = scale
                     }
                     .size(10.dp)
-                    .clip(CircleShape)
-                    .background(selectColor)
+                    .drawBehind {
+                        drawCircle(selectColor)
+                    }
             )
         }
     }
 
-//    Icon(
-//        imageVector = if (boolean) Icons.SelectSelectd else Icons.SelectNormal,
-//        tint = selectColor,
-//        contentDescription = "选中开关",
-//        modifier = modifier
-//    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -156,7 +156,7 @@ fun SelectButton(
 fun DialogButton(
     text: String,
     modifier: Modifier,
-    clickEnabled: Boolean = true,
+    clickEnabled: () -> Boolean = { true },
     onClick: () -> Unit
 ) {
 
@@ -164,34 +164,34 @@ fun DialogButton(
     CompositionLocalProvider(LocalRippleConfiguration provides buttonColor) {
 
         val backgroundColor by animateColorAsState(
-            if (clickEnabled) colors.themeColor.copy(0.06f) else colors.themeColor.copy(
+            if (clickEnabled()) colors.themeColor.copy(0.06f) else colors.themeColor.copy(
                 0.04f
             ), label = ""
         )
 
         val textColor by animateColorAsState(
-            if (clickEnabled) colors.themeColor else colors.themeColor.copy(
+            if (clickEnabled()) colors.themeColor else colors.themeColor.copy(
                 0.6f
             ), label = ""
         )
 
-        Text(
+        BasicText(
             text = text,
             modifier = modifier
                 .clip(SmootherShape(12.dp))
                 .background(color = backgroundColor)
                 .clickable(
                     role = Role.Button,
-                    enabled = clickEnabled,
+                    enabled = clickEnabled(),
                     onClick = onClick
                 )
                 .padding(vertical = 16.dp),
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = textColor,
                 textAlign = TextAlign.Center,
-            )
+            ),
+            color = { textColor }
         )
 
     }

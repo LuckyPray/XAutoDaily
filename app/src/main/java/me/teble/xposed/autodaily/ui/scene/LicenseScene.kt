@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import me.teble.xposed.autodaily.data.Dependency
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -29,10 +30,12 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.utils.openUrl
 
 @Composable
-fun LicenseScene(backClick: () -> Unit, viewmodel: LicenseViewModel = viewModel()) {
+fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = viewModel()) {
     Scaffold(
         topBar = {
-            TopBar(text = "开放源代码许可", backClick = backClick)
+            TopBar(text = "开放源代码许可", backClick = {
+                navController.popBackStack()
+            })
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->

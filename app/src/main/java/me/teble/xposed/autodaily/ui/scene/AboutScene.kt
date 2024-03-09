@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
@@ -48,13 +49,13 @@ import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
+import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScene(
-    backClick: () -> Unit,
-    onItemClick: (NavigationItem) -> Unit,
+    navController: NavController,
     viewmodel: AboutViewModel = viewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -69,7 +70,9 @@ fun AboutScene(
     Box {
         Scaffold(
             topBar = {
-                TopBar(text = "关于", backClick = backClick)
+                TopBar(text = "关于", backClick = {
+                    navController.popBackStack()
+                })
             },
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState) {
@@ -91,8 +94,8 @@ fun AboutScene(
             ) {
                 BuildConfigLayout()
                 UpdateLayout()
-                LicenseLayout(onItemClick)
-                OthterLayout(onItemClick)
+                LicenseLayout(navController)
+                OthterLayout(navController)
             }
         }
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -220,23 +223,22 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
 }
 
 @Composable
-private fun LicenseLayout(onItemClick: (NavigationItem) -> Unit) {
+private fun LicenseLayout(navController: NavController) {
     TextItem(
         text = "开放源代码许可",
         modifier = Modifier
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(colors.colorBgContainer),
-        clickEnabled = true
+            .background(colors.colorBgContainer)
     ) {
-        onItemClick(NavigationItem.License)
+        navController.navigate(NavigationItem.License, NavigationItem.Main)
     }
 }
 
 @Composable
 private fun OthterLayout(
-    onItemClick: (NavigationItem) -> Unit,
+    navController: NavController,
     viewmodel: AboutViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -252,9 +254,8 @@ private fun OthterLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            clickEnabled = true
         ) {
-            onItemClick(NavigationItem.Developer)
+            navController.navigate(NavigationItem.Developer, NavigationItem.Main)
         }
 
         TextItem(
@@ -262,7 +263,6 @@ private fun OthterLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            clickEnabled = true
         ) {
             viewmodel.openGithub(context)
         }
@@ -272,7 +272,6 @@ private fun OthterLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            clickEnabled = true
         ) {
             viewmodel.openTelegram(context)
         }
@@ -283,7 +282,7 @@ private fun OthterLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            clickEnabled = true
+            clickEnabled = { true }
         ) {
             viewmodel.openAliPay(context)
         }
