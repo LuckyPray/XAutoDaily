@@ -1,41 +1,35 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.data.Dependency
+import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
-import me.teble.xposed.autodaily.utils.openUrl
 
 @Composable
-fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = viewModel()) {
+fun LicenseScene(backClick: () -> Unit, viewmodel: LicenseViewModel = viewModel()) {
     Scaffold(
         topBar = {
-            TopBar(text = "开放源代码许可", backClick = {
-                navController.popBackStack()
-            })
+            TopBar(text = "开放源代码许可", backClick = backClick)
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
@@ -45,20 +39,19 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
             viewmodel.readJson(context)
         }
 
-        LazyColumn(
+
+
+        Column(
             modifier = Modifier
                 .padding(contentPadding)
                 .padding(horizontal = 16.dp)
                 .padding(top = 16.dp)
-                .clip(SmootherShape(12.dp)),
-            contentPadding = bottomPaddingValue,
-            // 绘制间隔
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .defaultNavigationBarPadding(),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            items(
-                items = viewmodel.dependencies,
-                key = { it.name },
-                contentType = { it.name }) { dependency ->
+            viewmodel.dependencies.forEach { dependency ->
                 DependencyItem(dependency)
             }
         }
@@ -70,15 +63,14 @@ fun LicenseScene(navController: NavController, viewmodel: LicenseViewModel = vie
 @Composable
 fun DependencyItem(dependency: Dependency) {
 
-    val context = LocalContext.current
+    val colors = XAutodailyTheme.colors
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(XAutodailyTheme.colors.colorBgContainer)
-            .clickable(role = Role.Button, onClick = {
-                context.openUrl(dependency.mavenCoordinates.groupId)
-            })
+            .drawBehind {
+                drawRect(colors.colorBgContainer)
+            }
             .padding(vertical = 20.dp, horizontal = 16.dp),
     ) {
         Text(
@@ -86,9 +78,9 @@ fun DependencyItem(dependency: Dependency) {
             maxLines = 1,
             style = TextStyle(
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = XAutodailyTheme.colors.colorText
-            )
+                fontWeight = FontWeight.Bold
+            ),
+            color = { colors.colorText }
         )
 
         Text(
@@ -98,9 +90,11 @@ fun DependencyItem(dependency: Dependency) {
             Modifier.padding(top = 6.dp),
             style = TextStyle(
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                color = XAutodailyTheme.colors.colorTextSecondary
-            )
+                fontWeight = FontWeight.Normal
+            ),
+            color = {
+                colors.colorTextSecondary
+            }
         )
 
     }

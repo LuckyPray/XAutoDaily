@@ -41,9 +41,10 @@ fun SwitchButton(
     clickEnabled: () -> Boolean,
     onClick: () -> Unit
 ) {
+
     val backgroundColor by animateColorAsState(
         targetValue =
-        if (boolean()) colors.themeColor else colors.colorSwitch, label = ""
+        if (boolean()) colors.themeColor else colors.colorSwitch, label = "switch"
     )
     val fabColor = RippleConfiguration(
         color = Color.White, rippleAlpha = RippleAlpha(
@@ -68,8 +69,6 @@ fun SwitchButton(
                 )
                 .padding(6.dp)
         ) {
-
-
             val translationX by animateDpAsState(
                 targetValue = if (boolean()) {
                     24.dp
@@ -91,7 +90,6 @@ fun SwitchButton(
             )
         }
     }
-
 }
 
 

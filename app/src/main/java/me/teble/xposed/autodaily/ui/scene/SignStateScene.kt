@@ -3,46 +3,45 @@ package me.teble.xposed.autodaily.ui.scene
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
+import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.lastExecMsg
 import me.teble.xposed.autodaily.ui.lastExecTime
-import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun SignStateScene(
-    navController: NavController,
+    backClick: () -> Unit,
     signStateViewModel: SignStateViewModel = viewModel()
 ) {
     Scaffold(
         topBar = {
             TopBar(
                 text = "签到状态",
-                backClick = {
-                    navController.popBackStack()
-                }
+                backClick = backClick
             )
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
@@ -63,16 +62,21 @@ fun SignStateScene(
                         .padding(bottom = 8.dp, start = 16.dp, top = 8.dp)
                 )
             }
+            val colors = colors
 
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .padding(contentPadding)
                     .clip(SmootherShape(12.dp))
-                    .background(XAutodailyTheme.colors.colorBgContainer),
-                contentPadding = bottomPaddingValue,
+                    .drawBehind {
+                        drawRect(colors.colorBgContainer)
+                    }
+                    .verticalScroll(rememberScrollState())
+                    .defaultNavigationBarPadding(),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
             ) {
 
-                items(tasksState, key = { it.id }, contentType = { it.id }) { task ->
+                tasksState.forEach { task ->
                     val title by remember {
                         derivedStateOf { task.id }
                     }
@@ -107,6 +111,7 @@ private fun StateItem(
     text: String,
     infoText: String,
 ) {
+    val colors = colors
     Column(
         modifier = modifier.padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
@@ -115,18 +120,18 @@ private fun StateItem(
             maxLines = 1,
             style = TextStyle(
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = XAutodailyTheme.colors.colorText
-            )
+                fontWeight = FontWeight.Bold
+            ),
+            color = { colors.colorText }
         )
 
         Text(
             text = infoText,
             style = TextStyle(
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                color = XAutodailyTheme.colors.colorTextSecondary
-            )
+                fontWeight = FontWeight.Normal
+            ),
+            color = { colors.colorTextSecondary }
         )
     }
 }

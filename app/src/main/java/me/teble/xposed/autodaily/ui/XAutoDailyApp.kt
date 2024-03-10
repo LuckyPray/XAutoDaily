@@ -42,11 +42,8 @@ sealed class NavigationItem(val route: String) {
         NavigationItem("${Screen.EditEnv.name}/$taskGroup/$taskId")
 }
 
-fun NavController.navigate(item: NavigationItem, popUpToItem: NavigationItem) {
-    this.navigate(item.route) {
-        popUpTo(popUpToItem.route)
-        launchSingleTop = true
-    }
+fun NavController.navigate(item: NavigationItem) {
+    this.navigate(item.route)
 }
 
 
@@ -57,39 +54,78 @@ fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
         navController = navController,
         startDestination = NavigationItem.Main.route
     ) {
-        composable(NavigationItem.Main.route) {
-            MainScreen(navController)
+        composable(route = NavigationItem.Main.route) {
+            MainScreen(
+                onNavigateToSign = {
+                    navController.navigate(
+                        NavigationItem.Sign
+                    )
+                },
+                onNavigateToSetting = {
+                    navController.navigate(
+                        NavigationItem.Setting
+                    )
+                },
+                onNavigateToAbout = {
+                    navController.navigate(
+                        NavigationItem.About
+                    )
+                }
+            )
         }
 
-        composable(NavigationItem.Sign.route) {
-            SignScene(navController)
+        composable(route = NavigationItem.Sign.route) {
+            SignScene(
+                backClick = { navController.popBackStack() },
+                onNavigateToEditEnvs = { groupId, taskId ->
+                    navController.navigate(
+                        NavigationItem.EditEnv(
+                            groupId,
+                            taskId
+                        )
+                    )
+                })
         }
-        composable(NavigationItem.About.route) {
-            AboutScene(navController)
+        composable(route = NavigationItem.About.route) {
+            AboutScene(
+                backClick = { navController.popBackStack() },
+                onNavigateToLicense = {
+                    navController.navigate(NavigationItem.License)
+                },
+                onNavigateToDeveloper = {
+                    navController.navigate(NavigationItem.Developer)
+                }
+            )
         }
 
-        composable(NavigationItem.Setting.route) {
-            SettingScene(navController, themeViewModel)
+        composable(route = NavigationItem.Setting.route) {
+            SettingScene(
+                backClick = { navController.popBackStack() },
+                onNavigateToSignState = {
+                    navController.navigate(NavigationItem.SignState)
+                }, themeViewModel
+            )
         }
 
-        composable(NavigationItem.Developer.route) {
-            DeveloperScene(navController)
+        composable(route = NavigationItem.Developer.route) {
+            DeveloperScene(backClick = { navController.popBackStack() })
         }
 
-        composable(NavigationItem.License.route) {
-            LicenseScene(navController)
+        composable(route = NavigationItem.License.route) {
+            LicenseScene(backClick = { navController.popBackStack() })
         }
 
-        composable(NavigationItem.SignState.route) {
-            SignStateScene(navController)
+        composable(route = NavigationItem.SignState.route) {
+            SignStateScene(backClick = { navController.popBackStack() })
         }
 
-        composable("${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
+        composable(route = "${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
             EditEnvScene(
-                navController,
+                backClick = { navController.popBackStack() },
                 backStackEntry.arguments!!.getString("taskGroup", ""),
                 backStackEntry.arguments!!.getString("taskId", "")
             )
         }
     }
+
 }

@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,12 +15,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
@@ -29,10 +28,11 @@ import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
 @Composable
-fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel = viewModel()) {
+fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     // 展示对应 snackbarText
@@ -43,9 +43,7 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
     }
     Scaffold(
         topBar = {
-            TopBar(text = "开发者", backClick = {
-                navController.popBackStack()
-            })
+            TopBar(text = "开发者", backClick = backClick)
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) {
@@ -72,16 +70,18 @@ fun DeveloperScene(navController: NavController, viewmodel: DeveloperViewModel =
 
 @Composable
 private fun AuthorLayout(
-
     viewmodel: DeveloperViewModel = viewModel()
 ) {
     val context = LocalContext.current
+    val colors = colors
     Column(
         modifier = Modifier
             .padding(top = 16.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = XAutodailyTheme.colors.colorBgContainer),
+            .drawBehind {
+                drawRect(colors.colorBgContainer)
+            },
     ) {
         AuthorItem(
             icon = painterResource(id = R.drawable.teble),

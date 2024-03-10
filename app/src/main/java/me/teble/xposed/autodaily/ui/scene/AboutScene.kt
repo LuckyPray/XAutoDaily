@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +14,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -35,9 +33,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import me.teble.xposed.autodaily.ui.NavigationItem
+import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
+import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
@@ -49,13 +47,14 @@ import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScene(
-    navController: NavController,
+    backClick: () -> Unit,
+    onNavigateToLicense: () -> Unit,
+    onNavigateToDeveloper: () -> Unit,
     viewmodel: AboutViewModel = viewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -70,9 +69,7 @@ fun AboutScene(
     Box {
         Scaffold(
             topBar = {
-                TopBar(text = "关于", backClick = {
-                    navController.popBackStack()
-                })
+                TopBar(text = "关于", backClick = backClick)
             },
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState) {
@@ -94,8 +91,8 @@ fun AboutScene(
             ) {
                 BuildConfigLayout()
                 UpdateLayout()
-                LicenseLayout(navController)
-                OthterLayout(navController)
+                LicenseLayout(onNavigateToLicense = onNavigateToLicense)
+                OthterLayout(onNavigateToDeveloper = onNavigateToDeveloper)
             }
         }
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -131,6 +128,7 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
     val moduleVersionName = viewmodel.moduleVersionName
     val moduleVersionCode = viewmodel.moduleVersionCode
 
+    val colors = colors
     Image(
         Icons.XAutoDailyRound,
         contentDescription = "XAutoDaily Round Icon",
@@ -140,7 +138,7 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
     )
 
     Icon(
-        tint = colors.colorText,
+        tint = { colors.colorText },
         imageVector = Icons.XAutoDaily,
         contentDescription = "text logo",
         modifier = Modifier.padding(top = 16.dp)
@@ -152,9 +150,9 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
         style = TextStyle(
             fontSize = 12.sp,
             fontWeight = FontWeight.Normal,
-            color = colors.colorAboutText,
             textAlign = TextAlign.Center,
-        )
+        ),
+        color = { colors.colorAboutText }
     )
 }
 
@@ -166,12 +164,15 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
     val configVersion = viewmodel.configVersion
     val hasUpdate = viewmodel.hasUpdate
 
+    val colors = colors
     Row(
         Modifier
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(colors.colorBgContainer)
+            .drawBehind {
+                drawRect(colors.colorBgContainer)
+            }
             .clickable(role = Role.Button, onClick = {
                 viewmodel.updateApp()
             })
@@ -186,9 +187,9 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
                 maxLines = 1,
                 style = TextStyle(
                     fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = colors.colorText
-                )
+                    fontWeight = FontWeight.Bold
+                ),
+                color = { colors.colorText }
             )
 
             Text(
@@ -198,7 +199,8 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                     color = colors.colorTextSecondary
-                )
+                ),
+                color = { colors.colorText }
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
@@ -207,9 +209,9 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
                 text = "有新版本",
                 style = TextStyle(
                     fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    color = colors.themeColor
-                )
+                    fontWeight = FontWeight.Normal
+                ),
+                color = { colors.themeColor }
             )
         }
 
@@ -217,46 +219,50 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
             imageVector = Icons.ChevronRight,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = colors.colorIcon
+            tint = { colors.colorIcon }
         )
     }
 }
 
 @Composable
-private fun LicenseLayout(navController: NavController) {
+private fun LicenseLayout(onNavigateToLicense: () -> Unit) {
+    val colors = colors
     TextItem(
         text = "开放源代码许可",
         modifier = Modifier
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(colors.colorBgContainer)
-    ) {
-        navController.navigate(NavigationItem.License, NavigationItem.Main)
-    }
+            .drawBehind {
+                drawRect(colors.colorBgContainer)
+            },
+        onClick = onNavigateToLicense
+    )
 }
 
 @Composable
 private fun OthterLayout(
-    navController: NavController,
+    onNavigateToDeveloper: () -> Unit,
     viewmodel: AboutViewModel = viewModel()
 ) {
+    val colors = colors
     val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(colors.colorBgContainer),
+            .drawBehind {
+                drawRect(colors.colorBgContainer)
+            },
     ) {
         TextItem(
             text = "开发者",
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-        ) {
-            navController.navigate(NavigationItem.Developer, NavigationItem.Main)
-        }
+            onClick = onNavigateToDeveloper
+        )
 
         TextItem(
             text = "Github",

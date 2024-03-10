@@ -4,24 +4,25 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import me.teble.xposed.autodaily.ui.NavigationItem
+import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -30,15 +31,15 @@ import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.layout.bottomPaddingValue
-import me.teble.xposed.autodaily.ui.navigate
+import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun SignScene(
-    navController: NavController,
+    backClick: () -> Unit,
+    onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
     signViewModel: SignViewModel = viewModel()
 ) {
     val colors = colors
@@ -46,19 +47,15 @@ fun SignScene(
         topBar = {
             TopBar(
                 text = "签到配置",
-                backClick = {
-                    navController.popBackStack()
-                }
+                backClick = backClick
             )
         },
         containerColor = colors.colorBgLayout
     ) { contentPadding ->
         Column(
-            Modifier
-                .padding(contentPadding)
+            Modifier.padding(contentPadding)
         ) {
-
-            val globalEnable = signViewModel.globalEnable
+            val globalEnable = { signViewModel.globalEnable }
             SwitchTextItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -68,163 +65,158 @@ fun SignScene(
                         drawRect(colors.colorBgContainer)
                     },
                 text = "总开关",
-                onClick = {
-                    signViewModel.updateGlobalEnable(it)
-                },
+                onClick = signViewModel::updateGlobalEnable,
                 clickEnabled = { true },
-                enable = { globalEnable }
+                enable = globalEnable
             )
-            GroupColumn(navController, enable = globalEnable)
+            GroupColumn(
+                onNavigateToEditEnvs = onNavigateToEditEnvs,
+                signViewModel = signViewModel,
+                enable = globalEnable
+            )
         }
     }
 }
 
 @Composable
-private fun GroupColumn(
-    navController: NavController,
-    signViewModel: SignViewModel = viewModel(),
-    enable: Boolean
+private fun ColumnScope.GroupColumn(
+    onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
+    signViewModel: SignViewModel,
+    enable: () -> Boolean
 ) {
-
-    LazyColumn(
+    Column(
         modifier = Modifier
+            .weight(1f, false)
             .padding(top = 16.dp, start = 16.dp, end = 16.dp)
-            .clip(SmootherShape(12.dp)),
-        contentPadding = bottomPaddingValue,
-        // 绘制间隔
-        verticalArrangement = Arrangement.spacedBy(24.dp),
+            .clip(SmootherShape(12.dp))
+            .verticalScroll(rememberScrollState())
+            .defaultNavigationBarPadding(),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        signViewModel.taskGroupsState.forEach { taskGroup ->
+            SignItem(onNavigateToEditEnvs, taskGroup, enable)
+        }
 
-        items(
-            items = signViewModel.taskGroupsState,
-            key = { it.id },
-            contentType = { it.id }) { taskGroup ->
+    }
+}
 
-            val groupTitle by remember {
-                derivedStateOf {
-                    taskGroup.id
+@Composable
+private fun SignItem(
+    onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
+    taskGroup: TaskGroup,
+    enable: () -> Boolean
+) {
+    val groupTitle by remember {
+        derivedStateOf {
+            taskGroup.id
+        }
+    }
+
+
+    val tasks by remember {
+        derivedStateOf {
+            taskGroup.tasks
+        }
+    }
+
+    val itemAlpha: Float by animateFloatAsState(
+        targetValue = if (enable()) DefaultAlpha else DisabledAlpha,
+        animationSpec = spring(), label = "switch item"
+    )
+
+    val colors = colors
+
+    Column {
+        SmallTitle(
+            title = groupTitle,
+            modifier = Modifier
+                .padding(bottom = 8.dp, start = 16.dp),
+        )
+
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(SmootherShape(12.dp))
+                .drawBehind {
+                    drawRect(colors.colorBgContainer)
                 }
-            }
-
-            SmallTitle(
-                title = groupTitle,
-                modifier = Modifier
-                    .padding(bottom = 8.dp, start = 16.dp),
-            )
-
-            val tasks by remember {
-                derivedStateOf {
-                    taskGroup.tasks
+                .graphicsLayer {
+                    alpha = itemAlpha
                 }
-            }
+        ) {
+            tasks.forEach { task ->
 
-            val itemAlpha: Float by animateFloatAsState(
-                targetValue = if (enable) DefaultAlpha else DisabledAlpha,
-                animationSpec = spring(), label = "switch item"
-            )
+                var checked by remember { mutableStateOf(task.enable) }
+                val clickFlag by remember {
+                    derivedStateOf { !task.envs.isNullOrEmpty() }
+                }
+                val desc by remember { derivedStateOf { task.desc } }
+                val title by remember { derivedStateOf { task.id } }
 
-            val colors = colors
+                if (desc.isNotBlank()) {
+                    if (clickFlag) {
+                        SwitchInfoDivideItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SmootherShape(12.dp)),
+                            enable = { checked },
+                            text = title,
+                            infoText = desc,
+                            clickEnabled = enable,
+                            onClick = {
+                                onNavigateToEditEnvs(taskGroup.id, task.id)
+                            },
+                            onChange = {
+                                checked = it
+                                task.enable = it
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(SmootherShape(12.dp))
-                    .drawBehind {
-                        drawRect(colors.colorBgContainer)
-                    }
-                    .graphicsLayer {
-                        alpha = itemAlpha
-                    },
-            ) {
-                tasks.forEach { task ->
-
-                    val checked = remember {
-                        mutableStateOf(task.enable)
-                    }
-                    val clickFlag by remember {
-                        derivedStateOf {
-                            !task.envs.isNullOrEmpty()
-                        }
-                    }
-                    val desc by remember {
-                        derivedStateOf {
-                            task.desc
-                        }
-                    }
-                    val title by remember {
-                        derivedStateOf {
-                            task.id
-                        }
-                    }
-
-                    if (desc.isNotBlank()) {
-                        if (clickFlag) {
-                            SwitchInfoDivideItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(SmootherShape(12.dp)),
-                                enable = { checked.value },
-                                text = title,
-                                infoText = desc,
-                                clickEnabled = { enable },
-                                onClick = {
-                                    navController.navigate(
-                                        NavigationItem.EditEnv(
-                                            taskGroup.id,
-                                            task.id
-                                        ),
-                                        NavigationItem.Sign
-                                    )
-                                },
-                                onChange = {
-                                    checked.value = it
-
-                                }
-                            )
-                        } else {
-                            SwitchInfoItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(SmootherShape(12.dp)),
-                                enable = { checked.value },
-                                clickEnabled = { enable },
-                                text = title,
-                                infoText = desc,
-                                onClick = {
-                                    checked.value = it
-                                }
-                            )
-                        }
-
-
+                            }
+                        )
                     } else {
-                        if (clickFlag) {
-                            SwitchTextItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(SmootherShape(12.dp)),
-                                enable = { checked.value },
-                                text = title,
-                                clickEnabled = { enable },
-                                onClick = {
-                                    checked.value = it
-                                }
-                            )
-                        } else {
-                            SwitchTextDivideItem(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clip(SmootherShape(12.dp)),
-                                enable = { checked.value },
-                                text = title,
-                                clickEnabled = { enable },
-                                onClick = {
-                                    checked.value = it
-                                }
-                            )
-                        }
+                        SwitchInfoItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SmootherShape(12.dp)),
+                            enable = { checked },
+                            clickEnabled = enable,
+                            text = title,
+                            infoText = desc,
+                            onClick = {
+                                checked = it
+                                task.enable = it
+                            }
+                        )
+                    }
 
 
+                } else {
+                    if (clickFlag) {
+                        SwitchTextItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SmootherShape(12.dp)),
+                            enable = { checked },
+                            text = title,
+                            clickEnabled = enable,
+                            onClick = {
+                                checked = it
+                                task.enable = it
+                            }
+                        )
+                    } else {
+                        SwitchTextDivideItem(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SmootherShape(12.dp)),
+                            enable = { checked },
+                            text = title,
+                            clickEnabled = enable,
+                            onClick = {
+                                checked = it
+                                task.enable = it
+                            }
+                        )
                     }
 
 
@@ -233,5 +225,4 @@ private fun GroupColumn(
 
         }
     }
-
 }

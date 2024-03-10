@@ -2,7 +2,6 @@ package me.teble.xposed.autodaily.ui.scene
 
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,11 +23,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
@@ -48,7 +47,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEnvScene(navController: NavController, groupId: String?, taskId: String) {
+fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
 
 
     Box {
@@ -83,9 +82,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
 //                }
             },
             topBar = {
-                TopBar(text = taskId, backClick = {
-                    navController.popBackStack()
-                })
+                TopBar(text = taskId, backClick = backClick)
             },
             floatingActionButton = {
                 FloatingButton(
@@ -98,6 +95,7 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
             containerColor = XAutodailyTheme.colors.colorBgContainer
         ) { contentPadding ->
 
+            val colors = colors
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -119,7 +117,10 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                     value = editText,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(colors.colorBgEdit, SmootherShape(12.dp)),
+                        .clip(SmootherShape(12.dp))
+                        .drawBehind {
+                            drawRect(colors.colorBgEdit)
+                        },
                     hintText = "好友清单",
                     iconClick = {
                         dialogState = true
@@ -140,7 +141,10 @@ fun EditEnvScene(navController: NavController, groupId: String?, taskId: String)
                 HintEditText(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(colors.colorBgEdit, SmootherShape(12.dp))
+                        .clip(SmootherShape(12.dp))
+                        .drawBehind {
+                            drawRect(colors.colorBgEdit)
+                        }
                         .padding(vertical = 18.dp, horizontal = 16.dp),
                     value = fireText,
                     onValueChange = {

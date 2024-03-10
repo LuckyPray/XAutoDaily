@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -54,7 +53,7 @@ fun TextItem(
             .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicText(
+        Text(
             text = text,
             modifier = Modifier.weight(1f),
             maxLines = 1,
@@ -98,7 +97,7 @@ fun SelectionItem(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicText(
+        Text(
             text = text,
             modifier = Modifier.weight(1f),
             maxLines = 1,
@@ -146,7 +145,7 @@ fun TextInfoItem(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            BasicText(
+            Text(
                 text = text,
                 maxLines = 1,
                 style = TextStyle(
@@ -157,7 +156,7 @@ fun TextInfoItem(
                 color = { colors.colorText }
             )
 
-            BasicText(
+            Text(
                 text = infoText,
                 style = TextStyle(
                     fontSize = 12.sp,
@@ -197,7 +196,7 @@ fun SwitchTextItem(
             .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicText(
+        Text(
             text = text,
             modifier = Modifier.weight(1f),
             maxLines = 1,
@@ -237,7 +236,7 @@ fun SwitchTextDivideItem(
             .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        BasicText(
+        Text(
             text = text,
             modifier = Modifier.weight(1f),
             maxLines = 1,
@@ -298,7 +297,7 @@ fun SwitchInfoItem(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            BasicText(
+            Text(
                 text = text,
                 maxLines = 1,
                 style = TextStyle(
@@ -308,7 +307,7 @@ fun SwitchInfoItem(
                 color = { colors.colorText }
             )
 
-            BasicText(
+            Text(
                 text = infoText,
                 style = TextStyle(
                     fontSize = 12.sp,
@@ -339,6 +338,7 @@ fun SwitchInfoDivideItem(
     onClick: () -> Unit,
     onChange: (Boolean) -> Unit
 ) {
+
     val itemAlpha: Float by animateFloatAsState(
         targetValue = if (clickEnabled()) DefaultAlpha else DisabledAlpha,
         animationSpec = spring(), label = "switch item"
@@ -364,7 +364,7 @@ fun SwitchInfoDivideItem(
                     onClick = { onClick() })
                 .padding(vertical = 20.dp, horizontal = 16.dp),
         ) {
-            BasicText(
+            Text(
                 modifier = Modifier.padding(end = 16.dp),
                 text = text,
                 maxLines = 1,
@@ -375,7 +375,7 @@ fun SwitchInfoDivideItem(
                 color = { colors.colorText }
             )
 
-            BasicText(
+            Text(
                 modifier = Modifier.padding(end = 16.dp),
                 text = infoText,
                 style = TextStyle(
@@ -402,6 +402,7 @@ fun SwitchInfoDivideItem(
             }
         )
     }
+
 }
 
 @Composable
@@ -444,7 +445,7 @@ fun ImageItem(
                 .padding(start = 10.dp)
                 .weight(1f)
         ) {
-            BasicText(
+            Text(
                 text = title,
                 style = TextStyle(
                     fontSize = 18.sp,
@@ -452,7 +453,7 @@ fun ImageItem(
                 ),
                 color = { colors.colorText }
             )
-            BasicText(
+            Text(
                 text = info, Modifier.padding(top = 4.dp),
                 style = TextStyle(
                     fontSize = 12.sp,
@@ -506,7 +507,7 @@ fun SelectInfoItem(
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            BasicText(
+            Text(
                 text = text,
                 maxLines = 1,
                 style = TextStyle(
@@ -516,7 +517,7 @@ fun SelectInfoItem(
                 color = { colors.colorText }
             )
 
-            BasicText(
+            Text(
                 text = infoText,
                 style = TextStyle(
                     fontSize = 10.sp,

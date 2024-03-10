@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,9 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
-import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
@@ -34,14 +31,14 @@ import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
-    navController: NavController,
+    backClick: () -> Unit,
+    onNavigateToSignState: () -> Unit,
     themeViewModel: MainThemeViewModel,
     viewmodel: SettingViewModel = viewModel()
 ) {
@@ -75,9 +72,7 @@ fun SettingScene(
                 SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
             },
             topBar = {
-                TopBar(text = "设置", backClick = {
-                    navController.popBackStack()
-                })
+                TopBar(text = "设置", backClick = backClick)
             },
             containerColor = XAutodailyTheme.colors.colorBgLayout
         ) { contentPadding ->
@@ -93,7 +88,7 @@ fun SettingScene(
                     .defaultNavigationBarPadding()
             ) {
 
-                EntryLayout(navController)
+                EntryLayout(onNavigateToSignState)
                 ConfigLayout()
                 CommonLayout()
                 BackupLayout()
@@ -123,7 +118,7 @@ fun SettingScene(
 }
 
 @Composable
-private fun EntryLayout(navController: NavController) {
+private fun EntryLayout(onNavigateToSignState: () -> Unit) {
     val backgroundColor = colors.colorBgContainer
     SmallTitle(
         title = "模块入口",
@@ -138,9 +133,8 @@ private fun EntryLayout(navController: NavController) {
                 drawRect(backgroundColor)
             },
         text = "签到状态",
-        onClick = {
-            navController.navigate(NavigationItem.SignState, NavigationItem.Main)
-        })
+        onClick = onNavigateToSignState
+    )
 }
 
 @Composable
@@ -160,7 +154,6 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
                 drawRect(backgroundColor)
             },
     ) {
-
         val showTaskToast = viewmodel.showTaskToast
         SwitchInfoItem(
             modifier = Modifier
@@ -297,11 +290,14 @@ private fun BackupLayout(viewmodel: SettingViewModel = viewModel()) {
             .padding(bottom = 8.dp, start = 16.dp, top = 24.dp)
     )
 
+    val colors = colors
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(color = colors.colorBgContainer),
+            .drawBehind {
+                drawRect(colors.colorBgContainer)
+            },
     ) {
         TextInfoItem(
             modifier = Modifier

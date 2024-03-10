@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.ui.scene
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,20 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -41,7 +37,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -52,11 +50,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.ui.NavigationItem
 import me.teble.xposed.autodaily.ui.composable.DialogButton
+import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
+import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -68,7 +66,6 @@ import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.navigate
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
@@ -77,7 +74,9 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun MainScreen(
-    navController: NavController,
+    onNavigateToSign: () -> Unit,
+    onNavigateToSetting: () -> Unit,
+    onNavigateToAbout: () -> Unit,
     viewmodel: HomeViewModel = viewModel()
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -118,7 +117,11 @@ fun MainScreen(
             ) {
 
                 Banner()
-                GridLayout(navController)
+                GridLayout(
+                    onNavigateToSign = onNavigateToSign,
+                    onNavigateToSetting = onNavigateToSetting,
+                    onNavigateToAbout = onNavigateToAbout
+                )
             }
 
         }
@@ -138,9 +141,11 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
             .align(alignment = Alignment.CenterHorizontally),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        val colors = colors
 
         Text(
-            text = execTaskNum.toString(), style = TextStyle(
+            text = { execTaskNum.toString() },
+            style = TextStyle(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Light,
                 color = Color(0xFF2ECC71),
@@ -150,11 +155,11 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
         )
         Text(
             text = "今日执行", style = TextStyle(
-                color = colors.colorTextSecondary,
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center
-            )
+            ),
+            color = { colors.colorTextSecondary }
         )
 
         val fabColor = RippleConfiguration(
@@ -171,19 +176,22 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
                 modifier = Modifier
                     .padding(top = 16.dp)
                     .clip(shape = SmootherShape(radius = 24.dp))
-                    .background(color = colors.themeColor.copy(alpha = 0.08f))
-                    .clickable(role = Role.Button, onClick = {
-                        viewmodel.signClick()
-                    })
+                    .drawBehind {
+                        drawRect(colors.themeColor.copy(alpha = 0.08f))
+                    }
+                    .clickable(
+                        role = Role.Button,
+                        onClick = {
+                            viewmodel.signClick()
+                        })
                     .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
                 style = TextStyle(
                     fontSize = 14.sp,
                     lineHeight = 16.sp,
                     fontWeight = FontWeight.Bold,
-                    color = colors.themeColor,
-
-                    textAlign = TextAlign.Center,
-                )
+                    textAlign = TextAlign.Center
+                ),
+                color = { colors.themeColor }
             )
         }
 
@@ -193,9 +201,12 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
 
 @Composable
 private fun GridLayout(
-    navController: NavController,
+    onNavigateToSign: () -> Unit,
+    onNavigateToSetting: () -> Unit,
+    onNavigateToAbout: () -> Unit,
     viewModel: HomeViewModel = viewModel()
 ) {
+    val colors = colors
     val execTaskNum = viewModel.execTaskNum
     Column(
         modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -207,28 +218,24 @@ private fun GridLayout(
                 iconColor = Color(0xFF47B6FF),
                 Icons.Configuration,
                 "签到配置",
-                "已启用 $execTaskNum 项",
-                true
-            ) {
-                navController.navigate(NavigationItem.Sign, NavigationItem.Main)
-            }
+                { "已启用 $execTaskNum 项" },
+                true,
+                onClick = onNavigateToSign
+            )
             CardItem(
-                iconColor = Color(0xFF8286FF), Icons.Script, "自定义脚本", "敬请期待", false
+                iconColor = Color(0xFF8286FF), Icons.Script, "自定义脚本", { "敬请期待" }, false
             )
         }
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = colors.colorBgContainer, SmootherShape(12.dp)),
+                .clip(SmootherShape(12.dp))
+                .drawBehind {
+                    drawRect(colors.colorBgContainer)
+                },
         ) {
-            TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onClick = {
-                navController.navigate(NavigationItem.Setting, NavigationItem.Main)
-            }
-
-            )
-            TextItem(iconColor = Color(0xFFFFBC04), Icons.About, "关于", onClick = {
-                navController.navigate(NavigationItem.About, NavigationItem.Main)
-            })
+            TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onNavigateToSetting)
+            TextItem(iconColor = Color(0xFFFFBC04), Icons.About, "关于", onNavigateToAbout)
 
         }
     }
@@ -243,7 +250,7 @@ private fun NoticeDialog(
     viewmodel: HomeViewModel = viewModel()
 ) {
 
-
+    val colors = colors
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val noticeDialog = viewmodel.noticeDialog
 
@@ -274,14 +281,16 @@ private fun NoticeDialog(
                     .defaultNavigationBarPadding()
             ) {
                 Text(
-                    text = "公告", style = TextStyle(
+                    text = "公告",
+                    style = TextStyle(
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = colors.colorText,
                         textAlign = TextAlign.Center
-                    ), modifier = Modifier
+                    ),
+                    modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp)
+                        .padding(top = 20.dp),
+                    color = { colors.colorText }
                 )
 
                 HorizontalDivider(
@@ -291,7 +300,7 @@ private fun NoticeDialog(
                 )
 
                 Text(
-                    text = viewmodel.noticeText,
+                    text = { viewmodel.noticeText },
                     modifier = Modifier
                         .padding(top = 24.dp)
                         .weight(1f, false)
@@ -299,8 +308,8 @@ private fun NoticeDialog(
                     style = TextStyle(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
-                        color = colors.colorTextSecondary,
-                    )
+                    ),
+                    color = { colors.colorTextSecondary }
                 )
 
                 DialogButton(
@@ -324,10 +333,11 @@ private fun RowScope.CardItem(
     iconColor: Color,
     imageVector: ImageVector,
     text: String,
-    subText: String,
+    subText: () -> String,
     enable: Boolean = true,
     onClick: () -> Unit = {}
 ) {
+    val colors = colors
     val cardColorAlpha: Float by animateFloatAsState(
         targetValue = if (enable) DefaultAlpha else CardDisabledAlpha,
         animationSpec = spring(),
@@ -343,7 +353,9 @@ private fun RowScope.CardItem(
         Modifier
             .weight(1f)
             .clip(SmootherShape(12.dp))
-            .background(color = colors.colorBgContainer.copy(alpha = cardColorAlpha))
+            .drawBehind {
+                drawRect(colors.colorBgContainer.copy(alpha = cardColorAlpha))
+            }
             .clickable(role = Role.Button, enabled = enable, onClick = onClick)
             .padding(top = 24.dp, start = 16.dp, bottom = 24.dp)
     ) {
@@ -352,33 +364,50 @@ private fun RowScope.CardItem(
             contentDescription = "",
             modifier = Modifier
                 .size(32.dp)
-                .background(iconColor.copy(alpha = cardColorAlpha), CircleShape),
-            tint = Color(0xffffffff).copy(alpha = cardColorAlpha)
+                .drawBehind {
+                    drawCircle(iconColor.copy(cardColorAlpha))
+                },
+            tint = { Color(0xffffffff) }
         )
 
         Text(
-            text = text, Modifier.padding(top = 16.dp), style = TextStyle(
+            text = text,
+            Modifier
+                .padding(top = 16.dp)
+                .graphicsLayer {
+                    alpha = textColorAlpha
+                },
+            style = TextStyle(
                 fontSize = 18.sp,
                 lineHeight = 21.6.sp,
-                fontWeight = FontWeight.Bold,
-                color = colors.colorText.copy(textColorAlpha),
-            )
+                fontWeight = FontWeight.Bold
+            ),
+            color = { colors.colorText },
         )
         Text(
-            text = subText, Modifier.padding(top = 4.dp), style = TextStyle(
+            text = subText,
+            Modifier
+                .padding(top = 4.dp)
+                .graphicsLayer {
+                    alpha = textColorAlpha
+                },
+            style = TextStyle(
                 fontSize = 12.sp,
                 lineHeight = 14.4.sp,
-                fontWeight = FontWeight.Normal,
-                color = colors.colorTextSecondary.copy(textColorAlpha),
-            )
+                fontWeight = FontWeight.Normal
+            ),
+            color = { colors.colorTextSecondary }
         )
     }
 }
 
 @Composable
 private fun TextItem(
-    iconColor: Color, imageVector: ImageVector, text: String, onClick: () -> Unit
+    iconColor: Color,
+    imageVector: ImageVector,
+    text: String, onClick: () -> Unit
 ) {
+    val colors = colors
     Row(
         Modifier
             .fillMaxWidth()
@@ -392,14 +421,17 @@ private fun TextItem(
             contentDescription = "",
             modifier = Modifier
                 .size(32.dp)
-                .background(iconColor, CircleShape),
-            tint = Color(0xffffffff)
+                .drawBehind {
+                    drawCircle(iconColor)
+                },
+            tint = { Color(0xffffffff) }
         )
 
         Text(
             text = text, Modifier.padding(start = 16.dp), style = TextStyle(
-                fontSize = 18.sp, fontWeight = FontWeight.Bold, color = colors.colorText
-            )
+                fontSize = 18.sp, fontWeight = FontWeight.Bold
+            ),
+            color = { colors.colorText }
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -408,7 +440,7 @@ private fun TextItem(
             imageVector = Icons.ChevronRight,
             contentDescription = "",
             modifier = Modifier.size(24.dp),
-            tint = colors.colorIcon
+            tint = { colors.colorIcon }
         )
     }
 }

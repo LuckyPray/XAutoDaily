@@ -1,4 +1,4 @@
-package me.teble.xposed.autodaily.ui.composable;
+package me.teble.xposed.autodaily.ui.composable
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
