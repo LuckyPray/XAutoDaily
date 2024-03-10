@@ -2,19 +2,19 @@ package me.teble.xposed.autodaily.ui.composable
 
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.InternalFoundationTextApi
 import androidx.compose.foundation.text.TextDelegate
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.isSpecified
+import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -92,7 +92,7 @@ import kotlin.math.min
 fun AutoSizeText(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
+    color: ColorProducer? = null,
     suggestedFontSizes: ImmutableWrapper<List<TextUnit>> = emptyList<TextUnit>().toImmutableWrapper(),
     suggestedFontSizesStatus: SuggestedFontSizesStatus = suggestedFontSizes.rememberSuggestedFontSizesStatus,
     stepGranularityTextSize: TextUnit = TextUnit.Unspecified,
@@ -151,7 +151,7 @@ fun AutoSizeText(
 fun AutoSizeText(
     text: AnnotatedString,
     modifier: Modifier = Modifier,
-    color: Color = Color.Unspecified,
+    color: ColorProducer? = null,
     suggestedFontSizes: ImmutableWrapper<List<TextUnit>> = emptyList<TextUnit>().toImmutableWrapper(),
     suggestedFontSizesStatus: SuggestedFontSizesStatus = suggestedFontSizes.rememberSuggestedFontSizesStatus,
     stepGranularityTextSize: TextUnit = TextUnit.Unspecified,
@@ -182,7 +182,6 @@ fun AutoSizeText(
             contentAlignment = alignment,
         ) {
             val combinedTextStyle = LocalTextStyle.current + style.copy(
-                color = color.takeIf { it.isSpecified } ?: style.color,
                 fontStyle = fontStyle ?: style.fontStyle,
                 fontWeight = fontWeight ?: style.fontWeight,
                 fontFamily = fontFamily ?: style.fontFamily,
@@ -239,7 +238,7 @@ fun AutoSizeText(
                     shouldMoveBackward = shouldMoveBackward,
                 )
 
-            Text(
+            BasicText(
                 text = text,
                 overflow = overflow,
                 softWrap = softWrap,
@@ -251,6 +250,7 @@ fun AutoSizeText(
                     fontSize = electedFontSize,
                     lineHeight = electedFontSize * coercedLineSpacingRatio,
                 ),
+                color = color
             )
         }
     }

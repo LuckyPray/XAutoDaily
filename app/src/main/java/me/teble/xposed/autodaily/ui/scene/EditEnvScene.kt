@@ -28,10 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
-import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
-import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.ui.composable.DatePicker
 import me.teble.xposed.autodaily.ui.composable.FloatingButton
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -42,7 +39,6 @@ import me.teble.xposed.autodaily.ui.dialog.CheckFriendsDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,16 +51,9 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
         val scope = rememberCoroutineScope()
 
         var dialogState by remember { mutableStateOf(false) }
-        val friendFlag = remember { mutableStateOf(true) }
 
         val envMap = remember { mutableStateOf("") }
-        var friends by remember { mutableStateOf(emptyList<Friend>()) }
-        LaunchedEffect(friends) {
-            scope.launch(IO) {
-                friends = FunctionPool.friendsManager.getFriends() ?: emptyList()
 
-            }
-        }
         LaunchedEffect(dialogState) {
             scope.launch {
                 if (dialogState) {
@@ -92,7 +81,7 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                     }
                 )
             },
-            containerColor = XAutodailyTheme.colors.colorBgContainer
+            containerColor = colors.colorBgContainer
         ) { contentPadding ->
 
             val colors = colors
@@ -114,7 +103,7 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                         .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
                 )
                 IconEditText(
-                    value = editText,
+                    value = { editText },
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(SmootherShape(12.dp))
@@ -137,7 +126,6 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                         .padding(bottom = 8.dp, start = 16.dp, top = 24.dp)
                 )
 
-
                 HintEditText(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -146,7 +134,7 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                             drawRect(colors.colorBgEdit)
                         }
                         .padding(vertical = 18.dp, horizontal = 16.dp),
-                    value = fireText,
+                    value = { fireText },
                     onValueChange = {
                         fireText = it
                     },
@@ -190,9 +178,7 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
         if (state.isVisible || dialogState) {
             CheckFriendsDialog(
                 state = state,
-                friends = friends,
                 uinListStr = envMap,
-
                 onConfirm = {
 
                 },

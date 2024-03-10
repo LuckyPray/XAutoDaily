@@ -34,7 +34,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -50,9 +49,8 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun CheckFriendsDialog(
     state: SheetState,
-    friends: List<Friend>,
     uinListStr: MutableState<String>,
-
+    viewmodel: FriendViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -66,10 +64,9 @@ fun CheckFriendsDialog(
         scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {
-        Column {
-
+        Column(Modifier) {
             DialogTopBar(
-                text = "好友列表（${friends.size}）",
+                text = "好友列表（${viewmodel.friendsState.size}）",
                 iconClick = onDismiss
             )
 
@@ -82,13 +79,11 @@ fun CheckFriendsDialog(
             )
 
             Column(
-                Modifier
-                    .padding(horizontal = 32.dp)
-
+                Modifier.padding(horizontal = 32.dp)
             ) {
 
                 SearchBar(
-                    text = searchText,
+                    text = { searchText },
                 ) {
                     searchText = it
                 }
@@ -114,16 +109,13 @@ fun CheckFriendsDialog(
 
                 }
 
-
-
-
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f, false)
                         .fillMaxWidth()
                 ) {
                     items(
-                        items = friends,
+                        items = viewmodel.friendsState,
                         key = { it.uin },
                         contentType = { it.remark == null }) { friend ->
                         var enable by remember {
@@ -157,8 +149,6 @@ fun CheckFriendsDialog(
 
             }
         }
-
-
     }
 }
 
@@ -194,7 +184,7 @@ private fun TextButton(text: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun SearchBar(text: String, onValueChange: (String) -> Unit) {
+private fun SearchBar(text: () -> String, onValueChange: (String) -> Unit) {
     Row(
         Modifier
             .padding(top = 16.dp)

@@ -2,7 +2,6 @@ package me.teble.xposed.autodaily.ui.composable
 
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
@@ -30,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -59,6 +57,7 @@ fun DatePicker(
     onScrollFinish: (time: Duration) -> Unit = { },
 ) {
 
+    val currentOnScrollFinish by rememberUpdatedState(onScrollFinish)
     Row(
         modifier = modifier.height(IntrinsicSize.Min),
         verticalAlignment = Alignment.CenterVertically
@@ -70,7 +69,7 @@ fun DatePicker(
             modifier = Modifier
                 .padding(start = 60.dp, top = 36.dp, bottom = 36.dp, end = 8.dp),
             onScrollFinish = {
-                onScrollFinish(it.hours + minute.minutes)
+                currentOnScrollFinish(it.hours + minute.minutes)
             }
         )
 
@@ -95,7 +94,7 @@ fun DatePicker(
             modifier = Modifier
                 .padding(start = 48.dp, top = 36.dp, bottom = 36.dp, end = 8.dp),
             onScrollFinish = {
-                onScrollFinish(hour.hours + it.minutes)
+                currentOnScrollFinish(hour.hours + it.minutes)
             }
         )
         Text(
@@ -106,7 +105,7 @@ fun DatePicker(
             style = TextStyle(
                 fontWeight = FontWeight.Normal,
                 fontSize = 16.sp
-            ),
+            )
         )
     }
 
@@ -120,11 +119,11 @@ internal fun TextPicker(
     count: Int,
     itemHeight: Dp = 77.dp,
     visibleItemCount: Int = 3,
-    onScrollFinish: (snappedIndex: Int) -> Unit = { }
+    onScrollFinish: (snappedIndex: Int) -> Unit
 ) {
-
+    val colors = colors
     val state = rememberLazyListState(startIndex)
-    val isScrollInProgress by remember { derivedStateOf(state::isScrollInProgress) }
+
 
     val snappingLayout = remember(state) { SnapLayoutInfoProvider(state) }
     val flingBehavior = rememberSnapFlingBehavior(snappingLayout)
@@ -134,22 +133,10 @@ internal fun TextPicker(
 
     val currentOnScrollFinish by rememberUpdatedState(onScrollFinish)
 
-    val itemHalfHeightToPx = with(LocalDensity.current) { itemHeight.toPx() / 2 }
-
-    LaunchedEffect(isScrollInProgress) {
-        if (!isScrollInProgress && currentIndex != 0) {
-            if (state.firstVisibleItemScrollOffset < itemHalfHeightToPx) {
-                state.animateScrollToItem(currentIndex)
-            } else if (state.firstVisibleItemScrollOffset > itemHalfHeightToPx) {
-                state.animateScrollToItem(currentIndex + 1)
-            }
-        }
-
-    }
-
     LaunchedEffect(currentIndex) {
         currentOnScrollFinish(currentIndex)
     }
+
 
     LazyColumn(
         modifier = modifier
@@ -160,6 +147,7 @@ internal fun TextPicker(
         flingBehavior = flingBehavior,
         contentPadding = PaddingValues(vertical = itemHeight * (visibleItemCount / 2)),
     ) {
+
         items(
             count,
             key = { it },
@@ -188,7 +176,7 @@ internal fun TextPicker(
             ) {
                 AutoSizeText(
                     text = String.format(Locale.getDefault(), "%02d", index),
-                    color = colors.colorText,
+                    color = { colors.colorText },
                     maxLines = 1,
                     modifier = Modifier.graphicsLayer {
                         this.scaleX = fontScale

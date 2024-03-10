@@ -35,7 +35,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun HintEditText(
-    value: String,
+    value: () -> String,
     modifier: Modifier,
     textStyle: TextStyle,
     singleLine: Boolean = true,
@@ -45,7 +45,7 @@ fun HintEditText(
 ) {
     BasicTextField(
         modifier = modifier,
-        value = value,
+        value = value(),
         onValueChange = onValueChange,
         textStyle = textStyle,
         singleLine = singleLine,
@@ -56,7 +56,7 @@ fun HintEditText(
                 contentAlignment = Alignment.CenterStart
             ) {
                 AnimatedVisibility(
-                    value.isEmpty(),
+                    value().isEmpty(),
                     enter = slideInHorizontally() + fadeIn(),
                     exit = slideOutHorizontally() + fadeOut(),
                 ) {
@@ -74,7 +74,7 @@ fun HintEditText(
 
 @Composable
 fun IconEditText(
-    value: String,
+    value: () -> String,
     modifier: Modifier,
     hintText: String,
     iconClick: () -> Unit,

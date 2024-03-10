@@ -1,29 +1,21 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import me.teble.xposed.autodaily.data.Dependency
+import me.teble.xposed.autodaily.hook.base.hostContext
 
 class LicenseViewModel : ViewModel() {
 
 
-    var dependencies = mutableStateListOf<Dependency>()
-
     @OptIn(ExperimentalSerializationApi::class)
-    fun readJson(context: Context) {
-        viewModelScope.launch(IO) {
-            dependencies.clear()
-            dependencies.addAll(
-                Json.decodeFromStream<List<Dependency>>(context.assets.open("licenses.json"))
-            )
-        }
+    var dependencies = mutableStateListOf<Dependency>(
+        *Json.decodeFromStream<List<Dependency>>(
+            hostContext.assets.open("licenses.json")
+        ).toTypedArray()
+    )
 
-    }
 }

@@ -8,11 +8,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -33,14 +31,6 @@ fun LicenseScene(backClick: () -> Unit, viewmodel: LicenseViewModel = viewModel(
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
-
-        val context = LocalContext.current
-        LaunchedEffect(context) {
-            viewmodel.readJson(context)
-        }
-
-
-
         Column(
             modifier = Modifier
                 .padding(contentPadding)
