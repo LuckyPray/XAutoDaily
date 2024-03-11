@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -52,6 +53,7 @@ fun ListDialog(
         containerColor = colors.colorBgDialog,
         windowInsets = contentWindowInsets,
         dragHandle = {},
+        modifier = Modifier.statusBarsPadding(),
         scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -61,93 +62,92 @@ fun CheckFriendsDialog(
         containerColor = colors.colorBgDialog,
         windowInsets = contentWindowInsets,
         dragHandle = {},
+        modifier = Modifier.statusBarsPadding(),
         scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {
-        Column(Modifier) {
-            DialogTopBar(
-                text = "好友列表（${viewmodel.friendsState.size}）",
-                iconClick = onDismiss
-            )
+        DialogTopBar(
+            text = "好友列表（${viewmodel.friendsState.size}）",
+            iconClick = onDismiss
+        )
 
-            HorizontalDivider(
-                color = colors.colorDialogDivider,
-                thickness = 1.dp,
-                modifier = Modifier
-                    .padding(horizontal = 32.dp)
-                    .padding(bottom = 16.dp)
-            )
+        HorizontalDivider(
+            color = colors.colorDialogDivider,
+            thickness = 1.dp,
+            modifier = Modifier
+                .padding(horizontal = 32.dp)
+                .padding(bottom = 16.dp)
+        )
 
-            Column(
-                Modifier.padding(horizontal = 32.dp)
+        Column(
+            Modifier.padding(horizontal = 32.dp)
+        ) {
+
+            SearchBar(
+                text = { searchText },
+            ) {
+                searchText = it
+            }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
             ) {
 
-                SearchBar(
-                    text = { searchText },
+                TextButton(
+                    text = "反选"
                 ) {
-                    searchText = it
-                }
-
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-
-                    TextButton(
-                        text = "反选"
-                    ) {
-
-                    }
-
-                    TextButton(
-                        text = "全选"
-                    ) {
-
-                    }
 
                 }
 
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f, false)
-                        .fillMaxWidth()
+                TextButton(
+                    text = "全选"
                 ) {
-                    items(
-                        items = viewmodel.friendsState,
-                        key = { it.uin },
-                        contentType = { it.remark == null }) { friend ->
-                        var enable by remember {
-                            mutableStateOf(false)
-                        }
-                        SelectInfoItem(
-                            text = friend.remark ?: friend.nike,
-                            infoText = friend.uin,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(SmootherShape(12.dp)),
-                            clickEnabled = { true },
-                            enable = { enable },
-                            onClick = {
-                                enable = !enable
-                            })
-                    }
-
 
                 }
-
-                DialogButton(
-                    text = "保存",
-                    Modifier
-                        .defaultNavigationBarPadding()
-                        .padding(top = 24.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth(),
-                    onClick = onConfirm
-                )
 
             }
+
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f, false)
+                    .fillMaxWidth()
+            ) {
+                items(
+                    items = viewmodel.friendsState,
+                    key = { it.uin },
+                    contentType = { it.remark == null }) { friend ->
+                    var enable by remember {
+                        mutableStateOf(false)
+                    }
+                    SelectInfoItem(
+                        text = friend.remark ?: friend.nike,
+                        infoText = friend.uin,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(SmootherShape(12.dp)),
+                        clickEnabled = { true },
+                        enable = { enable },
+                        onClick = {
+                            enable = !enable
+                        })
+                }
+
+
+            }
+
+            DialogButton(
+                text = "保存",
+                Modifier
+                    .defaultNavigationBarPadding()
+                    .padding(top = 24.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth(),
+                onClick = onConfirm
+            )
+
         }
     }
 }

@@ -272,6 +272,7 @@ private fun NoticeDialog(
             containerColor = colors.colorBgDialog,
             windowInsets = contentWindowInsets,
             dragHandle = {},
+            modifier = Modifier.statusBarsPadding(),
             scrimColor = colors.colorBgMask,
             shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         ) {
