@@ -50,15 +50,28 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
-
+    themeViewModel: ModuleThemeViewModel,
     onBackClick: () -> Unit,
-    themeViewModel: ModuleThemeViewModel = viewModel(),
     viewmodel: SettingViewModel = viewModel()
 ) {
 
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val showThemeDialog = viewmodel.showThemeDialog
+    val showThemeDialog by remember { viewmodel.showThemeDialog }
+
+    val shizukuEnable by remember { viewmodel.shizukuState }
+
+    val hiddenAppIcon by remember { viewmodel.hiddenAppIcon }
+
+    val untrustedTouchEvents by remember { viewmodel.untrustedTouchEvents }
+    val keepAlive by remember { viewmodel.keepAlive }
+    val qqKeepAlive by remember { viewmodel.qqKeepAlive }
+    val timKeepAlive by remember { viewmodel.timKeepAlive }
+
+
+    val theme by remember { themeViewModel.currentTheme }
+    val blackTheme by remember { themeViewModel.blackTheme }
+
 
     LaunchedEffect(showThemeDialog) {
         if (showThemeDialog) {
@@ -80,7 +93,22 @@ fun SettingScene(
         ) { contentPadding ->
 
             SettingLayout(
-                Modifier
+                shizukuEnable = { shizukuEnable },
+                hiddenAppIcon = { hiddenAppIcon },
+                untrustedTouchEvents = { untrustedTouchEvents },
+                keepAlive = { keepAlive },
+                qqKeepAlive = { qqKeepAlive },
+                timKeepAlive = { timKeepAlive },
+
+
+                updateKeepAliveChecked = viewmodel::updateKeepAliveChecked,
+                updateQQKeepAlive = viewmodel::updateQQKeepAlive,
+                updateTimKeepAlive = viewmodel::updateTimKeepAlive,
+                updateHiddenAppIcon = viewmodel::updateHiddenAppIcon,
+                updateUntrustedTouchEvents = viewmodel::updateUntrustedTouchEvents,
+                showThemeDialog = viewmodel::showThemeDialog,
+
+                modifier = Modifier
                     .fillMaxSize()
                     .padding(contentPadding)
                     .padding(horizontal = 16.dp)
@@ -90,22 +118,17 @@ fun SettingScene(
             )
 
         }
-        if (sheetState.isVisible || showThemeDialog) {
-            ThemeModelDialog(
-                state = sheetState,
-                targetTheme = themeViewModel.currentTheme,
-                isBlack = themeViewModel.blackTheme,
-                onDismiss = {
-                    viewmodel.dismissThemeDialog()
-                },
 
-                onConfirm = { themeCode, isBlack ->
-                    themeViewModel.updateBlack(isBlack)
-                    themeViewModel.updateTheme(themeCode)
-                    viewmodel.dismissThemeDialog()
-                }
-            )
-        }
+        ThemeModelDialog(
+            sheetState = sheetState,
+            enable = { showThemeDialog },
+            targetTheme = { theme },
+            targetBlack = { blackTheme },
+            onDismiss = viewmodel::dismissThemeDialog,
+
+            onConfirm = themeViewModel::confirmTheme
+        )
+
 
     }
 
@@ -113,28 +136,60 @@ fun SettingScene(
 
 
 @Composable
-private fun SettingLayout(modifier: Modifier, viewmodel: SettingViewModel = viewModel()) {
+private fun SettingLayout(
+    shizukuEnable: () -> Boolean,
+    hiddenAppIcon: () -> Boolean,
+    untrustedTouchEvents: () -> Boolean,
+    keepAlive: () -> Boolean,
+    qqKeepAlive: () -> Boolean,
+    timKeepAlive: () -> Boolean,
 
-    val shizukuState = viewmodel.shizukuState
 
-    val itemAlpha: Float by animateFloatAsState(
-        targetValue = if (shizukuState) DefaultAlpha else DisabledAlpha,
-        animationSpec = spring(), label = "switch item"
-    )
+    updateKeepAliveChecked: (Boolean) -> Unit,
+    updateQQKeepAlive: (Boolean) -> Unit,
+    updateTimKeepAlive: (Boolean) -> Unit,
+    updateHiddenAppIcon: (Boolean) -> Unit,
+    updateUntrustedTouchEvents: (Boolean) -> Unit,
+    showThemeDialog: () -> Unit,
+    modifier: Modifier
+) {
+
+
     Column(
         modifier = modifier
     ) {
 
-        CommonLayout(shizukuEnable = shizukuState)
-        ShizukuLayout(shizukuEnable = shizukuState, itemAlpha = itemAlpha)
+        CommonLayout(
+            shizukuEnable = shizukuEnable, hiddenAppIcon = hiddenAppIcon,
+            untrustedTouchEvents = untrustedTouchEvents,
+
+            updateHiddenAppIcon = updateHiddenAppIcon,
+            updateUntrustedTouchEvents = updateUntrustedTouchEvents,
+            showThemeDialog = showThemeDialog
+        )
+        ShizukuLayout(
+            shizukuEnable = shizukuEnable,
+            keepAlive = keepAlive,
+            qqKeepAlive = qqKeepAlive,
+            timKeepAlive = timKeepAlive,
+
+            updateKeepAliveChecked = updateKeepAliveChecked,
+            updateQQKeepAlive = updateQQKeepAlive,
+            updateTimKeepAlive = updateTimKeepAlive
+        )
     }
 
 }
 
 @Composable
 private fun CommonLayout(
-    shizukuEnable: Boolean,
-    viewmodel: SettingViewModel = viewModel()
+    shizukuEnable: () -> Boolean,
+    hiddenAppIcon: () -> Boolean,
+    untrustedTouchEvents: () -> Boolean,
+
+    updateHiddenAppIcon: (Boolean) -> Unit,
+    updateUntrustedTouchEvents: (Boolean) -> Unit,
+    showThemeDialog: () -> Unit
 ) {
     SmallTitle(
         title = "通用",
@@ -149,10 +204,10 @@ private fun CommonLayout(
             .background(colors.colorBgContainer)
     ) {
 
-        val hiddenAppIcon = viewmodel.hiddenAppIcon
+
         val hideText by remember {
             derivedStateOf {
-                if (hiddenAppIcon) "显示应用图标" else "隐藏应用图标"
+                if (hiddenAppIcon()) "显示应用图标" else "隐藏应用图标"
             }
         }
         SwitchTextItem(
@@ -161,31 +216,28 @@ private fun CommonLayout(
                 .clip(SmootherShape(12.dp)),
             text = hideText,
             clickEnabled = { true },
-            enable = { hiddenAppIcon },
-            onClick = {
-                viewmodel.updateHiddenAppIcon(!hiddenAppIcon)
-            })
+            enable = hiddenAppIcon,
+            onClick = updateHiddenAppIcon
+        )
         SelectionItem(
             Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            text = "主题颜色", clickEnabled = { true }, onClick = {
-                viewmodel.showThemeDialog()
-            })
+            text = "主题颜色", clickEnabled = { true },
+            onClick = showThemeDialog
+        )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            val untrustedTouchEvents = viewmodel.untrustedTouchEvents
+
             SwitchInfoItem(
                 Modifier
                     .fillMaxWidth()
                     .clip(SmootherShape(12.dp)),
-                enable = { untrustedTouchEvents },
+                enable = untrustedTouchEvents,
                 text = "取消安卓 12 不受信触摸",
                 infoText = "安卓 12 后启用对 Toast 弹窗等事件触摸不可穿透，勾选此项可关闭",
-                clickEnabled = { shizukuEnable },
-                onClick = {
-                    viewmodel.updateUntrustedTouchEvents(it)
-                }
+                clickEnabled = shizukuEnable,
+                onClick = updateUntrustedTouchEvents
             )
         }
     }
@@ -194,10 +246,20 @@ private fun CommonLayout(
 
 @Composable
 private fun ShizukuLayout(
-    itemAlpha: Float,
-    shizukuEnable: Boolean,
-    viewmodel: SettingViewModel = viewModel()
+    shizukuEnable: () -> Boolean,
+    keepAlive: () -> Boolean,
+    qqKeepAlive: () -> Boolean,
+    timKeepAlive: () -> Boolean,
+
+    updateKeepAliveChecked: (Boolean) -> Unit,
+    updateQQKeepAlive: (Boolean) -> Unit,
+    updateTimKeepAlive: (Boolean) -> Unit
 ) {
+
+    val itemAlpha: Float by animateFloatAsState(
+        targetValue = if (shizukuEnable()) DefaultAlpha else DisabledAlpha,
+        animationSpec = spring(), label = "switch item"
+    )
     SmallTitle(
         title = "Shizuku 保活",
         modifier = Modifier
@@ -210,28 +272,25 @@ private fun ShizukuLayout(
             .background(colors.colorBgContainer.copy(alpha = itemAlpha))
 
     ) {
-        val keepAlive = viewmodel.keepAlive
 
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { keepAlive },
+            enable = keepAlive,
             text = "启用 Shizuku 保活机制",
             infoText = "通过 Shizuku 运行一个 Service，当监测到 QQ/TIM 被杀死后重新拉起进程",
-            clickEnabled = { shizukuEnable },
-            onClick = {
-                viewmodel.updateKeepAliveChecked(it)
-            }
+            clickEnabled = shizukuEnable,
+            onClick = updateKeepAliveChecked
         )
         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
 
-            val qqKeepAlive = viewmodel.qqKeepAlive
 
             KeepTimeItem(
                 title = "启用 QQ 保活",
                 info = "单击此处尝试后台唤醒 QQ，如果模块 hook 生效将会显示一个气泡",
-                keepAlive = keepAlive && shizukuEnable,
+                keepAlive = keepAlive,
+                shizukuEnable = shizukuEnable,
                 hostPackage = PACKAGE_NAME_QQ,
                 hostKeepAlive = qqKeepAlive,
                 onClick = {
@@ -244,19 +303,17 @@ private fun ShizukuLayout(
                     )
 
                 },
-                onChange = {
-                    viewmodel.updateQQKeepAlive(it)
-                }
+                onChange = updateQQKeepAlive
             )
         }
 
         if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
-            val timKeepAlive = viewmodel.timKeepAlive
 
             KeepTimeItem(
                 title = "启用 TIM 保活",
                 info = "单击此处尝试后台唤醒 TIM，如果模块 hook 生效将会显示一个气泡",
-                keepAlive = keepAlive && shizukuEnable,
+                keepAlive = keepAlive,
+                shizukuEnable = shizukuEnable,
                 hostPackage = PACKAGE_NAME_TIM,
                 hostKeepAlive = timKeepAlive,
                 onClick = {
@@ -268,9 +325,7 @@ private fun ShizukuLayout(
                         )
                     )
                 },
-                onChange = {
-                    viewmodel.updateTimKeepAlive(it)
-                }
+                onChange = updateTimKeepAlive
             )
         }
 
@@ -285,13 +340,14 @@ private fun ShizukuLayout(
 private fun KeepTimeItem(
     title: String,
     info: String,
-    keepAlive: Boolean,
-    hostKeepAlive: Boolean,
+    keepAlive: () -> Boolean,
+    shizukuEnable: () -> Boolean,
+    hostKeepAlive: () -> Boolean,
     hostPackage: String,
     onClick: () -> Unit,
     onChange: (Boolean) -> Unit,
 ) {
-    LaunchedEffect(hostKeepAlive, keepAlive) {
+    LaunchedEffect(hostKeepAlive(), shizukuEnable(), keepAlive()) {
         val confDir = File(xaApp.getExternalFilesDir(null), "conf")
         if (confDir.isFile) {
             confDir.delete()
@@ -300,9 +356,10 @@ private fun KeepTimeItem(
             confDir.mkdirs()
         }
         val confFile = File(confDir, "conf.json")
-        val conf = ShizukuConf(keepAlive,
+        val conf = ShizukuConf(
+            shizukuEnable() && keepAlive(),
             mutableMapOf<String, Boolean>().apply {
-                put(hostPackage, hostKeepAlive)
+                put(hostPackage, hostKeepAlive())
             })
         val confString = conf.toJsonString()
         Log.d("XALog", confString)
@@ -312,10 +369,10 @@ private fun KeepTimeItem(
         modifier = Modifier
             .fillMaxWidth()
             .clip(SmootherShape(12.dp)),
-        enable = { hostKeepAlive },
+        enable = hostKeepAlive,
         text = title,
         infoText = info,
-        clickEnabled = { keepAlive },
+        clickEnabled = { shizukuEnable() && keepAlive() },
         onClick = onClick,
         onChange = onChange
     )

@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.Window
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.navigationBarLightOldMode
@@ -51,8 +53,8 @@ class ModuleActivity : BaseActivity() {
 
 
         setContent {
-            val theme = viewModel.currentTheme
-            val isBlack = viewModel.blackTheme
+            val theme by remember { viewModel.currentTheme }
+            val isBlack by remember { viewModel.blackTheme }
 
             when (theme) {
                 XAutodailyTheme.Theme.Light -> {

@@ -17,13 +17,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalRippleConfiguration
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -51,11 +48,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
+import me.teble.xposed.autodaily.ui.dialog.NoticeDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.About
@@ -64,7 +61,6 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
-import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
@@ -72,6 +68,7 @@ import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     onNavigateToSign: () -> Unit,
@@ -81,10 +78,23 @@ fun MainScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val noticeDialog by remember { viewmodel.noticeDialog }
     // 展示对应 snackbarText
     LaunchedEffect(Unit) {
         viewmodel.snackbarText.collect {
             snackbarHostState.showSnackbar(it)
+        }
+    }
+
+    val noticeText by remember { viewmodel.noticeText }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val execTaskNum by remember { viewmodel.execTaskNum }
+    LaunchedEffect(noticeDialog) {
+        if (noticeDialog) {
+            sheetState.expand()
+        } else {
+            sheetState.hide()
         }
     }
 
@@ -116,16 +126,22 @@ fun MainScreen(
                     .defaultNavigationBarPadding()
             ) {
 
-                Banner()
+                Banner({ execTaskNum }, signClick = viewmodel::signClick)
                 GridLayout(
                     onNavigateToSign = onNavigateToSign,
                     onNavigateToSetting = onNavigateToSetting,
-                    onNavigateToAbout = onNavigateToAbout
+                    onNavigateToAbout = onNavigateToAbout,
+                    execTaskNum = { execTaskNum }
                 )
             }
 
         }
-        NoticeDialog()
+        NoticeDialog(
+            enable = { noticeDialog },
+            sheetState = sheetState,
+            infoText = { noticeText },
+            onDismiss = viewmodel::dismissNoticeDialog
+        )
     }
 
 
@@ -133,8 +149,7 @@ fun MainScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
-    val execTaskNum = viewmodel.execTaskNum
+private fun ColumnScope.Banner(execTaskNum: () -> Int, signClick: () -> Unit) {
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
@@ -144,7 +159,7 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
         val colors = colors
 
         Text(
-            text = { execTaskNum.toString() },
+            text = { execTaskNum().toString() },
             style = TextStyle(
                 fontSize = 64.sp,
                 fontWeight = FontWeight.Light,
@@ -181,9 +196,8 @@ private fun ColumnScope.Banner(viewmodel: HomeViewModel = viewModel()) {
                     }
                     .clickable(
                         role = Role.Button,
-                        onClick = {
-                            viewmodel.signClick()
-                        })
+                        onClick = signClick
+                    )
                     .padding(start = 32.dp, top = 10.dp, end = 32.dp, bottom = 10.dp),
                 style = TextStyle(
                     fontSize = 14.sp,
@@ -204,10 +218,9 @@ private fun GridLayout(
     onNavigateToSign: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    execTaskNum: () -> Int
 ) {
     val colors = colors
-    val execTaskNum = viewModel.execTaskNum
     Column(
         modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
@@ -218,7 +231,7 @@ private fun GridLayout(
                 iconColor = Color(0xFF47B6FF),
                 Icons.Configuration,
                 "签到配置",
-                { "已启用 $execTaskNum 项" },
+                { "已启用 ${execTaskNum()} 项" },
                 true,
                 onClick = onNavigateToSign
             )
@@ -240,91 +253,6 @@ private fun GridLayout(
         }
     }
 
-
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NoticeDialog(
-    viewmodel: HomeViewModel = viewModel()
-) {
-
-    val colors = colors
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val noticeDialog = viewmodel.noticeDialog
-
-    LaunchedEffect(noticeDialog) {
-        if (viewmodel.noticeDialog) {
-            sheetState.expand()
-        } else {
-            sheetState.hide()
-        }
-    }
-
-    if (sheetState.isVisible || noticeDialog) {
-
-        ModalBottomSheet(
-            onDismissRequest = {
-                viewmodel.dismissNoticeDialog()
-            },
-            sheetState = sheetState,
-            containerColor = colors.colorBgDialog,
-            windowInsets = contentWindowInsets,
-            dragHandle = {},
-            modifier = Modifier.statusBarsPadding(),
-            scrimColor = colors.colorBgMask,
-            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(horizontal = 32.dp)
-                    .defaultNavigationBarPadding()
-            ) {
-                Text(
-                    text = "公告",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    ),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp),
-                    color = { colors.colorText }
-                )
-
-                HorizontalDivider(
-                    color = colors.colorDialogDivider,
-                    thickness = 1.dp,
-                    modifier = Modifier.padding(top = 20.dp)
-                )
-
-                Text(
-                    text = { viewmodel.noticeText },
-                    modifier = Modifier
-                        .padding(top = 24.dp)
-                        .weight(1f, false)
-                        .verticalScroll(rememberScrollState()),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Normal,
-                    ),
-                    color = { colors.colorTextSecondary }
-                )
-
-                DialogButton(
-                    text = "确定",
-                    modifier = Modifier
-                        .padding(top = 24.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .fillMaxWidth(),
-                    onClick = viewmodel::dismissNoticeDialog
-                )
-            }
-
-        }
-    }
 
 }
 

@@ -27,14 +27,13 @@ import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
 @Composable
 fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewModel()) {
     val snackbarHostState = remember { SnackbarHostState() }
-
+    val context = LocalContext.current
     // 展示对应 snackbarText
     LaunchedEffect(Unit) {
         viewmodel.snackbarText.collect {
@@ -50,7 +49,7 @@ fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewMo
                 RoundedSnackbar(it)
             }
         },
-        containerColor = XAutodailyTheme.colors.colorBgLayout
+        containerColor = colors.colorBgLayout
     ) { contentPadding ->
         Column(
             Modifier
@@ -62,7 +61,11 @@ fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewMo
                 .defaultNavigationBarPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            AuthorLayout()
+            AuthorLayout(
+                openAuthorGithub = {
+                    viewmodel.openAuthorGithub(context = context, it)
+                }
+            )
         }
     }
 }
@@ -70,9 +73,9 @@ fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewMo
 
 @Composable
 private fun AuthorLayout(
-    viewmodel: DeveloperViewModel = viewModel()
+    openAuthorGithub: (String) -> Unit
 ) {
-    val context = LocalContext.current
+
     val colors = colors
     Column(
         modifier = Modifier
@@ -89,7 +92,7 @@ private fun AuthorLayout(
             title = "韵の祈",
             info = "主要开发者"
         ) {
-            viewmodel.openAuthorGithub(context, "https://github.com/teble")
+            openAuthorGithub("https://github.com/teble")
         }
         AuthorItem(
             icon = painterResource(id = R.drawable.lagrio),
@@ -97,7 +100,7 @@ private fun AuthorLayout(
             title = "MaiTungTM",
             info = "UI & Icon 设计师"
         ) {
-            viewmodel.openAuthorGithub(context, "https://github.com/Lagrio")
+            openAuthorGithub("https://github.com/Lagrio")
         }
         AuthorItem(
             icon = painterResource(id = R.drawable.agoines),
@@ -105,7 +108,7 @@ private fun AuthorLayout(
             title = "Agoines",
             info = "UI 开发者"
         ) {
-            viewmodel.openAuthorGithub(context, "https://github.com/agoines")
+            openAuthorGithub("https://github.com/agoines")
         }
     }
 }

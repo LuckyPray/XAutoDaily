@@ -6,6 +6,8 @@ import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.navigationBarLightOldMode
@@ -44,9 +46,10 @@ class MainActivity : ComponentActivity() {
 
 
         setContent {
+            val theme by remember { viewModel.currentTheme }
+            val isBlack by remember { viewModel.blackTheme }
 
-
-            when (viewModel.currentTheme) {
+            when (theme) {
                 XAutodailyTheme.Theme.Light -> {
                     window.statusBarLightMode()
                     window.navigationBarLightMode()
@@ -63,10 +66,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val theme = viewModel.currentTheme
-            val isBlack = viewModel.blackTheme
             XAutodailyTheme(isBlack = isBlack, colorTheme = theme) {
-                ModuleApp()
+                ModuleApp(viewModel)
             }
 
         }

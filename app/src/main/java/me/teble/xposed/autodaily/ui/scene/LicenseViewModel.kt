@@ -12,7 +12,7 @@ class LicenseViewModel : ViewModel() {
 
 
     @OptIn(ExperimentalSerializationApi::class)
-    var dependencies = mutableStateListOf<Dependency>(
+    val dependencies = mutableStateListOf(
         *Json.decodeFromStream<List<Dependency>>(
             hostContext.assets.open("licenses.json")
         ).toTypedArray()

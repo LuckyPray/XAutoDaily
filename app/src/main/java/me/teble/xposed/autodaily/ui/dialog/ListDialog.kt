@@ -3,7 +3,6 @@ package me.teble.xposed.autodaily.ui.dialog
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -57,7 +56,6 @@ fun ListDialog(
         scrimColor = colors.colorBgMask,
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {
-    Column() {
 
         DialogTopBar(
             text = title,
@@ -99,10 +97,7 @@ fun ListDialog(
                 .fillMaxWidth(),
             onClick = onConfirm
         )
-
     }
-    }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

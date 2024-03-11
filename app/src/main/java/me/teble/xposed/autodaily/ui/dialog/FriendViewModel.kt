@@ -5,6 +5,6 @@ import androidx.lifecycle.ViewModel
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 
 class FriendViewModel : ViewModel() {
-    var friendsState =
+    val friendsState =
         mutableStateListOf(*FunctionPool.friendsManager.getFriends().orEmpty().toTypedArray())
 }

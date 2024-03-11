@@ -20,6 +20,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -57,7 +58,23 @@ fun AboutScene(
     onNavigateToDeveloper: () -> Unit,
     viewmodel: AboutViewModel = viewModel()
 ) {
+    val showUpdateDialog by remember { viewmodel.showUpdateDialog }
+    val hasUpdate by remember { viewmodel.hasUpdate }
+
+    val qqVersionName by remember { viewmodel.qqVersionName }
+    val moduleVersionCode by remember { viewmodel.moduleVersionCode }
+
+
+    val moduleVersionName by remember { viewmodel.moduleVersionName }
+    val qqVersionCode by remember { viewmodel.qqVersionCode }
+
+    val configVersion by remember { viewmodel.configVersion }
+    val updateDialogText by remember { viewmodel.updateDialogText }
+
     val snackbarHostState = remember { SnackbarHostState() }
+
+
+    val context = LocalContext.current
 
     // 展示对应 snackbarText
     LaunchedEffect(Unit) {
@@ -89,44 +106,50 @@ fun AboutScene(
                     .defaultNavigationBarPadding(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                BuildConfigLayout()
-                UpdateLayout()
+                BuildConfigLayout(
+                    moduleVersionName = { moduleVersionName },
+                    moduleVersionCode = { moduleVersionCode }
+                )
+                UpdateLayout(
+                    qqVersionName = { qqVersionName },
+                    qqVersionCode = { qqVersionCode },
+                    configVersion = { configVersion },
+                    hasUpdate = { hasUpdate },
+                    updateApp = viewmodel::updateApp
+                )
                 LicenseLayout(onNavigateToLicense = onNavigateToLicense)
-                OthterLayout(onNavigateToDeveloper = onNavigateToDeveloper)
+                OthterLayout(
+                    onNavigateToDeveloper = onNavigateToDeveloper,
+                    openGithub = { viewmodel.openGithub(context) },
+                    openTelegram = { viewmodel.openTelegram(context) },
+                    openAliPay = { viewmodel.openAliPay(context) })
             }
         }
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-        LaunchedEffect(viewmodel.showUpdateDialog) {
-            if (viewmodel.showUpdateDialog) {
-                sheetState.expand()
-            } else {
-                sheetState.hide()
-            }
-        }
-        val context = LocalContext.current
+        LaunchedEffect(showUpdateDialog) {
+            if (showUpdateDialog) sheetState.expand()
+            else sheetState.hide()
 
-        if (sheetState.isVisible || viewmodel.hasUpdate) {
-            UpdateDialog(
-                sheetState,
-                text = "新版本",
-                info = viewmodel.updateDialogText,
-                onDismiss = {
-                    viewmodel.dismissUpdateDialog()
-                },
-                onConfirm = {
-                    viewmodel.updateConfirm(context, it)
-                }
-            )
         }
+        UpdateDialog(
+            state = sheetState,
+            enable = { showUpdateDialog },
+            text = "新版本",
+            info = { updateDialogText },
+            onDismiss = viewmodel::dismissUpdateDialog,
+            onConfirm = {
+                viewmodel.updateConfirm(context, it)
+            }
+        )
     }
 }
 
 @Composable
-private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
-
-    val moduleVersionName = viewmodel.moduleVersionName
-    val moduleVersionCode = viewmodel.moduleVersionCode
+private fun BuildConfigLayout(
+    moduleVersionName: () -> String,
+    moduleVersionCode: () -> Int,
+) {
 
     val colors = colors
     Image(
@@ -145,7 +168,7 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
     )
 
     Text(
-        text = "v${moduleVersionName} (${moduleVersionCode}) ",
+        text = { "v${moduleVersionName} (${moduleVersionCode}) " },
         modifier = Modifier.padding(top = 8.dp),
         style = TextStyle(
             fontSize = 12.sp,
@@ -157,12 +180,15 @@ private fun BuildConfigLayout(viewmodel: AboutViewModel = viewModel()) {
 }
 
 @Composable
-private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
+private fun UpdateLayout(
+    qqVersionName: () -> String,
+    qqVersionCode: () -> Long,
+    configVersion: () -> Int,
+    hasUpdate: () -> Boolean,
+    updateApp: () -> Unit
 
-    val qqVersionName = viewmodel.qqVersionName
-    val qqVersionCode = viewmodel.qqVersionCode
-    val configVersion = viewmodel.configVersion
-    val hasUpdate = viewmodel.hasUpdate
+) {
+
 
     val colors = colors
     Row(
@@ -173,9 +199,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
             .drawBehind {
                 drawRect(colors.colorBgContainer)
             }
-            .clickable(role = Role.Button, onClick = {
-                viewmodel.updateApp()
-            })
+            .clickable(role = Role.Button, onClick = updateApp)
             .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -204,7 +228,7 @@ private fun UpdateLayout(viewmodel: AboutViewModel = viewModel()) {
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
-        if (hasUpdate) {
+        if (hasUpdate()) {
             Text(
                 text = "有新版本",
                 style = TextStyle(
@@ -243,7 +267,9 @@ private fun LicenseLayout(onNavigateToLicense: () -> Unit) {
 @Composable
 private fun OthterLayout(
     onNavigateToDeveloper: () -> Unit,
-    viewmodel: AboutViewModel = viewModel()
+    openGithub: () -> Unit,
+    openTelegram: () -> Unit,
+    openAliPay: () -> Unit,
 ) {
     val colors = colors
     val context = LocalContext.current
@@ -269,18 +295,16 @@ private fun OthterLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-        ) {
-            viewmodel.openGithub(context)
-        }
+            onClick = openGithub
+        )
 
         TextItem(
             text = "Telegram 频道",
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-        ) {
-            viewmodel.openTelegram(context)
-        }
+            onClick = openTelegram
+        )
 
         TextInfoItem(
             text = "请作者吃辣条",
@@ -288,10 +312,9 @@ private fun OthterLayout(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            clickEnabled = { true }
-        ) {
-            viewmodel.openAliPay(context)
-        }
+            clickEnabled = { true },
+            onClick = openAliPay
+        )
     }
 
 }

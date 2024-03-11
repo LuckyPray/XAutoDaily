@@ -20,7 +20,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ModuleApp() {
+fun ModuleApp(viewModel: ModuleThemeViewModel) {
 
 // Create the ListDetailPaneScaffoldState
 
@@ -37,9 +37,7 @@ fun ModuleApp() {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<Nothing>(scaffoldDirective = customDirective)
 
-    BackHandler(scaffoldNavigator.canNavigateBack()) {
-        scaffoldNavigator.navigateBack()
-    }
+    BackHandler(scaffoldNavigator.canNavigateBack(), scaffoldNavigator::navigateBack)
 
     ListDetailPaneScaffold(
         scaffoldState = scaffoldNavigator.scaffoldState,
@@ -57,9 +55,8 @@ fun ModuleApp() {
         detailPane = {
             AnimatedPane(Modifier) {
                 SettingScene(
-                    onBackClick = {
-                        scaffoldNavigator.navigateBack()
-                    }
+                    themeViewModel = viewModel,
+                    onBackClick = scaffoldNavigator::navigateBack
                 )
 
             }

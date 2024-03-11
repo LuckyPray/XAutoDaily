@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -31,6 +32,9 @@ fun LicenseScene(backClick: () -> Unit, viewmodel: LicenseViewModel = viewModel(
         },
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) { contentPadding ->
+        val dependencies = remember {
+            viewmodel.dependencies
+        }
         Column(
             modifier = Modifier
                 .padding(contentPadding)
@@ -41,7 +45,7 @@ fun LicenseScene(backClick: () -> Unit, viewmodel: LicenseViewModel = viewModel(
                 .defaultNavigationBarPadding(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            viewmodel.dependencies.forEach { dependency ->
+            dependencies.forEach { dependency ->
                 DependencyItem(dependency)
             }
         }

@@ -1,8 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -12,23 +10,23 @@ import me.teble.xposed.autodaily.ui.ConfUnit
 
 class SettingViewModel : ViewModel() {
 
-    var showTaskToast by mutableStateOf(ConfUnit.showTaskToast)
+    val showTaskToast = mutableStateOf(ConfUnit.showTaskToast)
 
-    var usedThreadPool by mutableStateOf(ConfUnit.usedThreadPool)
+    val usedThreadPool = mutableStateOf(ConfUnit.usedThreadPool)
 
-    var taskNotification by mutableStateOf(ConfUnit.enableTaskNotification)
+    val taskNotification = mutableStateOf(ConfUnit.enableTaskNotification)
 
-    var taskExceptionNotification by mutableStateOf(ConfUnit.enableTaskExceptionNotification)
+    val taskExceptionNotification = mutableStateOf(ConfUnit.enableTaskExceptionNotification)
 
-    var logToXposed by mutableStateOf(ConfUnit.logToXposed)
+    val logToXposed = mutableStateOf(ConfUnit.logToXposed)
 
-    var debugLog by mutableStateOf(ConfUnit.enableDebugLog)
+    val debugLog = mutableStateOf(ConfUnit.enableDebugLog)
 
 
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
-    var themeDialog by mutableStateOf(false)
+    val themeDialog = mutableStateOf(false)
 
     fun showThemeDialog() {
         updateThemeDialogState(true)
@@ -39,8 +37,8 @@ class SettingViewModel : ViewModel() {
     }
 
     fun updateThemeDialogState(boolean: Boolean) {
-        if (themeDialog != boolean) {
-            themeDialog = boolean
+        if (themeDialog.value != boolean) {
+            themeDialog.value = boolean
         }
     }
 
@@ -52,32 +50,32 @@ class SettingViewModel : ViewModel() {
 
     fun updateShowTaskToast(boolean: Boolean) {
         ConfUnit.showTaskToast = boolean
-        showTaskToast = ConfUnit.showTaskToast
+        showTaskToast.value = ConfUnit.showTaskToast
     }
 
     fun updateUsedThreadPool(boolean: Boolean) {
         ConfUnit.usedThreadPool = boolean
-        usedThreadPool = ConfUnit.usedThreadPool
+        usedThreadPool.value = ConfUnit.usedThreadPool
     }
 
     fun updateTaskExceptionNotification(boolean: Boolean) {
         ConfUnit.enableTaskExceptionNotification = boolean
-        taskExceptionNotification = ConfUnit.enableTaskExceptionNotification
+        taskExceptionNotification.value = ConfUnit.enableTaskExceptionNotification
     }
 
     fun updateLogToXposed(boolean: Boolean) {
         ConfUnit.logToXposed = boolean
-        logToXposed = ConfUnit.logToXposed
+        logToXposed.value = ConfUnit.logToXposed
     }
 
     fun updateTaskNotification(boolean: Boolean) {
         ConfUnit.enableTaskNotification = boolean
-        taskNotification = ConfUnit.enableTaskNotification
+        taskNotification.value = ConfUnit.enableTaskNotification
     }
 
     fun updateDebugLog(boolean: Boolean) {
         ConfUnit.enableDebugLog = boolean
-        debugLog = ConfUnit.enableDebugLog
+        debugLog.value = ConfUnit.enableDebugLog
     }
 
     fun saveLog() {

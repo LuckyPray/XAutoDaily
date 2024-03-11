@@ -14,6 +14,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +32,6 @@ import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,15 +52,22 @@ fun SettingScene(
     }
 
     Box {
-        val theme = themeViewModel.currentTheme
-        val isBlack = themeViewModel.blackTheme
+        val theme by remember { themeViewModel.currentTheme }
+        val isBlack by remember { themeViewModel.blackTheme }
+
+        val showTaskToast by remember { viewmodel.showTaskToast }
+        val usedThreadPool by remember { viewmodel.usedThreadPool }
+        val taskNotification by remember { viewmodel.taskNotification }
+        val taskExceptionNotification by remember { viewmodel.taskExceptionNotification }
+        val logToXposed by remember { viewmodel.logToXposed }
+        val debugLog by remember { viewmodel.debugLog }
 
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val themeDialog = viewmodel.themeDialog
+        val themeDialog by remember { viewmodel.themeDialog }
 
         LaunchedEffect(themeDialog) {
-            if (viewmodel.themeDialog) {
+            if (themeDialog) {
                 sheetState.expand()
             } else {
                 sheetState.hide()
@@ -74,7 +81,7 @@ fun SettingScene(
             topBar = {
                 TopBar(text = "设置", backClick = backClick)
             },
-            containerColor = XAutodailyTheme.colors.colorBgLayout
+            containerColor = colors.colorBgLayout
         ) { contentPadding ->
             // Screen content
             Column(
@@ -89,30 +96,37 @@ fun SettingScene(
             ) {
 
                 EntryLayout(onNavigateToSignState)
-                ConfigLayout()
-                CommonLayout()
-                BackupLayout()
+                ConfigLayout(
+                    showTaskToast = { showTaskToast },
+                    usedThreadPool = { usedThreadPool },
+                    taskNotification = { taskNotification },
+                    taskExceptionNotification = { taskExceptionNotification },
+                    logToXposed = { logToXposed },
+                    debugLog = { debugLog },
+
+                    updateShowTaskToast = viewmodel::updateShowTaskToast,
+                    updateUsedThreadPool = viewmodel::updateUsedThreadPool,
+                    updateTaskNotification = viewmodel::updateTaskNotification,
+                    updateTaskExceptionNotification = viewmodel::updateTaskExceptionNotification,
+                    updateLogToXposed = viewmodel::updateLogToXposed,
+                    updateDebugLog = viewmodel::updateDebugLog,
+
+                    showSnackbar = viewmodel::showSnackbar
+                )
+                CommonLayout(viewmodel::showThemeDialog)
+                BackupLayout(showSnackbar = viewmodel::showSnackbar)
             }
         }
 
 
-        if (sheetState.isVisible || themeDialog) {
-            ThemeModelDialog(
-                state = sheetState,
-                targetTheme = theme,
-                isBlack = isBlack,
-                onDismiss = {
-                    viewmodel.dismissThemeDialog()
-                },
-
-                onConfirm = { themeCode, black ->
-                    themeViewModel.updateBlack(black)
-                    themeViewModel.updateTheme(themeCode)
-                    viewmodel.dismissThemeDialog()
-                }
-            )
-        }
-
+        ThemeModelDialog(
+            enable = { themeDialog },
+            sheetState = sheetState,
+            targetTheme = { theme },
+            targetBlack = { isBlack },
+            onDismiss = viewmodel::dismissThemeDialog,
+            onConfirm = themeViewModel::confirmTheme
+        )
     }
 
 }
@@ -138,7 +152,23 @@ private fun EntryLayout(onNavigateToSignState: () -> Unit) {
 }
 
 @Composable
-private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
+private fun ConfigLayout(
+    showTaskToast: () -> Boolean,
+    usedThreadPool: () -> Boolean,
+    taskNotification: () -> Boolean,
+    taskExceptionNotification: () -> Boolean,
+    logToXposed: () -> Boolean,
+    debugLog: () -> Boolean,
+
+    updateShowTaskToast: (Boolean) -> Unit,
+    updateUsedThreadPool: (Boolean) -> Unit,
+    updateTaskNotification: (Boolean) -> Unit,
+    updateTaskExceptionNotification: (Boolean) -> Unit,
+    updateLogToXposed: (Boolean) -> Unit,
+    updateDebugLog: (Boolean) -> Unit,
+
+    showSnackbar: (String) -> Unit
+) {
     SmallTitle(
         title = "模块配置",
         modifier = Modifier
@@ -154,92 +184,74 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
                 drawRect(backgroundColor)
             },
     ) {
-        val showTaskToast = viewmodel.showTaskToast
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { showTaskToast },
+            enable = showTaskToast,
             clickEnabled = { true },
             text = "签到提示",
             infoText = "执行完签到任务后弹出 Toast 提示",
-            onClick = {
-                viewmodel.updateShowTaskToast(it)
-            }
+            onClick = updateShowTaskToast
         )
 
 
-        val usedThreadPool = viewmodel.usedThreadPool
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { usedThreadPool },
+            enable = usedThreadPool,
             clickEnabled = { true },
             text = "多线程执行",
             infoText = "启用线程池执行任务，加快任务执行速度",
-            onClick = {
-                viewmodel.updateUsedThreadPool(it)
-            }
+            onClick = updateUsedThreadPool
         )
 
-        val taskNotification = viewmodel.taskNotification
 
 
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { taskNotification },
+            enable = taskNotification,
             clickEnabled = { true },
             text = "启用签到通知",
             infoText = "任务执行时通知提醒，结束后自动销毁",
-            onClick = {
-                viewmodel.updateTaskNotification(it)
-            }
+            onClick = updateTaskNotification
         )
 
-        val taskExceptionNotification = viewmodel.taskExceptionNotification
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { taskExceptionNotification },
+            enable = taskExceptionNotification,
             clickEnabled = { true },
             text = "任务异常通知",
             infoText = "当任务执行异常时提示用户，一次性通知",
-            onClick = {
-                viewmodel.updateTaskExceptionNotification(it)
-            }
+            onClick = updateTaskExceptionNotification
         )
 
-        val logToXposed = viewmodel.logToXposed
 
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { logToXposed },
+            enable = logToXposed,
             clickEnabled = { true },
             text = "日志输出至 Xposed",
             infoText = "是否将日志信息输出至框架日志中（默认方式为输出至 logcat）",
-            onClick = {
-                viewmodel.updateLogToXposed(it)
-            }
+            onClick = updateLogToXposed
         )
-        val debugLog = viewmodel.debugLog
 
         SwitchInfoItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(SmootherShape(12.dp)),
-            enable = { debugLog },
+            enable = debugLog,
             clickEnabled = { true },
             text = "输出调试日志",
             infoText = "仅供调试使用",
-            onClick = {
-                viewmodel.updateDebugLog(it)
-            }
+            onClick = updateDebugLog
         )
 
         TextInfoItem(
@@ -250,7 +262,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
             text = "日志导出",
             infoText = "保存日志文件打包导出至内部存储",
             onClick = {
-                viewmodel.showSnackbar("请选择保存位置")
+                showSnackbar("请选择保存位置")
 //                MainScope().launch(IO) {
 //                            ToastUtil.send("请选择保存位置")
 //
@@ -261,7 +273,7 @@ private fun ConfigLayout(viewmodel: SettingViewModel = viewModel()) {
 }
 
 @Composable
-private fun CommonLayout(viewmodel: SettingViewModel = viewModel()) {
+private fun CommonLayout(showThemeDialog: () -> Unit) {
     val backgroundColor = colors.colorBgContainer
     SmallTitle(
         title = "模块配置",
@@ -277,13 +289,12 @@ private fun CommonLayout(viewmodel: SettingViewModel = viewModel()) {
                 drawRect(backgroundColor)
             },
         text = "主题风格", clickEnabled = { true },
-        onClick = {
-            viewmodel.showThemeDialog()
-        })
+        onClick = showThemeDialog
+    )
 }
 
 @Composable
-private fun BackupLayout(viewmodel: SettingViewModel = viewModel()) {
+private fun BackupLayout(showSnackbar: (String) -> Unit) {
     SmallTitle(
         title = "模块配置",
         modifier = Modifier
@@ -307,7 +318,7 @@ private fun BackupLayout(viewmodel: SettingViewModel = viewModel()) {
             text = "配置备份",
             infoText = "将配置文件打包导出至内部存储",
             onClick = {
-                viewmodel.showSnackbar("请选择保存位置")
+                showSnackbar("请选择保存位置")
 //                            ToastUtil.send("请选择保存位置")
 //                            configBackupLauncher.launch("XAutoDaily_config_${LocalDateTime.now()}.zip")
             }

@@ -1,11 +1,9 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import android.content.Context
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -29,47 +27,47 @@ import kotlin.concurrent.thread
 
 class AboutViewModel : ViewModel() {
 
-    var moduleVersionName by mutableStateOf("")
+    val moduleVersionName = mutableStateOf("")
 
-    var moduleVersionCode by mutableIntStateOf(0)
-
-
-    var qqVersionName by mutableStateOf("")
-
-    var qqVersionCode by mutableLongStateOf(0L)
+    val moduleVersionCode = mutableIntStateOf(0)
 
 
-    var configVersion by mutableIntStateOf(0)
+    val qqVersionName = mutableStateOf("")
+
+    val qqVersionCode = mutableLongStateOf(0L)
+
+
+    val configVersion = mutableIntStateOf(0)
 
     private val _snackbarText = MutableSharedFlow<String>()
     val snackbarText = _snackbarText.asSharedFlow()
 
-    var showUpdateDialog by mutableStateOf(false)
+    val showUpdateDialog = mutableStateOf(false)
 
 
-    var updateDialogText by mutableStateOf("")
+    val updateDialogText = mutableStateOf("")
 
 
-    var hasUpdate by mutableStateOf(false)
+    val hasUpdate = mutableStateOf(false)
 
-    private var lastClickTime by mutableLongStateOf(0L)
+    private val lastClickTime = mutableLongStateOf(0L)
 
     init {
-        moduleVersionName = BuildConfig.VERSION_NAME
-        moduleVersionCode = BuildConfig.VERSION_CODE
-        qqVersionName = hostVersionName
-        qqVersionCode = hostVersionCode
-        configVersion = ConfigUtil.loadSaveConf().version
+        moduleVersionName.value = BuildConfig.VERSION_NAME
+        moduleVersionCode.intValue = BuildConfig.VERSION_CODE
+        qqVersionName.value = hostVersionName
+        qqVersionCode.longValue = hostVersionCode
+        configVersion.intValue = ConfigUtil.loadSaveConf().version
 
         ConfigUtil.fetchMeta()?.let {
             // 检查新版本
             if (BuildConfig.VERSION_CODE < it.app.versionCode) {
-                hasUpdate = true
+                hasUpdate.value = true
             }
         }
     }
 
-    fun showUpdateDialog() {
+    private fun showUpdateDialog() {
         updateUpdateDialogState(true)
     }
 
@@ -78,18 +76,18 @@ class AboutViewModel : ViewModel() {
     }
 
     fun updateUpdateDialogState(boolean: Boolean) {
-        if (showUpdateDialog != boolean) {
-            showUpdateDialog = boolean
+        if (showUpdateDialog.value != boolean) {
+            showUpdateDialog.value = boolean
         }
     }
 
     fun updateApp() {
         val time = TimeUtil.cnTimeMillis()
-        if (time - lastClickTime < 15_000) {
+        if (time - lastClickTime.longValue < 15_000) {
             showSnackbar("不要频繁点击哦~")
             return
         }
-        lastClickTime = time
+        lastClickTime.longValue = time
         thread {
             showSnackbar("正在检测更新")
 
@@ -107,8 +105,8 @@ class AboutViewModel : ViewModel() {
                         }
                     }
                     if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-                        hasUpdate = true
-                        updateDialogText =
+                        hasUpdate.value = true
+                        updateDialogText.value =
                             ConfUnit.metaInfoCache?.app?.updateLog ?: ""
                         showUpdateDialog()
 
@@ -120,7 +118,7 @@ class AboutViewModel : ViewModel() {
 
             }
 
-            configVersion = ConfigUtil.loadSaveConf().version
+            configVersion.intValue = ConfigUtil.loadSaveConf().version
         }
     }
 

@@ -55,7 +55,8 @@ fun SignScene(
         Column(
             Modifier.padding(contentPadding)
         ) {
-            val globalEnable = { signViewModel.globalEnable }
+            val globalEnable by remember { signViewModel.globalEnable }
+            val taskGroupsState = remember { signViewModel.taskGroupsState }
             SwitchTextItem(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
@@ -67,12 +68,12 @@ fun SignScene(
                 text = "总开关",
                 onClick = signViewModel::updateGlobalEnable,
                 clickEnabled = { true },
-                enable = globalEnable
+                enable = { globalEnable }
             )
             GroupColumn(
                 onNavigateToEditEnvs = onNavigateToEditEnvs,
-                signViewModel = signViewModel,
-                enable = globalEnable
+                taskGroupList = { taskGroupsState },
+                enable = { globalEnable }
             )
         }
     }
@@ -81,7 +82,7 @@ fun SignScene(
 @Composable
 private fun ColumnScope.GroupColumn(
     onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
-    signViewModel: SignViewModel,
+    taskGroupList: () -> List<TaskGroup>,
     enable: () -> Boolean
 ) {
     Column(
@@ -93,7 +94,7 @@ private fun ColumnScope.GroupColumn(
             .defaultNavigationBarPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        signViewModel.taskGroupsState.forEach { taskGroup ->
+        taskGroupList().forEach { taskGroup ->
             SignItem(onNavigateToEditEnvs, taskGroup, enable)
         }
 

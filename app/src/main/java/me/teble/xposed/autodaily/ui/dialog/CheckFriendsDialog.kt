@@ -50,104 +50,108 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun CheckFriendsDialog(
     state: SheetState,
+    enable: () -> Boolean,
     uinListStr: MutableState<String>,
     viewmodel: FriendViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = state,
-        containerColor = colors.colorBgDialog,
-        windowInsets = contentWindowInsets,
-        dragHandle = {},
-        modifier = Modifier.statusBarsPadding(),
-        scrimColor = colors.colorBgMask,
-        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-    ) {
-        DialogTopBar(
-            text = "好友列表（${viewmodel.friendsState.size}）",
-            iconClick = onDismiss
-        )
-
-        HorizontalDivider(
-            color = colors.colorDialogDivider,
-            thickness = 1.dp,
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .padding(bottom = 16.dp)
-        )
-
-        Column(
-            Modifier.padding(horizontal = 32.dp)
+    val friendsState = remember { viewmodel.friendsState }
+    if (state.isVisible || enable()) {
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = state,
+            containerColor = colors.colorBgDialog,
+            windowInsets = contentWindowInsets,
+            dragHandle = {},
+            modifier = Modifier.statusBarsPadding(),
+            scrimColor = colors.colorBgMask,
+            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         ) {
-
-            SearchBar(
-                text = { searchText },
-            ) {
-                searchText = it
-            }
-
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-
-                TextButton(
-                    text = "反选"
-                ) {
-
-                }
-
-                TextButton(
-                    text = "全选"
-                ) {
-
-                }
-
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .weight(1f, false)
-                    .fillMaxWidth()
-            ) {
-                items(
-                    items = viewmodel.friendsState,
-                    key = { it.uin },
-                    contentType = { it.remark == null }) { friend ->
-                    var enable by remember {
-                        mutableStateOf(false)
-                    }
-                    SelectInfoItem(
-                        text = friend.remark ?: friend.nike,
-                        infoText = friend.uin,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(SmootherShape(12.dp)),
-                        clickEnabled = { true },
-                        enable = { enable },
-                        onClick = {
-                            enable = !enable
-                        })
-                }
-
-
-            }
-
-            DialogButton(
-                text = "保存",
-                Modifier
-                    .defaultNavigationBarPadding()
-                    .padding(top = 24.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(),
-                onClick = onConfirm
+            DialogTopBar(
+                text = "好友列表（${viewmodel.friendsState.size}）",
+                iconClick = onDismiss
             )
 
+            HorizontalDivider(
+                color = colors.colorDialogDivider,
+                thickness = 1.dp,
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 16.dp)
+            )
+
+            Column(
+                Modifier.padding(horizontal = 32.dp)
+            ) {
+
+                SearchBar(
+                    text = { searchText },
+                ) {
+                    searchText = it
+                }
+
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+
+                    TextButton(
+                        text = "反选"
+                    ) {
+
+                    }
+
+                    TextButton(
+                        text = "全选"
+                    ) {
+
+                    }
+
+                }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f, false)
+                        .fillMaxWidth()
+                ) {
+                    items(
+                        items = friendsState,
+                        key = { it.uin },
+                        contentType = { it.remark == null }) { friend ->
+                        var itemEnable by remember {
+                            mutableStateOf(false)
+                        }
+                        SelectInfoItem(
+                            text = friend.remark ?: friend.nike,
+                            infoText = friend.uin,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(SmootherShape(12.dp)),
+                            clickEnabled = { true },
+                            enable = { itemEnable },
+                            onClick = {
+                                itemEnable = !itemEnable
+                            })
+                    }
+
+
+                }
+
+                DialogButton(
+                    text = "保存",
+                    Modifier
+                        .defaultNavigationBarPadding()
+                        .padding(top = 24.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth(),
+                    onClick = onConfirm
+                )
+
+            }
         }
     }
 }

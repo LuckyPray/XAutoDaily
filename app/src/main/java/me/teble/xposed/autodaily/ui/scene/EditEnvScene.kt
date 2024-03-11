@@ -175,19 +175,18 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
 
 
 
-        if (state.isVisible || dialogState) {
-            CheckFriendsDialog(
-                state = state,
-                uinListStr = envMap,
-                onConfirm = {
+        CheckFriendsDialog(
+            state = state,
+            enable = { dialogState },
+            uinListStr = envMap,
+            onConfirm = {
 
-                },
-                onDismiss = {
-                    dialogState = false
+            },
+            onDismiss = {
+                dialogState = false
 
-                }
-            )
-        }
+            }
+        )
 
 
     }

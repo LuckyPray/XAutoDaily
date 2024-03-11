@@ -1,9 +1,7 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -21,11 +19,11 @@ class HomeViewModel : ViewModel() {
 
     private var lastClickTime = 0L
 
-    var execTaskNum by mutableIntStateOf(0)
+    val execTaskNum = mutableIntStateOf(0)
 
-    var noticeDialog by mutableStateOf(false)
+    val noticeDialog = mutableStateOf(false)
 
-    var noticeText by mutableStateOf("")
+    val noticeText = mutableStateOf("")
 
 
     private val _snackbarText = MutableSharedFlow<String>()
@@ -45,8 +43,8 @@ class HomeViewModel : ViewModel() {
     }
 
     fun updateNoticeDialogState(boolean: Boolean) {
-        if (noticeDialog != boolean) {
-            noticeDialog = boolean
+        if (noticeDialog.value != boolean) {
+            noticeDialog.value = boolean
         }
     }
 
@@ -58,7 +56,7 @@ class HomeViewModel : ViewModel() {
             }
             meta?.let {
                 withContext(Main) {
-                    noticeText = it.notice?.trimEnd() ?: "暂无公告"
+                    noticeText.value = it.notice?.trimEnd() ?: "暂无公告"
                 }
             } ?: run {
                 showSnackbar("拉取公告失败")
@@ -74,7 +72,7 @@ class HomeViewModel : ViewModel() {
                 for (i in 1..num) {
                     delay(15)
                     withContext(Main) {
-                        execTaskNum += 1
+                        execTaskNum.value += 1
                     }
 
                 }

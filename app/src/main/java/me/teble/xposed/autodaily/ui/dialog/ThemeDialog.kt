@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.Icon
+import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Android
@@ -45,7 +45,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Sun
 import me.teble.xposed.autodaily.ui.icon.icons.Text
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme.Dark
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme.Light
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme.System
@@ -55,102 +55,102 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThemeModelDialog(
-    state: SheetState,
-    targetTheme: XAutodailyTheme.Theme,
-    isBlack: Boolean,
-    onConfirm: (XAutodailyTheme.Theme, Boolean) -> Unit,
+    sheetState: SheetState,
+    enable: () -> Boolean,
+    targetTheme: () -> Theme,
+    targetBlack: () -> Boolean,
+    onConfirm: (Theme, Boolean) -> Unit,
     onDismiss: () -> Unit
 ) {
 
-    var theme by remember {
-        mutableStateOf(targetTheme)
-    }
-    var black by remember {
-        mutableStateOf(isBlack)
-    }
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = state,
-        containerColor = colors.colorBgDialog,
-        windowInsets = contentWindowInsets,
-        dragHandle = {},
-        scrimColor = colors.colorBgMask,
-        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-    ) {
-
-        DialogTopBar(
-            text = "主题风格",
-            iconClick = onDismiss
-        )
-
-        HorizontalDivider(
-            color = colors.colorDialogDivider,
-            thickness = 1.dp,
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .padding(bottom = 18.dp)
-        )
-        Column(
-            Modifier
-                .padding(horizontal = 32.dp)
-                .weight(weight = 1f, fill = false)
-                .verticalScroll(rememberScrollState())
+    var theme by remember { mutableStateOf(targetTheme()) }
+    var black by remember { mutableStateOf(targetBlack()) }
+    if (sheetState.isVisible || enable()) {
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = sheetState,
+            containerColor = colors.colorBgDialog,
+            windowInsets = contentWindowInsets,
+            dragHandle = {},
+            scrimColor = colors.colorBgMask,
+            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         ) {
-            ThemeItem(
-                text = "亮色模式",
-                imageVector = Icons.Sun,
-                checked = { theme == Light },
-                onClick = {
-                    theme = Light
-                }
-            )
-            ThemeItem(
-                text = "暗色模式",
-                imageVector = Icons.Moon,
-                checked = { theme == Dark },
-                onClick = {
-                    theme = Dark
-                }
-            )
-            ThemeItem(
-                text = "跟随系统",
-                imageVector = Icons.Android,
-                checked = { theme == System },
-                onClick = {
-                    theme = System
-                }
+
+            DialogTopBar(
+                text = "主题风格",
+                iconClick = onDismiss
             )
 
             HorizontalDivider(
                 color = colors.colorDialogDivider,
+                thickness = 1.dp,
                 modifier = Modifier
-                    .padding(vertical = 12.dp)
-                    .height(1.dp)
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 18.dp)
             )
-            ThemeItem(
-                text = "使用纯黑色深色主题",
-                imageVector = Icons.Text,
-                checked = { black },
+            Column(
+                Modifier
+                    .padding(horizontal = 32.dp)
+                    .weight(weight = 1f, fill = false)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                ThemeItem(
+                    text = "亮色模式",
+                    imageVector = Icons.Sun,
+                    checked = { theme == Light },
+                    onClick = {
+                        theme = Light
+                    }
+                )
+                ThemeItem(
+                    text = "暗色模式",
+                    imageVector = Icons.Moon,
+                    checked = { theme == Dark },
+                    onClick = {
+                        theme = Dark
+                    }
+                )
+                ThemeItem(
+                    text = "跟随系统",
+                    imageVector = Icons.Android,
+                    checked = { theme == System },
+                    onClick = {
+                        theme = System
+                    }
+                )
+
+                HorizontalDivider(
+                    color = colors.colorDialogDivider,
+                    modifier = Modifier
+                        .padding(vertical = 12.dp)
+                        .height(1.dp)
+                )
+                ThemeItem(
+                    text = "使用纯黑色深色主题",
+                    imageVector = Icons.Text,
+                    checked = { black },
+                    onClick = {
+                        black = !black
+                    }
+                )
+            }
+            DialogButton(
+                text = "确认",
+                modifier = Modifier
+                    .padding(horizontal = 32.dp)
+                    .padding(top = 24.dp)
+                    .defaultNavigationBarPadding()
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth(),
+                clickEnabled = {
+                    theme != targetTheme() || black != targetBlack()
+                },
                 onClick = {
-                    black = !black
+                    onConfirm(theme, black)
+                    onDismiss()
                 }
             )
         }
-        DialogButton(
-            text = "确认",
-            modifier = Modifier
-                .padding(horizontal = 32.dp)
-                .padding(top = 24.dp)
-                .defaultNavigationBarPadding()
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth(),
-            clickEnabled = {
-                theme != targetTheme || isBlack != black
-            },
-            onClick = {
-                onConfirm(theme, black)
-            }
-        )
     }
 }
 
@@ -196,7 +196,7 @@ private fun ThemeItem(
                 tint = { textColor }
             )
 
-            BasicText(
+            Text(
                 text = text,
                 color = {
                     textColor

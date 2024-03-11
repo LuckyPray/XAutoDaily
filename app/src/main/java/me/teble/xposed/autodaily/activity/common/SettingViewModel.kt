@@ -3,63 +3,59 @@ package me.teble.xposed.autodaily.activity.common
 import android.content.ComponentName
 import android.content.pm.PackageManager
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 
-class SettingViewModel() : ViewModel() {
+class SettingViewModel : ViewModel() {
 
-    val shizukuState by derivedStateOf {
-        ShizukuApi.isPermissionGranted && ShizukuApi.binderAvailable
+    val shizukuState = derivedStateOf {
+        ShizukuApi.isPermissionGranted.value && ShizukuApi.binderAvailable.value
     }
 
 
-    var keepAlive by mutableStateOf(AppConfUnit.keepAlive)
+    val keepAlive = mutableStateOf(AppConfUnit.keepAlive)
 
 
-    var qqKeepAlive by mutableStateOf(AppConfUnit.qKeepAlive)
+    val qqKeepAlive = mutableStateOf(AppConfUnit.qKeepAlive)
 
-    var timKeepAlive by mutableStateOf(AppConfUnit.timKeepAlive)
+    val timKeepAlive = mutableStateOf(AppConfUnit.timKeepAlive)
 
+    val showThemeDialog = mutableStateOf(false)
 
-    var showThemeDialog by mutableStateOf(false)
+    val untrustedTouchEvents = mutableStateOf(AppConfUnit.untrustedTouchEvents)
 
-    var untrustedTouchEvents by mutableStateOf(AppConfUnit.untrustedTouchEvents)
-
-    var hiddenAppIcon by mutableStateOf(AppConfUnit.hiddenAppIcon)
+    val hiddenAppIcon = mutableStateOf(AppConfUnit.hiddenAppIcon)
 
     fun updateKeepAliveChecked(bool: Boolean) {
-
         AppConfUnit.keepAlive = bool
-        keepAlive = bool
+        keepAlive.value = bool
 
     }
 
     fun updateQQKeepAlive(bool: Boolean) {
         AppConfUnit.qKeepAlive = bool
-        qqKeepAlive = bool
+        qqKeepAlive.value = bool
     }
 
 
     fun updateTimKeepAlive(bool: Boolean) {
         AppConfUnit.timKeepAlive = bool
-        timKeepAlive = bool
+        timKeepAlive.value = bool
     }
 
 
     fun updateUntrustedTouchEvents(bool: Boolean) {
         AppConfUnit.untrustedTouchEvents = bool
-        untrustedTouchEvents = bool
+        untrustedTouchEvents.value = bool
         ShizukuApi.setUntrustedTouchEvents(bool)
     }
 
 
     fun updateHiddenAppIcon(bool: Boolean) {
         AppConfUnit.hiddenAppIcon = bool
-        hiddenAppIcon = bool
+        hiddenAppIcon.value = bool
         xaApp.packageManager.setComponentEnabledSetting(
             ComponentName(xaApp, MainActivity::class.java.name + "Alias"),
             if (bool) PackageManager.COMPONENT_ENABLED_STATE_DISABLED else PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
@@ -76,8 +72,7 @@ class SettingViewModel() : ViewModel() {
     }
 
     fun updateThemeDialogState(boolean: Boolean) {
-        if (showThemeDialog != boolean) {
-            showThemeDialog = boolean
-        }
+        if (showThemeDialog.value != boolean)
+            showThemeDialog.value = boolean
     }
 }

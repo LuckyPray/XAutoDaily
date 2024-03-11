@@ -76,7 +76,7 @@ fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
 
         composable(route = NavigationItem.Sign.route) {
             SignScene(
-                backClick = { navController.popBackStack() },
+                backClick = navController::popBackStack,
                 onNavigateToEditEnvs = { groupId, taskId ->
                     navController.navigate(
                         NavigationItem.EditEnv(
@@ -88,7 +88,7 @@ fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
         }
         composable(route = NavigationItem.About.route) {
             AboutScene(
-                backClick = { navController.popBackStack() },
+                backClick = navController::popBackStack,
                 onNavigateToLicense = {
                     navController.navigate(NavigationItem.License)
                 },
@@ -100,7 +100,7 @@ fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
 
         composable(route = NavigationItem.Setting.route) {
             SettingScene(
-                backClick = { navController.popBackStack() },
+                backClick = navController::popBackStack,
                 onNavigateToSignState = {
                     navController.navigate(NavigationItem.SignState)
                 }, themeViewModel
@@ -108,15 +108,15 @@ fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
         }
 
         composable(route = NavigationItem.Developer.route) {
-            DeveloperScene(backClick = { navController.popBackStack() })
+            DeveloperScene(backClick = navController::popBackStack)
         }
 
         composable(route = NavigationItem.License.route) {
-            LicenseScene(backClick = { navController.popBackStack() })
+            LicenseScene(backClick = navController::popBackStack)
         }
 
         composable(route = NavigationItem.SignState.route) {
-            SignStateScene(backClick = { navController.popBackStack() })
+            SignStateScene(backClick = navController::popBackStack)
         }
 
         composable(route = "${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->

@@ -16,7 +16,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -25,7 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.Role
@@ -41,6 +42,7 @@ import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
+import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -88,10 +90,77 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding()
         ) {
+            val shizukuState by remember { viewmodel.shizukuState }
+            val context = LocalContext.current
 
-            ShizukuCard()
 
-            EntryLayout()
+            val backgroundColor by animateColorAsState(
+
+                targetValue = when (shizukuState) {
+                    is ShisukuState.Activated -> Color(0xFF25CD8E)
+                    is ShisukuState.Warn -> Color(0xFFFFBC04)
+                    ShisukuState.Error -> Color(0xFFFA5F5C)
+                }, label = "shizuku background"
+            )
+
+            val titleText by remember {
+                derivedStateOf {
+                    when (shizukuState) {
+                        is ShisukuState.Warn,
+                        is ShisukuState.Activated -> "Shizuku 服务正在运行"
+
+                        ShisukuState.Error -> "Shizuku 服务未在运行"
+                    }
+                }
+            }
+
+            val icon by remember {
+                derivedStateOf {
+                    when (shizukuState) {
+                        is ShisukuState.Activated -> Icons.Activated
+                        is ShisukuState.Warn -> Icons.Warn
+                        ShisukuState.Error -> Icons.Error
+                    }
+                }
+            }
+
+            val versionText by remember {
+                derivedStateOf {
+                    when (shizukuState) {
+                        is ShisukuState.Activated -> "${(shizukuState as ShisukuState.Activated).version}"
+                        is ShisukuState.Warn -> "${(shizukuState as ShisukuState.Warn).version}"
+                        ShisukuState.Error -> "Unknown"
+                    }
+                }
+            }
+
+            val infoText by remember {
+                derivedStateOf {
+                    when (val state = shizukuState) {
+                        is ShisukuState.Activated -> "守护进程正在运行，点击停止运行"
+                        is ShisukuState.Warn -> state.info
+                        ShisukuState.Error -> "部分功能无法运行"
+                    }
+                }
+            }
+            ShizukuCard(
+                backgroundColor = { backgroundColor },
+                titleText = { titleText },
+                icon = { icon },
+                versionText = { "Shizuku Api Version: $versionText" },
+                infoText = { infoText },
+                shizukuClickable = viewmodel::shizukuClickable
+            )
+
+
+            EntryLayout(
+                openTimSetting = {
+                    viewmodel.openHostSetting(context, QQTypeEnum.QQ)
+                },
+                openQQSetting = {
+                    viewmodel.openHostSetting(context, QQTypeEnum.QQ)
+                }
+            )
             TextItem(
                 text = "更多设置",
                 modifier = Modifier
@@ -120,74 +189,28 @@ private fun ModuleTopBar() {
 
 @Composable
 private fun ShizukuCard(
-    viewmodel: ModuleViewModel = viewModel()
+    backgroundColor: () -> Color,
+    titleText: () -> String,
+    icon: () -> ImageVector,
+    versionText: () -> String,
+    infoText: () -> String,
+    shizukuClickable: () -> Unit
 ) {
-    val shizukuState = viewmodel.shizukuState
 
-
-    val backgroundColor by animateColorAsState(
-
-        targetValue = when (shizukuState) {
-            is ShisukuState.Activated -> Color(0xFF25CD8E)
-            is ShisukuState.Warn -> Color(0xFFFFBC04)
-            ShisukuState.Error -> Color(0xFFFA5F5C)
-        }, label = "shizuku background"
-    )
-
-    val titleText by remember {
-        derivedStateOf {
-            when (shizukuState) {
-                is ShisukuState.Warn,
-                is ShisukuState.Activated -> "Shizuku 服务正在运行"
-
-                ShisukuState.Error -> "Shizuku 服务未在运行"
-            }
-        }
-    }
-
-    val icon by remember {
-        derivedStateOf {
-            when (shizukuState) {
-                is ShisukuState.Activated -> Icons.Activated
-                is ShisukuState.Warn -> Icons.Warn
-                ShisukuState.Error -> Icons.Error
-            }
-        }
-    }
-
-    val versionText by remember {
-        derivedStateOf {
-            when (shizukuState) {
-                is ShisukuState.Activated -> "${shizukuState.version}"
-                is ShisukuState.Warn -> "${shizukuState.version}"
-                ShisukuState.Error -> "Unknown"
-            }
-        }
-    }
-
-    val infoText by remember {
-        derivedStateOf {
-            when (shizukuState) {
-                is ShisukuState.Activated -> "守护进程正在运行，点击停止运行"
-                is ShisukuState.Warn -> shizukuState.info
-                ShisukuState.Error -> "部分功能无法运行"
-            }
-        }
-    }
 
     Row(
         Modifier
             .padding(top = 16.dp)
             .fillMaxWidth()
             .clip(SmootherShape(12.dp))
-            .background(backgroundColor)
-            .clickable(role = Role.Button) {
-                viewmodel.shizukuClickable()
+            .drawBehind {
+                drawRect(backgroundColor())
             }
+            .clickable(role = Role.Button, onClick = shizukuClickable)
             .padding(horizontal = 16.dp, vertical = 20.dp)
     ) {
         Image(
-            imageVector = icon,
+            imageVector = icon(),
             modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .size(40.dp),
@@ -203,7 +226,7 @@ private fun ShizukuCard(
                 )
             )
             Text(
-                text = "Shizuku Api Version: $versionText",
+                text = versionText,
                 Modifier.padding(top = 4.dp),
                 style = TextStyle(
                     fontSize = 12.sp,
@@ -212,7 +235,9 @@ private fun ShizukuCard(
                 )
             )
             Text(
-                text = infoText, Modifier.padding(top = 4.dp), style = TextStyle(
+                text = infoText,
+                Modifier.padding(top = 4.dp),
+                style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
                     color = Color(0xFFFFFFFF),
@@ -223,8 +248,12 @@ private fun ShizukuCard(
 }
 
 @Composable
-private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
-    if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)
+private fun EntryLayout(
+    openQQSetting: () -> Unit,
+    openTimSetting: () -> Unit,
+) {
+    if (
+        xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)
         || xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)
     ) {
         SmallTitle(
@@ -239,16 +268,15 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
                 .clip(SmootherShape(12.dp))
                 .background(colors.colorBgContainer)
         ) {
-            val context = LocalContext.current
+
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)) {
                 ImageItem(
                     icon = rememberVectorPainter(Icons.QQ),
                     contentDescription = "QQ Logo",
                     title = "QQ",
                     info = "QQ 侧滑 > 设置 > XAutoDaily",
-                    onClick = {
-                        viewmodel.openHostSetting(context, QQTypeEnum.QQ)
-                    })
+                    onClick = openQQSetting
+                )
             }
             if (xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)) {
                 ImageItem(
@@ -256,9 +284,7 @@ private fun EntryLayout(viewmodel: ModuleViewModel = viewModel()) {
                     contentDescription = "Tim Logo",
                     title = "Tim",
                     info = "TIM 侧滑 > 设置 > XAutoDaily",
-                    onClick = {
-                        viewmodel.openHostSetting(context, QQTypeEnum.TIM)
-                    }
+                    onClick = openTimSetting
                 )
             }
         }
