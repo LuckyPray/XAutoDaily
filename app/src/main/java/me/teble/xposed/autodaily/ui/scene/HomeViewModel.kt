@@ -72,7 +72,7 @@ class HomeViewModel : ViewModel() {
                 for (i in 1..num) {
                     delay(15)
                     withContext(Main) {
-                        execTaskNum.value += 1
+                        execTaskNum.intValue += 1
                     }
 
                 }

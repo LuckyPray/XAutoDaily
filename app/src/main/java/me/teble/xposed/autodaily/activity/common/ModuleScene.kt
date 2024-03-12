@@ -6,15 +6,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -40,11 +37,12 @@ import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.ui.composable.ImageItem
-import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
+import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Activated
@@ -52,10 +50,8 @@ import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
-import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
-
 
 @Composable
 fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewModel()) {
@@ -69,23 +65,14 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
         }
     }
 
-    Scaffold(
-        contentWindowInsets = contentWindowInsets,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) {
-                RoundedSnackbar(it)
-            }
-        },
-        topBar = {
-            ModuleTopBar()
-        },
+    XaScaffold(
+        snackbarHost = { RoundedSnackbarHost(hostState = snackbarHostState) },
+        topBar = { ModuleTopBar() },
+        modifier = Modifier,
         containerColor = colors.colorBgLayout
-    ) { contentPadding ->
+    ) {
         Column(
             Modifier
-                .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding()
@@ -97,19 +84,19 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
             val backgroundColor by animateColorAsState(
 
                 targetValue = when (shizukuState) {
-                    is ShisukuState.Activated -> Color(0xFF25CD8E)
-                    is ShisukuState.Warn -> Color(0xFFFFBC04)
-                    ShisukuState.Error -> Color(0xFFFA5F5C)
+                    is ShizukuState.Activated -> Color(0xFF25CD8E)
+                    is ShizukuState.Warn -> Color(0xFFFFBC04)
+                    ShizukuState.Error -> Color(0xFFFA5F5C)
                 }, label = "shizuku background"
             )
 
             val titleText by remember {
                 derivedStateOf {
                     when (shizukuState) {
-                        is ShisukuState.Warn,
-                        is ShisukuState.Activated -> "Shizuku 服务正在运行"
+                        is ShizukuState.Warn,
+                        is ShizukuState.Activated -> "Shizuku 服务正在运行"
 
-                        ShisukuState.Error -> "Shizuku 服务未在运行"
+                        ShizukuState.Error -> "Shizuku 服务未在运行"
                     }
                 }
             }
@@ -117,9 +104,9 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
             val icon by remember {
                 derivedStateOf {
                     when (shizukuState) {
-                        is ShisukuState.Activated -> Icons.Activated
-                        is ShisukuState.Warn -> Icons.Warn
-                        ShisukuState.Error -> Icons.Error
+                        is ShizukuState.Activated -> Icons.Activated
+                        is ShizukuState.Warn -> Icons.Warn
+                        ShizukuState.Error -> Icons.Error
                     }
                 }
             }
@@ -127,9 +114,9 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
             val versionText by remember {
                 derivedStateOf {
                     when (shizukuState) {
-                        is ShisukuState.Activated -> "${(shizukuState as ShisukuState.Activated).version}"
-                        is ShisukuState.Warn -> "${(shizukuState as ShisukuState.Warn).version}"
-                        ShisukuState.Error -> "Unknown"
+                        is ShizukuState.Activated -> "${(shizukuState as ShizukuState.Activated).version}"
+                        is ShizukuState.Warn -> "${(shizukuState as ShizukuState.Warn).version}"
+                        ShizukuState.Error -> "Unknown"
                     }
                 }
             }
@@ -137,9 +124,9 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
             val infoText by remember {
                 derivedStateOf {
                     when (val state = shizukuState) {
-                        is ShisukuState.Activated -> "守护进程正在运行，点击停止运行"
-                        is ShisukuState.Warn -> state.info
-                        ShisukuState.Error -> "部分功能无法运行"
+                        is ShizukuState.Activated -> "守护进程正在运行，点击停止运行"
+                        is ShizukuState.Warn -> state.info
+                        ShizukuState.Error -> "部分功能无法运行"
                     }
                 }
             }

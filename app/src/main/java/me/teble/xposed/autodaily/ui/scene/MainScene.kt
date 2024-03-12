@@ -23,13 +23,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,12 +47,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slack.circuit.overlay.OverlayEffect
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.internal.rememberStableCoroutineScope
+import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.Screen
+import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.composable.Icon
-import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
+import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
-import me.teble.xposed.autodaily.ui.dialog.NoticeDialog
+import me.teble.xposed.autodaily.ui.dialog.showNoticeOverlay
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.About
@@ -67,18 +76,69 @@ import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@Parcelize
+data object MainScreen : Screen {
+    data class State(
+        val eventSink: (Event) -> Unit,
+        val onNavigateToSign: () -> Unit = { eventSink(Event.Sign) },
+        val onNavigateToSetting: () -> Unit = { eventSink(Event.Setting) },
+        val onNavigateToAbout: () -> Unit = { eventSink(Event.About) },
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object Sign : Event()
+        data object Setting : Event()
+        data object About : Event()
+    }
+}
+
+
+class MainPresenter(private val navigator: Navigator) : Presenter<MainScreen.State> {
+    class Factory : Presenter.Factory {
+        override fun create(
+            screen: Screen,
+            navigator: Navigator,
+            context: CircuitContext
+        ): Presenter<*>? {
+            return when (screen) {
+                MainScreen -> return MainPresenter(navigator)
+                else -> null
+            }
+        }
+    }
+
+    @Composable
+    override fun present(): MainScreen.State {
+        return MainScreen.State(
+            eventSink = { event ->
+                when (event) {
+                    // Navigate to the detail screen when an email is clicked
+                    is MainScreen.Event.Sign -> navigator.goTo(SignScreen)
+                    MainScreen.Event.About -> navigator.goTo(AboutScreen)
+                    MainScreen.Event.Setting -> navigator.goTo(SettingScreen)
+                }
+            }
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(
+fun MainUI(
+    eventSink: (MainScreen.Event) -> Unit,
     onNavigateToSign: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
+    modifier: Modifier,
     viewmodel: HomeViewModel = viewModel()
 ) {
+
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val noticeDialog by remember { viewmodel.noticeDialog }
+
+    val (noticeDialog, updateNoticeDialog) = remember { mutableStateOf(false) }
+
+
     // 展示对应 snackbarText
     LaunchedEffect(Unit) {
         viewmodel.snackbarText.collect {
@@ -90,31 +150,29 @@ fun MainScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val execTaskNum by remember { viewmodel.execTaskNum }
-    LaunchedEffect(noticeDialog) {
-        if (noticeDialog) {
-            sheetState.expand()
-        } else {
-            sheetState.hide()
-        }
-    }
+
+    val colors = colors
 
     Box {
-        Scaffold(snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState) {
-                RoundedSnackbar(it)
-            }
-        }, topBar = {
-            XAutoDailyTopBar(modifier = Modifier
-                .statusBarsPadding()
-                .padding(horizontal = 16.dp)
-                .padding(vertical = 20.dp)
-                .padding(start = 16.dp),
-                icon = Icons.Notice,
-                contentDescription = "公告",
-                iconClick = {
-                    viewmodel.showNoticeDialog()
-                })
-        }, containerColor = colors.colorBgLayout
+
+
+        Scaffold(
+            modifier = modifier,
+            snackbarHost = {
+                RoundedSnackbarHost(hostState = snackbarHostState)
+            }, topBar = {
+                XAutoDailyTopBar(modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp)
+                    .padding(vertical = 20.dp)
+                    .padding(start = 16.dp),
+                    icon = Icons.Notice,
+                    contentDescription = "公告",
+                    iconClick = {
+                        updateNoticeDialog(true)
+                        //viewmodel.showNoticeDialog()
+                    })
+            }, containerColor = colors.colorBgLayout
         ) { contentPadding ->
             Column(
                 modifier = Modifier
@@ -136,15 +194,16 @@ fun MainScreen(
             }
 
         }
-        NoticeDialog(
-            enable = { noticeDialog },
-            sheetState = sheetState,
-            infoText = { noticeText },
-            onDismiss = viewmodel::dismissNoticeDialog
-        )
+        val scope = rememberStableCoroutineScope()
+
+        if (noticeDialog) {
+            OverlayEffect { host ->
+                host.showNoticeOverlay(colors = colors, noticeText)
+            }
+
+        }
+
     }
-
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -222,10 +281,12 @@ private fun GridLayout(
 ) {
     val colors = colors
     Column(
-        modifier = Modifier.padding(top = 32.dp), verticalArrangement = Arrangement.spacedBy(24.dp)
+        modifier = Modifier.padding(top = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CardItem(
                 iconColor = Color(0xFF47B6FF),

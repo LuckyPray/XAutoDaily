@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -21,17 +20,71 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.Screen
+import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@Parcelize
+data object DeveloperScreen : Screen {
+    data class State(
+        val eventSink: (Event) -> Unit,
+        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object BackClicked : Event()
+    }
+}
+
+class DeveloperPresenter(
+    private val screen: DeveloperScreen,
+    private val navigator: Navigator,
+) : Presenter<DeveloperScreen.State> {
+
+    class Factory() : Presenter.Factory {
+        override fun create(
+            screen: Screen,
+            navigator: Navigator,
+            context: CircuitContext
+        ): Presenter<*>? {
+            return when (screen) {
+                is DeveloperScreen -> return DeveloperPresenter(screen, navigator)
+                else -> null
+            }
+        }
+    }
+
+    @Composable
+    override fun present(): DeveloperScreen.State {
+        return DeveloperScreen.State(
+            eventSink = { event ->
+                when (event) {
+                    DeveloperScreen.Event.BackClicked -> navigator.pop()
+                }
+            }
+
+        )
+    }
+}
 
 @Composable
-fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewModel()) {
+fun DeveloperUI(
+    backClick: () -> Unit,
+    modifier: Modifier,
+    viewmodel: DeveloperViewModel = viewModel()
+) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
     // 展示对应 snackbarText
@@ -40,22 +93,21 @@ fun DeveloperScene(backClick: () -> Unit, viewmodel: DeveloperViewModel = viewMo
             snackbarHostState.showSnackbar(it)
         }
     }
-    Scaffold(
+    XaScaffold(
         topBar = {
             TopBar(text = "开发者", backClick = backClick)
         },
+        modifier = modifier,
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState) {
                 RoundedSnackbar(it)
             }
         },
         containerColor = colors.colorBgLayout
-    ) { contentPadding ->
+    ) {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding(),

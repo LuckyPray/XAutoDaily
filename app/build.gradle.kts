@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.serialization)
     alias(libs.plugins.licenses)
+    id("kotlin-parcelize")
 }
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
@@ -358,8 +359,9 @@ dependencies {
 
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.compose.shadows.plus)
-
-    implementation(libs.androidx.navigation.compose)
+    implementation("com.slack.circuit:circuit-foundation:0.19.1")
+    implementation("com.slack.circuit:circuitx-gesture-navigation:0.19.1")
+    implementation("com.slack.circuit:circuitx-overlays:0.19.1")
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose

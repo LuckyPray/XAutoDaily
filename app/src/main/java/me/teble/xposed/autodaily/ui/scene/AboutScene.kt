@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -34,28 +33,87 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.Screen
+import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.dialog.UpdateDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDailyRound
-import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@Parcelize
+data object AboutScreen : Screen {
+    data class State(
+        private val eventSink: (Event) -> Unit,
+        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
+        val onNavigateToLicense: () -> Unit = { eventSink(Event.License) },
+        val onNavigateToDeveloper: () -> Unit = { eventSink(Event.Developer) },
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object BackClicked : Event()
+
+        data object License : Event()
+
+        data object Developer : Event()
+    }
+}
+
+class AboutPresenter(
+    private val screen: AboutScreen,
+    private val navigator: Navigator,
+) : Presenter<AboutScreen.State> {
+
+    class Factory() : Presenter.Factory {
+        override fun create(
+            screen: Screen,
+            navigator: Navigator,
+            context: CircuitContext
+        ): Presenter<*>? {
+            return when (screen) {
+                is AboutScreen -> return AboutPresenter(screen, navigator)
+                else -> null
+            }
+        }
+    }
+
+    @Composable
+    override fun present(): AboutScreen.State {
+        return AboutScreen.State(
+            eventSink = { event ->
+                when (event) {
+                    AboutScreen.Event.BackClicked -> navigator.pop()
+                    AboutScreen.Event.Developer -> navigator.goTo(DeveloperScreen)
+                    AboutScreen.Event.License -> navigator.goTo(LicenseScreen)
+                }
+            }
+
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScene(
+fun AboutUI(
     backClick: () -> Unit,
     onNavigateToLicense: () -> Unit,
     onNavigateToDeveloper: () -> Unit,
+    modifier: Modifier,
     viewmodel: AboutViewModel = viewModel()
 ) {
     val showUpdateDialog by remember { viewmodel.showUpdateDialog }
@@ -84,7 +142,7 @@ fun AboutScene(
     }
 
     Box {
-        Scaffold(
+        XaScaffold(
             topBar = {
                 TopBar(text = "关于", backClick = backClick)
             },
@@ -93,14 +151,13 @@ fun AboutScene(
                     RoundedSnackbar(it)
                 }
             },
+            modifier = modifier,
             containerColor = colors.colorBgLayout,
-            contentWindowInsets = contentWindowInsets
-        ) { contentPadding ->
+
+            ) {
             Column(
                 Modifier
                     .fillMaxSize()
-                    .padding(contentPadding)
-                    .padding(horizontal = 16.dp)
                     .clip(SmootherShape(12.dp))
                     .verticalScroll(rememberScrollState())
                     .defaultNavigationBarPadding(),
@@ -168,7 +225,7 @@ private fun BuildConfigLayout(
     )
 
     Text(
-        text = { "v${moduleVersionName} (${moduleVersionCode}) " },
+        text = { "v${moduleVersionName()} (${moduleVersionCode()}) " },
         modifier = Modifier.padding(top = 8.dp),
         style = TextStyle(
             fontSize = 12.sp,
@@ -217,8 +274,8 @@ private fun UpdateLayout(
             )
 
             Text(
-                text = "当前宿主版本：${qqVersionName} (${qqVersionCode})\n"
-                        + "当前配置版本：${configVersion}",
+                text = "当前宿主版本：${qqVersionName()} (${qqVersionCode()})\n"
+                        + "当前配置版本：${configVersion()}",
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
@@ -272,7 +329,6 @@ private fun OthterLayout(
     openAliPay: () -> Unit,
 ) {
     val colors = colors
-    val context = LocalContext.current
     Column(
         modifier = Modifier
             .padding(top = 24.dp)

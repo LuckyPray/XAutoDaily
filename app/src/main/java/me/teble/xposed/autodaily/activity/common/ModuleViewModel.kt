@@ -25,6 +25,7 @@ import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
 
+
 class ModuleViewModel : ViewModel() {
     private val shizukuDaemonRunning = mutableStateOf(false)
     private val shizukuErrInfo = mutableStateOf("")
@@ -34,18 +35,18 @@ class ModuleViewModel : ViewModel() {
 
         if (ShizukuApi.binderAvailable.value) {
             if (!ShizukuApi.isPermissionGranted.value) {
-                ShisukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
+                ShizukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
             } else if (!shizukuDaemonRunning.value) {
-                ShisukuState.Warn(
+                ShizukuState.Warn(
                     Shizuku.getVersion(),
                     if (shizukuErrInfo.value.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
                 )
             } else {
-                ShisukuState.Activated(Shizuku.getVersion())
+                ShizukuState.Activated(Shizuku.getVersion())
             }
 
         } else {
-            ShisukuState.Error
+            ShizukuState.Error
         }
     }
 

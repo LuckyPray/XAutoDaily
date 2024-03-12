@@ -14,8 +14,33 @@ import com.agoines.system.common.setNavigationBarTranslation
 import com.agoines.system.common.setStatusBarTranslation
 import com.agoines.system.common.statusBarLightMode
 import com.agoines.system.common.statusBarLightOldMode
+import com.slack.circuit.foundation.Circuit
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
+import me.teble.xposed.autodaily.ui.scene.AboutPresenter
+import me.teble.xposed.autodaily.ui.scene.AboutScreen
+import me.teble.xposed.autodaily.ui.scene.AboutUI
+import me.teble.xposed.autodaily.ui.scene.DeveloperPresenter
+import me.teble.xposed.autodaily.ui.scene.DeveloperScreen
+import me.teble.xposed.autodaily.ui.scene.DeveloperUI
+import me.teble.xposed.autodaily.ui.scene.EditEnvPresenter
+import me.teble.xposed.autodaily.ui.scene.EditEnvScreen
+import me.teble.xposed.autodaily.ui.scene.EditEnvUI
+import me.teble.xposed.autodaily.ui.scene.LicensePresenter
+import me.teble.xposed.autodaily.ui.scene.LicenseScreen
+import me.teble.xposed.autodaily.ui.scene.LicenseUI
+import me.teble.xposed.autodaily.ui.scene.MainPresenter
+import me.teble.xposed.autodaily.ui.scene.MainScreen
+import me.teble.xposed.autodaily.ui.scene.MainUI
+import me.teble.xposed.autodaily.ui.scene.SettingPresenter
+import me.teble.xposed.autodaily.ui.scene.SettingScreen
+import me.teble.xposed.autodaily.ui.scene.SettingUI
+import me.teble.xposed.autodaily.ui.scene.SignPresenter
+import me.teble.xposed.autodaily.ui.scene.SignScreen
+import me.teble.xposed.autodaily.ui.scene.SignStatePresenter
+import me.teble.xposed.autodaily.ui.scene.SignStateScreen
+import me.teble.xposed.autodaily.ui.scene.SignStateUI
+import me.teble.xposed.autodaily.ui.scene.SignUI
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class ModuleActivity : BaseActivity() {
@@ -50,6 +75,79 @@ class ModuleActivity : BaseActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
 
+        val circuit: Circuit =
+            Circuit.Builder()
+                .addPresenterFactory(MainPresenter.Factory())
+                .addUi<MainScreen, MainScreen.State> { state, modifier ->
+                    MainUI(
+                        eventSink = state.eventSink,
+                        onNavigateToSign = state.onNavigateToSign,
+                        onNavigateToSetting = state.onNavigateToSetting,
+                        onNavigateToAbout = state.onNavigateToAbout,
+                        modifier = modifier
+                    )
+                }
+                .addPresenterFactory(SignPresenter.Factory())
+                .addUi<SignScreen, SignScreen.State> { state, modifier ->
+                    SignUI(
+                        backClick = state.backClick,
+                        onNavigateToEditEnvs = state.onNavigateToEditEnvs,
+                        modifier = modifier
+                    )
+                }
+                .addPresenterFactory(EditEnvPresenter.Factory())
+                .addUi<EditEnvScreen, EditEnvScreen.State> { state, modifier ->
+                    EditEnvUI(
+                        backClick = state.backClick,
+                        groupId = state.groupId, taskId = state.taskId,
+                        modifier = modifier
+                    )
+                }
+
+
+                .addPresenterFactory(SettingPresenter.Factory())
+                .addUi<SettingScreen, SettingScreen.State> { state, modifier ->
+                    SettingUI(
+                        backClick = state.backClick,
+                        onNavigateToSignState = state.onNavigateToSignState,
+                        modifier = modifier
+                    )
+                }
+                .addPresenterFactory(SignStatePresenter.Factory())
+                .addUi<SignStateScreen, SignStateScreen.State> { state, modifier ->
+                    SignStateUI(
+                        backClick = state.backClick,
+                        modifier = modifier
+                    )
+                }
+                .addPresenterFactory(LicensePresenter.Factory())
+
+
+                .addPresenterFactory(AboutPresenter.Factory())
+                .addUi<AboutScreen, AboutScreen.State> { state, modifier ->
+                    AboutUI(
+                        backClick = state.backClick,
+                        onNavigateToLicense = state.onNavigateToLicense,
+                        onNavigateToDeveloper = state.onNavigateToDeveloper,
+                        modifier = modifier
+                    )
+                }
+                .addUi<LicenseScreen, LicenseScreen.State> { state, modifier ->
+                    LicenseUI(
+                        backClick = state.backClick,
+                        modifier = modifier
+                    )
+                }
+                .addPresenterFactory(DeveloperPresenter.Factory())
+                .addUi<DeveloperScreen, DeveloperScreen.State> { state, modifier ->
+                    DeveloperUI(
+                        backClick = state.backClick,
+                        modifier = modifier
+                    )
+                }
+                .build()
+
+
 
 
         setContent {
@@ -75,7 +173,8 @@ class ModuleActivity : BaseActivity() {
             }
 
             XAutodailyTheme(isBlack = isBlack, colorTheme = theme) {
-                XAutoDailyApp(viewModel)
+                XAutoDailyApp(circuit)
+
             }
 
         }

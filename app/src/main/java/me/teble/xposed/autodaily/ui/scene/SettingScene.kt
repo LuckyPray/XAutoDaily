@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -21,6 +20,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.Screen
+import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
@@ -29,17 +35,64 @@ import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@Parcelize
+data object SettingScreen : Screen {
+    data class State(
+        private val eventSink: (Event) -> Unit,
+        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
+        val onNavigateToSignState: () -> Unit = { eventSink(Event.SignState) },
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object BackClicked : Event()
+        data object SignState : Event()
+    }
+}
+
+class SettingPresenter(
+    private val screen: SettingScreen,
+    private val navigator: Navigator,
+) : Presenter<SettingScreen.State> {
+
+    class Factory() : Presenter.Factory {
+        override fun create(
+            screen: Screen,
+            navigator: Navigator,
+            context: CircuitContext
+        ): Presenter<*>? {
+            return when (screen) {
+                is SettingScreen -> return SettingPresenter(screen, navigator)
+                else -> null
+            }
+        }
+    }
+
+    @Composable
+    override fun present(): SettingScreen.State {
+        return SettingScreen.State(
+            eventSink = { event ->
+                when (event) {
+                    SettingScreen.Event.BackClicked -> navigator.pop()
+                    SettingScreen.Event.SignState -> navigator.goTo(SignStateScreen)
+                }
+            }
+
+        )
+    }
+}
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingScene(
+fun SettingUI(
     backClick: () -> Unit,
     onNavigateToSignState: () -> Unit,
-    themeViewModel: MainThemeViewModel,
+    modifier: Modifier,
+    themeViewModel: MainThemeViewModel = viewModel(),
     viewmodel: SettingViewModel = viewModel()
 ) {
 
@@ -74,22 +127,20 @@ fun SettingScene(
             }
         }
 
-        Scaffold(
+        XaScaffold(
             snackbarHost = {
                 SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
             },
             topBar = {
                 TopBar(text = "设置", backClick = backClick)
             },
+            modifier = modifier,
             containerColor = colors.colorBgLayout
-        ) { contentPadding ->
+        ) {
             // Screen content
             Column(
                 Modifier
                     .fillMaxSize()
-
-                    .padding(contentPadding)
-                    .padding(horizontal = 16.dp)
                     .clip(SmootherShape(12.dp))
                     .verticalScroll(rememberScrollState())
                     .defaultNavigationBarPadding()

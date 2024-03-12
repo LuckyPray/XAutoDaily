@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -28,22 +27,79 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.Screen
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.ui.composable.DatePicker
 import me.teble.xposed.autodaily.ui.composable.FloatingButton
 import me.teble.xposed.autodaily.ui.composable.HintEditText
 import me.teble.xposed.autodaily.ui.composable.IconEditText
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
-import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.dialog.CheckFriendsDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
+@Parcelize
+data class EditEnvScreen(
+    val groupId: String?,
+    val taskId: String
+) : Screen {
+    data class State(
+        val groupId: String?,
+        val taskId: String,
+        val eventSink: (Event) -> Unit,
+        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object BackClicked : Event()
+    }
+}
+
+class EditEnvPresenter(
+    private val screen: EditEnvScreen,
+    private val navigator: Navigator,
+) : Presenter<EditEnvScreen.State> {
+
+    class Factory() : Presenter.Factory {
+        override fun create(
+            screen: Screen,
+            navigator: Navigator,
+            context: CircuitContext
+        ): Presenter<*>? {
+            return when (screen) {
+                is EditEnvScreen -> return EditEnvPresenter(screen, navigator)
+                else -> null
+            }
+        }
+    }
+
+    @Composable
+    override fun present(): EditEnvScreen.State {
+        return EditEnvScreen.State(
+            groupId = screen.groupId,
+            taskId = screen.taskId,
+            eventSink = { event ->
+                when (event) {
+                    EditEnvScreen.Event.BackClicked -> navigator.pop()
+                }
+            }
+
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
+fun EditEnvUI(backClick: () -> Unit, groupId: String?, taskId: String, modifier: Modifier) {
 
 
     Box {
@@ -64,15 +120,10 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
             }
 
         }
-        Scaffold(
-            snackbarHost = {
-//                SnackbarHost(hostState = snackbarHostState) {
-//                    RoundedSnackbar(it)
-//                }
-            },
-            topBar = {
-                TopBar(text = taskId, backClick = backClick)
-            },
+        XaScaffold(
+            text = taskId,
+            modifier = modifier,
+            backClick = backClick,
             floatingActionButton = {
                 FloatingButton(
                     modifier = Modifier.padding(end = 16.dp, bottom = 16.dp),
@@ -82,19 +133,16 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
                 )
             },
             containerColor = colors.colorBgContainer
-        ) { contentPadding ->
+        ) {
 
             val colors = colors
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(contentPadding)
-                    .padding(horizontal = 16.dp)
                     .clip(SmootherShape(12.dp))
                     .verticalScroll(rememberScrollState())
-                    .defaultNavigationBarPadding(),
-
-                ) {
+                    .defaultNavigationBarPadding()
+            ) {
                 var editText by remember { mutableStateOf("") }
 
                 SmallTitle(
@@ -172,8 +220,6 @@ fun EditEnvScene(backClick: () -> Unit, groupId: String?, taskId: String) {
             }
 
         }
-
-
 
         CheckFriendsDialog(
             state = state,

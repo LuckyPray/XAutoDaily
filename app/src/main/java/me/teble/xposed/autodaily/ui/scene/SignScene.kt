@@ -9,10 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,14 +22,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.slack.circuit.runtime.CircuitContext
+import com.slack.circuit.runtime.CircuitUiEvent
+import com.slack.circuit.runtime.CircuitUiState
+import com.slack.circuit.runtime.Navigator
+import com.slack.circuit.runtime.presenter.Presenter
+import com.slack.circuit.runtime.screen.Screen
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.task.model.TaskGroup
+import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
-import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
@@ -36,47 +48,123 @@ import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
-@Composable
-fun SignScene(
-    backClick: () -> Unit,
-    onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
-    signViewModel: SignViewModel = viewModel()
-) {
-    val colors = colors
-    Scaffold(
-        topBar = {
-            TopBar(
-                text = "签到配置",
-                backClick = backClick
-            )
-        },
-        containerColor = colors.colorBgLayout
-    ) { contentPadding ->
-        Column(
-            Modifier.padding(contentPadding)
-        ) {
-            val globalEnable by remember { signViewModel.globalEnable }
-            val taskGroupsState = remember { signViewModel.taskGroupsState }
-            SwitchTextItem(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .fillMaxWidth()
-                    .clip(SmootherShape(12.dp))
-                    .drawBehind {
-                        drawRect(colors.colorBgContainer)
-                    },
-                text = "总开关",
-                onClick = signViewModel::updateGlobalEnable,
-                clickEnabled = { true },
-                enable = { globalEnable }
-            )
-            GroupColumn(
-                onNavigateToEditEnvs = onNavigateToEditEnvs,
-                taskGroupList = { taskGroupsState },
-                enable = { globalEnable }
+@Parcelize
+data object SignScreen : Screen {
+    data class State(
+        val eventSink: (Event) -> Unit,
+        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
+        val onNavigateToEditEnvs: (String?, String) -> Unit = { groupId, taskId ->
+            eventSink(
+                Event.EditEnv(
+                    groupId,
+                    taskId
+                )
             )
         }
+    ) : CircuitUiState
+
+    sealed class Event : CircuitUiEvent {
+        data object BackClicked : Event()
+        data class EditEnv(
+            val groupId: String?,
+            val taskId: String
+        ) : Event()
     }
+}
+
+class SignPresenter(
+    private val screen: SignScreen,
+    private val navigator: Navigator,
+) : Presenter<SignScreen.State> {
+
+    class Factory() : Presenter.Factory {
+        override fun create(
+            screen: Screen,
+            navigator: Navigator,
+            context: CircuitContext
+        ): Presenter<*>? {
+            return when (screen) {
+                is SignScreen -> return SignPresenter(screen, navigator)
+                else -> null
+            }
+        }
+    }
+
+    @Composable
+    override fun present(): SignScreen.State {
+        return SignScreen.State(
+            eventSink = { event ->
+                when (event) {
+                    SignScreen.Event.BackClicked -> navigator.pop()
+                    is SignScreen.Event.EditEnv -> navigator.goTo(
+                        EditEnvScreen(
+                            groupId = event.groupId,
+                            taskId = event.taskId
+
+                        )
+                    )
+                }
+            }
+
+        )
+    }
+}
+
+@Composable
+fun counterPresenter(
+    events: Flow<Unit>
+): () -> Boolean {
+    var globalEnable by remember { mutableStateOf(ConfUnit.globalEnable) }
+
+    LaunchedEffect(Unit) {
+        events.collect {
+            globalEnable = !globalEnable
+            ConfUnit.globalEnable = globalEnable
+        }
+    }
+
+    return { globalEnable }
+}
+
+@Composable
+fun SignUI(
+    backClick: () -> Unit,
+    onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
+    modifier: Modifier
+) {
+    val colors = colors
+    XaScaffold(
+        text = "签到配置",
+        backClick = backClick,
+        modifier = modifier,
+        containerColor = colors.colorBgLayout
+    ) {
+        val channel = remember { Channel<Unit>() }
+
+        val flow = remember(channel) { channel.consumeAsFlow() }
+        val globalEnable = counterPresenter(flow)
+
+        val taskGroupsState =
+            remember { mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray()) }
+        SwitchTextItem(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(SmootherShape(12.dp))
+                .drawBehind {
+                    drawRect(colors.colorBgContainer)
+                },
+            text = "总开关",
+            onClick = { channel.trySend(Unit) },
+            clickEnabled = { true },
+            enable = globalEnable
+        )
+        GroupColumn(
+            onNavigateToEditEnvs = onNavigateToEditEnvs,
+            taskGroupList = { taskGroupsState },
+            enable = globalEnable
+        )
+    }
+
 }
 
 @Composable
@@ -88,7 +176,7 @@ private fun ColumnScope.GroupColumn(
     Column(
         modifier = Modifier
             .weight(1f, false)
-            .padding(top = 16.dp, start = 16.dp, end = 16.dp)
+            .padding(top = 16.dp)
             .clip(SmootherShape(12.dp))
             .verticalScroll(rememberScrollState())
             .defaultNavigationBarPadding(),
