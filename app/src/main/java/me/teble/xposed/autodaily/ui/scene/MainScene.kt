@@ -5,7 +5,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -22,15 +21,17 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +47,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.slack.circuit.overlay.OverlayEffect
 import com.slack.circuit.runtime.CircuitContext
 import com.slack.circuit.runtime.CircuitUiEvent
@@ -55,12 +55,20 @@ import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.internal.rememberStableCoroutineScope
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
+import com.slack.circuitx.overlays.DialogResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.R
+import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.dialog.showNoticeOverlay
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
@@ -75,20 +83,33 @@ import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
+import me.teble.xposed.autodaily.utils.TaskExecutor
 
 @Parcelize
 data object MainScreen : Screen {
+    @Stable
     data class State(
-        val eventSink: (Event) -> Unit,
+        private val eventSink: (Event) -> Unit,
+
+        val snackbarHostState: SnackbarHostState,
+        val noticeProvider: () -> String,
+        val execTaskTaskNumProvider: () -> String,
+
+        val signClick: () -> Unit,
+
+        val dialogStateProvider: () -> Boolean,
+        val dismissDialog: () -> Unit,
+        val showDialog: () -> Unit,
+
         val onNavigateToSign: () -> Unit = { eventSink(Event.Sign) },
         val onNavigateToSetting: () -> Unit = { eventSink(Event.Setting) },
         val onNavigateToAbout: () -> Unit = { eventSink(Event.About) },
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object Sign : Event()
-        data object Setting : Event()
-        data object About : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object Sign : Event
+        data object Setting : Event
+        data object About : Event
     }
 }
 
@@ -107,9 +128,76 @@ class MainPresenter(private val navigator: Navigator) : Presenter<MainScreen.Sta
         }
     }
 
+    @Stable
     @Composable
     override fun present(): MainScreen.State {
+        val (dialogState, updateState) = remember { mutableStateOf(false) }
+
+        val (execTaskNum, updateNum) = remember { mutableIntStateOf(0) }
+
+        val (noticeText, updateText) = remember { mutableStateOf("") }
+
+        var lastClickTime by remember { mutableLongStateOf(0L) }
+
+        val scope = rememberStableCoroutineScope()
+
+        val snackbarHostState = remember { SnackbarHostState() }
+
+        suspend fun showSnackbar(text: String) {
+            snackbarHostState.showSnackbar(text)
+        }
+        LaunchedEffect(Unit) {
+            val meta = ConfUnit.metaInfoCache ?: ConfigUtil.fetchMeta()
+            if (System.currentTimeMillis() - ConfUnit.lastFetchTime > 60 * 60 * 1000L) {
+                ConfigUtil.fetchMeta()
+            }
+            meta?.let {
+                withContext(Dispatchers.Main) {
+                    updateText(it.notice?.trimEnd() ?: "暂无公告")
+                }
+            } ?: run {
+                showSnackbar("拉取公告失败")
+            }
+        }
+
+
+        LaunchedEffect(Unit) {
+            try {
+                val num = ConfigUtil.getCurrentExecTaskNum()
+                for (i in 1..num) {
+                    delay(15)
+                    withContext(Dispatchers.Main) {
+                        updateNum(execTaskNum + 1)
+                    }
+
+                }
+            } catch (e: Exception) {
+                showSnackbar(e.stackTraceToString())
+            }
+        }
+
+
+
         return MainScreen.State(
+            snackbarHostState = snackbarHostState,
+            noticeProvider = { noticeText },
+            execTaskTaskNumProvider = { execTaskNum.toString() },
+
+            signClick = {
+                scope.launch {
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastClickTime < 5000L) {
+                        showSnackbar("点那么快怎么不上天呢")
+                    } else {
+                        lastClickTime = currentTime
+                        TaskExecutor.handler.sendEmptyMessage(TaskExecutor.EXEC_TASK)
+                    }
+                }
+            },
+            dialogStateProvider = { dialogState },
+            dismissDialog = { updateState(false) },
+            showDialog = { updateState(true) },
+
             eventSink = { event ->
                 when (event) {
                     // Navigate to the detail screen when an email is clicked
@@ -118,97 +206,94 @@ class MainPresenter(private val navigator: Navigator) : Presenter<MainScreen.Sta
                     MainScreen.Event.Setting -> navigator.goTo(SettingScreen)
                 }
             }
+
         )
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainUI(
-    eventSink: (MainScreen.Event) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    noticeProvider: () -> String,
+    execTaskTaskNumProvider: () -> String,
+
+    signClick: () -> Unit,
+
+    dialogStateProvider: () -> Boolean,
+    dismissDialog: () -> Unit,
+    showDialog: () -> Unit,
+
     onNavigateToSign: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    modifier: Modifier,
-    viewmodel: HomeViewModel = viewModel()
+
+    modifier: Modifier
 ) {
 
-    val snackbarHostState = remember { SnackbarHostState() }
 
-
-    val (noticeDialog, updateNoticeDialog) = remember { mutableStateOf(false) }
-
-
-    // 展示对应 snackbarText
-    LaunchedEffect(Unit) {
-        viewmodel.snackbarText.collect {
-            snackbarHostState.showSnackbar(it)
-        }
-    }
-
-    val noticeText by remember { viewmodel.noticeText }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val execTaskNum by remember { viewmodel.execTaskNum }
-
-    val colors = colors
-
-    Box {
-
-
-        Scaffold(
-            modifier = modifier,
-            snackbarHost = {
-                RoundedSnackbarHost(hostState = snackbarHostState)
-            }, topBar = {
-                XAutoDailyTopBar(modifier = Modifier
+    XaScaffold(
+        modifier = modifier,
+        snackbarHost = {
+            RoundedSnackbarHost(hostState = snackbarHostState)
+        },
+        topBar = {
+            XAutoDailyTopBar(
+                modifier = Modifier
                     .statusBarsPadding()
                     .padding(horizontal = 16.dp)
                     .padding(vertical = 20.dp)
                     .padding(start = 16.dp),
-                    icon = Icons.Notice,
-                    contentDescription = "公告",
-                    iconClick = {
-                        updateNoticeDialog(true)
-                        //viewmodel.showNoticeDialog()
-                    })
-            }, containerColor = colors.colorBgLayout
-        ) { contentPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding)
-                    .padding(horizontal = 16.dp)
-                    .clip(SmootherShape(12.dp))
-                    .verticalScroll(rememberScrollState())
-                    .defaultNavigationBarPadding()
-            ) {
+                icon = Icons.Notice,
+                contentDescription = "公告",
+                iconClick = showDialog
+            )
+        }, containerColor = colors.colorBgLayout
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .defaultNavigationBarPadding()
+        ) {
 
-                Banner({ execTaskNum }, signClick = viewmodel::signClick)
-                GridLayout(
-                    onNavigateToSign = onNavigateToSign,
-                    onNavigateToSetting = onNavigateToSetting,
-                    onNavigateToAbout = onNavigateToAbout,
-                    execTaskNum = { execTaskNum }
-                )
-            }
-
-        }
-        val scope = rememberStableCoroutineScope()
-
-        if (noticeDialog) {
-            OverlayEffect { host ->
-                host.showNoticeOverlay(colors = colors, noticeText)
-            }
-
+            Banner(execTaskTaskNumProvider, signClick = signClick)
+            GridLayout(
+                onNavigateToSign = onNavigateToSign,
+                onNavigateToSetting = onNavigateToSetting,
+                onNavigateToAbout = onNavigateToAbout,
+                execTaskNum = execTaskTaskNumProvider
+            )
         }
 
     }
+
+    NoticeOverlay(dialogStateProvider, noticeProvider, dismissDialog)
 }
+
+@Composable
+fun NoticeOverlay(
+    dialogStateProvider: () -> Boolean,
+    noticeProvider: () -> String,
+    dismissDialog: () -> Unit
+) {
+    val colors = colors
+    if (dialogStateProvider()) {
+        OverlayEffect { host ->
+            val result = host.showNoticeOverlay(colors = colors, noticeProvider)
+            when (result) {
+                DialogResult.Confirm -> dismissDialog()
+                DialogResult.Cancel -> dismissDialog()
+                DialogResult.Dismiss -> dismissDialog()
+            }
+        }
+    }
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ColumnScope.Banner(execTaskNum: () -> Int, signClick: () -> Unit) {
+private fun ColumnScope.Banner(execTaskNum: () -> String, signClick: () -> Unit) {
     Column(
         modifier = Modifier
             .padding(top = 24.dp)
@@ -277,7 +362,7 @@ private fun GridLayout(
     onNavigateToSign: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    execTaskNum: () -> Int
+    execTaskNum: () -> String
 ) {
     val colors = colors
     Column(

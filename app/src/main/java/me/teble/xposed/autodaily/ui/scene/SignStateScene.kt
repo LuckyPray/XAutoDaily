@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -41,13 +42,14 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Parcelize
 data object SignStateScreen : Screen {
+    @Stable
     data class State(
         val eventSink: (Event) -> Unit,
         val backClick: () -> Unit = { eventSink(Event.BackClicked) },
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object BackClicked : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object BackClicked : Event
     }
 }
 
@@ -69,6 +71,7 @@ class SignStatePresenter(
         }
     }
 
+    @Stable
     @Composable
     override fun present(): SignStateScreen.State {
         return SignStateScreen.State(

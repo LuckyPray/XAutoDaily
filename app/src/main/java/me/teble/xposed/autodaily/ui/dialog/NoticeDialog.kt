@@ -27,11 +27,13 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 suspend fun OverlayHost.showNoticeOverlay(
     colors: XAutodailyColors,
-    infoText: String
+    infoText: () -> String,
+
 ): DialogResult {
     return show(
         BottomSheetOverlay(
             model = infoText,
+            onDismiss = { DialogResult.Dismiss },
             skipPartiallyExpandedState = true,
             dragHandle = {},
             sheetContainerColor = colors.colorBgDialog,
@@ -51,7 +53,7 @@ suspend fun OverlayHost.showNoticeOverlay(
 
 @Composable
 fun NoticeOverlayUI(
-    infoText: String,
+    infoText: () -> String,
     onDismiss: () -> Unit
 ) {
     val colors = XAutodailyTheme.colors

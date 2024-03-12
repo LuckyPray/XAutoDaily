@@ -10,13 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -28,9 +30,6 @@ import com.slack.circuit.runtime.CircuitUiState
 import com.slack.circuit.runtime.Navigator
 import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.util.ConfigUtil
@@ -50,25 +49,25 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Parcelize
 data object SignScreen : Screen {
+    @Stable
     data class State(
         val eventSink: (Event) -> Unit,
         val backClick: () -> Unit = { eventSink(Event.BackClicked) },
         val onNavigateToEditEnvs: (String?, String) -> Unit = { groupId, taskId ->
-            eventSink(
-                Event.EditEnv(
-                    groupId,
-                    taskId
-                )
-            )
-        }
+            eventSink(Event.EditEnv(groupId, taskId))
+        },
+        val globalEnableProvider: () -> Boolean,
+        val updateGlobalEnable: (Boolean) -> Unit,
+
+        val taskGroupsState: SnapshotStateList<TaskGroup>
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object BackClicked : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object BackClicked : Event
         data class EditEnv(
             val groupId: String?,
             val taskId: String
-        ) : Event()
+        ) : Event
     }
 }
 
@@ -90,8 +89,12 @@ class SignPresenter(
         }
     }
 
+    @Stable
     @Composable
     override fun present(): SignScreen.State {
+        var globalEnable by remember { mutableStateOf(ConfUnit.globalEnable) }
+        val taskGroupsState =
+            remember { mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray()) }
         return SignScreen.State(
             eventSink = { event ->
                 when (event) {
@@ -104,32 +107,28 @@ class SignPresenter(
                         )
                     )
                 }
-            }
+            },
+            globalEnableProvider = { globalEnable },
+            updateGlobalEnable = {
+                globalEnable = it
+                ConfUnit.globalEnable = it
+            },
+            taskGroupsState = taskGroupsState
+
 
         )
     }
 }
 
-@Composable
-fun counterPresenter(
-    events: Flow<Unit>
-): () -> Boolean {
-    var globalEnable by remember { mutableStateOf(ConfUnit.globalEnable) }
-
-    LaunchedEffect(Unit) {
-        events.collect {
-            globalEnable = !globalEnable
-            ConfUnit.globalEnable = globalEnable
-        }
-    }
-
-    return { globalEnable }
-}
 
 @Composable
 fun SignUI(
     backClick: () -> Unit,
     onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
+    taskGroupsState: SnapshotStateList<TaskGroup>,
+
+    globalEnableProvider: () -> Boolean,
+    updateGlobalEnable: (Boolean) -> Unit,
     modifier: Modifier
 ) {
     val colors = colors
@@ -139,13 +138,7 @@ fun SignUI(
         modifier = modifier,
         containerColor = colors.colorBgLayout
     ) {
-        val channel = remember { Channel<Unit>() }
 
-        val flow = remember(channel) { channel.consumeAsFlow() }
-        val globalEnable = counterPresenter(flow)
-
-        val taskGroupsState =
-            remember { mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray()) }
         SwitchTextItem(
             modifier = Modifier
                 .fillMaxWidth()
@@ -154,14 +147,14 @@ fun SignUI(
                     drawRect(colors.colorBgContainer)
                 },
             text = "总开关",
-            onClick = { channel.trySend(Unit) },
+            onClick = { updateGlobalEnable(it) },
             clickEnabled = { true },
-            enable = globalEnable
+            enable = globalEnableProvider
         )
         GroupColumn(
             onNavigateToEditEnvs = onNavigateToEditEnvs,
             taskGroupList = { taskGroupsState },
-            enable = globalEnable
+            enable = globalEnableProvider
         )
     }
 
@@ -183,7 +176,10 @@ private fun ColumnScope.GroupColumn(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         taskGroupList().forEach { taskGroup ->
-            SignItem(onNavigateToEditEnvs, taskGroup, enable)
+            key(taskGroup.id) {
+                SignItem(onNavigateToEditEnvs, taskGroup, enable)
+            }
+
         }
 
     }

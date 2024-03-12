@@ -19,9 +19,9 @@ fun XAutoDailyApp(circuit: Circuit) {
     CircuitCompositionLocals(circuit) {
         ContentWithOverlays {
             NavigableCircuitContent(
-                navigator = navigator, backStack = backStack,
+                navigator = navigator,
+                backStack = backStack,
                 decoration = GestureNavigationDecoration(
-                    circuit.defaultNavDecoration,
                     onBackInvoked = navigator::pop
                 )
             )

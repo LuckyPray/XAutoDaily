@@ -59,8 +59,8 @@ data class EditEnvScreen(
         val backClick: () -> Unit = { eventSink(Event.BackClicked) },
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object BackClicked : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object BackClicked : Event
     }
 }
 

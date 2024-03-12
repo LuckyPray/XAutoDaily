@@ -80,7 +80,15 @@ class ModuleActivity : BaseActivity() {
                 .addPresenterFactory(MainPresenter.Factory())
                 .addUi<MainScreen, MainScreen.State> { state, modifier ->
                     MainUI(
-                        eventSink = state.eventSink,
+                        snackbarHostState = state.snackbarHostState,
+                        noticeProvider = state.noticeProvider,
+                        execTaskTaskNumProvider = state.execTaskTaskNumProvider,
+
+                        signClick = state.signClick,
+                        dialogStateProvider = state.dialogStateProvider,
+                        dismissDialog = state.dismissDialog,
+                        showDialog = state.showDialog,
+
                         onNavigateToSign = state.onNavigateToSign,
                         onNavigateToSetting = state.onNavigateToSetting,
                         onNavigateToAbout = state.onNavigateToAbout,
@@ -92,6 +100,10 @@ class ModuleActivity : BaseActivity() {
                     SignUI(
                         backClick = state.backClick,
                         onNavigateToEditEnvs = state.onNavigateToEditEnvs,
+                        taskGroupsState = state.taskGroupsState,
+
+                        globalEnableProvider = state.globalEnableProvider,
+                        updateGlobalEnable = state.updateGlobalEnable,
                         modifier = modifier
                     )
                 }
@@ -108,8 +120,25 @@ class ModuleActivity : BaseActivity() {
                 .addPresenterFactory(SettingPresenter.Factory())
                 .addUi<SettingScreen, SettingScreen.State> { state, modifier ->
                     SettingUI(
+                        showTaskToastProvider = state.showTaskToastProvider,
+                        usedThreadPoolProvider = state.usedThreadPoolProvider,
+                        taskNotificationProvider = state.taskNotificationProvider,
+                        taskExceptionNotificationProvider = state.taskExceptionNotificationProvider,
+                        logToXposedProvider = state.logToXposedProvider,
+                        debugLogProvider = state.debugLogProvider,
+
+                        updateShowTaskToast = state.updateShowTaskToast,
+                        updateUsedThreadPool = state.updateUsedThreadPool,
+                        updateTaskNotification = state.updateTaskNotification,
+                        updateTaskExceptionNotification = state.updateTaskExceptionNotification,
+                        updateLogToXposed = state.updateLogToXposed,
+                        updateDebugLog = state.updateDebugLog,
                         backClick = state.backClick,
                         onNavigateToSignState = state.onNavigateToSignState,
+
+                        dialogStateProvider = state.dialogStateProvider,
+                        dismissDialog = state.dismissDialog,
+                        showDialog = state.showDialog,
                         modifier = modifier
                     )
                 }
@@ -126,15 +155,36 @@ class ModuleActivity : BaseActivity() {
                 .addPresenterFactory(AboutPresenter.Factory())
                 .addUi<AboutScreen, AboutScreen.State> { state, modifier ->
                     AboutUI(
+                        snackbarHostState = state.snackbarHostState,
+
                         backClick = state.backClick,
                         onNavigateToLicense = state.onNavigateToLicense,
                         onNavigateToDeveloper = state.onNavigateToDeveloper,
+
+                        hasUpdateProvider = state.hasUpdateProvider,
+                        moduleVersionNameProvider = state.moduleVersionNameProvider,
+                        moduleVersionCodeProvider = state.moduleVersionCodeProvider,
+
+                        qqVersionNameProvider = state.qqVersionNameProvider,
+                        qqVersionCodeProvider = state.qqVersionCodeProvider,
+                        configVersionProvider = state.configVersionProvider,
+
+                        dialogStateProvider = state.dialogStateProvider,
+                        dismissDialog = state.dismissDialog,
+                        showDialog = state.showDialog,
+
+                        updateApp = state.updateApp,
+                        updateConfirm = state.updateConfirm,
+                        openGithub = state.openGithub,
+                        openTelegram = state.openTelegram,
+                        openAliPay = state.openAliPay,
                         modifier = modifier
                     )
                 }
                 .addUi<LicenseScreen, LicenseScreen.State> { state, modifier ->
                     LicenseUI(
                         backClick = state.backClick,
+                        dependencies = state.dependencies,
                         modifier = modifier
                     )
                 }
@@ -142,6 +192,8 @@ class ModuleActivity : BaseActivity() {
                 .addUi<DeveloperScreen, DeveloperScreen.State> { state, modifier ->
                     DeveloperUI(
                         backClick = state.backClick,
+                        snackbarHostState = state.snackbarHostState,
+                        openAuthorGithub = state.openAuthorGithub,
                         modifier = modifier
                     )
                 }

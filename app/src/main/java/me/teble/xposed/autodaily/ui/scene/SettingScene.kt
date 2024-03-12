@@ -8,12 +8,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,7 +27,11 @@ import com.slack.circuit.runtime.presenter.Presenter
 import com.slack.circuit.runtime.screen.Screen
 import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
-import me.teble.xposed.autodaily.ui.composable.RoundedSnackbar
+import me.teble.xposed.autodaily.ui.ConfUnit.enableDebugLog
+import me.teble.xposed.autodaily.ui.ConfUnit.enableTaskNotification
+import me.teble.xposed.autodaily.ui.ConfUnit.logToXposed
+import me.teble.xposed.autodaily.ui.ConfUnit.showTaskToast
+import me.teble.xposed.autodaily.ui.ConfUnit.usedThreadPool
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -43,15 +46,35 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Parcelize
 data object SettingScreen : Screen {
+    @Stable
     data class State(
         private val eventSink: (Event) -> Unit,
+
+        val showTaskToastProvider: () -> Boolean,
+        val usedThreadPoolProvider: () -> Boolean,
+        val taskNotificationProvider: () -> Boolean,
+        val taskExceptionNotificationProvider: () -> Boolean,
+        val logToXposedProvider: () -> Boolean,
+        val debugLogProvider: () -> Boolean,
+
+        val updateShowTaskToast: (Boolean) -> Unit,
+        val updateUsedThreadPool: (Boolean) -> Unit,
+        val updateTaskNotification: (Boolean) -> Unit,
+        val updateTaskExceptionNotification: (Boolean) -> Unit,
+        val updateLogToXposed: (Boolean) -> Unit,
+        val updateDebugLog: (Boolean) -> Unit,
+
+        val dialogStateProvider: () -> Boolean,
+        val dismissDialog: () -> Unit,
+        val showDialog: () -> Unit,
+
         val backClick: () -> Unit = { eventSink(Event.BackClicked) },
         val onNavigateToSignState: () -> Unit = { eventSink(Event.SignState) },
     ) : CircuitUiState
 
-    sealed class Event : CircuitUiEvent {
-        data object BackClicked : Event()
-        data object SignState : Event()
+    sealed interface Event : CircuitUiEvent {
+        data object BackClicked : Event
+        data object SignState : Event
     }
 }
 
@@ -73,63 +96,122 @@ class SettingPresenter(
         }
     }
 
+    @Stable
     @Composable
     override fun present(): SettingScreen.State {
+        val (dialogState, updateState) = remember { mutableStateOf(false) }
+
+        val (taskToast, updateToast) = remember { mutableStateOf(showTaskToast) }
+
+        val (threadPool, updateThreadPool) = remember { mutableStateOf(usedThreadPool) }
+
+        val (taskNotification, updateNotification) = remember {
+            mutableStateOf(
+                enableTaskNotification
+            )
+        }
+
+        val (exceptionNotification, updateExceptionNotification) = remember {
+            mutableStateOf(
+                enableTaskNotification
+            )
+        }
+
+        val (xposed, updateLogToXposed) = remember { mutableStateOf(logToXposed) }
+
+        val (debugLog, updateDebugLog) = remember { mutableStateOf(enableDebugLog) }
+
+
+
         return SettingScreen.State(
             eventSink = { event ->
                 when (event) {
                     SettingScreen.Event.BackClicked -> navigator.pop()
                     SettingScreen.Event.SignState -> navigator.goTo(SignStateScreen)
                 }
-            }
+            },
+            showTaskToastProvider = { taskToast },
+            usedThreadPoolProvider = { threadPool },
+            taskNotificationProvider = { taskNotification },
+            taskExceptionNotificationProvider = { exceptionNotification },
+            logToXposedProvider = { xposed },
+            debugLogProvider = { debugLog },
 
+            updateShowTaskToast = {
+                updateToast(it)
+                showTaskToast = it
+
+            },
+            updateUsedThreadPool = {
+                updateThreadPool(it)
+                usedThreadPool = it
+            },
+            updateTaskNotification = {
+                updateNotification(it)
+                usedThreadPool = it
+            },
+            updateTaskExceptionNotification = {
+                updateExceptionNotification(it)
+                enableTaskNotification = it
+            },
+            updateLogToXposed = {
+                updateLogToXposed(it)
+                logToXposed = it
+            },
+            updateDebugLog = {
+                updateDebugLog(it)
+                enableDebugLog = it
+            },
+
+
+            dialogStateProvider = { dialogState },
+            dismissDialog = { updateState(false) },
+            showDialog = { updateState(true) },
         )
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingUI(
+
+    showTaskToastProvider: () -> Boolean,
+    usedThreadPoolProvider: () -> Boolean,
+    taskNotificationProvider: () -> Boolean,
+    taskExceptionNotificationProvider: () -> Boolean,
+    logToXposedProvider: () -> Boolean,
+    debugLogProvider: () -> Boolean,
+
+    updateShowTaskToast: (Boolean) -> Unit,
+    updateUsedThreadPool: (Boolean) -> Unit,
+    updateTaskNotification: (Boolean) -> Unit,
+    updateTaskExceptionNotification: (Boolean) -> Unit,
+    updateLogToXposed: (Boolean) -> Unit,
+    updateDebugLog: (Boolean) -> Unit,
+
+    dialogStateProvider: () -> Boolean,
+    dismissDialog: () -> Unit,
+    showDialog: () -> Unit,
+
     backClick: () -> Unit,
     onNavigateToSignState: () -> Unit,
     modifier: Modifier,
     themeViewModel: MainThemeViewModel = viewModel(),
-    viewmodel: SettingViewModel = viewModel()
 ) {
 
-    val snackbarHostState = remember { SnackbarHostState() }
-    // 展示对应 snackbarText
-    LaunchedEffect(snackbarHostState) {
-        viewmodel.snackbarText.collect {
-            snackbarHostState.showSnackbar(it)
-        }
-    }
+
 
     Box {
         val theme by remember { themeViewModel.currentTheme }
         val isBlack by remember { themeViewModel.blackTheme }
 
-        val showTaskToast by remember { viewmodel.showTaskToast }
-        val usedThreadPool by remember { viewmodel.usedThreadPool }
-        val taskNotification by remember { viewmodel.taskNotification }
-        val taskExceptionNotification by remember { viewmodel.taskExceptionNotification }
-        val logToXposed by remember { viewmodel.logToXposed }
-        val debugLog by remember { viewmodel.debugLog }
-
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val themeDialog by remember { viewmodel.themeDialog }
 
-        LaunchedEffect(themeDialog) {
-            if (themeDialog) {
-                sheetState.expand()
-            } else {
-                sheetState.hide()
-            }
-        }
 
         XaScaffold(
             snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
+                // SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
             },
             topBar = {
                 TopBar(text = "设置", backClick = backClick)
@@ -148,34 +230,34 @@ fun SettingUI(
 
                 EntryLayout(onNavigateToSignState)
                 ConfigLayout(
-                    showTaskToast = { showTaskToast },
-                    usedThreadPool = { usedThreadPool },
-                    taskNotification = { taskNotification },
-                    taskExceptionNotification = { taskExceptionNotification },
-                    logToXposed = { logToXposed },
-                    debugLog = { debugLog },
+                    showTaskToast = showTaskToastProvider,
+                    usedThreadPool = usedThreadPoolProvider,
+                    taskNotification = taskNotificationProvider,
+                    taskExceptionNotification = taskExceptionNotificationProvider,
+                    logToXposed = logToXposedProvider,
+                    debugLog = debugLogProvider,
 
-                    updateShowTaskToast = viewmodel::updateShowTaskToast,
-                    updateUsedThreadPool = viewmodel::updateUsedThreadPool,
-                    updateTaskNotification = viewmodel::updateTaskNotification,
-                    updateTaskExceptionNotification = viewmodel::updateTaskExceptionNotification,
-                    updateLogToXposed = viewmodel::updateLogToXposed,
-                    updateDebugLog = viewmodel::updateDebugLog,
+                    updateShowTaskToast = updateShowTaskToast,
+                    updateUsedThreadPool = updateUsedThreadPool,
+                    updateTaskNotification = updateTaskNotification,
+                    updateTaskExceptionNotification = updateTaskExceptionNotification,
+                    updateLogToXposed = updateLogToXposed,
+                    updateDebugLog = updateDebugLog,
 
-                    showSnackbar = viewmodel::showSnackbar
+                    showSnackbar = {}
                 )
-                CommonLayout(viewmodel::showThemeDialog)
-                BackupLayout(showSnackbar = viewmodel::showSnackbar)
+                CommonLayout(showDialog)
+                BackupLayout(showSnackbar = {})
             }
         }
 
 
         ThemeModelDialog(
-            enable = { themeDialog },
+            enable = dialogStateProvider,
             sheetState = sheetState,
             targetTheme = { theme },
             targetBlack = { isBlack },
-            onDismiss = viewmodel::dismissThemeDialog,
+            onDismiss = dismissDialog,
             onConfirm = themeViewModel::confirmTheme
         )
     }
