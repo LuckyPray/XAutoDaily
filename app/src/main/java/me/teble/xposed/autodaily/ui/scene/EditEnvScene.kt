@@ -27,14 +27,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slack.circuit.runtime.CircuitContext
-import com.slack.circuit.runtime.CircuitUiEvent
-import com.slack.circuit.runtime.CircuitUiState
-import com.slack.circuit.runtime.Navigator
-import com.slack.circuit.runtime.presenter.Presenter
-import com.slack.circuit.runtime.screen.Screen
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.ui.composable.DatePicker
 import me.teble.xposed.autodaily.ui.composable.FloatingButton
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -47,59 +40,22 @@ import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
-@Parcelize
-data class EditEnvScreen(
-    val groupId: String?,
-    val taskId: String
-) : Screen {
-    data class State(
-        val groupId: String?,
-        val taskId: String,
-        val eventSink: (Event) -> Unit,
-        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
-    ) : CircuitUiState
+@Composable
+fun EditEnvScene(
+    backClick: () -> Unit, groupId: String?, taskId: String,
+) {
 
-    sealed interface Event : CircuitUiEvent {
-        data object BackClicked : Event
-    }
-}
-
-class EditEnvPresenter(
-    private val screen: EditEnvScreen,
-    private val navigator: Navigator,
-) : Presenter<EditEnvScreen.State> {
-
-    class Factory() : Presenter.Factory {
-        override fun create(
-            screen: Screen,
-            navigator: Navigator,
-            context: CircuitContext
-        ): Presenter<*>? {
-            return when (screen) {
-                is EditEnvScreen -> return EditEnvPresenter(screen, navigator)
-                else -> null
-            }
-        }
-    }
-
-    @Composable
-    override fun present(): EditEnvScreen.State {
-        return EditEnvScreen.State(
-            groupId = screen.groupId,
-            taskId = screen.taskId,
-            eventSink = { event ->
-                when (event) {
-                    EditEnvScreen.Event.BackClicked -> navigator.pop()
-                }
-            }
-
-        )
-    }
+    EditEnvUI(
+        backClick = backClick,
+        groupId = groupId,
+        taskId = taskId,
+        modifier = Modifier
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEnvUI(backClick: () -> Unit, groupId: String?, taskId: String, modifier: Modifier) {
+private fun EditEnvUI(backClick: () -> Unit, groupId: String?, taskId: String, modifier: Modifier) {
 
 
     Box {

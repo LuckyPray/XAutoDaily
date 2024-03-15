@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -21,13 +20,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slack.circuit.runtime.CircuitContext
-import com.slack.circuit.runtime.CircuitUiEvent
-import com.slack.circuit.runtime.CircuitUiState
-import com.slack.circuit.runtime.Navigator
-import com.slack.circuit.runtime.presenter.Presenter
-import com.slack.circuit.runtime.screen.Screen
-import kotlinx.parcelize.Parcelize
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.Text
@@ -40,60 +32,13 @@ import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
-@Parcelize
-data object SignStateScreen : Screen {
-    @Stable
-    data class State(
-        val eventSink: (Event) -> Unit,
-        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
-    ) : CircuitUiState
-
-    sealed interface Event : CircuitUiEvent {
-        data object BackClicked : Event
-    }
-}
-
-class SignStatePresenter(
-    private val screen: SignStateScreen,
-    private val navigator: Navigator,
-) : Presenter<SignStateScreen.State> {
-
-    class Factory() : Presenter.Factory {
-        override fun create(
-            screen: Screen,
-            navigator: Navigator,
-            context: CircuitContext
-        ): Presenter<*>? {
-            return when (screen) {
-                is SignStateScreen -> return SignStatePresenter(screen, navigator)
-                else -> null
-            }
-        }
-    }
-
-    @Stable
-    @Composable
-    override fun present(): SignStateScreen.State {
-        return SignStateScreen.State(
-            eventSink = { event ->
-                when (event) {
-                    SignStateScreen.Event.BackClicked -> navigator.pop()
-                }
-            }
-
-        )
-    }
-}
-
 @Composable
-fun SignStateUI(
-    backClick: () -> Unit,
-    modifier: Modifier
+fun SignStateScene(
+    backClick: () -> Unit
 ) {
     XaScaffold(
         text = "签到状态",
         backClick = backClick,
-        modifier = modifier,
         containerColor = colors.colorBgLayout
     ) {
         val tasksState = remember {

@@ -56,6 +56,7 @@ fun ModuleApp(viewModel: ModuleThemeViewModel) {
             AnimatedPane(Modifier) {
                 SettingScene(
                     themeViewModel = viewModel,
+                    hasBackProvider = scaffoldNavigator::canNavigateBack,
                     onBackClick = scaffoldNavigator::navigateBack
                 )
 

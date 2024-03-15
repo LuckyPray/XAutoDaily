@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -19,13 +17,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slack.circuit.runtime.CircuitContext
-import com.slack.circuit.runtime.CircuitUiEvent
-import com.slack.circuit.runtime.CircuitUiState
-import com.slack.circuit.runtime.Navigator
-import com.slack.circuit.runtime.presenter.Presenter
-import com.slack.circuit.runtime.screen.Screen
-import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
@@ -38,71 +29,21 @@ import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 
-@Parcelize
-data object LicenseScreen : Screen {
-    @Stable
-    data class State(
-        private val eventSink: (Event) -> Unit,
-        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
-        val dependencies: SnapshotStateList<Dependency>
-    ) : CircuitUiState
-
-    sealed interface Event : CircuitUiEvent {
-        data object BackClicked : Event
-    }
-}
-
-class LicensePresenter(
-    private val screen: LicenseScreen,
-    private val navigator: Navigator,
-) : Presenter<LicenseScreen.State> {
-
-    class Factory() : Presenter.Factory {
-        override fun create(
-            screen: Screen,
-            navigator: Navigator,
-            context: CircuitContext
-        ): Presenter<*>? {
-            return when (screen) {
-                is LicenseScreen -> return LicensePresenter(screen, navigator)
-                else -> null
-            }
-        }
-    }
-
-    @Stable
-    @OptIn(ExperimentalSerializationApi::class)
-    @Composable
-    override fun present(): LicenseScreen.State {
-        val dependencies = remember {
-            mutableStateListOf(
-                *Json.decodeFromStream<List<Dependency>>(
-                    hostContext.assets.open("licenses.json")
-                ).toTypedArray()
-            )
-        }
-        return LicenseScreen.State(
-            eventSink = { event ->
-                when (event) {
-                    LicenseScreen.Event.BackClicked -> navigator.pop()
-                }
-            },
-            dependencies = dependencies
-
+@OptIn(ExperimentalSerializationApi::class)
+@Composable
+fun LicenseScene(
+    backClick: () -> Unit,
+) {
+    val dependencies = remember {
+        mutableStateListOf(
+            *Json.decodeFromStream<List<Dependency>>(
+                hostContext.assets.open("licenses.json")
+            ).toTypedArray()
         )
     }
-}
-
-@Composable
-fun LicenseUI(
-    backClick: () -> Unit,
-    dependencies: SnapshotStateList<Dependency>,
-    modifier: Modifier
-) {
     XaScaffold(
         text = "开放源代码许可",
         backClick = backClick,
-        modifier = modifier,
         containerColor = XAutodailyTheme.colors.colorBgLayout
     ) {
 

@@ -63,6 +63,7 @@ fun XAutoDailyTopBar(
 fun TopBar(
     text: String,
     modifier: Modifier = Modifier,
+    hasBackProvider: () -> Boolean = { true },
     backClick: () -> Unit = {},
 ) {
     val colors = colors
@@ -72,17 +73,20 @@ fun TopBar(
             .padding(bottom = 20.dp, top = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Back,
-            modifier = Modifier
-                .padding(start = 26.dp)
-                .size(36.dp)
-                .clip(CircleShape)
-                .clickable(role = Role.Button, onClick = backClick)
-                .padding(6.dp),
-            contentDescription = "",
-            tint = { colors.colorText }
-        )
+        if (hasBackProvider()) {
+            Icon(
+                imageVector = Icons.Back,
+                modifier = Modifier
+                    .padding(start = 26.dp)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = backClick)
+                    .padding(6.dp),
+                contentDescription = "",
+                tint = { colors.colorText }
+            )
+        }
+
         Spacer(modifier = Modifier.weight(1f))
 
         BasicText(

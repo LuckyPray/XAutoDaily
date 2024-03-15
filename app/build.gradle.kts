@@ -74,6 +74,8 @@ android {
         buildFeatures {
             buildConfig = true
             aidl = true
+            prefab = true
+            compose = true
         }
 
         externalNativeBuild {
@@ -114,10 +116,6 @@ android {
                 keyPassword = properties.getProperty("keyPassword")
             }
         }
-    }
-
-    buildFeatures {
-        prefab = true
     }
 
     buildTypes {
@@ -214,9 +212,6 @@ android {
     }
     androidResources {
         additionalParameters += arrayOf("--allow-reserved-package-id", "--package-id", "0x62")
-    }
-    buildFeatures {
-        compose = true
     }
 
     composeOptions {
@@ -326,7 +321,6 @@ dependencies {
     implementation(project(":dexkit"))
     implementation(project(":mmkv"))
 
-
     compileOnly(project(":stub"))
     implementation(project(":system"))
 
@@ -346,12 +340,7 @@ dependencies {
     // jetpack compose
     implementation(libs.androidx.activity.compose)
 
-    implementation(libs.androidx.compose.animation)
-
-    implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.runtime)
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.androidx.compose.material)
@@ -359,14 +348,10 @@ dependencies {
 
     implementation(libs.androidx.material3.adaptive)
     implementation(libs.compose.shadows.plus)
-    implementation("com.slack.circuit:circuit-foundation:0.19.1")
-    implementation("com.slack.circuit:circuitx-gesture-navigation:0.19.1")
-    implementation("com.slack.circuit:circuitx-overlays:0.19.1")
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose)
 
     implementation(libs.hutool.core)
     implementation(libs.okhttp)
@@ -378,6 +363,8 @@ dependencies {
     // shizuku
     implementation(libs.shizuku.api)
     implementation(libs.provider)
+
+    implementation(libs.androidx.navigation.compose)
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath

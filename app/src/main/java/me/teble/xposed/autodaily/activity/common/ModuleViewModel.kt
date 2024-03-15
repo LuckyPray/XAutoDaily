@@ -8,7 +8,9 @@ import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -27,19 +29,19 @@ import rikka.shizuku.Shizuku
 
 
 class ModuleViewModel : ViewModel() {
-    private val shizukuDaemonRunning = mutableStateOf(false)
-    private val shizukuErrInfo = mutableStateOf("")
+    private var shizukuDaemonRunning by mutableStateOf(false)
+    private var shizukuErrInfo by mutableStateOf("")
 
 
-    val shizukuState = derivedStateOf {
+    val shizukuState by derivedStateOf {
 
-        if (ShizukuApi.binderAvailable.value) {
-            if (!ShizukuApi.isPermissionGranted.value) {
+        if (ShizukuApi.binderAvailable) {
+            if (!ShizukuApi.isPermissionGranted) {
                 ShizukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
-            } else if (!shizukuDaemonRunning.value) {
+            } else if (!shizukuDaemonRunning) {
                 ShizukuState.Warn(
                     Shizuku.getVersion(),
-                    if (shizukuErrInfo.value.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
+                    if (shizukuErrInfo.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
                 )
             } else {
                 ShizukuState.Activated(Shizuku.getVersion())
@@ -56,8 +58,8 @@ class ModuleViewModel : ViewModel() {
 
     private val peekServiceJob by lazy {
         viewModelScope.launch(IO) {
-            while (!shizukuDaemonRunning.value) {
-                shizukuDaemonRunning.value = peekUserService()
+            while (!shizukuDaemonRunning) {
+                shizukuDaemonRunning = peekUserService()
                 delay(1000)
             }
             bindUserService()
@@ -74,21 +76,21 @@ class ModuleViewModel : ViewModel() {
                 ShizukuApi.initBinder(binder)
                 try {
                     if (service.isRunning) {
-                        shizukuErrInfo.value = ""
-                        shizukuDaemonRunning.value = true
+                        shizukuErrInfo = ""
+                        shizukuDaemonRunning = true
                     }
                 } catch (e: RemoteException) {
                     Log.e("XALog", e.stackTraceToString())
-                    shizukuErrInfo.value = "守护进程连接失败"
+                    shizukuErrInfo = "守护进程连接失败"
                 }
             } else {
-                shizukuErrInfo.value = "invalid binder for $name received"
+                shizukuErrInfo = "invalid binder for $name received"
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
-            shizukuErrInfo.value = ""
-            shizukuDaemonRunning.value = false
+            shizukuErrInfo = ""
+            shizukuDaemonRunning = false
         }
     }
 
@@ -128,7 +130,7 @@ class ModuleViewModel : ViewModel() {
                 userServiceArgs,
                 userServiceConnection, true
             )
-            shizukuDaemonRunning.value = false
+            shizukuDaemonRunning = false
             return true
         } catch (e: Throwable) {
             Log.e("XALog", e.stackTraceToString())
@@ -179,11 +181,11 @@ class ModuleViewModel : ViewModel() {
     }
 
     fun shizukuClickable() {
-        if (ShizukuApi.binderAvailable.value && !ShizukuApi.isPermissionGranted.value) {
+        if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
             Shizuku.requestPermission(1101)
 
             viewModelScope.launch(IO) {
-                while (!ShizukuApi.isPermissionGranted.value) {
+                while (!ShizukuApi.isPermissionGranted) {
                     ShizukuApi.checkSelfPermission()
                     delay(500)
                 }
@@ -196,7 +198,7 @@ class ModuleViewModel : ViewModel() {
                 showSnackbar("未启用保活，无需启动守护进程")
                 return@launch
             }
-            if (!shizukuDaemonRunning.value) {
+            if (!shizukuDaemonRunning) {
                 bindUserService()
                 peekServiceJob.start()
                 showSnackbar("正在启动守护进程，请稍后")

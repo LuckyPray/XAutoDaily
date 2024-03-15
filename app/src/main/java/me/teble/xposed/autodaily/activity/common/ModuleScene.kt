@@ -77,13 +77,12 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding()
         ) {
-            val shizukuState by remember { viewmodel.shizukuState }
             val context = LocalContext.current
 
 
             val backgroundColor by animateColorAsState(
 
-                targetValue = when (shizukuState) {
+                targetValue = when (viewmodel.shizukuState) {
                     is ShizukuState.Activated -> Color(0xFF25CD8E)
                     is ShizukuState.Warn -> Color(0xFFFFBC04)
                     ShizukuState.Error -> Color(0xFFFA5F5C)
@@ -92,7 +91,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 
             val titleText by remember {
                 derivedStateOf {
-                    when (shizukuState) {
+                    when (viewmodel.shizukuState) {
                         is ShizukuState.Warn,
                         is ShizukuState.Activated -> "Shizuku 服务正在运行"
 
@@ -103,7 +102,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 
             val icon by remember {
                 derivedStateOf {
-                    when (shizukuState) {
+                    when (viewmodel.shizukuState) {
                         is ShizukuState.Activated -> Icons.Activated
                         is ShizukuState.Warn -> Icons.Warn
                         ShizukuState.Error -> Icons.Error
@@ -113,9 +112,9 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 
             val versionText by remember {
                 derivedStateOf {
-                    when (shizukuState) {
-                        is ShizukuState.Activated -> "${(shizukuState as ShizukuState.Activated).version}"
-                        is ShizukuState.Warn -> "${(shizukuState as ShizukuState.Warn).version}"
+                    when (val state = viewmodel.shizukuState) {
+                        is ShizukuState.Activated -> "${state.version}"
+                        is ShizukuState.Warn -> "${state.version}"
                         ShizukuState.Error -> "Unknown"
                     }
                 }
@@ -123,7 +122,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 
             val infoText by remember {
                 derivedStateOf {
-                    when (val state = shizukuState) {
+                    when (val state = viewmodel.shizukuState) {
                         is ShizukuState.Activated -> "守护进程正在运行，点击停止运行"
                         is ShizukuState.Warn -> state.info
                         ShizukuState.Error -> "部分功能无法运行"

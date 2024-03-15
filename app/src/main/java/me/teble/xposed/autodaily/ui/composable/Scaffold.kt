@@ -17,7 +17,8 @@ fun XaScaffold(
     text: String,
     containerColor: Color,
     backClick: () -> Unit,
-    modifier: Modifier,
+    hasBackProvider: () -> Boolean = { true },
+    modifier: Modifier = Modifier,
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit
@@ -26,7 +27,8 @@ fun XaScaffold(
         topBar = {
             TopBar(
                 text = text,
-                backClick = backClick
+                backClick = backClick,
+                hasBackProvider = hasBackProvider
             )
         },
         modifier = modifier,
@@ -42,7 +44,7 @@ fun XaScaffold(
     topBar: @Composable () -> Unit,
     containerColor: Color,
     snackbarHost: @Composable () -> Unit = {},
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 
     floatingActionButton: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit

@@ -1,30 +1,35 @@
 package me.teble.xposed.autodaily.activity.common
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class ModuleThemeViewModel : ViewModel() {
 
-    val blackTheme = mutableStateOf(AppConfUnit.blackTheme)
+    var blackTheme by mutableStateOf(
+        XAutodailyTheme.getAppBlack()
+    )
 
-    val currentTheme = mutableStateOf(AppConfUnit.theme)
+    var currentTheme by mutableStateOf(
+        XAutodailyTheme.getAppTheme()
+    )
 
     private fun updateBlack(black: Boolean) {
         AppConfUnit.blackTheme = black
-        blackTheme.value = black
+        blackTheme = black
     }
 
     private fun updateTheme(theme: XAutodailyTheme.Theme) {
         AppConfUnit.theme = theme
-        currentTheme.value = theme
+        currentTheme = theme
     }
 
     fun confirmTheme(theme: XAutodailyTheme.Theme, black: Boolean) {
         updateTheme(theme)
         updateBlack(black)
     }
-
 
 
 }

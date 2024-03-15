@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,10 +34,9 @@ import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
-import me.teble.xposed.autodaily.ui.composable.TopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
-import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
@@ -51,30 +49,17 @@ import java.io.File
 @Composable
 fun SettingScene(
     themeViewModel: ModuleThemeViewModel,
+    hasBackProvider: () -> Boolean,
     onBackClick: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
 
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val showThemeDialog by remember { viewmodel.showThemeDialog }
-
-    val shizukuEnable by remember { viewmodel.shizukuState }
-
-    val hiddenAppIcon by remember { viewmodel.hiddenAppIcon }
-
-    val untrustedTouchEvents by remember { viewmodel.untrustedTouchEvents }
-    val keepAlive by remember { viewmodel.keepAlive }
-    val qqKeepAlive by remember { viewmodel.qqKeepAlive }
-    val timKeepAlive by remember { viewmodel.timKeepAlive }
 
 
-    val theme by remember { themeViewModel.currentTheme }
-    val blackTheme by remember { themeViewModel.blackTheme }
-
-
-    LaunchedEffect(showThemeDialog) {
-        if (showThemeDialog) {
+    LaunchedEffect(viewmodel.showThemeDialog) {
+        if (viewmodel.showThemeDialog) {
             sheetState.expand()
         } else {
             sheetState.hide()
@@ -84,21 +69,20 @@ fun SettingScene(
         viewmodel.updateThemeDialogState(sheetState.isVisible)
     }
     Box {
-        Scaffold(
-            topBar = {
-                TopBar(text = "设置", backClick = onBackClick)
-            },
-            contentWindowInsets = contentWindowInsets,
+        XaScaffold(
+            text = "设置",
+            backClick = onBackClick,
+            hasBackProvider = hasBackProvider,
             containerColor = colors.colorBgLayout
-        ) { contentPadding ->
+        ) {
 
             SettingLayout(
-                shizukuEnable = { shizukuEnable },
-                hiddenAppIcon = { hiddenAppIcon },
-                untrustedTouchEvents = { untrustedTouchEvents },
-                keepAlive = { keepAlive },
-                qqKeepAlive = { qqKeepAlive },
-                timKeepAlive = { timKeepAlive },
+                shizukuEnable = viewmodel::shizukuState,
+                hiddenAppIcon = viewmodel::hiddenAppIcon,
+                untrustedTouchEvents = viewmodel::untrustedTouchEvents,
+                keepAlive = viewmodel::keepAlive,
+                qqKeepAlive = viewmodel::qqKeepAlive,
+                timKeepAlive = viewmodel::timKeepAlive,
 
 
                 updateKeepAliveChecked = viewmodel::updateKeepAliveChecked,
@@ -110,7 +94,6 @@ fun SettingScene(
 
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(contentPadding)
                     .padding(horizontal = 16.dp)
                     .clip(SmootherShape(12.dp))
                     .verticalScroll(rememberScrollState())
@@ -121,9 +104,9 @@ fun SettingScene(
 
         ThemeModelDialog(
             sheetState = sheetState,
-            enable = { showThemeDialog },
-            targetTheme = { theme },
-            targetBlack = { blackTheme },
+            enable = viewmodel::showThemeDialog,
+            targetTheme = themeViewModel::currentTheme,
+            targetBlack = themeViewModel::blackTheme,
             onDismiss = viewmodel::dismissThemeDialog,
 
             onConfirm = themeViewModel::confirmTheme

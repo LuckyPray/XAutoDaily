@@ -3,10 +3,14 @@ package me.teble.xposed.autodaily.ui.dialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,44 +19,45 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.slack.circuit.overlay.OverlayHost
-import com.slack.circuitx.overlays.BottomSheetOverlay
-import com.slack.circuitx.overlays.DialogResult
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.Text
+import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.XAutodailyColors
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 
-suspend fun OverlayHost.showNoticeOverlay(
-    colors: XAutodailyColors,
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun NoticeDialog(
+    sheetState: SheetState,
+    enable: () -> Boolean,
     infoText: () -> String,
+    onDismiss: () -> Unit
+) {
+    if (sheetState.isVisible || enable()) {
 
-): DialogResult {
-    return show(
-        BottomSheetOverlay(
-            model = infoText,
-            onDismiss = { DialogResult.Dismiss },
-            skipPartiallyExpandedState = true,
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = sheetState,
+            containerColor = XAutodailyTheme.colors.colorBgDialog,
+            windowInsets = contentWindowInsets,
             dragHandle = {},
-            sheetContainerColor = colors.colorBgDialog,
-            sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-        ) { text, overlayNavigator ->
+            modifier = Modifier.statusBarsPadding(),
+            scrimColor = XAutodailyTheme.colors.colorBgMask,
+            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+        ) {
             NoticeOverlayUI(
-                infoText = text,
-                onDismiss = {
-                    overlayNavigator.finish(DialogResult.Dismiss)
-                }
+                infoText = infoText,
+                onDismiss = onDismiss
             )
-
         }
-    )
+
+    }
 }
 
 
 @Composable
-fun NoticeOverlayUI(
+private fun NoticeOverlayUI(
     infoText: () -> String,
     onDismiss: () -> Unit
 ) {

@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,15 +15,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.slack.circuit.runtime.CircuitContext
-import com.slack.circuit.runtime.CircuitUiEvent
-import com.slack.circuit.runtime.CircuitUiState
-import com.slack.circuit.runtime.Navigator
-import com.slack.circuit.runtime.internal.rememberStableCoroutineScope
-import com.slack.circuit.runtime.presenter.Presenter
-import com.slack.circuit.runtime.screen.Screen
-import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
+import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
@@ -35,88 +24,21 @@ import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
-import me.teble.xposed.autodaily.utils.openUrl
 
-@Parcelize
-data object DeveloperScreen : Screen {
-    @Stable
-    data class State(
-        private val eventSink: (Event) -> Unit,
-
-        val snackbarHostState: SnackbarHostState,
-        val backClick: () -> Unit = { eventSink(Event.BackClicked) },
-
-        val openAuthorGithub: (String) -> Unit,
-    ) : CircuitUiState
-
-    sealed interface Event : CircuitUiEvent {
-        data object BackClicked : Event
-    }
-}
-
-class DeveloperPresenter(
-    private val screen: DeveloperScreen,
-    private val navigator: Navigator,
-) : Presenter<DeveloperScreen.State> {
-
-    class Factory() : Presenter.Factory {
-        override fun create(
-            screen: Screen,
-            navigator: Navigator,
-            context: CircuitContext
-        ): Presenter<*>? {
-            return when (screen) {
-                is DeveloperScreen -> return DeveloperPresenter(screen, navigator)
-                else -> null
-            }
-        }
-    }
-
-    @Stable
-    @Composable
-    override fun present(): DeveloperScreen.State {
-        val context = LocalContext.current
-        val scope = rememberStableCoroutineScope()
-
-        val snackbarHostState = remember { SnackbarHostState() }
-
-        suspend fun showSnackbar(text: String) {
-            snackbarHostState.showSnackbar(text)
-        }
-        return DeveloperScreen.State(
-            snackbarHostState = snackbarHostState,
-            eventSink = { event ->
-                when (event) {
-                    DeveloperScreen.Event.BackClicked -> navigator.pop()
-                }
-            },
-            openAuthorGithub = {
-                scope.launch {
-                    showSnackbar("正在跳转，请稍后")
-                    context.openUrl(it)
-                }
-
-            }
-
-        )
-    }
-}
 
 @Composable
-fun DeveloperUI(
+fun DeveloperScene(
     backClick: () -> Unit,
-    snackbarHostState: SnackbarHostState,
-    openAuthorGithub: (String) -> Unit,
-    modifier: Modifier,
+    viewmodel: DeveloperViewModel = viewModel()
 ) {
 
+    val context = LocalContext.current
     XaScaffold(
         topBar = {
             TopBar(text = "开发者", backClick = backClick)
         },
-        modifier = modifier,
         snackbarHost = {
-            RoundedSnackbarHost(hostState = snackbarHostState)
+            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
         },
         containerColor = colors.colorBgLayout
     ) {
@@ -129,7 +51,7 @@ fun DeveloperUI(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             AuthorLayout(
-                openAuthorGithub = openAuthorGithub
+                openAuthorGithub = viewmodel.openAuthorGithub(context = context)
             )
         }
     }

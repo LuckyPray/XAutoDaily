@@ -5,9 +5,8 @@ import android.os.Bundle
 import android.view.Window
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.navigationBarLightOldMode
@@ -22,55 +21,52 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         setStatusBarTranslation()
         setNavigationBarTranslation()
-        super.onCreate(savedInstanceState)
-
-        when (XAutodailyTheme.getCurrentTheme()) {
+        enableEdgeToEdge()
+        when (XAutodailyTheme.getAppTheme()) {
             XAutodailyTheme.Theme.Light -> {
-                window.statusBarLightOldMode()
-                window.navigationBarLightOldMode()
+                setSystemBarOldMode()
             }
 
             XAutodailyTheme.Theme.Dark -> {
-                window.statusBarLightOldMode(false)
-                window.navigationBarLightOldMode(false)
+                setSystemBarOldMode(false)
             }
 
             XAutodailyTheme.Theme.System -> {
-                window.statusBarLightOldMode(!isNightMode())
-                window.navigationBarLightOldMode(!isNightMode())
+                setSystemBarOldMode(!isNightMode())
             }
         }
+        super.onCreate(savedInstanceState)
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
 
         setContent {
-            val theme by remember { viewModel.currentTheme }
-            val isBlack by remember { viewModel.blackTheme }
 
-            when (theme) {
-                XAutodailyTheme.Theme.Light -> {
-                    window.statusBarLightMode()
-                    window.navigationBarLightMode()
-                }
+            when (viewModel.currentTheme) {
+                XAutodailyTheme.Theme.Light -> setSystemBarMode()
 
-                XAutodailyTheme.Theme.Dark -> {
-                    window.statusBarLightMode(false)
-                    window.navigationBarLightMode(false)
-                }
+                XAutodailyTheme.Theme.Dark -> setSystemBarMode(false)
 
-                XAutodailyTheme.Theme.System -> {
-                    window.statusBarLightMode(!isNightMode())
-                    window.navigationBarLightMode(!isNightMode())
-                }
+                XAutodailyTheme.Theme.System -> setSystemBarMode(!isNightMode())
+
             }
 
-            XAutodailyTheme(isBlack = isBlack, colorTheme = theme) {
+            XAutodailyTheme(isBlack = viewModel.blackTheme, colorTheme = viewModel.currentTheme) {
                 ModuleApp(viewModel)
             }
 
         }
+    }
+
+    private fun setSystemBarOldMode(enable: Boolean = true) {
+        window.statusBarLightOldMode(enable)
+        window.navigationBarLightOldMode(enable)
+    }
+
+    private fun setSystemBarMode(enable: Boolean = true) {
+        window.statusBarLightMode(enable)
+        window.navigationBarLightMode(enable)
     }
 
     /**
