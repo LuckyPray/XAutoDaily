@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.collections.immutable.persistentMapOf
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.DataMigrationService
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
@@ -341,7 +342,7 @@ private fun KeepTimeItem(
         val confFile = File(confDir, "conf.json")
         val conf = ShizukuConf(
             shizukuEnable() && keepAlive(),
-            mutableMapOf<String, Boolean>().apply {
+            persistentMapOf<String, Boolean>().apply {
                 put(hostPackage, hostKeepAlive())
             })
         val confString = conf.toJsonString()

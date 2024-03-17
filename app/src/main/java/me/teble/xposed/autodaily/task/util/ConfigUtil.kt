@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.task.util
 import cn.hutool.core.codec.Base64Decoder
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
+import kotlinx.collections.immutable.persistentListOf
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config.xaConfig
@@ -157,7 +158,7 @@ object ConfigUtil {
         defaultConf ?: let {
             LogUtil.w("加载默认配置失败")
             ToastUtil.send("加载默认配置失败")
-            return TaskProperties(0, 0, listOf(), listOf())
+            return TaskProperties(0, 0, persistentListOf(), persistentListOf())
         }
         if (conf == null) {
             conf = defaultConf
@@ -269,9 +270,6 @@ object ConfigUtil {
                 return true
             }
         }
-        if (nextShouldExecTime <= now.format()) {
-            return true
-        }
-        return false
+        return nextShouldExecTime <= now.format()
     }
 }

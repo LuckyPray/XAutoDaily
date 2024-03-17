@@ -1,9 +1,12 @@
 package me.teble.xposed.autodaily.task.cron.pattent
 
 import cn.hutool.core.collection.CollUtil
+import kotlinx.collections.immutable.ImmutableList
 import me.teble.xposed.autodaily.task.cron.pattent.matcher.PatternMatcher
 import me.teble.xposed.autodaily.task.cron.pattent.parser.PatternParser
-import java.util.*
+import java.util.Calendar
+import java.util.GregorianCalendar
+import java.util.TimeZone
 
 
 /**
@@ -68,7 +71,7 @@ import java.util.*
  * @author Looly
  */
 class CronPattern(private val pattern: String) {
-    private val matchers: List<PatternMatcher> = PatternParser.parse(pattern)
+    private val matchers: ImmutableList<PatternMatcher> = PatternParser.parse(pattern)
 
     /**
      * 给定时间是否匹配定时任务表达式

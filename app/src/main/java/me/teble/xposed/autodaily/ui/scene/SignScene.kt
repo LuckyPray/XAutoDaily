@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.task.model.TaskGroup
+import me.teble.xposed.autodaily.ui.XAutodailyConstants
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -44,7 +45,6 @@ fun SignScene(
     onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
     signViewModel: SignViewModel = viewModel()
 ) {
-    val taskGroupsState = remember { signViewModel.taskGroupsState }
     val colors = colors
     XaScaffold(
         text = "签到配置",
@@ -67,7 +67,7 @@ fun SignScene(
         )
         GroupColumn(
             onNavigateToEditEnvs = onNavigateToEditEnvs,
-            taskGroupList = { taskGroupsState },
+            taskGroupList = XAutodailyConstants.TaskGroupsList,
             enable = signViewModel::globalEnable
         )
     }
@@ -77,7 +77,7 @@ fun SignScene(
 @Composable
 private fun ColumnScope.GroupColumn(
     onNavigateToEditEnvs: (taskGroup: String, taskId: String) -> Unit,
-    taskGroupList: () -> List<TaskGroup>,
+    taskGroupList: List<TaskGroup>,
     enable: () -> Boolean
 ) {
     Column(
@@ -89,7 +89,7 @@ private fun ColumnScope.GroupColumn(
             .defaultNavigationBarPadding(),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        taskGroupList().forEach { taskGroup ->
+        taskGroupList.forEach { taskGroup ->
             key(taskGroup.id) {
                 SignItem(onNavigateToEditEnvs, taskGroup, enable)
             }

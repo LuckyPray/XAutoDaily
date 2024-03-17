@@ -1,5 +1,7 @@
 package me.teble.xposed.autodaily.task.filter
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskCheckExecuteFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskExecuteBasicFilter
@@ -18,26 +20,24 @@ import java.net.SocketTimeoutException
 import java.util.Date
 
 class GroupTaskFilterChain(
-    val taskGroup: TaskGroup
+    val taskGroup: TaskGroup,
+    private var pos: Int = 0,
+    private val filters: ImmutableList<GroupTaskFilter>
 ) : FilterChain {
-
-    private var pos = 0
-    private val filters: MutableList<GroupTaskFilter> = ArrayList()
 
     companion object {
         fun build(taskGroup: TaskGroup): FilterChain {
-            val chain = GroupTaskFilterChain(taskGroup)
-            chain.add(GroupTaskCheckExecuteFilter())
-            chain.add(GroupTaskPreFilter())
-            chain.add(GroupTaskRelayBuilderFilter())
-            chain.add(GroupTaskExecuteBasicFilter())
+            val builder = persistentListOf<GroupTaskFilter>().builder().apply {
+                add(GroupTaskCheckExecuteFilter())
+                add(GroupTaskPreFilter())
+                add(GroupTaskRelayBuilderFilter())
+                add(GroupTaskExecuteBasicFilter())
+            }
+            val chain = GroupTaskFilterChain(taskGroup = taskGroup, filters = builder.build())
             return chain
         }
     }
 
-    fun add(groupTaskFilter: GroupTaskFilter) {
-        filters.add(groupTaskFilter)
-    }
 
     override fun doFilter(
         relayTaskMap: MutableMap<String, Task>,

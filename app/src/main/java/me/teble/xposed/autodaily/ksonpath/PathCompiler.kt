@@ -1,5 +1,9 @@
 package me.teble.xposed.autodaily.ksonpath
 
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
+
 internal object PathCompiler {
 
     /**
@@ -7,7 +11,7 @@ internal object PathCompiler {
      * @return List of [Token] to read against a JSON
      */
     @Throws(IllegalArgumentException::class)
-    internal fun compile(path: String): List<Token> {
+    internal fun compile(path: String): ImmutableList<Token> {
         if (path.isBlank()) {
             throw IllegalArgumentException("Path cannot be empty")
         }
@@ -27,7 +31,7 @@ internal object PathCompiler {
             val key = keyBuilder.toString()
             val token = when {
                 isDeepScan && isWildcard -> DeepScanWildcardToken()
-                isDeepScan -> DeepScanObjectAccessorToken(listOf(key))
+                isDeepScan -> DeepScanObjectAccessorToken(persistentListOf(key))
                 isWildcard -> WildcardToken()
                 else -> ObjectAccessorToken(key)
             }
@@ -72,9 +76,15 @@ internal object PathCompiler {
                         if (isDeepScan) {
                             val deepScanToken: Token? = when (token) {
                                 is WildcardToken -> DeepScanWildcardToken()
-                                is ObjectAccessorToken -> DeepScanObjectAccessorToken(listOf(token.key))
+                                is ObjectAccessorToken -> DeepScanObjectAccessorToken(
+                                    persistentListOf(token.key)
+                                )
                                 is MultiObjectAccessorToken -> DeepScanObjectAccessorToken(token.keys)
-                                is ArrayAccessorToken -> DeepScanArrayAccessorToken(listOf(token.index))
+                                is ArrayAccessorToken -> DeepScanArrayAccessorToken(
+                                    persistentListOf(
+                                        token.index
+                                    )
+                                )
                                 is MultiArrayAccessorToken -> DeepScanArrayAccessorToken(token.indices)
                                 is ArrayLengthBasedRangeAccessorToken -> DeepScanLengthBasedArrayAccessorToken(token.startIndex, token.endIndex, token.offsetFromEnd)
                                 else -> null
@@ -98,7 +108,7 @@ internal object PathCompiler {
             addObjectAccessorToken()
         }
 
-        return tokens.toList()
+        return tokens.toImmutableList()
     }
 
     /**
@@ -276,7 +286,7 @@ internal object PathCompiler {
 
         val token: Token? = if (isObjectAccessor) {
             if (keys.size > 1) {
-                MultiObjectAccessorToken(keys)
+                MultiObjectAccessorToken(keys.toImmutableList())
             } else {
                 keys.firstOrNull()?.let {
                     ObjectAccessorToken(it)
@@ -294,7 +304,7 @@ internal object PathCompiler {
                         val endIndex = if (!isEndNegative) end else null
                         ArrayLengthBasedRangeAccessorToken(start, endIndex, offsetFromEnd)
                     } else {
-                        MultiArrayAccessorToken(IntRange(start, end - 1).toList())
+                        MultiArrayAccessorToken(IntRange(start, end - 1).toImmutableList())
                     }
                 }
                 hasStartColon && hasEndColon -> {
@@ -308,7 +318,7 @@ internal object PathCompiler {
                         ArrayLengthBasedRangeAccessorToken(0, null, end)
                     } else {
                         // take all from beginning of list up to $end
-                        MultiArrayAccessorToken(IntRange(0, end - 1).toList())
+                        MultiArrayAccessorToken(IntRange(0, end - 1).toImmutableList())
                     }
                 }
                 hasEndColon -> {
@@ -316,7 +326,8 @@ internal object PathCompiler {
                     ArrayLengthBasedRangeAccessorToken(start)
                 }
                 keys.size == 1 -> ArrayAccessorToken(keys[0].toInt(10))
-                keys.size > 1 -> MultiArrayAccessorToken(keys.map { it.toInt(10) })
+                keys.size > 1 -> MultiArrayAccessorToken(keys.map { it.toInt(10) }
+                    .toImmutableList())
                 else -> null
             }
         }

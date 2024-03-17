@@ -328,7 +328,7 @@ dependencies {
 
     compileOnly(libs.api)
     implementation(libs.ezxhelper)
-
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.protobuf.kotlin.lite)
     compileOnly(libs.protoc)
     coreLibraryDesugaring(libs.desugar.jdk.libs)

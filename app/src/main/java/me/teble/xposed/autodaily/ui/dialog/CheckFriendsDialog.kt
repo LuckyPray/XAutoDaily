@@ -35,6 +35,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.teble.xposed.autodaily.ui.XAutodailyConstants
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -57,7 +58,7 @@ fun CheckFriendsDialog(
     onDismiss: () -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
-    val friendsState = remember { viewmodel.friendsState }
+    val friendsState = XAutodailyConstants.FriendList
     if (state.isVisible || enable()) {
         ModalBottomSheet(
             onDismissRequest = onDismiss,
@@ -70,7 +71,7 @@ fun CheckFriendsDialog(
             shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         ) {
             DialogTopBar(
-                text = "好友列表（${viewmodel.friendsState.size}）",
+                text = "好友列表（${friendsState.size}）",
                 iconClick = onDismiss
             )
 

@@ -1,12 +1,14 @@
 package me.teble.xposed.autodaily.task.model
 
-import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import kotlinx.collections.immutable.PersistentList
+import kotlinx.collections.immutable.PersistentMap
 import kotlinx.serialization.Serializable
 import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.math.BigInteger
 
-@Immutable
+@Stable
 @Serializable
 data class TaskProperties(
     // 配置文件版本
@@ -14,19 +16,21 @@ data class TaskProperties(
     // 最小支持app版本
     val minAppVersion: Int,
     // 配置更新日志
-    val updateLogs: List<UpdateInfo>,
+    @Serializable(with = UpdateInfoPersistentListSerializer::class)
+    val updateLogs: PersistentList<UpdateInfo>,
     // 任务组
-    val taskGroups: List<TaskGroup>,
+    @Serializable(with = TaskGroupPersistentListSerializer::class)
+    val taskGroups: PersistentList<TaskGroup>,
 )
 
-@Immutable
+@Stable
 @Serializable
 data class UpdateInfo(
     val version: Int,
     val desc: String
 )
 
-@Immutable
+@Stable
 @Serializable
 data class TaskGroup(
     // 组名
@@ -35,12 +39,14 @@ data class TaskGroup(
     // 例如：mini|1108057289|超级萌宠、mini|1108789561|情侣空间
     val type: String,
     // 预处理任务列表
-    val preTasks: List<Task>,
+    @Serializable(with = TaskPersistentListSerializer::class)
+    val preTasks: PersistentList<Task>,
     // 任务列表
-    val tasks: List<Task>,
+    @Serializable(with = TaskPersistentListSerializer::class)
+    val tasks: PersistentList<Task>,
 )
 
-@Immutable
+@Stable
 @Serializable
 data class Task(
     // 任务名
@@ -56,9 +62,11 @@ data class Task(
     // 依赖task的id，有些任务需要后置请求
     val rear: String?,
     // 环境变量，允许自定义内容
-    val envs: List<TaskEnv>?,
+    @Serializable(with = TaskEnvPersistentListSerializer::class)
+    val envs: PersistentList<TaskEnv>?,
     // 执行条件，如果为 null，表示无条件执行
-    val conditions: List<TaskCondition>?,
+    @Serializable(with = TaskConditionPersistentListSerializer::class)
+    val conditions: PersistentList<TaskCondition>?,
     // 重复请求次数，允许通过环境变量自定义
     val repeat: String,
     // 延迟（秒）
@@ -68,7 +76,8 @@ data class Task(
     // 请求方法
     val reqMethod: String,
     // 请求头
-    val reqHeaders: Map<String, String>?,
+    @Serializable(with = ReqHeadersPersistentMapSerializer::class)
+    val reqHeaders: PersistentMap<String, String>?,
     // 请求体
     val reqData: String?,
     // 当前任务所需要访问的域名，如果为qq域名，则获取不同域下的cookie
@@ -76,14 +85,17 @@ data class Task(
     // 请求回调
     val callback: TaskCallback
 ) {
-    constructor(id: String): this(id, "", null, null, null, null, null, "1", 0, "", "", null, null, null,
-        TaskCallback(null, null, null, null, null, null))
+    constructor(id: String) : this(
+        id, "", null, null, null, null, null, "1", 0, "", "", null, null, null,
+        TaskCallback(null, null, null, null, null, null)
+    )
+
     val isRelayTask = cron == null
     val isBasic = cron == "basic"
     val isCronTask = !isRelayTask && !isBasic
 }
 
-@Immutable
+@Stable
 @Serializable
 data class TaskEnv(
     // 变量名
@@ -98,13 +110,14 @@ data class TaskEnv(
     val desc: String,
 )
 
-@Immutable
+@Stable
 @Serializable
 data class TaskCallback(
     // 响应的data提取正则，如果为null，则表示不需要处理
     val dataRegex: String?,
     // 字段提取器列表
-    val extracts: List<MsgExtract>?,
+    @Serializable(with = MsgExtractPersistentMapSerializer::class)
+    val extracts: PersistentList<MsgExtract>?,
     // 判断任务是否执行成功的断言器，如果为空则使用http code
     val assert: Assert?,
     // 签到失败提示 eval string，如果为空则使用默认成功提示：执行成功
@@ -112,10 +125,11 @@ data class TaskCallback(
     // 签到失败提示 eval string，如果为空则使用默认错误提示：执行失败
     val errMsg: String?,
     // 签到提示的替换规则
-    val replaces: List<MsgReplace>?
+    @Serializable(with = MsgReplacePersistentMapSerializer::class)
+    val replaces: PersistentList<MsgReplace>?
 )
 
-@Immutable
+@Stable
 @Serializable
 data class MsgExtract(
     // headers/data，提取响应中返回的响应头或者响应体
@@ -128,7 +142,7 @@ data class MsgExtract(
     val value: String,
 )
 
-@Immutable
+@Stable
 @Serializable
 data class Assert(
     // eval string
@@ -137,7 +151,7 @@ data class Assert(
     val value: String,
 )
 
-@Immutable
+@Stable
 @Serializable
 data class TaskCondition(
     // 任务执行条件，eval string
@@ -163,25 +177,35 @@ fun TaskCondition.test(env: MutableMap<String, Any>): Boolean {
         "!=" -> v1.toString() != v2.toString()
         ">" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) > BigInteger(v2) else v1.toString() > v2.toString()
         "<" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) < BigInteger(v2) else v1.toString() < v2.toString()
-        ">=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) >= BigInteger(v2) else v1.toString() >= v2.toString()
-        "<=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) <= BigInteger(v2) else v1.toString() <= v2.toString()
+        ">=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) >= BigInteger(
+            v2
+        ) else v1.toString() >= v2.toString()
+
+        "<=" -> if (isNumber(v1 as String) and isNumber(v2 as String)) BigInteger(v1) <= BigInteger(
+            v2
+        ) else v1.toString() <= v2.toString()
+
         "in" -> {
             when (v2) {
                 is Iterable<*> -> {
                     v2.contains(v1)
                 }
+
                 is String -> {
                     if (v2.startsWith("[") && v2.endsWith("]")) {
-                        v2.substring(1, v2.length - 1).split(",").map { it.trim() }.contains(v1.toString())
+                        v2.substring(1, v2.length - 1).split(",").map { it.trim() }
+                            .contains(v1.toString())
                     } else {
                         v2.contains(v1.toString())
                     }
                 }
+
                 else -> {
                     throw IllegalArgumentException("var2 must be Iterable or String")
                 }
             }
         }
+
         else -> throw IllegalArgumentException("unknown operator: $operator")
     }
 }

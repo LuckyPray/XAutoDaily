@@ -16,10 +16,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
@@ -36,7 +34,6 @@ class ModuleViewModel : ViewModel() {
 
 
     val shizukuState by derivedStateOf {
-
         if (ShizukuApi.binderAvailable) {
             if (!ShizukuApi.isPermissionGranted) {
                 ShizukuState.Warn(Shizuku.getVersion(), "点击此卡片进行授权")
@@ -57,17 +54,15 @@ class ModuleViewModel : ViewModel() {
 
     val snackbarHostState = SnackbarHostState()
 
-    private val peekServiceJob = viewModelScope.launch(Main) {
+    private val peekServiceJob
+        get() = viewModelScope.launch(IO) {
             while (!shizukuDaemonRunning) {
-                withContext(IO) {
-                    shizukuDaemonRunning = peekUserService()
-                    delay(1000)
-                }
+                shizukuDaemonRunning = peekUserService()
+                delay(1000)
 
             }
             bindUserService()
-
-    }
+        }
 
     /**
      * 用于与Shizuku服务的连接和断开

@@ -31,7 +31,7 @@ class XaApplication : MultiDexApplication() {
     }
 
 
-    var qPackageState = mutableStateMapOf<String, Boolean>()
+    val qPackageState = mutableStateMapOf<String, Boolean>()
 
 
     @SuppressLint("UnsafeDynamicallyLoadedCode")
@@ -67,12 +67,12 @@ suspend fun fetchAppList() {
         val pm = xaApp.packageManager
         pm.getInstalledApplications(GET_META_DATA).let {
             Log.d("XALog", it.count().toString())
-            it.forEach { info ->
+            it.filter { info ->
+                qPackageSet.contains(info.packageName)
+            }.forEach { info ->
                 val packageName = info.packageName
-                if (qPackageSet.contains(packageName)) {
-                    Log.d("XALog", packageName)
-                    xaApp.qPackageState[packageName] = true
-                }
+                Log.d("XALog", packageName)
+                xaApp.qPackageState[packageName] = true
             }
         }
     }

@@ -1,8 +1,10 @@
 package me.teble.xposed.autodaily.ui.theme
 
-import androidx.compose.runtime.Immutable
+
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 
+@Stable
 val LightColorPalette = XAutodailyColors(
     themeColor = Color(0xFF0095FF),
     rippleColor = Color(0xFF3C4043),
@@ -30,7 +32,7 @@ val LightColorPalette = XAutodailyColors(
 
     )
 
-
+@Stable
 val DarkColorPalette = XAutodailyColors(
     themeColor = Color(0xFF47B6FF),
     rippleColor = Color(0xFFFFFFFF),
@@ -56,6 +58,7 @@ val DarkColorPalette = XAutodailyColors(
     colorDialogDivider = Color(0xFF474C4F),
 )
 
+@Stable
 val BlackColorPalette = XAutodailyColors(
     themeColor = Color(0xFF47B6FF),
     rippleColor = Color(0xFFFFFFFF),
@@ -85,7 +88,7 @@ val BlackColorPalette = XAutodailyColors(
 /**
  * 这是颜色对应的类
  */
-@Immutable
+@Stable
 data class XAutodailyColors(
     val themeColor: Color,
     val rippleColor: Color,

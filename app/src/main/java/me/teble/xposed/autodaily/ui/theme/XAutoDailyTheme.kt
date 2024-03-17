@@ -18,14 +18,13 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import me.teble.xposed.autodaily.activity.common.AppConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit
 
-internal val LocalXAutodailyShapes = staticCompositionLocalOf {
+val LocalXAutodailyShapes = staticCompositionLocalOf {
     XAutodailyShapes
 }
 
-internal val LocalXAutodailyColors = staticCompositionLocalOf {
+val LocalXAutodailyColors = staticCompositionLocalOf {
     LightColorPalette
 }
-
 
 object XAutodailyTheme {
     val shapes: XAutodailyShapes

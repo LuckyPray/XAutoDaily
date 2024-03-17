@@ -12,9 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -56,17 +54,8 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewModel()) {
 
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // 展示对应 snackbarText
-    LaunchedEffect(Unit) {
-        viewmodel.snackbarText.collect {
-            snackbarHostState.showSnackbar(it)
-        }
-    }
-
     XaScaffold(
-        snackbarHost = { RoundedSnackbarHost(hostState = snackbarHostState) },
+        snackbarHost = { RoundedSnackbarHost(hostState = viewmodel.snackbarHostState) },
         topBar = { ModuleTopBar() },
         modifier = Modifier,
         containerColor = colors.colorBgLayout
@@ -141,7 +130,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 
             EntryLayout(
                 openTimSetting = {
-                    viewmodel.openHostSetting(context, QQTypeEnum.QQ)
+                    viewmodel.openHostSetting(context, QQTypeEnum.TIM)
                 },
                 openQQSetting = {
                     viewmodel.openHostSetting(context, QQTypeEnum.QQ)

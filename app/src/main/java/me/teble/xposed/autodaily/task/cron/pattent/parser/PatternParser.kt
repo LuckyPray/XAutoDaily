@@ -2,6 +2,8 @@ package me.teble.xposed.autodaily.task.cron.pattent.parser
 
 import cn.hutool.core.lang.Assert
 import cn.hutool.core.util.StrUtil
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import me.teble.xposed.autodaily.task.cron.CronException
 import me.teble.xposed.autodaily.task.cron.pattent.Part
 import me.teble.xposed.autodaily.task.cron.pattent.matcher.AlwaysTrueMatcher
@@ -30,7 +32,7 @@ object PatternParser {
      * @param cronPattern 复合表达式
      * @return [List]
      */
-    fun parse(cronPattern: String): List<PatternMatcher> {
+    fun parse(cronPattern: String): ImmutableList<PatternMatcher> {
         return parseGroupPattern(cronPattern)
     }
 
@@ -43,13 +45,11 @@ object PatternParser {
      * @param groupPattern 复合表达式
      * @return [List]
      */
-    private fun parseGroupPattern(groupPattern: String): List<PatternMatcher> {
+    private fun parseGroupPattern(groupPattern: String): ImmutableList<PatternMatcher> {
         val patternList = StrUtil.splitTrim(groupPattern, '|')
-        val patternMatchers: MutableList<PatternMatcher> = ArrayList(patternList.size)
-        for (pattern in patternList) {
-            patternMatchers.add(parseSinglePattern(pattern))
-        }
-        return patternMatchers
+        return patternList.map {
+            parseSinglePattern(it)
+        }.toImmutableList()
     }
 
     /**
