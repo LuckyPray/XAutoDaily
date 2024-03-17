@@ -2,11 +2,13 @@ package me.teble.xposed.autodaily.ui.scene
 
 import android.content.Context
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.utils.openUrl
 
+@Stable
 class DeveloperViewModel : ViewModel() {
 
     val snackbarHostState = SnackbarHostState()

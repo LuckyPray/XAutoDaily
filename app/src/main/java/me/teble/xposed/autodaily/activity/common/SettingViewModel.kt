@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.activity.common
 
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 
+@Stable
 class SettingViewModel : ViewModel() {
 
     val shizukuState by derivedStateOf {

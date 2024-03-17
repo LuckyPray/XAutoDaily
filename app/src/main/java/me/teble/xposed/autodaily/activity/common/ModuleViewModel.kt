@@ -7,6 +7,8 @@ import android.content.ServiceConnection
 import android.os.IBinder
 import android.os.RemoteException
 import android.util.Log
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,10 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
@@ -27,7 +29,7 @@ import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
 import rikka.shizuku.Shizuku
 
-
+@Stable
 class ModuleViewModel : ViewModel() {
     private var shizukuDaemonRunning by mutableStateOf(false)
     private var shizukuErrInfo by mutableStateOf("")
@@ -53,17 +55,18 @@ class ModuleViewModel : ViewModel() {
     }
 
 
-    private val _snackbarText = MutableSharedFlow<String>()
-    val snackbarText = _snackbarText.asSharedFlow()
+    val snackbarHostState = SnackbarHostState()
 
-    private val peekServiceJob by lazy {
-        viewModelScope.launch(IO) {
+    private val peekServiceJob = viewModelScope.launch(Main) {
             while (!shizukuDaemonRunning) {
-                shizukuDaemonRunning = peekUserService()
-                delay(1000)
+                withContext(IO) {
+                    shizukuDaemonRunning = peekUserService()
+                    delay(1000)
+                }
+
             }
             bindUserService()
-        }
+
     }
 
     /**
@@ -176,7 +179,7 @@ class ModuleViewModel : ViewModel() {
      */
     private fun showSnackbar(text: String) {
         viewModelScope.launch {
-            _snackbarText.emit(text)
+            snackbarHostState.showSnackbar(text)
         }
     }
 

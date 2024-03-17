@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -9,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.ui.ConfUnit
 
+@Stable
 class SettingViewModel : ViewModel() {
 
     var showTaskToast by mutableStateOf(ConfUnit.showTaskToast)

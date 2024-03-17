@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.ui.scene
 
 import android.content.Context
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -25,6 +26,7 @@ import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.openUrl
 import kotlin.concurrent.thread
 
+@Stable
 class AboutViewModel : ViewModel() {
 
     var moduleVersionName by mutableStateOf("")

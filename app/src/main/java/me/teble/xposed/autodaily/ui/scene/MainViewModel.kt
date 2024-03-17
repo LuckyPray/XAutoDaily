@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -15,6 +16,7 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.TaskExecutor
 
+@Stable
 class MainViewModel : ViewModel() {
 
     private var lastClickTime = 0L

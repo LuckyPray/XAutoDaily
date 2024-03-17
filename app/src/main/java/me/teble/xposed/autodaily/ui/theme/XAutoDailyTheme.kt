@@ -12,27 +12,30 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import me.teble.xposed.autodaily.activity.common.AppConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit
 
-val LocalXAutodailyShapes = compositionLocalOf {
+internal val LocalXAutodailyShapes = staticCompositionLocalOf {
     XAutodailyShapes
 }
 
-val LocalXAutodailyColors = compositionLocalOf {
+internal val LocalXAutodailyColors = staticCompositionLocalOf {
     LightColorPalette
 }
 
 
 object XAutodailyTheme {
     val shapes: XAutodailyShapes
+        @ReadOnlyComposable
         @Composable
         get() = LocalXAutodailyShapes.current
 
 
     val colors: XAutodailyColors
+        @ReadOnlyComposable
         @Composable
         get() = LocalXAutodailyColors.current
 
