@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.hook
 import android.util.Log
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookReplace
+import kotlinx.collections.immutable.persistentSetOf
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.QLog
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
@@ -16,7 +17,7 @@ class QLogHook : BaseHook() {
     override val enabled: Boolean
         get() = false
 
-    private val qTagFilter = setOf<String>(
+    private val qTagFilter = persistentSetOf(
 //        "PublicAccountManager",
 //        "reportsendMenuEventequest",
 //        "PublicAccountManager-Click:",

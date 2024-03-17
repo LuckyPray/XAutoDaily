@@ -17,12 +17,10 @@ import java.lang.Integer.min
 object FuncTaskReqUtil : ITaskReqUtil {
 
     override fun create(task: Task, env: MutableMap<String, Any>): List<TaskRequest> {
-        return mutableListOf<TaskRequest>().apply {
-            val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
+        val evalUrls = EnvFormatUtil.formatList(task.reqUrl, task.domain, env)
+        return buildList {
             LogUtil.d("urls -> ${evalUrls.toJsonString()}")
-            evalUrls.forEach {
-                add(TaskRequest(it, null, null, null, null))
-            }
+            addAll(evalUrls.map { TaskRequest(it, null, null, null, null) })
         }
     }
 

@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.hook.function.proxy
 
 import android.content.Context
+import kotlinx.collections.immutable.toPersistentHashMap
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.impl.FavoriteManager
@@ -33,30 +34,28 @@ object FunctionPool {
         PublicAccountManager::class.java,
     )
 
-    private val functionMap = HashMap<Class<out BaseFunction>, BaseFunction>().let {
-        val strategy = AndroidClassLoadingStrategy.Wrapping(
-            hostContext.getDir(
-                "generated",
-                Context.MODE_PRIVATE
-            )
+    private val strategy = AndroidClassLoadingStrategy.Wrapping(
+        hostContext.getDir(
+            "generated",
+            Context.MODE_PRIVATE
         )
-        for (cls in functionArray) {
-            if (Modifier.toString(cls.modifiers).contains("final")) {
-                throw RuntimeException("修饰符错误")
-            }
-            it[cls] = ByteBuddy()
-                .subclass(cls)
-                .method(
-                    ElementMatchers.not(ElementMatchers.isDeclaredBy(Any::class.java))
-                        .and(ElementMatchers.not(ElementMatchers.isOverriddenFrom(BaseFunction::class.java)))
-                )
-                .intercept(MethodDelegation.to(FunctionProxy()))
-                .make()
-                .load(cls.classLoader, strategy)
-                .loaded.getDeclaredConstructor().newInstance()
+    )
+    private val functionMap = functionArray.associateWith { cls ->
+        if (Modifier.toString(cls.modifiers).contains("final")) {
+            throw RuntimeException("修饰符错误")
         }
-        it
-    }
+        ByteBuddy()
+            .subclass(cls)
+            .method(
+                ElementMatchers.not(ElementMatchers.isDeclaredBy(Any::class.java))
+                    .and(ElementMatchers.not(ElementMatchers.isOverriddenFrom(BaseFunction::class.java)))
+            )
+            .intercept(MethodDelegation.to(FunctionProxy()))
+            .make()
+            .load(cls.classLoader, strategy)
+            .loaded.getDeclaredConstructor().newInstance()
+    }.toPersistentHashMap()
+
 
     @Suppress("UNCHECKED_CAST")
     fun <T : BaseFunction> getFunction(functionClass: Class<T>) = functionMap[functionClass] as T

@@ -47,7 +47,7 @@ open class TicketManager : BaseFunction(
 
     private fun getTicketManager(): TicketManager {
         if (ticketManagerMap.containsKey(uin)) {
-            return ticketManagerMap[uin]!!
+            return ticketManagerMap.getValue(uin)
         }
         val manager = QApplicationUtil.appRuntime.getManager(2) as TicketManager
         ticketManagerMap[uin] = manager

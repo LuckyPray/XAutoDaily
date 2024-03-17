@@ -2,6 +2,9 @@ package me.teble.xposed.autodaily.hook.config
 
 import android.annotation.SuppressLint
 import com.tencent.mmkv.MMKV
+import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.persistentSetOf
+import kotlinx.collections.immutable.toImmutableMap
 import me.teble.xposed.autodaily.hook.base.getSimpleName
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
@@ -58,22 +61,20 @@ object Config {
             }
         }
 
-    private val obfuscate = mapOf(
-        "Lcom/tencent/mobileqq/activity/ChatActivityFacade;" to setOf(
+    private val obfuscate = persistentMapOf(
+        "Lcom/tencent/mobileqq/activity/ChatActivityFacade;" to persistentSetOf(
             "^reSendEmo",
         ),
-        "Lcooperation/qzone/PlatformInfor;" to setOf(
+        "Lcooperation/qzone/PlatformInfor;" to persistentSetOf(
             "^52b7f2$",
             "^qimei",
         ),
-        "Lcom/tencent/mobileqq/service/MobileQQServiceBase;" to setOf(
+        "Lcom/tencent/mobileqq/service/MobileQQServiceBase;" to persistentSetOf(
             "^req_pb_protocol_flag$", "^MobileQQServiceBase$"
         ),
     )
     const val hooksVersion = 2
-    val confuseInfo = mutableMapOf<String, Set<String>>().apply {
-        obfuscate.forEach { (k, v) ->
-            put(getSimpleName(k), v)
-        }
-    }
+    val confuseInfo = obfuscate.mapKeys { (k, _) ->
+        getSimpleName(k)
+    }.toImmutableMap()
 }
