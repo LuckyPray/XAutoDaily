@@ -78,10 +78,10 @@ fun FloatingButton(
                 ) {
                     onClick()
                 }
-                .padding(12.dp),
+                .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Save, "保存", modifier = Modifier.size(32.dp), tint = Color(0xFFFFFFFF))
+            Icon(Icons.Save, "保存", modifier = Modifier.size(24.dp), tint = Color(0xFFFFFFFF))
         }
     }
 }
