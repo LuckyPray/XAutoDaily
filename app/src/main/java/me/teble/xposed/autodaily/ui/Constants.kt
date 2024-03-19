@@ -11,6 +11,7 @@ import kotlinx.serialization.json.decodeFromStream
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.data.Dependency
@@ -31,6 +32,13 @@ private val LocalTaskGroupsState = staticCompositionLocalOf {
     mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray())
 }
 
+private val LocalTurnTaskState = staticCompositionLocalOf {
+    mutableStateListOf(
+        *ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten().filter { it.enable }
+            .toTypedArray()
+    )
+}
+
 object XAutodailyConstants {
     val FriendList: SnapshotStateList<Friend>
         @ReadOnlyComposable
@@ -46,4 +54,9 @@ object XAutodailyConstants {
         @ReadOnlyComposable
         @Composable
         get() = LocalTaskGroupsState.current
+
+    val TurnTaskState: SnapshotStateList<Task>
+        @ReadOnlyComposable
+        @Composable
+        get() = LocalTurnTaskState.current
 }

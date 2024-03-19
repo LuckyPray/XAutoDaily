@@ -147,8 +147,8 @@ fun ThemeModelDialog(
                     theme != targetTheme() || black != targetBlack()
                 },
                 onClick = {
-                    onConfirm(theme, black)
                     onDismiss()
+                    onConfirm(theme, black)
                 }
             )
         }

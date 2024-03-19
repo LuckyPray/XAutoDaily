@@ -3,15 +3,14 @@ package me.teble.xposed.autodaily.ui.scene
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,7 +19,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.ui.XAutodailyConstants.TurnTaskState
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
@@ -41,13 +40,10 @@ fun SignStateScene(
         backClick = backClick,
         containerColor = colors.colorBgLayout
     ) {
-        val tasksState = remember {
-            mutableStateListOf<Task>()
-        }
 
 
         AnimatedVisibility(
-            tasksState.isNotEmpty(),
+            TurnTaskState.isNotEmpty(),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -62,15 +58,15 @@ fun SignStateScene(
         Column(
             modifier = Modifier
                 .clip(SmootherShape(12.dp))
+                .fillMaxWidth()
                 .drawBehind {
                     drawRect(colors.colorBgContainer)
                 }
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding(),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
 
-            tasksState.forEach { task ->
+            TurnTaskState.forEach { task ->
                 val title by remember {
                     derivedStateOf { task.id }
                 }
@@ -106,7 +102,9 @@ private fun StateItem(
 ) {
     val colors = colors
     Column(
-        modifier = modifier.padding(vertical = 20.dp, horizontal = 16.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
         Text(
             text = text,

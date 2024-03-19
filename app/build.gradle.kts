@@ -347,7 +347,6 @@ dependencies {
     implementation(libs.androidx.compose.materialWindow)
 
     implementation(libs.androidx.material3.adaptive)
-    implementation(libs.compose.shadows.plus)
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose

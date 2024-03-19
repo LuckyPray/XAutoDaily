@@ -1,12 +1,11 @@
 [versions]
 # 依赖版本号
 activityCompose = "1.8.2"
-agp = "8.3.0"
+agp = "8.3.1"
 ahoCorasickDoubleArrayTrie = "1.2.3"
 annotation = "1.7.1"
 apiVersion = "13.1.5"
 byteBuddyAndroid = "1.14.12"
-composeshadowsplus = "1.0.4"
 desugar_jdk_libs = "2.0.4"
 ezxhelper = "1.0.3"
 api = "82"
@@ -39,7 +38,6 @@ buildTool = "35.0.0-rc1"
 ndk = "26.2.11394342"
 compose-compiler = "1.5.10"
 jvm-target = "21"
-navigationRuntimeKtx = "2.7.7"
 navigationCompose = "2.7.7"
 
 
@@ -54,7 +52,7 @@ androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-view
 
 
 byte-buddy-android = { module = "net.bytebuddy:byte-buddy-android", version.ref = "byteBuddyAndroid" }
-compose-shadows-plus = { module = "com.github.GIGAMOLE:ComposeShadowsPlus", version.ref = "composeshadowsplus" }
+
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 flatbuffers-java = { module = "com.google.flatbuffers:flatbuffers-java", version.ref = "flatbuffersJava" }
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "kotlinxCollectionsImmutable" }

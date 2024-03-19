@@ -105,18 +105,10 @@ private fun SignItem(
     taskGroup: TaskGroup,
     enable: () -> Boolean
 ) {
-    val groupTitle by remember {
-        derivedStateOf {
-            taskGroup.id
-        }
-    }
+    val groupTitle by remember { derivedStateOf { taskGroup.id } }
 
 
-    val tasks by remember {
-        derivedStateOf {
-            taskGroup.tasks
-        }
-    }
+    val tasks by remember { derivedStateOf { taskGroup.tasks } }
 
     val itemAlpha: Float by animateFloatAsState(
         targetValue = if (enable()) DefaultAlpha else DisabledAlpha,

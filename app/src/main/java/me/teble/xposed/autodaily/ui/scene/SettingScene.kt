@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -41,7 +42,6 @@ fun SettingScene(
 
 
     Box {
-
 
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -86,7 +86,13 @@ fun SettingScene(
                 BackupLayout(showSnackbar = viewmodel::showSnackbar)
             }
         }
-
+        LaunchedEffect(viewmodel.themeDialog) {
+            if (viewmodel.themeDialog) {
+                sheetState.expand()
+            } else {
+                sheetState.hide()
+            }
+        }
 
         ThemeModelDialog(
             enable = viewmodel::themeDialog,
