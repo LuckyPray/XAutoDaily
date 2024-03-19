@@ -32,10 +32,9 @@ private val LocalTaskGroupsState = staticCompositionLocalOf {
     mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray())
 }
 
-private val LocalTurnTaskState = staticCompositionLocalOf {
+private val LocalTaskState = staticCompositionLocalOf {
     mutableStateListOf(
-        *ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten().filter { it.enable }
-            .toTypedArray()
+        *ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten().toTypedArray()
     )
 }
 
@@ -55,8 +54,8 @@ object XAutodailyConstants {
         @Composable
         get() = LocalTaskGroupsState.current
 
-    val TurnTaskState: SnapshotStateList<Task>
+    val TaskState: SnapshotStateList<Task>
         @ReadOnlyComposable
         @Composable
-        get() = LocalTurnTaskState.current
+        get() = LocalTaskState.current
 }

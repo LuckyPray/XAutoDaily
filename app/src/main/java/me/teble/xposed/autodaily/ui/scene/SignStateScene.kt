@@ -3,6 +3,7 @@ package me.teble.xposed.autodaily.ui.scene
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,15 +15,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.ui.XAutodailyConstants.TurnTaskState
+import me.teble.xposed.autodaily.ui.XAutodailyConstants.TaskState
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
+import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.lastExecMsg
 import me.teble.xposed.autodaily.ui.lastExecTime
@@ -41,9 +42,9 @@ fun SignStateScene(
         containerColor = colors.colorBgLayout
     ) {
 
-
+        val turnTaskState = TaskState.filter { it.enable }
         AnimatedVisibility(
-            TurnTaskState.isNotEmpty(),
+            TaskState.isNotEmpty(),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -59,14 +60,12 @@ fun SignStateScene(
             modifier = Modifier
                 .clip(SmootherShape(12.dp))
                 .fillMaxWidth()
-                .drawBehind {
-                    drawRect(colors.colorBgContainer)
-                }
                 .verticalScroll(rememberScrollState())
-                .defaultNavigationBarPadding(),
+                .defaultNavigationBarPadding()
+                .background(colors.colorBgContainer, SmootherShape(12.dp)),
         ) {
 
-            TurnTaskState.forEach { task ->
+            turnTaskState.forEach { task ->
                 val title by remember {
                     derivedStateOf { task.id }
                 }
