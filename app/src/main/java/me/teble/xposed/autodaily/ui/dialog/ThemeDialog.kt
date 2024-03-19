@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.ui.dialog
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -172,6 +173,10 @@ private fun ThemeItem(
         if (checked()) colors.themeColor else colors.colorTextTheme, label = ""
     )
 
+    val textWeight by animateIntAsState(
+        if (checked()) FontWeight.Bold.weight else FontWeight.Normal.weight, label = ""
+    )
+
     val fabColor = RippleConfiguration(color = if (checked()) colors.themeColor else Unspecified)
 
     // 替换了水波纹原本的颜色
@@ -198,14 +203,12 @@ private fun ThemeItem(
 
             Text(
                 text = text,
-                color = {
-                    textColor
-                },
+                color = { textColor },
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
                     .weight(1f),
                 style = TextStyle(
-                    fontWeight = FontWeight.Normal
+                    fontWeight = FontWeight(textWeight)
                 )
             )
 

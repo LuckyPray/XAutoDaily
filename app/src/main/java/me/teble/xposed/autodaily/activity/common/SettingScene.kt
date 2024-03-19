@@ -71,7 +71,7 @@ fun SettingScene(
     }
     Box {
         XaScaffold(
-            text = "设置",
+            text = "更多设置",
             backClick = onBackClick,
             hasBackProvider = hasBackProvider,
             containerColor = colors.colorBgLayout
@@ -95,7 +95,6 @@ fun SettingScene(
 
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
                     .clip(SmootherShape(12.dp))
                     .verticalScroll(rememberScrollState())
                     .defaultNavigationBarPadding()

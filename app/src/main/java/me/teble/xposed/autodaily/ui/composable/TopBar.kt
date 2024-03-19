@@ -99,7 +99,9 @@ fun TopBar(
         )
         Spacer(modifier = Modifier.weight(1f))
 
-        Spacer(modifier = Modifier.width(62.dp))
+        if (hasBackProvider()) {
+            Spacer(modifier = Modifier.width(62.dp))
+        }
 
     }
 }
@@ -118,6 +120,7 @@ fun DialogTopBar(
     ) {
         BasicText(
             text = text,
+            modifier = Modifier.align(Alignment.CenterVertically),
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,

@@ -42,7 +42,7 @@ val DarkColorPalette = XAutodailyColors(
     colorBgContainer = Color(0xFF303134),
     colorBgDialog = Color(0xFF3C4043),
     colorBgSearch = Color(0xFF4F5355),
-    colorBgMask = Color(0xFFFFFFFF).copy(0.18f),
+    colorBgMask = Color(0xFF202124).copy(0.38f),
     colorBgEdit = Color(0xFF3C4043),
 
     colorText = Color(0xFFFFFFFF),
@@ -68,7 +68,7 @@ val BlackColorPalette = XAutodailyColors(
     colorBgContainer = Color(0xFF303134),
     colorBgDialog = Color(0xFF3C4043),
     colorBgSearch = Color(0xFF4F5355),
-    colorBgMask = Color(0xFFFFFFFF).copy(0.18f),
+    colorBgMask = Color(0xFF202124).copy(0.38f),
     colorBgEdit = Color(0xFF3C4043),
 
     colorText = Color(0xFFFFFFFF),

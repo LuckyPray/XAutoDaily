@@ -104,7 +104,7 @@ fun SettingScene(
 private fun EntryLayout(onNavigateToSignState: () -> Unit) {
     val backgroundColor = colors.colorBgContainer
     SmallTitle(
-        title = "模块入口",
+        title = "状态",
         modifier = Modifier
             .padding(bottom = 8.dp, start = 16.dp, top = 8.dp)
     )
@@ -245,7 +245,7 @@ private fun ConfigLayout(
 private fun CommonLayout(showThemeDialog: () -> Unit) {
     val backgroundColor = colors.colorBgContainer
     SmallTitle(
-        title = "模块配置",
+        title = "通用",
         modifier = Modifier
             .padding(bottom = 8.dp, start = 16.dp, top = 24.dp)
     )
@@ -265,7 +265,7 @@ private fun CommonLayout(showThemeDialog: () -> Unit) {
 @Composable
 private fun BackupLayout(showSnackbar: (String) -> Unit) {
     SmallTitle(
-        title = "模块配置",
+        title = "备份与恢复",
         modifier = Modifier
             .padding(bottom = 8.dp, start = 16.dp, top = 24.dp)
     )
