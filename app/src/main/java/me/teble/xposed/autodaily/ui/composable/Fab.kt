@@ -29,7 +29,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Save
-import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,8 +58,8 @@ fun FloatingButton(
         Box(
             modifier = modifier
                 .shadow(
-                    ambientColor = Color(0xFF26C288).copy(alpha = DisabledAlpha),
-                    spotColor = Color(0xFF26C288).copy(alpha = DisabledAlpha),
+                    ambientColor = Color(0xFF26C288),
+                    spotColor = Color(0xFF26C288),
                     clip = true, shape = CircleShape,
                     elevation = elevation
                 )
