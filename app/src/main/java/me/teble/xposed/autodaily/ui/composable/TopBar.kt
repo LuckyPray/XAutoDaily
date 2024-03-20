@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
@@ -24,6 +23,7 @@ import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Back
 import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
+import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
@@ -69,7 +69,7 @@ fun TopBar(
     val colors = colors
     Row(
         modifier = modifier
-            .statusBarsPadding()
+            .padding(top = StatusBarsTopPadding)
             .padding(bottom = 20.dp, top = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

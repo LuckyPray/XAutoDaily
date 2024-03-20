@@ -16,23 +16,23 @@ import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.data.Dependency
 
-private val LocalFriendList = staticCompositionLocalOf {
+val LocalFriendList = staticCompositionLocalOf {
     mutableStateListOf(*FunctionPool.friendsManager.getFriends().orEmpty().toTypedArray())
 }
 
 @OptIn(ExperimentalSerializationApi::class)
-private val LocalDependencies = staticCompositionLocalOf {
+val LocalDependencies = staticCompositionLocalOf {
     mutableStateListOf(
         *Json.decodeFromStream<List<Dependency>>(
             hostContext.assets.open("licenses.json")
         ).toTypedArray()
     )
 }
-private val LocalTaskGroupsState = staticCompositionLocalOf {
+val LocalTaskGroupsState = staticCompositionLocalOf {
     mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray())
 }
 
-private val LocalTaskState = staticCompositionLocalOf {
+val LocalTaskState = staticCompositionLocalOf {
     mutableStateListOf(
         *ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten().toTypedArray()
     )

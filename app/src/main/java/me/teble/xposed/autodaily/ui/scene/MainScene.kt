@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ripple.RippleAlpha
@@ -22,10 +20,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,19 +32,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
-import me.teble.xposed.autodaily.ui.dialog.NoticeDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.About
@@ -57,16 +49,18 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
+import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.signFontFamily
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScene(
+    onNavigateToNotice: (String) -> Unit,
     onNavigateToSign: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
@@ -77,59 +71,44 @@ fun MainScene(
 
     val colors = colors
 
-    Box {
 
 
-        Scaffold(
-            snackbarHost = {
-                RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
-            }, topBar = {
-                XAutoDailyTopBar(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp)
-                        .padding(vertical = 20.dp)
-                        .padding(start = 16.dp),
-                    icon = Icons.Notice,
-                    contentDescription = "公告",
-                    iconClick = viewmodel::showNoticeDialog
-                )
-            }, containerColor = colors.colorBgLayout
-        ) { contentPadding ->
-            Column(
+    Scaffold(
+        snackbarHost = {
+            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
+        }, topBar = {
+            XAutoDailyTopBar(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding)
+                    .padding(top = StatusBarsTopPadding)
                     .padding(horizontal = 16.dp)
-                    .clip(SmootherShape(12.dp))
-                    .verticalScroll(rememberScrollState())
-                    .defaultNavigationBarPadding()
-            ) {
+                    .padding(vertical = 20.dp)
+                    .padding(start = 16.dp),
+                icon = Icons.Notice,
+                contentDescription = "公告",
+                iconClick = {
+                    onNavigateToNotice(viewmodel.noticeText)
+                }
+            )
+        }, containerColor = colors.colorBgLayout
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+                .padding(horizontal = 16.dp)
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .defaultNavigationBarPadding()
+        ) {
 
-                Banner(execTaskNum = viewmodel::execTaskNum, signClick = viewmodel::signClick)
-                GridLayout(
-                    onNavigateToSign = onNavigateToSign,
-                    onNavigateToSetting = onNavigateToSetting,
-                    onNavigateToAbout = onNavigateToAbout,
-                    execTaskNum = viewmodel::execTaskNum
-                )
-            }
-
+            Banner(execTaskNum = viewmodel::execTaskNum, signClick = viewmodel::signClick)
+            GridLayout(
+                onNavigateToSign = onNavigateToSign,
+                onNavigateToSetting = onNavigateToSetting,
+                onNavigateToAbout = onNavigateToAbout,
+                execTaskNum = viewmodel::execTaskNum
+            )
         }
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        LaunchedEffect(viewmodel.noticeDialog) {
-            if (viewmodel.noticeDialog) {
-                sheetState.expand()
-            } else {
-                sheetState.hide()
-            }
-        }
-        NoticeDialog(
-            enable = viewmodel::noticeDialog,
-            sheetState = sheetState,
-            infoText = viewmodel::noticeText,
-            onDismiss = viewmodel::dismissNoticeDialog
-        )
 
     }
 
@@ -154,7 +133,7 @@ private fun ColumnScope.Banner(execTaskNum: () -> Int, signClick: () -> Unit) {
                 fontWeight = FontWeight.Light,
                 color = Color(0xFF2ECC71),
                 textAlign = TextAlign.Center,
-                fontFamily = FontFamily(Font(R.font.tcloud_number_vf))
+                fontFamily = signFontFamily
             )
         )
         Text(

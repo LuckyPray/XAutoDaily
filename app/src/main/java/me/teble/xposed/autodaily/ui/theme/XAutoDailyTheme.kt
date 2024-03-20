@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.theme
 
+
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -15,6 +16,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.activity.common.AppConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit
 
@@ -25,6 +29,7 @@ val LocalXAutodailyShapes = staticCompositionLocalOf {
 val LocalXAutodailyColors = staticCompositionLocalOf {
     LightColorPalette
 }
+
 
 object XAutodailyTheme {
     val shapes: XAutodailyShapes
@@ -37,6 +42,13 @@ object XAutodailyTheme {
         @ReadOnlyComposable
         @Composable
         get() = LocalXAutodailyColors.current
+
+    val signFontFamily: FontFamily
+        @ReadOnlyComposable
+        @Composable
+        get() = FontFamily(
+            Font(R.font.tcloud_number_vf)
+        )
 
     enum class Theme {
         Light,
@@ -223,10 +235,9 @@ fun XAutodailyTheme(
                 lightColorScheme()
             } else {
                 darkColorScheme()
-            }.copy(primary = colors.themeColor)
-        ) {
-            content()
-        }
+            }.copy(primary = colors.themeColor),
+            content = content
+        )
     }
 
 }

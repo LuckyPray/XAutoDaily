@@ -18,33 +18,20 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 class ModuleActivity : BaseActivity() {
 
     private val viewModel: MainThemeViewModel by viewModels()
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         setStatusBarTranslation()
         setNavigationBarTranslation()
         enableEdgeToEdge()
         when (XAutodailyTheme.getCurrentTheme()) {
-            XAutodailyTheme.Theme.Light -> {
-                setSystemBarOldMode()
-            }
-
-            XAutodailyTheme.Theme.Dark -> {
-                setSystemBarOldMode(false)
-            }
-
-            XAutodailyTheme.Theme.System -> {
-                setSystemBarOldMode(!isNightMode())
-            }
+            XAutodailyTheme.Theme.Light -> setSystemBarOldMode()
+            XAutodailyTheme.Theme.Dark -> setSystemBarOldMode(false)
+            XAutodailyTheme.Theme.System -> setSystemBarOldMode(!isNightMode())
         }
-
 
         super.onCreate(savedInstanceState)
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-
-
 
         setContent {
 

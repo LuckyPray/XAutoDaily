@@ -23,17 +23,10 @@ class MainActivity : ComponentActivity() {
         setNavigationBarTranslation()
         enableEdgeToEdge()
         when (XAutodailyTheme.getAppTheme()) {
-            XAutodailyTheme.Theme.Light -> {
-                setSystemBarOldMode()
-            }
+            XAutodailyTheme.Theme.Light -> setSystemBarOldMode()
+            XAutodailyTheme.Theme.Dark -> setSystemBarOldMode(false)
+            XAutodailyTheme.Theme.System -> setSystemBarOldMode(!isNightMode())
 
-            XAutodailyTheme.Theme.Dark -> {
-                setSystemBarOldMode(false)
-            }
-
-            XAutodailyTheme.Theme.System -> {
-                setSystemBarOldMode(!isNightMode())
-            }
         }
         super.onCreate(savedInstanceState)
         // 状态栏和导航栏沉浸
@@ -45,11 +38,8 @@ class MainActivity : ComponentActivity() {
 
             when (viewModel.currentTheme) {
                 XAutodailyTheme.Theme.Light -> setSystemBarMode()
-
                 XAutodailyTheme.Theme.Dark -> setSystemBarMode(false)
-
                 XAutodailyTheme.Theme.System -> setSystemBarMode(!isNightMode())
-
             }
 
             XAutodailyTheme(isBlack = viewModel.blackTheme, colorTheme = viewModel.currentTheme) {

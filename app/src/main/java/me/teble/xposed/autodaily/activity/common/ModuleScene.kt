@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -48,6 +47,8 @@ import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
+import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
+
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -67,10 +68,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
                 .defaultNavigationBarPadding()
         ) {
             val context = LocalContext.current
-
-
             val backgroundColor by animateColorAsState(
-
                 targetValue = when (viewmodel.shizukuState) {
                     is ShizukuState.Activated -> Color(0xFF25CD8E)
                     is ShizukuState.Warn -> Color(0xFFFFBC04)
@@ -155,7 +153,7 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 private fun ModuleTopBar() {
     XAutoDailyTopBar(
         modifier = Modifier
-            .statusBarsPadding()
+            .padding(top = StatusBarsTopPadding)
             .padding(horizontal = 16.dp)
             .padding(vertical = 20.dp)
             .padding(start = 16.dp),
