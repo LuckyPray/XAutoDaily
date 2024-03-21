@@ -63,7 +63,7 @@ class AboutViewModel : ViewModel() {
     }
 
 
-    fun updateApp() {
+    fun updateApp(onNavigateToUpdate: (String) -> Unit) {
         val time = TimeUtil.cnTimeMillis()
         if (time - lastClickTime < 15_000) {
             showSnackbar("不要频繁点击哦~")
@@ -88,7 +88,7 @@ class AboutViewModel : ViewModel() {
                     hasUpdate = true
                     updateDialogText =
                         ConfUnit.metaInfoCache?.app?.updateLog ?: ""
-
+                    onNavigateToUpdate(updateDialogText)
                     showSnackbar("插件版本存在更新")
                     return@launch
                 }

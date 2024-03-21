@@ -79,7 +79,7 @@ fun AboutScene(
                 configVersion = viewmodel::configVersion,
                 hasUpdate = viewmodel::hasUpdate,
                 updateApp = {
-                    onNavigateToUpdate(viewmodel.updateDialogText)
+                    viewmodel.updateApp(onNavigateToUpdate)
                 }
             )
             LicenseLayout(onNavigateToLicense = onNavigateToLicense)
@@ -136,10 +136,7 @@ private fun UpdateLayout(
     configVersion: () -> Int,
     hasUpdate: () -> Boolean,
     updateApp: () -> Unit
-
 ) {
-
-
     val colors = colors
     Row(
         Modifier
