@@ -2,7 +2,6 @@ package me.teble.xposed.autodaily.ui.scene
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,10 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,7 +32,6 @@ import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
-import me.teble.xposed.autodaily.ui.dialog.UpdateDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.ChevronRight
@@ -46,72 +41,57 @@ import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScene(
     backClick: () -> Unit,
     hasBackProvider: () -> Boolean,
+    onNavigateToUpdate: (String) -> Unit,
     onNavigateToLicense: () -> Unit,
     onNavigateToDeveloper: () -> Unit,
     viewmodel: AboutViewModel = viewModel()
 ) {
-    Box {
-        val context = LocalContext.current
+    val context = LocalContext.current
 
-
-        XaScaffold(
-            topBar = {
-                TopBar(text = "关于", backClick = backClick, hasBackProvider = hasBackProvider)
-            },
-            snackbarHost = {
-                RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
-            },
-            containerColor = colors.colorBgLayout
+    XaScaffold(
+        topBar = {
+            TopBar(text = "关于", backClick = backClick, hasBackProvider = hasBackProvider)
+        },
+        snackbarHost = {
+            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
+        },
+        containerColor = colors.colorBgLayout
+    ) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .defaultNavigationBarPadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .clip(SmootherShape(12.dp))
-                    .verticalScroll(rememberScrollState())
-                    .defaultNavigationBarPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                BuildConfigLayout(
-                    moduleVersionName = viewmodel::moduleVersionName,
-                    moduleVersionCode = viewmodel::moduleVersionCode
-                )
-                UpdateLayout(
-                    qqVersionName = viewmodel::qqVersionName,
-                    qqVersionCode = viewmodel::qqVersionCode,
-                    configVersion = viewmodel::configVersion,
-                    hasUpdate = viewmodel::hasUpdate,
-                    updateApp = viewmodel::updateApp
-                )
-                LicenseLayout(onNavigateToLicense = onNavigateToLicense)
-                OthterLayout(
-                    onNavigateToDeveloper = onNavigateToDeveloper,
-                    openGithub = viewmodel.openGithub(context),
-                    openTelegram = viewmodel.openTelegram(context),
-                    openAliPay = viewmodel.openAliPay(context)
-                )
-            }
+            BuildConfigLayout(
+                moduleVersionName = viewmodel::moduleVersionName,
+                moduleVersionCode = viewmodel::moduleVersionCode
+            )
+            UpdateLayout(
+                qqVersionName = viewmodel::qqVersionName,
+                qqVersionCode = viewmodel::qqVersionCode,
+                configVersion = viewmodel::configVersion,
+                hasUpdate = viewmodel::hasUpdate,
+                updateApp = {
+                    onNavigateToUpdate(viewmodel.updateDialogText)
+                }
+            )
+            LicenseLayout(onNavigateToLicense = onNavigateToLicense)
+            OthterLayout(
+                onNavigateToDeveloper = onNavigateToDeveloper,
+                openGithub = viewmodel.openGithub(context),
+                openTelegram = viewmodel.openTelegram(context),
+                openAliPay = viewmodel.openAliPay(context)
+            )
         }
-
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        LaunchedEffect(viewmodel.showUpdateDialog) {
-            if (viewmodel.showUpdateDialog) sheetState.expand()
-            else sheetState.hide()
-        }
-
-        UpdateDialog(
-            state = sheetState,
-            enable = viewmodel::showUpdateDialog,
-            text = "新版本",
-            info = viewmodel::updateDialogText,
-            onDismiss = viewmodel::dismissUpdateDialog,
-            onConfirm = viewmodel.updateConfirm(context)
-        )
     }
+
 
 }
 

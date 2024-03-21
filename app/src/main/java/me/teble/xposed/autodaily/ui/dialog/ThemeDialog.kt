@@ -188,10 +188,11 @@ private fun ThemeItem(
         if (checked()) colors.themeColor else colors.colorTextTheme, label = ""
     )
 
-    val textWeight by animateIntAsState(
-        if (checked()) FontWeight.Bold.weight else FontWeight.Normal.weight, label = ""
-    )
 
+    val fontWeight by animateIntAsState(
+        targetValue = if (checked()) FontWeight.Bold.weight else FontWeight.Normal.weight,
+        label = "fontWeight"
+    )
     val fabColor = RippleConfiguration(color = if (checked()) colors.themeColor else Unspecified)
 
     // 替换了水波纹原本的颜色
@@ -223,7 +224,7 @@ private fun ThemeItem(
                     .padding(horizontal = 16.dp)
                     .weight(1f),
                 style = TextStyle(
-                    fontWeight = FontWeight(textWeight)
+                    fontWeight = FontWeight(fontWeight)
                 )
             )
 

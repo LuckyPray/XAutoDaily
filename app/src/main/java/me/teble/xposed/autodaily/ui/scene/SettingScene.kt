@@ -32,8 +32,6 @@ fun SettingScene(
     onNavigateToSignState: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
-
-
     XaScaffold(
         snackbarHost = {
             // SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }

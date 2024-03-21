@@ -19,7 +19,6 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -41,6 +40,7 @@ import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XAutoDailyTopBar
+import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.About
@@ -49,6 +49,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
+import me.teble.xposed.autodaily.ui.layout.HorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
@@ -67,20 +68,15 @@ fun MainScene(
 
     viewmodel: MainViewModel = viewModel()
 ) {
-
-
     val colors = colors
-
-
-
-    Scaffold(
+    XaScaffold(
         snackbarHost = {
             RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
         }, topBar = {
             XAutoDailyTopBar(
                 modifier = Modifier
-                    .padding(top = StatusBarsTopPadding)
-                    .padding(horizontal = 16.dp)
+                    .padding(StatusBarsTopPadding)
+                    .padding(HorizontalPadding)
                     .padding(vertical = 20.dp)
                     .padding(start = 16.dp),
                 icon = Icons.Notice,
@@ -90,12 +86,10 @@ fun MainScene(
                 }
             )
         }, containerColor = colors.colorBgLayout
-    ) { contentPadding ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
-                .padding(horizontal = 16.dp)
                 .clip(SmootherShape(12.dp))
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding()

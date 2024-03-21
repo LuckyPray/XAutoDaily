@@ -14,17 +14,13 @@ import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.config.ALIPAY_QRCODE
-import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
-import me.teble.xposed.autodaily.config.PAN_URL
 import me.teble.xposed.autodaily.hook.base.hostVersionCode
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.dialog.UpdateType
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.openUrl
-import kotlin.concurrent.thread
 
 @Stable
 class AboutViewModel : ViewModel() {
@@ -40,8 +36,6 @@ class AboutViewModel : ViewModel() {
 
 
     var configVersion by mutableIntStateOf(0)
-
-    var showUpdateDialog by mutableStateOf(false)
 
 
     var updateDialogText by mutableStateOf("")
@@ -68,19 +62,6 @@ class AboutViewModel : ViewModel() {
         }
     }
 
-    private fun showUpdateDialog() {
-        updateUpdateDialogState(true)
-    }
-
-    fun dismissUpdateDialog() {
-        updateUpdateDialogState(false)
-    }
-
-    private fun updateUpdateDialogState(boolean: Boolean) {
-        if (showUpdateDialog != boolean) {
-            showUpdateDialog = boolean
-        }
-    }
 
     fun updateApp() {
         val time = TimeUtil.cnTimeMillis()
@@ -89,64 +70,37 @@ class AboutViewModel : ViewModel() {
             return
         }
         lastClickTime = time
-        thread {
-            showSnackbar("正在检测更新")
 
-
-            viewModelScope.launch(IO) {
-                val info = ConfigUtil.fetchMeta()
-                info?.let {
-                    val currConfVer = ConfigUtil.loadSaveConf().version
-                    if (currConfVer < info.config.version) {
-                        if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
-                            return@launch
-                        } else {
+        showSnackbar("正在检测更新")
+        viewModelScope.launch(IO) {
+            val info = ConfigUtil.fetchMeta()
+            info?.let {
+                val currConfVer = ConfigUtil.loadSaveConf().version
+                if (currConfVer < info.config.version) {
+                    if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
+                        return@launch
+                    } else {
 //                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
-                            return@launch
-                        }
-                    }
-                    if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-                        hasUpdate = true
-                        updateDialogText =
-                            ConfUnit.metaInfoCache?.app?.updateLog ?: ""
-                        showUpdateDialog()
-
-                        showSnackbar("插件版本存在更新")
                         return@launch
                     }
                 }
-                showSnackbar("当前插件与配置均是最新版本")
+                if (BuildConfig.VERSION_CODE < info.app.versionCode) {
+                    hasUpdate = true
+                    updateDialogText =
+                        ConfUnit.metaInfoCache?.app?.updateLog ?: ""
 
+                    showSnackbar("插件版本存在更新")
+                    return@launch
+                }
             }
+            showSnackbar("当前插件与配置均是最新版本")
+
 
             configVersion = ConfigUtil.loadSaveConf().version
         }
     }
 
-    fun updateConfirm(context: Context): (type: UpdateType) -> Unit {
-        return { type ->
-            when (type) {
-                UpdateType.Ignore -> {
-                    dismissUpdateDialog()
-                    ConfUnit.skipUpdateVersion = "${ConfUnit.metaInfoCache?.app?.versionCode}"
-                    showSnackbar("已忽略版本号为 ${ConfUnit.skipUpdateVersion} 的更新")
-                }
 
-                UpdateType.Drive -> {
-                    dismissUpdateDialog()
-                    showSnackbar("正在跳转，请稍后")
-                    context.openUrl(PAN_URL)
-                }
-
-                UpdateType.Github -> {
-                    dismissUpdateDialog()
-                    showSnackbar("正在跳转，请稍后")
-                    context.openUrl(GITHUB_RELEASE_URL)
-                }
-            }
-        }
-
-    }
 
 
     fun openGithub(context: Context): () -> Unit {

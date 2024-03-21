@@ -8,7 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import me.teble.xposed.autodaily.ui.layout.HorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 
 
@@ -61,7 +61,7 @@ fun XaScaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding)
-                .padding(horizontal = 16.dp),
+                .padding(HorizontalPadding),
             content = content
         )
     }

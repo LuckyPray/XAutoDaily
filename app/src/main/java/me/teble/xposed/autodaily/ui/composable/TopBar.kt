@@ -69,7 +69,7 @@ fun TopBar(
     val colors = colors
     Row(
         modifier = modifier
-            .padding(top = StatusBarsTopPadding)
+            .padding(StatusBarsTopPadding)
             .padding(bottom = 20.dp, top = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

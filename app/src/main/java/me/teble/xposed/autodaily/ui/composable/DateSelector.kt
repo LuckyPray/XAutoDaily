@@ -2,6 +2,7 @@ package me.teble.xposed.autodaily.ui.composable
 
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
@@ -161,6 +162,10 @@ internal fun TextPicker(
                 targetValue = if (isSelect) DefaultAlpha else DisabledFontAlpha,
                 animationSpec = spring(), label = "Picker fontAlpha"
             )
+            val fontWeight by animateIntAsState(
+                targetValue = if (isSelect) FontWeight.Bold.weight else FontWeight.Normal.weight,
+                label = "fontWeight"
+            )
 
             Box(
                 modifier = Modifier
@@ -183,7 +188,8 @@ internal fun TextPicker(
                     style = TextStyle(
                         textAlign = TextAlign.Center,
                         fontFamily = XAutodailyTheme.signFontFamily,
-                        fontWeight = if (isSelect) FontWeight.Bold else FontWeight.Normal
+                        fontWeight = FontWeight(fontWeight),
+                        fontSize = 48.sp
                     )
                 )
             }

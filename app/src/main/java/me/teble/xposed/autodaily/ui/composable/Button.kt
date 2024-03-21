@@ -114,6 +114,7 @@ fun SelectButton(
     CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
         Box(
             modifier = modifier
+                .clip(CircleShape)
                 .border(width = 1.5.dp, color = selectColor, shape = CircleShape)
                 .clickable(
                     role = Role.Switch,

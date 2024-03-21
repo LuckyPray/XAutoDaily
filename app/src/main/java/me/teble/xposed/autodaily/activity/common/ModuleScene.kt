@@ -47,6 +47,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Error
 import me.teble.xposed.autodaily.ui.icon.icons.QQ
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
+import me.teble.xposed.autodaily.ui.layout.HorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
 
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
@@ -153,8 +154,8 @@ fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewMod
 private fun ModuleTopBar() {
     XAutoDailyTopBar(
         modifier = Modifier
-            .padding(top = StatusBarsTopPadding)
-            .padding(horizontal = 16.dp)
+            .padding(StatusBarsTopPadding)
+            .padding(HorizontalPadding)
             .padding(vertical = 20.dp)
             .padding(start = 16.dp),
     )
