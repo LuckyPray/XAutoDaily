@@ -27,6 +27,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.collections.immutable.toImmutableSet
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.dialog.CheckFriendsOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.NoticeOverlayUI
@@ -84,9 +85,9 @@ sealed class DialogItem(route: String) : NavigationItem(route) {
     data class Notice(val infoText: String) : DialogItem("${Dialog.Notice.name}/$infoText")
     data object Theme : DialogItem(Dialog.Theme.name)
     data class CheckFriends(val uinListStr: String) :
-        DialogItem("${Dialog.CheckFriends.name}/$uinListStr")
+        DialogItem("${Dialog.CheckFriends.name}/?uinListStr=$uinListStr")
 
-    data class Update(val info: String) : DialogItem("${Dialog.Update.name}/$info")
+    data class Update(val info: String) : DialogItem("${Dialog.Update.name}/?info=$info")
 
 }
 
@@ -220,12 +221,11 @@ fun NavGraphBuilder.addSceneGraph(navController: NavController) {
 
     composable(route = "${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
         EditEnvScene(
-            onNavigateToCheckFriends = {
-                navController.navigate(DialogItem.CheckFriends(it))
-            },
+            onNavigateToCheckFriends = { navController.navigate(DialogItem.CheckFriends(it)) },
             backClick = navController::popBackStack,
-            backStackEntry.arguments!!.getString("taskGroup", ""),
-            backStackEntry.arguments!!.getString("taskId", "")
+            savedStateHandle = navController.currentBackStackEntry?.savedStateHandle,
+            groupId = backStackEntry.arguments!!.getString("taskGroup", ""),
+            taskId = backStackEntry.arguments!!.getString("taskId", "")
         )
     }
 
@@ -243,7 +243,9 @@ fun NavGraphBuilder.addBottomSheetGraph(
     }
 
 
-    bottomSheet(route = "${Dialog.Update.name}/{info}") { backStackEntry ->
+    bottomSheet(
+        route = "${Dialog.Update.name}/?info={info}"
+    ) { backStackEntry ->
         UpdateOverlayUI(
             info = { backStackEntry.arguments!!.getString("info", "") },
             onDismiss = navController::popBackStack
@@ -260,10 +262,18 @@ fun NavGraphBuilder.addBottomSheetGraph(
     }
 
 
-    bottomSheet(route = "${Dialog.CheckFriends.name}/{uinListStr}") { backStackEntry ->
+    bottomSheet(route = "${Dialog.CheckFriends.name}/?uinListStr={uinListStr}") { backStackEntry ->
+        val uinListStr = backStackEntry.arguments!!.getString("uinListStr", "")
+        val uinSet = uinListStr.split(",").toImmutableSet()
         CheckFriendsOverlayUI(
-            uinListStr = backStackEntry.arguments!!.getString("uinListStr", ""),
-            onConfirm = navController::popBackStack,
+            uinListStr = uinSet,
+            onConfirm = { string ->
+                navController.previousBackStackEntry?.savedStateHandle?.let {
+                    it["uinListStr"] = string
+                }
+                navController.popBackStack()
+
+            },
             onDismiss = navController::popBackStack
         )
     }

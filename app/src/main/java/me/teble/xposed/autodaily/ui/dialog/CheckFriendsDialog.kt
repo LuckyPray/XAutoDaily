@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.collections.immutable.ImmutableSet
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -44,8 +45,8 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
 fun CheckFriendsOverlayUI(
-    uinListStr: String,
-    onConfirm: () -> Unit,
+    uinListStr: ImmutableSet<String>,
+    onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
     viewmodel: FriendViewModel = viewModel(),
 ) {
@@ -130,7 +131,9 @@ fun CheckFriendsOverlayUI(
                 .padding(top = 24.dp)
                 .align(Alignment.CenterHorizontally)
                 .fillMaxWidth(),
-            onClick = onConfirm
+            onClick = {
+                onConfirm("1234")
+            }
         )
 
     }

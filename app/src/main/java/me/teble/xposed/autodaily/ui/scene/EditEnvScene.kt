@@ -1,7 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,6 +9,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.SavedStateHandle
 import me.teble.xposed.autodaily.ui.composable.DatePicker
 import me.teble.xposed.autodaily.ui.composable.FloatingButton
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -37,10 +39,17 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 fun EditEnvScene(
     onNavigateToCheckFriends: (String) -> Unit,
     backClick: () -> Unit,
+    savedStateHandle: SavedStateHandle?,
     groupId: String?,
     taskId: String
 ) {
-
+    var editText by remember { mutableStateOf("") }
+    if (savedStateHandle != null) {
+        val uinListStr by savedStateHandle.getStateFlow("uinListStr", "").collectAsState()
+        LaunchedEffect(uinListStr) {
+            editText = uinListStr
+        }
+    }
 
     val envMap = remember { mutableStateOf("") }
 
@@ -67,7 +76,7 @@ fun EditEnvScene(
                 .verticalScroll(rememberScrollState())
                 .defaultNavigationBarPadding()
         ) {
-            var editText by remember { mutableStateOf("") }
+
 
             SmallTitle(
                 title = "好友清单",
@@ -84,7 +93,7 @@ fun EditEnvScene(
                     },
                 hintText = "好友清单",
                 iconClick = {
-                    onNavigateToCheckFriends("123")
+                    onNavigateToCheckFriends("")
                 }
             ) {
                 editText = it
@@ -136,7 +145,7 @@ fun EditEnvScene(
             ) {
 
                 DatePicker(Modifier.width(328.dp)) {
-                    Log.d("time", "EditEnvScene: ${it}")
+
                 }
             }
 

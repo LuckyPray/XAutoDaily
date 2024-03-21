@@ -14,10 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalRippleConfiguration
+import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,6 +77,7 @@ fun HintEditText(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IconEditText(
     value: () -> String,
@@ -113,19 +119,28 @@ fun IconEditText(
                 .padding(vertical = 16.dp)
                 .clip(SmootherShape(1.dp)),
         )
-
-        Icon(
-            imageVector = Icons.Edit,
-            modifier = Modifier
-                .padding(8.dp)
-                .clip(CircleShape)
-                .clickable(role = Role.Button) {
-                    iconClick()
-                }
-                .padding(8.dp)
-                .size(24.dp),
-            contentDescription = "", tint = colors.themeColor
+        val fabColor = RippleConfiguration(
+            color = colors.themeColor, rippleAlpha = RippleAlpha(
+                pressedAlpha = 0.36f,
+                focusedAlpha = 0.36f,
+                draggedAlpha = 0.24f,
+                hoveredAlpha = 0.16f
+            )
         )
+        CompositionLocalProvider(LocalRippleConfiguration provides fabColor) {
+            Icon(
+                imageVector = Icons.Edit,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button) {
+                        iconClick()
+                    }
+                    .padding(8.dp)
+                    .size(24.dp),
+                contentDescription = "", tint = colors.themeColor
+            )
+        }
     }
 
 }
