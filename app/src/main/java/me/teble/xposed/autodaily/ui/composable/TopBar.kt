@@ -3,8 +3,15 @@ package me.teble.xposed.autodaily.ui.composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.captionBar
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
@@ -116,7 +123,15 @@ fun DialogTopBar(
     Row(
         modifier = modifier
             .padding(start = 32.dp, end = 26.dp)
-            .padding(vertical = 21.dp)
+            .padding(
+                WindowInsets.statusBars
+                    .union(WindowInsets.captionBar)
+                    .union(WindowInsets(top = 21.dp))
+                    .only(WindowInsetsSides.Top)
+                    .asPaddingValues()
+            )
+            .padding(bottom = 21.dp)
+
     ) {
         BasicText(
             text = text,
