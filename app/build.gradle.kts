@@ -325,7 +325,7 @@ dependencies {
     implementation(project(":system"))
 
     implementation(libs.androidx.multidex)
-    implementation("org.lsposed.hiddenapibypass:hiddenapibypass:4.3")
+    implementation(libs.hiddenapibypass)
 
     compileOnly(libs.api)
     implementation(libs.ezxhelper)
@@ -345,11 +345,13 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material.navigation)
+
+    implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.materialWindow)
 
     implementation(libs.androidx.material3.adaptive)
 
-    implementation("com.google.accompanist:accompanist-navigation-material:0.35.0-alpha")
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose

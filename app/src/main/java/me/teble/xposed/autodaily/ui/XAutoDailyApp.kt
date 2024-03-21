@@ -1,20 +1,31 @@
 package me.teble.xposed.autodaily.ui
 
 import androidx.annotation.Keep
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.shape.RoundedCornerShape
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.ModalBottomSheetValue
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.navigation.BottomSheetNavigator
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.navigation.ModalBottomSheetLayout
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.navigation.bottomSheet
+//noinspection UsingMaterialAndMaterial3Libraries
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
-import com.google.accompanist.navigation.material.bottomSheet
-import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
+
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.dialog.NoticeOverlayUI
+import me.teble.xposed.autodaily.ui.dialog.ThemeOverlayUI
 import me.teble.xposed.autodaily.ui.scene.AboutScene
 import me.teble.xposed.autodaily.ui.scene.DeveloperScene
 import me.teble.xposed.autodaily.ui.scene.EditEnvScene
@@ -39,7 +50,8 @@ enum class Screen {
 
 @Keep
 enum class Dialog {
-    Notice
+    Notice,
+    Theme
 }
 
 sealed class NavigationItem(val route: String)
@@ -58,6 +70,7 @@ sealed class SceneItem(route: String) : NavigationItem(route) {
 
 sealed class DialogItem(route: String) : NavigationItem(route) {
     data class Notice(val infoText: String) : SceneItem("${Dialog.Notice.name}/$infoText")
+    data object Theme : SceneItem(Dialog.Theme.name)
 
 }
 
@@ -65,109 +78,128 @@ fun NavController.navigate(item: NavigationItem) {
     this.navigate(item.route)
 }
 
+/**
+ * Create and remember a [BottomSheetNavigator]
+ */
+@Composable
+public fun rememberBottomSheetNavigator(
+    animationSpec: AnimationSpec<Float> = SpringSpec(),
+    skipHalfExpanded: Boolean
 
-@OptIn(ExperimentalMaterialNavigationApi::class)
+): BottomSheetNavigator {
+    val sheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        animationSpec = animationSpec,
+        skipHalfExpanded = skipHalfExpanded,
+    )
+    return remember(sheetState) { BottomSheetNavigator(sheetState) }
+}
+
 @Composable
 fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
-
-    val bottomSheetNavigator = rememberBottomSheetNavigator()
+    val bottomSheetNavigator = rememberBottomSheetNavigator(skipHalfExpanded = true)
     val navController = rememberNavController(bottomSheetNavigator)
-    CompositionLocalProvider(
-        LocalFriendList provides XAutodailyConstants.FriendList,
-        LocalDependencies provides XAutodailyConstants.DependencyList,
-        LocalTaskGroupsState provides XAutodailyConstants.TaskGroupsList,
-        LocalTaskState provides XAutodailyConstants.TaskState,
+    ModalBottomSheetLayout(
+        sheetBackgroundColor = colors.colorBgDialog,
+        bottomSheetNavigator = bottomSheetNavigator,
+        scrimColor = colors.colorBgMask,
+        sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
     ) {
-        ModalBottomSheetLayout(
-            sheetBackgroundColor = colors.colorBgDialog,
-            bottomSheetNavigator = bottomSheetNavigator,
-            scrimColor = colors.colorBgMask,
-            sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+        NavHost(
+            navController = navController,
+            startDestination = SceneItem.Main.route
         ) {
-            NavHost(
-                navController = navController,
-                startDestination = SceneItem.Main.route
-            ) {
-                composable(route = SceneItem.Main.route) {
-                    MainScene(
-                        onNavigateToNotice = {
-                            navController.navigate(DialogItem.Notice(it))
-                        },
-                        onNavigateToSign = {
-                            navController.navigate(SceneItem.Sign)
-                        },
-                        onNavigateToSetting = {
-                            navController.navigate(SceneItem.Setting)
-                        },
-                        onNavigateToAbout = {
-                            navController.navigate(SceneItem.About)
-                        }
-                    )
-                }
+            composable(route = SceneItem.Main.route) {
+                MainScene(
+                    onNavigateToNotice = {
+                        navController.navigate(DialogItem.Notice(it))
+                    },
+                    onNavigateToSign = {
+                        navController.navigate(SceneItem.Sign)
+                    },
+                    onNavigateToSetting = {
+                        navController.navigate(SceneItem.Setting)
+                    },
+                    onNavigateToAbout = {
+                        navController.navigate(SceneItem.About)
+                    }
+                )
+            }
 
-                bottomSheet(route = "${Dialog.Notice.name}/{infoText}") { backStackEntry ->
-                    NoticeOverlayUI(
-                        infoText = backStackEntry.arguments!!.getString("infoText", ""),
-                        onDismiss = navController::popBackStack
-                    )
-                }
+            bottomSheet(route = "${Dialog.Notice.name}/{infoText}") { backStackEntry ->
+                NoticeOverlayUI(
+                    infoText = backStackEntry.arguments!!.getString("infoText", ""),
+                    onDismiss = navController::popBackStack
+                )
+            }
 
-                composable(route = SceneItem.Sign.route) {
-                    SignScene(
-                        backClick = navController::popBackStack,
-                        hasBackProvider = { true },
-                        onNavigateToEditEnvs = { groupId, taskId ->
-                            navController.navigate(
-                                SceneItem.EditEnv(
-                                    groupId,
-                                    taskId
-                                )
+            composable(route = SceneItem.Sign.route) {
+                SignScene(
+                    backClick = navController::popBackStack,
+                    hasBackProvider = { true },
+                    onNavigateToEditEnvs = { groupId, taskId ->
+                        navController.navigate(
+                            SceneItem.EditEnv(
+                                groupId,
+                                taskId
                             )
-                        })
-                }
-                composable(route = SceneItem.About.route) {
-                    AboutScene(
-                        hasBackProvider = { true },
-                        backClick = navController::popBackStack,
-                        onNavigateToLicense = {
-                            navController.navigate(SceneItem.License)
-                        },
-                        onNavigateToDeveloper = {
-                            navController.navigate(SceneItem.Developer)
-                        },
-                    )
-                }
+                        )
+                    })
+            }
+            composable(route = SceneItem.About.route) {
+                AboutScene(
+                    hasBackProvider = { true },
+                    backClick = navController::popBackStack,
+                    onNavigateToLicense = {
+                        navController.navigate(SceneItem.License)
+                    },
+                    onNavigateToDeveloper = {
+                        navController.navigate(SceneItem.Developer)
+                    },
+                )
+            }
 
-                composable(route = SceneItem.Setting.route) {
-                    SettingScene(
-                        backClick = navController::popBackStack,
-                        onNavigateToSignState = {
-                            navController.navigate(SceneItem.SignState)
-                        },
-                        hasBackProvider = { true },
-                        themeViewModel = themeViewModel
-                    )
-                }
+            composable(route = SceneItem.Setting.route) {
+                SettingScene(
+                    backClick = navController::popBackStack,
+                    onNavigateToTheme = {
+                        navController.navigate(DialogItem.Theme)
+                    },
+                    onNavigateToSignState = {
+                        navController.navigate(SceneItem.SignState)
+                    },
+                    hasBackProvider = { true },
+                )
+            }
+            bottomSheet(route = Dialog.Theme.name) {
+                ThemeOverlayUI(
+                    targetTheme = themeViewModel::currentTheme,
+                    targetBlack = themeViewModel::blackTheme,
+                    onConfirm = themeViewModel::confirmTheme,
+                    onDismiss = navController::popBackStack
+                )
+            }
 
-                composable(route = SceneItem.Developer.route) {
-                    DeveloperScene(backClick = navController::popBackStack)
-                }
 
-                composable(route = SceneItem.License.route) {
-                    LicenseScene(backClick = navController::popBackStack)
-                }
 
-                composable(route = SceneItem.SignState.route) {
-                    SignStateScene(backClick = navController::popBackStack)
-                }
+            composable(route = SceneItem.Developer.route) {
+                DeveloperScene(backClick = navController::popBackStack)
+            }
 
-                composable(route = "${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
-                    EditEnvScene(
-                        backClick = { navController.popBackStack() },
-                        backStackEntry.arguments!!.getString("taskGroup", ""),
-                        backStackEntry.arguments!!.getString("taskId", "")
-                    )
-                }
+            composable(route = SceneItem.License.route) {
+                LicenseScene(backClick = navController::popBackStack)
+            }
+
+            composable(route = SceneItem.SignState.route) {
+                SignStateScene(backClick = navController::popBackStack)
+            }
+
+            composable(route = "${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
+                EditEnvScene(
+                    backClick = { navController.popBackStack() },
+                    backStackEntry.arguments!!.getString("taskGroup", ""),
+                    backStackEntry.arguments!!.getString("taskId", "")
+                )
             }
         }
     }

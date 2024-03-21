@@ -60,4 +60,5 @@ class BaseActivityClassLoader(referencer: ClassLoader) :
 
         return mBaseReferencer.loadClass(name)
     }
+
 }

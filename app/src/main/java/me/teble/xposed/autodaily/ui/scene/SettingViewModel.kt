@@ -27,21 +27,6 @@ class SettingViewModel : ViewModel() {
 
     var snackbarHostState = SnackbarHostState()
 
-    var themeDialog by mutableStateOf(false)
-
-    fun showThemeDialog() {
-        updateThemeDialogState(true)
-    }
-
-    fun dismissThemeDialog() {
-        updateThemeDialogState(false)
-    }
-
-    private fun updateThemeDialogState(boolean: Boolean) {
-        if (themeDialog != boolean) {
-            themeDialog = boolean
-        }
-    }
 
     fun showSnackbar(text: String) {
         viewModelScope.launch {

@@ -8,6 +8,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
@@ -16,7 +18,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.serialization.ExperimentalSerializationApi
-import me.teble.xposed.autodaily.ui.XAutodailyConstants
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.data.Dependency
@@ -31,6 +35,13 @@ fun LicenseScene(
     backClick: () -> Unit,
 ) {
 
+    val dependencyList = remember {
+        mutableStateListOf(
+            *Json.decodeFromStream<List<Dependency>>(
+                hostContext.assets.open("licenses.json")
+            ).toTypedArray()
+        )
+    }
     XaScaffold(
         text = "开放源代码许可",
         backClick = backClick,
@@ -46,7 +57,7 @@ fun LicenseScene(
                 .defaultNavigationBarPadding(),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            XAutodailyConstants.DependencyList.forEach { dependency ->
+            dependencyList.forEach { dependency ->
                 key(dependency.name) {
                     DependencyItem(dependency)
                 }

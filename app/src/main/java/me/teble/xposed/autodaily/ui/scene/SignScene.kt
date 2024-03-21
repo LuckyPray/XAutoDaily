@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -23,7 +24,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.task.model.TaskGroup
-import me.teble.xposed.autodaily.ui.XAutodailyConstants
+import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoDivideItem
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -46,6 +47,9 @@ fun SignScene(
     signViewModel: SignViewModel = viewModel()
 ) {
     val colors = colors
+    val signTaskGroupsState = remember {
+        mutableStateListOf(*ConfigUtil.loadSaveConf().taskGroups.toTypedArray())
+    }
     XaScaffold(
         text = "签到配置",
         backClick = backClick,
@@ -67,7 +71,7 @@ fun SignScene(
         )
         GroupColumn(
             onNavigateToEditEnvs = onNavigateToEditEnvs,
-            taskGroupList = XAutodailyConstants.TaskGroupsList,
+            taskGroupList = signTaskGroupsState,
             enable = signViewModel::globalEnable
         )
     }

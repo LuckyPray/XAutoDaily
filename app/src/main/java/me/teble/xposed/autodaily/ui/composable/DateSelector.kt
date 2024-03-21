@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -172,8 +171,8 @@ internal fun TextPicker(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                AutoSizeText(
-                    text = String.format(Locale.getDefault(), "%02d", index),
+                Text(
+                    text = { String.format(Locale.getDefault(), "%02d", index) },
                     color = { colors.colorText },
                     maxLines = 1,
                     modifier = Modifier.graphicsLayer {
@@ -181,13 +180,10 @@ internal fun TextPicker(
                         this.scaleY = fontScale
 
                     },
-                    maxTextSize = 48.sp,
-                    stepGranularityTextSize = 1.sp,
-                    fontWeight = if (isSelect) FontWeight.Bold else FontWeight.Normal,
-
                     style = TextStyle(
                         textAlign = TextAlign.Center,
-                        fontFamily = XAutodailyTheme.signFontFamily
+                        fontFamily = XAutodailyTheme.signFontFamily,
+                        fontWeight = if (isSelect) FontWeight.Bold else FontWeight.Normal
                     )
                 )
             }

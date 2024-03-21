@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.union
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 
 
 val StatusBarsTopPadding: Dp
@@ -29,3 +30,4 @@ val NavigationBarsBottomPadding: Dp
 @Composable
 fun Modifier.defaultNavigationBarPadding() = this
     .padding(bottom = NavigationBarsBottomPadding)
+    .padding(bottom = 16.dp)

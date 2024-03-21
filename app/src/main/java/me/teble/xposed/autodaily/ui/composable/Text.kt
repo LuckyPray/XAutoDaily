@@ -4,6 +4,7 @@ package me.teble.xposed.autodaily.ui.composable
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorProducer
 import androidx.compose.ui.text.TextStyle
 
@@ -48,4 +49,24 @@ fun Text(
         color = color
     )
 }
+
+@Composable
+fun Text(
+    text: String,
+    modifier: Modifier = Modifier,
+    style: TextStyle = TextStyle.Default,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    color: Color
+) {
+    BasicText(
+        text = text,
+        modifier = modifier,
+        style = style,
+        minLines = minLines,
+        maxLines = maxLines,
+        color = { color }
+    )
+}
+
 

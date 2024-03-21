@@ -1,22 +1,17 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -24,84 +19,60 @@ import me.teble.xposed.autodaily.ui.composable.TextInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
-import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
     backClick: () -> Unit,
+    onNavigateToTheme: () -> Unit,
     hasBackProvider: () -> Boolean,
     onNavigateToSignState: () -> Unit,
-    themeViewModel: MainThemeViewModel,
     viewmodel: SettingViewModel = viewModel()
 ) {
 
 
-    Box {
-
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-
-        XaScaffold(
-            snackbarHost = {
-                // SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
-            },
-            topBar = {
-                TopBar(text = "设置", backClick = backClick, hasBackProvider = hasBackProvider)
-            },
-            containerColor = colors.colorBgLayout
+    XaScaffold(
+        snackbarHost = {
+            // SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
+        },
+        topBar = {
+            TopBar(text = "设置", backClick = backClick, hasBackProvider = hasBackProvider)
+        },
+        containerColor = colors.colorBgLayout
+    ) {
+        // Screen content
+        Column(
+            Modifier
+                .fillMaxSize()
+                .clip(SmootherShape(12.dp))
+                .verticalScroll(rememberScrollState())
+                .defaultNavigationBarPadding()
         ) {
-            // Screen content
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .clip(SmootherShape(12.dp))
-                    .verticalScroll(rememberScrollState())
-                    .defaultNavigationBarPadding()
-            ) {
 
-                EntryLayout(onNavigateToSignState)
-                ConfigLayout(
-                    showTaskToast = viewmodel::showTaskToast,
-                    usedThreadPool = viewmodel::usedThreadPool,
-                    taskNotification = viewmodel::taskNotification,
-                    taskExceptionNotification = viewmodel::taskExceptionNotification,
-                    logToXposed = viewmodel::logToXposed,
-                    debugLog = viewmodel::debugLog,
+            EntryLayout(onNavigateToSignState)
+            ConfigLayout(
+                showTaskToast = viewmodel::showTaskToast,
+                usedThreadPool = viewmodel::usedThreadPool,
+                taskNotification = viewmodel::taskNotification,
+                taskExceptionNotification = viewmodel::taskExceptionNotification,
+                logToXposed = viewmodel::logToXposed,
+                debugLog = viewmodel::debugLog,
 
-                    updateShowTaskToast = viewmodel::updateShowTaskToast,
-                    updateUsedThreadPool = viewmodel::updateUsedThreadPool,
-                    updateTaskNotification = viewmodel::updateTaskNotification,
-                    updateTaskExceptionNotification = viewmodel::updateTaskExceptionNotification,
-                    updateLogToXposed = viewmodel::updateLogToXposed,
-                    updateDebugLog = viewmodel::updateDebugLog,
+                updateShowTaskToast = viewmodel::updateShowTaskToast,
+                updateUsedThreadPool = viewmodel::updateUsedThreadPool,
+                updateTaskNotification = viewmodel::updateTaskNotification,
+                updateTaskExceptionNotification = viewmodel::updateTaskExceptionNotification,
+                updateLogToXposed = viewmodel::updateLogToXposed,
+                updateDebugLog = viewmodel::updateDebugLog,
 
-                    showSnackbar = viewmodel::showSnackbar
-                )
-                CommonLayout(viewmodel::showThemeDialog)
-                BackupLayout(showSnackbar = viewmodel::showSnackbar)
-            }
+                showSnackbar = viewmodel::showSnackbar
+            )
+            CommonLayout(onNavigateToTheme)
+            BackupLayout(showSnackbar = viewmodel::showSnackbar)
         }
-        LaunchedEffect(viewmodel.themeDialog) {
-            if (viewmodel.themeDialog) {
-                sheetState.expand()
-            } else {
-                sheetState.hide()
-            }
-        }
-
-        ThemeModelDialog(
-            enable = viewmodel::themeDialog,
-            sheetState = sheetState,
-            targetTheme = themeViewModel::currentTheme,
-            targetBlack = themeViewModel::blackTheme,
-            onDismiss = viewmodel::dismissThemeDialog,
-            onConfirm = themeViewModel::confirmTheme
-        )
     }
 
 }

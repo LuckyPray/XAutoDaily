@@ -77,7 +77,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                                             }!!
                                         fmIntent.set(item, rIntent)
                                         // android 12
-                                        if (Build.VERSION.SDK_INT == 31) {
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                             val cActivityThread =
                                                 Class.forName("android.app.ActivityThread")
                                             val activityThread = HiddenApiBypass.invoke(

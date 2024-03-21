@@ -23,8 +23,6 @@ class MainViewModel : ViewModel() {
 
     var execTaskNum by mutableIntStateOf(0)
 
-    var noticeDialog by mutableStateOf(false)
-
     var noticeText by mutableStateOf("")
 
     val snackbarHostState = SnackbarHostState()
@@ -34,19 +32,6 @@ class MainViewModel : ViewModel() {
         initNotice()
     }
 
-    fun showNoticeDialog() {
-        updateNoticeDialogState(true)
-    }
-
-    fun dismissNoticeDialog() {
-        updateNoticeDialogState(false)
-    }
-
-    private fun updateNoticeDialogState(boolean: Boolean) {
-        if (noticeDialog != boolean) {
-            noticeDialog = boolean
-        }
-    }
 
     private fun initNotice() {
         viewModelScope.launch(Dispatchers.IO) {

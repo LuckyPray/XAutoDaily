@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,7 +36,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.ui.XAutodailyConstants
+import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.HintEditText
@@ -58,7 +59,11 @@ fun CheckFriendsDialog(
     onDismiss: () -> Unit
 ) {
     var searchText by remember { mutableStateOf("") }
-    val friendsState = XAutodailyConstants.FriendList
+    val friendsState = remember {
+        mutableStateListOf(
+            *FunctionPool.friendsManager.getFriends().orEmpty().toTypedArray()
+        )
+    }
     if (state.isVisible || enable()) {
         ModalBottomSheet(
             onDismissRequest = onDismiss,

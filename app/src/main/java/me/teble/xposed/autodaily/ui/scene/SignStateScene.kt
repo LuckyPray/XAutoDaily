@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -19,7 +20,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import me.teble.xposed.autodaily.ui.XAutodailyConstants.TaskState
+import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
@@ -42,9 +43,14 @@ fun SignStateScene(
         containerColor = colors.colorBgLayout
     ) {
 
-        val turnTaskState = TaskState.filter { it.enable }
+        val turnTaskState = remember {
+            mutableStateListOf(
+                *ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten().toTypedArray()
+            ).filter { it.enable }
+
+        }
         AnimatedVisibility(
-            TaskState.isNotEmpty(),
+            turnTaskState.isNotEmpty(),
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
