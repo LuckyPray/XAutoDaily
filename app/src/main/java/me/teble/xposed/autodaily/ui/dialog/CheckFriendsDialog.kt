@@ -39,6 +39,7 @@ import me.teble.xposed.autodaily.ui.composable.SelectInfoItem
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Search
+import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -60,12 +61,12 @@ fun CheckFriendsOverlayUI(
         color = colors.colorDialogDivider,
         thickness = 1.dp,
         modifier = Modifier
-            .padding(horizontal = 32.dp)
+            .padding(DialogHorizontalPadding)
             .padding(bottom = 16.dp)
     )
 
     Column(
-        Modifier.padding(horizontal = 32.dp)
+        Modifier.padding(DialogHorizontalPadding)
     ) {
 
         SearchBar(
@@ -99,6 +100,7 @@ fun CheckFriendsOverlayUI(
             modifier = Modifier
                 .weight(1f, false)
                 .fillMaxWidth()
+                .clip(SmootherShape(12.dp))
 
         ) {
             items(

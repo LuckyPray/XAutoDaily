@@ -156,8 +156,7 @@ private fun ModuleTopBar() {
         modifier = Modifier
             .padding(StatusBarsTopPadding)
             .padding(HorizontalPadding)
-            .padding(vertical = 20.dp)
-            .padding(start = 16.dp),
+            .padding(vertical = 20.dp),
     )
 }
 

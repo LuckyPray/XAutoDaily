@@ -29,6 +29,22 @@ val HorizontalPadding: PaddingValues
         WindowInsets(right = 16.dp, left = 16.dp)
     ).only(WindowInsetsSides.Horizontal).asPaddingValues()
 
+
+val DialogHorizontalPadding: PaddingValues
+    @Composable
+    get() = WindowInsets.waterfall.union(
+        WindowInsets(right = 32.dp, left = 32.dp)
+    ).only(WindowInsetsSides.Horizontal).asPaddingValues()
+
+val DialogVerticalPadding: PaddingValues
+    @Composable
+    get() = WindowInsets.statusBars
+        .union(WindowInsets.captionBar)
+        .only(WindowInsetsSides.Top)
+        .union(WindowInsets(top = 20.dp, bottom = 20.dp))
+        .only(WindowInsetsSides.Vertical)
+        .asPaddingValues()
+
 val NavigationBarsBottomPadding: PaddingValues
     @Composable
     get() = WindowInsets.navigationBars.union(

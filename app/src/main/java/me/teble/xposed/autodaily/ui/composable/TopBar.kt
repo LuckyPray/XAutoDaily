@@ -3,22 +3,14 @@ package me.teble.xposed.autodaily.ui.composable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.captionBar
-import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -30,6 +22,9 @@ import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Back
 import me.teble.xposed.autodaily.ui.icon.icons.Close
 import me.teble.xposed.autodaily.ui.icon.icons.XAutoDaily
+import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
+import me.teble.xposed.autodaily.ui.layout.DialogVerticalPadding
+import me.teble.xposed.autodaily.ui.layout.HorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -54,11 +49,13 @@ fun XAutoDailyTopBar(
                 imageVector = icon,
                 tint = { colors.colorText },
                 modifier = Modifier
-                    .padding(end = 10.dp)
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .clickable(role = Role.Button, onClick = iconClick)
-                    .padding(6.dp),
+                    .clickable(
+                        interactionSource = null,
+                        role = Role.Button,
+                        indication = ripple(bounded = false, radius = 18.dp),
+                        onClick = iconClick
+                    )
+                    .size(24.dp),
                 contentDescription = contentDescription
             )
 
@@ -76,6 +73,7 @@ fun TopBar(
     val colors = colors
     Row(
         modifier = modifier
+            .padding(HorizontalPadding)
             .padding(StatusBarsTopPadding)
             .padding(bottom = 20.dp, top = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -84,11 +82,13 @@ fun TopBar(
             Icon(
                 imageVector = Icons.Back,
                 modifier = Modifier
-                    .padding(start = 26.dp)
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .clickable(role = Role.Button, onClick = backClick)
-                    .padding(6.dp),
+                    .clickable(
+                        interactionSource = null,
+                        role = Role.Button,
+                        indication = ripple(bounded = false, radius = 18.dp),
+                        onClick = backClick
+                    )
+                    .size(24.dp),
                 contentDescription = "",
                 tint = { colors.colorText }
             )
@@ -107,7 +107,7 @@ fun TopBar(
         Spacer(modifier = Modifier.weight(1f))
 
         if (hasBackProvider()) {
-            Spacer(modifier = Modifier.width(62.dp))
+            Spacer(modifier = Modifier.width(24.dp))
         }
 
     }
@@ -122,20 +122,13 @@ fun DialogTopBar(
     val colors = colors
     Row(
         modifier = modifier
-            .padding(start = 32.dp, end = 26.dp)
-            .padding(
-                WindowInsets.statusBars
-                    .union(WindowInsets.captionBar)
-                    .union(WindowInsets(top = 21.dp))
-                    .only(WindowInsetsSides.Top)
-                    .asPaddingValues()
-            )
-            .padding(bottom = 21.dp)
+            .padding(DialogHorizontalPadding)
+            .padding(DialogVerticalPadding),
+        verticalAlignment = Alignment.CenterVertically
 
     ) {
         BasicText(
             text = text,
-            modifier = Modifier.align(Alignment.CenterVertically),
             style = TextStyle(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -149,10 +142,15 @@ fun DialogTopBar(
             contentDescription = "关闭",
             tint = { colors.colorText },
             modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .clickable(role = Role.Button, onClick = iconClick)
-                .padding(6.dp)
+                .clickable(
+                    interactionSource = null,
+                    role = Role.Button,
+                    indication = ripple(bounded = false, radius = 18.dp),
+                    onClick = iconClick
+                )
+                .size(24.dp)
+
+
         )
     }
 }

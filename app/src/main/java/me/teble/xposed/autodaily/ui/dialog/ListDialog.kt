@@ -33,6 +33,7 @@ import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.icon.Icons
 import me.teble.xposed.autodaily.ui.icon.icons.Chosen
+import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -62,9 +63,10 @@ fun ListDialog(
 
         LazyColumn(
             modifier = Modifier
-                .padding(horizontal = 32.dp)
+                .padding(DialogHorizontalPadding)
                 .weight(1f, false)
                 .fillMaxWidth()
+                .clip(SmootherShape(12.dp))
         ) {
             items(
                 items = list,

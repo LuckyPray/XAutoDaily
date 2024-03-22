@@ -9,6 +9,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -16,6 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.Text
+import me.teble.xposed.autodaily.ui.graphics.SmootherShape
+import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
+import me.teble.xposed.autodaily.ui.layout.DialogVerticalPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
@@ -28,7 +32,7 @@ fun NoticeOverlayUI(
     val colors = XAutodailyTheme.colors
     Column(
         modifier = Modifier
-            .padding(horizontal = 32.dp)
+            .padding(DialogHorizontalPadding)
             .defaultNavigationBarPadding()
     ) {
         Text(
@@ -40,14 +44,13 @@ fun NoticeOverlayUI(
             ),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(top = 20.dp),
+                .padding(DialogVerticalPadding),
             color = { colors.colorText }
         )
 
         HorizontalDivider(
             color = XAutodailyTheme.colors.colorDialogDivider,
-            thickness = 1.dp,
-            modifier = Modifier.padding(top = 20.dp)
+            thickness = 1.dp
         )
 
         Text(
@@ -55,7 +58,8 @@ fun NoticeOverlayUI(
             modifier = Modifier
                 .padding(top = 24.dp)
                 .weight(1f, false)
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .clip(SmootherShape(12.dp)),
             style = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,

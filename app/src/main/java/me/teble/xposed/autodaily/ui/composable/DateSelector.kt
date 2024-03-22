@@ -119,15 +119,20 @@ internal fun TextPicker(
     visibleItemCount: Int = 3,
     onScrollFinish: (snappedIndex: Int) -> Unit
 ) {
-    val colors = colors
-    val state = rememberLazyListState(startIndex)
+
+    val state =
+        rememberLazyListState((Int.MAX_VALUE / 2) - (Int.MAX_VALUE / 2 % count) + startIndex)
 
 
     val snappingLayout = remember(state) { SnapLayoutInfoProvider(state) }
     val flingBehavior = rememberSnapFlingBehavior(snappingLayout)
 
 
-    val currentIndex by remember { derivedStateOf(state::firstVisibleItemIndex) }
+    val currentIndex by remember {
+        derivedStateOf {
+            state.firstVisibleItemIndex % count
+        }
+    }
 
     val currentOnScrollFinish by rememberUpdatedState(onScrollFinish)
 
@@ -147,56 +152,68 @@ internal fun TextPicker(
     ) {
 
         items(
-            count,
+            Int.MAX_VALUE,
             key = { it },
-            contentType = { derivedStateOf { currentIndex == it }.value }) { index ->
-
-            val isSelect by remember { derivedStateOf { currentIndex == index } }
-
-            val fontScale by animateFloatAsState(
-                targetValue = if (isSelect) 1.0f else 0.8f,
-                animationSpec = spring(), label = "Picker fontSize"
+            contentType = { derivedStateOf { currentIndex == it }.value }) { size ->
+            TextPickerItem(
+                currentIndex = { currentIndex },
+                index = size % count,
+                itemHeight = itemHeight
             )
-
-            val alpha by animateFloatAsState(
-                targetValue = if (isSelect) DefaultAlpha else DisabledFontAlpha,
-                animationSpec = spring(), label = "Picker fontAlpha"
-            )
-            val fontWeight by animateIntAsState(
-                targetValue = if (isSelect) FontWeight.Bold.weight else FontWeight.Normal.weight,
-                label = "fontWeight"
-            )
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(itemHeight)
-                    .graphicsLayer {
-                        this.alpha = alpha
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = { String.format(Locale.getDefault(), "%02d", index) },
-                    color = { colors.colorText },
-                    maxLines = 1,
-                    modifier = Modifier.graphicsLayer {
-                        this.scaleX = fontScale
-                        this.scaleY = fontScale
-
-                    },
-                    style = TextStyle(
-                        textAlign = TextAlign.Center,
-                        fontFamily = XAutodailyTheme.signFontFamily,
-                        fontWeight = FontWeight(fontWeight),
-                        fontSize = 48.sp
-                    )
-                )
-            }
-
 
         }
 
+    }
+}
+
+@Composable
+private fun TextPickerItem(
+    currentIndex: () -> Int,
+    index: Int,
+    itemHeight: Dp,
+) {
+    val colors = colors
+    val isSelect by remember { derivedStateOf { currentIndex() == index } }
+
+    val fontScale by animateFloatAsState(
+        targetValue = if (isSelect) 1.0f else 0.8f,
+        animationSpec = spring(), label = "Picker fontSize"
+    )
+
+    val alpha by animateFloatAsState(
+        targetValue = if (isSelect) DefaultAlpha else DisabledFontAlpha,
+        animationSpec = spring(), label = "Picker fontAlpha"
+    )
+    val fontWeight by animateIntAsState(
+        targetValue = if (isSelect) FontWeight.Bold.weight else FontWeight.Normal.weight,
+        label = "fontWeight"
+    )
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(itemHeight)
+            .graphicsLayer {
+                this.alpha = alpha
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = { String.format(Locale.getDefault(), "%02d", index) },
+            color = { colors.colorText },
+            maxLines = 1,
+            modifier = Modifier.graphicsLayer {
+                this.scaleX = fontScale
+                this.scaleY = fontScale
+
+            },
+            style = TextStyle(
+                textAlign = TextAlign.Center,
+                fontFamily = XAutodailyTheme.signFontFamily,
+                fontWeight = FontWeight(fontWeight),
+                fontSize = 48.sp
+            )
+        )
     }
 }
 

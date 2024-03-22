@@ -44,6 +44,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Chosen
 import me.teble.xposed.autodaily.ui.icon.icons.Moon
 import me.teble.xposed.autodaily.ui.icon.icons.Sun
 import me.teble.xposed.autodaily.ui.icon.icons.Text
+import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.Theme
@@ -103,14 +104,15 @@ fun ThemeOverlayUI(
             color = colors.colorDialogDivider,
             thickness = 1.dp,
             modifier = Modifier
-                .padding(horizontal = 32.dp)
+                .padding(DialogHorizontalPadding)
                 .padding(bottom = 18.dp)
         )
         Column(
             Modifier
-                .padding(horizontal = 32.dp)
+                .padding(DialogHorizontalPadding)
                 .weight(weight = 1f, fill = false)
                 .verticalScroll(rememberScrollState())
+                .clip(SmootherShape(12.dp))
         ) {
             ThemeItem(
                 text = "亮色模式",

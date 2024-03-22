@@ -11,6 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -20,6 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.Text
+import me.teble.xposed.autodaily.ui.graphics.SmootherShape
+import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -47,7 +50,7 @@ fun UpdateOverlayUI(
             color = colors.colorDialogDivider,
             thickness = 1.dp,
             modifier = Modifier
-                .padding(horizontal = 32.dp)
+                .padding(DialogHorizontalPadding)
                 .padding(bottom = 24.dp)
         )
 
@@ -57,8 +60,9 @@ fun UpdateOverlayUI(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f, false)
-                .padding(horizontal = 32.dp)
-                .verticalScroll(rememberScrollState()),
+                .padding(DialogHorizontalPadding)
+                .verticalScroll(rememberScrollState())
+                .clip(SmootherShape(12.dp)),
             style = TextStyle(
                 color = colors.colorTextSecondary,
                 fontWeight = FontWeight.Normal,
