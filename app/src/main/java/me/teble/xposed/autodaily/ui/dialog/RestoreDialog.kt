@@ -78,7 +78,7 @@ private fun RestorBottomBar(onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.width(16.dp))
 
         DialogButton(
-            text = "立刻重启",
+            text = "立即重启",
             modifier = Modifier.weight(1f),
             onClick = {
                 exitProcess(0)
