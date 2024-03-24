@@ -52,14 +52,17 @@ class SettingViewModel : ViewModel() {
         }
     }
 
-    fun restoreResult(uri: Uri?) {
-        uri?.let {
-            val backupTmpFile = File(Config.mmkvDir, "tmp.zip")
-            FileUtil.saveFile(it, backupTmpFile)
-            FileUtil.restoreBackupConfig(backupTmpFile, Config.mmkvDir)
-            backupTmpFile.delete()
-//                showRestoreRestartDialog = true
+    fun restoreResult(onNavigateToRestore: () -> Unit): (Uri?) -> Unit {
+        return { uri ->
+            uri?.let {
+                val backupTmpFile = File(Config.mmkvDir, "tmp.zip")
+                FileUtil.saveFile(it, backupTmpFile)
+                FileUtil.restoreBackupConfig(backupTmpFile, Config.mmkvDir)
+                backupTmpFile.delete()
+                onNavigateToRestore()
+            }
         }
+
     }
 
     fun backupSaveResult(uri: Uri?) {

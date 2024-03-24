@@ -31,28 +31,25 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun SettingScene(
     backClick: () -> Unit,
+    onNavigateToRestore: () -> Unit,
     onNavigateToTheme: () -> Unit,
     hasBackProvider: () -> Boolean,
     onNavigateToSignState: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
-    val logSaveLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.CreateDocument("application/zip"),
-            onResult = viewmodel::logSaveResult
-        )
-    val configBackupLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.CreateDocument("application/zip"),
-            onResult = viewmodel::backupSaveResult
-        )
+    val logSaveLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip"),
+        onResult = viewmodel::logSaveResult
+    )
+    val configBackupLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/zip"),
+        onResult = viewmodel::backupSaveResult
+    )
 
-
-    val restoreLauncher =
-        rememberLauncherForActivityResult(
-            ActivityResultContracts.GetContent(),
-            viewmodel::restoreResult
-        )
+    val restoreLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent(),
+        viewmodel.restoreResult(onNavigateToRestore)
+    )
     XaScaffold(
         snackbarHost = {
             RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)

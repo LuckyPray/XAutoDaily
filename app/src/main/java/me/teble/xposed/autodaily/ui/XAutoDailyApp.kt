@@ -31,6 +31,7 @@ import kotlinx.collections.immutable.toImmutableSet
 import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
 import me.teble.xposed.autodaily.ui.dialog.CheckFriendsOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.NoticeOverlayUI
+import me.teble.xposed.autodaily.ui.dialog.RestoreOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.ThemeOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.UpdateOverlayUI
 import me.teble.xposed.autodaily.ui.scene.AboutScene
@@ -60,7 +61,8 @@ enum class Dialog {
     Notice,
     Theme,
     CheckFriends,
-    Update
+    Update,
+    Restore
 }
 
 @Stable
@@ -88,6 +90,7 @@ sealed class DialogItem(route: String) : NavigationItem(route) {
         DialogItem("${Dialog.CheckFriends.name}/?uinListStr=$uinListStr")
 
     data class Update(val info: String) : DialogItem("${Dialog.Update.name}/?info=$info")
+    data object Restore : DialogItem(Dialog.Restore.name)
 
 }
 
@@ -195,6 +198,9 @@ fun NavGraphBuilder.addSceneGraph(navController: NavController) {
     composable(route = SceneItem.Setting.route) {
         SettingScene(
             backClick = navController::popBackStack,
+            onNavigateToRestore = {
+                navController.navigate(DialogItem.Restore)
+            },
             onNavigateToTheme = {
                 navController.navigate(DialogItem.Theme)
             },
@@ -277,4 +283,10 @@ fun NavGraphBuilder.addBottomSheetGraph(
             onDismiss = navController::popBackStack
         )
     }
+    bottomSheet(route = Dialog.Restore.name) { backStackEntry ->
+        RestoreOverlayUI(
+            onDismiss = navController::popBackStack
+        )
+    }
+
 }

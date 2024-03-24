@@ -12,36 +12,26 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.ui.composable.DialogButton
 import me.teble.xposed.autodaily.ui.composable.DialogTopBar
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
-
-
-enum class UpdateType {
-    Ignore,
-    Drive,
-    Github,
-}
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import kotlin.system.exitProcess
 
 @Composable
-fun UpdateOverlayUI(
-    info: () -> String,
-    onDismiss: () -> Unit,
-    viewmodel: UpdateViewModel = viewModel()
+fun RestoreOverlayUI(
+    onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
+    val colors = XAutodailyTheme.colors
     DialogTopBar(
-        text = "新版本",
+        text = "配置已恢复",
         iconClick = onDismiss
     )
     Column(
@@ -49,65 +39,49 @@ fun UpdateOverlayUI(
             .padding(DialogHorizontalPadding)
             .defaultNavigationBarPadding()
     ) {
-
-
         HorizontalDivider(
-            color = colors.colorDialogDivider,
-            thickness = 1.dp,
-            modifier = Modifier.padding(bottom = 24.dp)
+            color = XAutodailyTheme.colors.colorDialogDivider,
+            thickness = 1.dp
         )
 
-
         Text(
-            text = info,
+            text = "配置恢复完成，新配置需要重启应用才能生效，是否立刻重启？",
             modifier = Modifier
-                .fillMaxWidth()
+                .padding(top = 24.dp)
                 .weight(1f, false)
                 .verticalScroll(rememberScrollState())
                 .clip(SmootherShape(12.dp)),
             style = TextStyle(
-                color = colors.colorTextSecondary,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Normal,
-                fontSize = 14.sp
-            )
+            ),
+            color = { colors.colorTextSecondary }
         )
 
-        UpdateBottomBar(onConfirm = viewmodel.updateConfirm(context))
+        RestorBottomBar(onDismiss = onDismiss)
 
     }
 }
 
 @Composable
-private fun UpdateBottomBar(onConfirm: (UpdateType) -> Unit) {
+private fun RestorBottomBar(onDismiss: () -> Unit) {
     Row(
         Modifier
             .fillMaxWidth()
             .padding(top = 24.dp)
     ) {
         DialogButton(
-            text = "忽略",
-            modifier = Modifier.weight(3f),
-            onClick = {
-                onConfirm(UpdateType.Ignore)
-            }
+            text = "稍后重启",
+            modifier = Modifier.weight(1f),
+            onClick = onDismiss
         )
         Spacer(modifier = Modifier.width(16.dp))
 
         DialogButton(
-            text = "123 盘",
-            modifier = Modifier
-                .weight(4f),
+            text = "立刻重启",
+            modifier = Modifier.weight(1f),
             onClick = {
-                onConfirm(UpdateType.Drive)
-            }
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-
-        DialogButton(
-            text = "GitHub",
-            modifier = Modifier.weight(4f),
-            onClick = {
-                onConfirm(UpdateType.Github)
+                exitProcess(0)
             }
         )
     }
