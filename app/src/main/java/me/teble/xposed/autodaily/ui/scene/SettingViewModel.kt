@@ -1,5 +1,6 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import android.net.Uri
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -7,8 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
+import me.teble.xposed.autodaily.hook.base.hostContext
+import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.utils.FileUtil
+import me.teble.xposed.autodaily.utils.LogUtil
+import java.io.File
 
 @Stable
 class SettingViewModel : ViewModel() {
@@ -28,7 +35,52 @@ class SettingViewModel : ViewModel() {
     var snackbarHostState = SnackbarHostState()
 
 
-    fun showSnackbar(text: String) {
+    fun logSaveResult(uri: Uri?) {
+        uri?.let {
+            viewModelScope.launch(IO) {
+                try {
+                    hostContext.contentResolver.openFileDescriptor(uri, "wt").use { zipFd ->
+                        zipFd?.let {
+                            FileUtil.saveLogs(zipFd)
+                        }
+                    }
+                    showSnackbar("导出成功")
+                } catch (e: Throwable) {
+                    LogUtil.e(e, "save log failed")
+                }
+            }
+        }
+    }
+
+    fun restoreResult(uri: Uri?) {
+        uri?.let {
+            val backupTmpFile = File(Config.mmkvDir, "tmp.zip")
+            FileUtil.saveFile(it, backupTmpFile)
+            FileUtil.restoreBackupConfig(backupTmpFile, Config.mmkvDir)
+            backupTmpFile.delete()
+//                showRestoreRestartDialog = true
+        }
+    }
+
+    fun backupSaveResult(uri: Uri?) {
+        uri?.let {
+            viewModelScope.launch(IO) {
+                try {
+                    hostContext.contentResolver.openFileDescriptor(uri, "wt").use { zipFd ->
+                        zipFd?.let {
+                            FileUtil.backupConfig(zipFd)
+                        }
+                    }
+                    showSnackbar("备份成功")
+                } catch (e: Throwable) {
+                    LogUtil.e(e, "save log failed")
+                }
+            }
+        }
+    }
+
+
+    private fun showSnackbar(text: String) {
         viewModelScope.launch {
             snackbarHostState.showSnackbar(text)
         }
@@ -63,12 +115,5 @@ class SettingViewModel : ViewModel() {
         ConfUnit.enableDebugLog = boolean
         debugLog = ConfUnit.enableDebugLog
     }
-
-    fun saveLog() {
-//        this.viewModelScope.launch {
-//            logSaveLauncher.launch("XAutoDaily_${LocalDateTime.now()}.zip")
-//        }
-    }
-
 
 }

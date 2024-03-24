@@ -1,5 +1,7 @@
 package me.teble.xposed.autodaily.ui.scene
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,6 +14,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.datetime.Clock
+import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
@@ -32,9 +36,26 @@ fun SettingScene(
     onNavigateToSignState: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
+    val logSaveLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.CreateDocument("application/zip"),
+            onResult = viewmodel::logSaveResult
+        )
+    val configBackupLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.CreateDocument("application/zip"),
+            onResult = viewmodel::backupSaveResult
+        )
+
+
+    val restoreLauncher =
+        rememberLauncherForActivityResult(
+            ActivityResultContracts.GetContent(),
+            viewmodel::restoreResult
+        )
     XaScaffold(
         snackbarHost = {
-            // SnackbarHost(hostState = snackbarHostState) { RoundedSnackbar(it) }
+            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
         },
         topBar = {
             TopBar(text = "设置", backClick = backClick, hasBackProvider = hasBackProvider)
@@ -65,11 +86,19 @@ fun SettingScene(
                 updateTaskExceptionNotification = viewmodel::updateTaskExceptionNotification,
                 updateLogToXposed = viewmodel::updateLogToXposed,
                 updateDebugLog = viewmodel::updateDebugLog,
-
-                showSnackbar = viewmodel::showSnackbar
+                logSave = {
+                    logSaveLauncher.launch("XAutoDaily_${Clock.System.now()}.zip")
+                }
             )
             CommonLayout(onNavigateToTheme)
-            BackupLayout(showSnackbar = viewmodel::showSnackbar)
+            BackupLayout(
+                configBackup = {
+                    configBackupLauncher.launch("XAutoDaily_config_${Clock.System.now()}.zip")
+                },
+                configRestore = {
+                    restoreLauncher.launch("application/zip")
+                }
+            )
         }
     }
 
@@ -111,7 +140,7 @@ private fun ConfigLayout(
     updateLogToXposed: (Boolean) -> Unit,
     updateDebugLog: (Boolean) -> Unit,
 
-    showSnackbar: (String) -> Unit
+    logSave: () -> Unit
 ) {
     SmallTitle(
         title = "模块配置",
@@ -205,13 +234,7 @@ private fun ConfigLayout(
             clickEnabled = { true },
             text = "日志导出",
             infoText = "保存日志文件打包导出至内部存储",
-            onClick = {
-                showSnackbar("请选择保存位置")
-//                MainScope().launch(IO) {
-//                            ToastUtil.send("请选择保存位置")
-//
-//                        }
-            }
+            onClick = logSave
         )
     }
 }
@@ -238,7 +261,10 @@ private fun CommonLayout(showThemeDialog: () -> Unit) {
 }
 
 @Composable
-private fun BackupLayout(showSnackbar: (String) -> Unit) {
+private fun BackupLayout(
+    configBackup: () -> Unit,
+    configRestore: () -> Unit
+) {
     SmallTitle(
         title = "备份与恢复",
         modifier = Modifier
@@ -261,11 +287,7 @@ private fun BackupLayout(showSnackbar: (String) -> Unit) {
             clickEnabled = { true },
             text = "配置备份",
             infoText = "将配置文件打包导出至内部存储",
-            onClick = {
-                showSnackbar("请选择保存位置")
-//                            ToastUtil.send("请选择保存位置")
-//                            configBackupLauncher.launch("XAutoDaily_config_${LocalDateTime.now()}.zip")
-            }
+            onClick = configBackup
         )
         TextInfoItem(
             modifier = Modifier
@@ -274,9 +296,7 @@ private fun BackupLayout(showSnackbar: (String) -> Unit) {
             clickEnabled = { true },
             text = "配置恢复",
             infoText = "选择待恢复配置文件",
-            onClick = {
-
-            }
+            onClick = configRestore
         )
     }
 }

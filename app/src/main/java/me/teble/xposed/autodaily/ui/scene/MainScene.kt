@@ -99,7 +99,7 @@ fun MainScene(
                 onNavigateToSign = onNavigateToSign,
                 onNavigateToSetting = onNavigateToSetting,
                 onNavigateToAbout = onNavigateToAbout,
-                execTaskNum = viewmodel::execTaskNum
+                turnTaskSize = viewmodel::turnTaskSize
             )
         }
 
@@ -179,7 +179,7 @@ private fun GridLayout(
     onNavigateToSign: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
-    execTaskNum: () -> Int
+    turnTaskSize: () -> Int
 ) {
     val colors = colors
     Column(
@@ -194,7 +194,7 @@ private fun GridLayout(
                 iconColor = Color(0xFF47B6FF),
                 Icons.Configuration,
                 "签到配置",
-                { "已启用 ${execTaskNum()} 项" },
+                { "已启用 ${turnTaskSize()} 项" },
                 true,
                 onClick = onNavigateToSign
             )

@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
@@ -14,22 +15,25 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.utils.TaskExecutor
 
 @Stable
 class MainViewModel : ViewModel() {
 
-    private var lastClickTime = 0L
+    private var lastClickTime by mutableLongStateOf(0L)
 
     var execTaskNum by mutableIntStateOf(0)
 
     var noticeText by mutableStateOf("")
+    var turnTaskSize by mutableIntStateOf(0)
 
     val snackbarHostState = SnackbarHostState()
 
     init {
         initExecTaskNum()
         initNotice()
+        initTurnTaskSize()
     }
 
 
@@ -66,6 +70,17 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+    fun initTurnTaskSize() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val turnTaskState = ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten()
+                .filter { it.enable }
+            withContext(Dispatchers.Main) {
+                turnTaskSize = turnTaskState.size
+            }
+        }
+    }
+
 
     fun signClick() {
         val currentTime = System.currentTimeMillis()
