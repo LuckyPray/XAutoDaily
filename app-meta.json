@@ -1,6 +1,6 @@
 {
-    "versionName": "3.0.24",
-    "versionCode": 24021216,
-    "updateTime": "2024-02-12 16:00:00",
-    "updateLog": "1. 修复部分情况下无法正常获取资源导致崩溃的问题"
+    "versionName": "3.0.25",
+    "versionCode": 24041416,
+    "updateTime": "2024-04-14 16:55:44",
+    "updateLog": "1. 修复一处配置文件可能无法正常获取的bug\n2. 修复回赞筛选天数不生效的问题\n3. 优化模块稳定性"
 }
