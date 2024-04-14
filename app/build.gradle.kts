@@ -37,9 +37,11 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.24"
+val appVerName: String = "3.0.25"
 val updateLog = """
-    1. 修复部分情况下无法正常获取资源导致崩溃的问题
+    1. 修复一处配置文件可能无法正常获取的bug
+    2. 修复回赞筛选天数不生效的问题
+    3. 优化模块稳定性
 """.trimIndent()
 
 android {
