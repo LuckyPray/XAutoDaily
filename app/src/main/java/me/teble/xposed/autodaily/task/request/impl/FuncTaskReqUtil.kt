@@ -41,7 +41,7 @@ object FuncTaskReqUtil : ITaskReqUtil {
                 val maxDays = paramMap["maxDays"]!!.toInt()
                 LogUtil.d("maxPage: $maxPage, maxDays: $maxDays")
                 manager = favoriteManager
-                val res = favoriteManager.getAllVoter(maxPage)
+                val res = favoriteManager.getAllVoter(maxPage, maxDays)
                 LogUtil.d("满足要求点赞列表人数: ${res.size}")
                 var favoriteCnt = 0
                 res.forEach {
