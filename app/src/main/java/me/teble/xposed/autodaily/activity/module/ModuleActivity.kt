@@ -88,6 +88,13 @@ class ModuleActivity : BaseActivity(), CoroutineScope by MainScope() {
             injectRes(it.resources)
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        composeViewContext.get()?.let {
+            injectRes(it.resources)
+        }
+    }
 }
 
 fun colors(
