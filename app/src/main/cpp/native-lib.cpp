@@ -48,6 +48,12 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_6;
 }
 
+void log_to_java(JNIEnv *env, const std::string& content) {
+    jclass LogUtil = env->FindClass("me/teble/xposed/autodaily/utils/LogUtil");
+    jmethodID LogUtil_i = env->GetStaticMethodID(LogUtil, "i", "(Ljava/lang/String;)V");
+    env->CallStaticVoidMethod(LogUtil, LogUtil_i, env->NewStringUTF(content.c_str()));
+}
+
 std::string
 decryptByPublicKey(JNIEnv *env, const std::string &encode_key, const std::string &pub_key) {
     jclass CX509EncodedKeySpec = env->FindClass("java/security/spec/X509EncodedKeySpec");
@@ -97,8 +103,7 @@ decryptByPublicKey(JNIEnv *env, const std::string &encode_key, const std::string
     return decode_key;
 }
 
-const char *decryptXAConf(JNIEnv *env, const std::string &src) {
-    static const char *ret;
+std::string decryptXAConf(JNIEnv *env, const std::string &src) {
     LOGD("src size -> %lu", src.size());
     std::string encPublicKey(encRsaPublicKey);
     std::string pubKey;
@@ -111,9 +116,6 @@ const char *decryptXAConf(JNIEnv *env, const std::string &src) {
     std::string encConf = src.substr(171);
     LOGD("encode conf size -> %lu", encConf.size());
     std::string aesKey = decodeByRSAPubKey(base64_decode(encAesKey), pubKey);
-//    std::string aesKey = decryptByPublicKey(env,
-//                                            base64_decode(encAesKey),
-//                                            base64_decode(pubKey, true));
     if (aesKey.empty()) {
         LOGE("decode aes key failed");
         return "";
@@ -121,8 +123,7 @@ const char *decryptXAConf(JNIEnv *env, const std::string &src) {
     LOGD("aesKey size -> %lu", aesKey.size());
     std::string res = decryptByAES(base64_decode(encConf), aesKey);
     LOGD("conf size -> %lu", res.size());
-    ret = res.c_str();
-    return ret;
+    return res;
 }
 
 const char *md5Hex(const std::string &value) {
@@ -138,10 +139,9 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_decryptXAConf(
     const char *bytes = (char *) env->GetByteArrayElements(enc_conf_bytes, nullptr);
     int len = env->GetArrayLength(enc_conf_bytes);
     std::string encConf(bytes, len);
-    const char *res;
-    res = decryptXAConf(env, encConf);
-    jbyteArray ret = env->NewByteArray((int) strlen(res));
-    env->SetByteArrayRegion(ret, 0, (int) strlen(res), (const jbyte *) res);
+    std::string res = decryptXAConf(env, encConf);
+    jbyteArray ret = env->NewByteArray((int) res.size());
+    env->SetByteArrayRegion(ret, 0, (int) res.size(), (const jbyte *) res.c_str());
     env->ReleaseByteArrayElements(enc_conf_bytes, (jbyte *) bytes, 0);
     return ret;
 }

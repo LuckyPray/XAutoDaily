@@ -29,8 +29,12 @@ class QLogHook : BaseHook() {
 //        "CardHandler",
 //        "MsgRespHandleReporter",
 //        "mqq",
-        "TicketManager",
-        "PskeyManagerImpl",
+//        "TicketManager",
+//        "PskeyManagerImpl",
+    )
+
+    private val ignoreTagFilter = setOf<String>(
+        "PlayerCore",
     )
 
     private fun containsTag(tag: String?): Boolean {
@@ -65,7 +69,9 @@ class QLogHook : BaseHook() {
                 )
             )
         }.hookReplace {
-            if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
+            val tag = it.args[0] as String?
+            if (!ignoreTagFilter.contains(tag)
+                && qTagFilter.isEmpty() || containsTag(tag)) {
                 Log.i("XALog", "QTag: ${it.args[0]}, msg: ${it.args[2]}")
             }
             return@hookReplace Unit
@@ -85,7 +91,9 @@ class QLogHook : BaseHook() {
                 )
             )
         }.hookReplace {
-            if (qTagFilter.isEmpty() || containsTag(it.args[0] as String?)) {
+            val tag = it.args[0] as String?
+            if (!ignoreTagFilter.contains(tag)
+                && qTagFilter.isEmpty() || containsTag(tag)) {
                 Log.i("XALog", "QTag: ${it.args[0]}, msg: ${it.args[2]}")
             }
             return@hookReplace Unit
