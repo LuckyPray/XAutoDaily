@@ -37,10 +37,11 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.26"
+val appVerName: String = "3.0.26-fix"
 val updateLog = """
     1. 优化续火随机字符串逻辑，避免重复发送同一条消息触发风控（建议添加足够多的续火语句用于随机）
     2. 修复部分魔改系统使用 makeText 时触发空指针异常的问题
+    3. 修复 3.0.26 在部分系统可能导致崩溃的问题
 """.trimIndent()
 
 android {
