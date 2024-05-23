@@ -1,13 +1,19 @@
 package me.teble.xposed.autodaily.hook.utils
 
+import android.R
 import android.content.Context
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import me.teble.xposed.autodaily.config.NAME
 import me.teble.xposed.autodaily.hook.base.hostContext
 import java.util.Locale
+
 
 object ToastUtil {
 
@@ -20,17 +26,19 @@ object ToastUtil {
     }
 
     private fun toast(context: Context, msg: String, longDuration: Boolean) {
-        val toast: Toast
-        if (Build.BRAND.lowercase(Locale.getDefault()) == "xiaomi") {
-            // 小米系统需要使用该方式避免 Toast 弹窗附带宿主应用名前缀
+        lateinit var toast: Toast
+        runCatching {
             toast = Toast.makeText(context, null, parse(longDuration))
-        } else {
-            // 部分系统会因为魔改 makeText 中的 text 参数为 @NonNull 从而导致空指针异常
-            toast = Toast(context).apply {
-                duration = parse(longDuration)
-            }
+            // Attempt to invoke interface method 'java.lang.String java.lang.CharSequence.toString()' on a null object reference
+            // 不确定性太多了，摆烂 catch
+            // toast = Toast(context).apply {
+            //     setText("$NAME: $msg") // This Toast was not created with Toast.makeText()
+            //     duration = parse(longDuration)
+            // }
+            toast.setText("$NAME: $msg")
+        }.onFailure {
+            toast = Toast.makeText(context, msg, parse(longDuration))
         }
-        toast.setText("$NAME: $msg")
         toast.show()
     }
 
