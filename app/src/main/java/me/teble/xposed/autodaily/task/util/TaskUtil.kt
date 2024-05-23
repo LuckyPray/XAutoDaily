@@ -10,6 +10,7 @@ import me.teble.xposed.autodaily.ksonpath.read
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
 import me.teble.xposed.autodaily.task.model.MsgExtract
+import me.teble.xposed.autodaily.task.model.RandomEnv
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.test
 import me.teble.xposed.autodaily.task.request.ReqFactory
@@ -281,7 +282,7 @@ object TaskUtil {
                 }
 
                 "randString" -> {
-                    env[it.name] = (confValue ?: it.default).split("|").random()
+                    env[it.name] = RandomEnv((confValue ?: it.default).split("|"))
                 }
 
                 "list", "friend", "group" -> {

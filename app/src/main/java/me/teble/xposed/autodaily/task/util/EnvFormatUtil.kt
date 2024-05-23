@@ -11,6 +11,7 @@ import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.ticketManager
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.VersionUtil
 import me.teble.xposed.autodaily.task.model.MiniProfile
+import me.teble.xposed.autodaily.task.model.RandomEnv
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.utils.LogUtil
@@ -188,13 +189,13 @@ object EnvFormatUtil {
             "skey" -> ticketManager.getSkey() ?: ""
             "bkn" -> {
                 val skey = ticketManager.getSkey()
-                    ?: throw RuntimeException("获取skey失败")
+                    ?: error("获取skey失败")
                 CalculationUtil.getBkn(skey).toString()
             }
 
             "ps_tk" -> {
                 val pskey = ticketManager.getPskey(qDomain ?: "")
-                    ?: throw RuntimeException("获取pskey失败")
+                    ?: error("获取pskey失败")
                 CalculationUtil.getPsToken(pskey).toString()
             }
 
@@ -202,7 +203,7 @@ object EnvFormatUtil {
             "mini_nick" -> {
                 val miniProfile = (env["mini_profile"] ?: let {
                     val profile = miniProfileManager.syncGetProfile(env["mini_app_id"] as String)
-                        ?: throw RuntimeException("获取mini_profile失败")
+                        ?: error("获取mini_profile失败")
                     env["mini_profile"] = profile
                     profile
                 }) as MiniProfile
@@ -212,7 +213,7 @@ object EnvFormatUtil {
             "mini_avatar" -> {
                 val miniProfile = (env["mini_profile"] ?: let {
                     val profile = miniProfileManager.syncGetProfile(env["mini_app_id"] as String)
-                        ?: throw RuntimeException("获取mini_profile失败")
+                        ?: error("获取mini_profile失败")
                     env["mini_profile"] = profile
                     profile
                 }) as MiniProfile
@@ -220,11 +221,15 @@ object EnvFormatUtil {
             }
 
             "mini_login_code" -> miniLoginManager.syncGetLoginCode(env["mini_app_id"] as String)
-                ?: throw RuntimeException("获取mini_login_code失败")
+                ?: error("获取mini_login_code失败")
 
-            else -> env[argName] ?: let {
-                LogUtil.w("没有找到对应的参数: $argName")
-                ""
+            else -> {
+                val argValue = env[argName] ?: error("没有找到对应的参数: $argName")
+                if (argValue is RandomEnv) {
+                    argValue.values.random()
+                } else {
+                    argValue
+                }
             }
         }
         return if (res is String && defaultValue != null) {
