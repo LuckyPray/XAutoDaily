@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.sp
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledFontAlpha
-import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 import java.util.Locale
 import kotlin.time.Duration
@@ -209,7 +208,7 @@ private fun TextPickerItem(
             },
             style = TextStyle(
                 textAlign = TextAlign.Center,
-                fontFamily = XAutodailyTheme.signFontFamily,
+//                fontFamily = XAutodailyTheme.signFontFamily,
                 fontWeight = FontWeight(fontWeight),
                 fontSize = 48.sp
             )

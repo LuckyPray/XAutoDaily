@@ -41,9 +41,11 @@ class ModuleActivity : BaseActivity() {
                 XAutodailyTheme.Theme.System -> setSystemBarMode(!isNightMode())
             }
 
-            XAutodailyTheme(isBlack = viewModel.blackTheme, colorTheme = viewModel.currentTheme) {
+            XAutodailyTheme(
+                isBlack = viewModel.blackTheme,
+                colorTheme = viewModel.currentTheme
+            ) {
                 XAutoDailyApp(viewModel)
-
             }
 
         }

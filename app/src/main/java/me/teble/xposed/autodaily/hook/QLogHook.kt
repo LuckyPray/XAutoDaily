@@ -17,7 +17,7 @@ class QLogHook : BaseHook() {
     override val enabled: Boolean
         get() = false
 
-    private val qTagFilter = persistentSetOf(
+    private val qTagFilter = persistentSetOf<String>(
 //        "PublicAccountManager",
 //        "reportsendMenuEventequest",
 //        "PublicAccountManager-Click:",

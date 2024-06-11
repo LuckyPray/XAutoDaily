@@ -430,7 +430,7 @@ tasks.whenTaskAdded {
 
         "installDebug" -> {
             // 不知道怎么判断，先这样写
-            finalizedBy(restartTim)
+//            finalizedBy(restartTim)
             finalizedBy(restartQQ)
         }
     }

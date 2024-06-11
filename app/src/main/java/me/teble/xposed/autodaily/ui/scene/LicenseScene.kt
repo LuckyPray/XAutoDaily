@@ -19,14 +19,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
-import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.ui.composable.Text
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.data.Dependency
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.utils.getTextFromModuleAssets
 
 
 @OptIn(ExperimentalSerializationApi::class)
@@ -37,8 +36,8 @@ fun LicenseScene(
 
     val dependencyList = remember {
         mutableStateListOf(
-            *Json.decodeFromStream<List<Dependency>>(
-                hostContext.assets.open("licenses.json")
+            *Json.decodeFromString<List<Dependency>>(
+                getTextFromModuleAssets("licenses.json")
             ).toTypedArray()
         )
     }
