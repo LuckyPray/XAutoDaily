@@ -1,7 +1,7 @@
 {
-    "version": 52,
+    "version": 53,
     "needAppVersion": 23080814,
-    "updateLog": "动态获取超星任务参数，修改执行时间为5号，避免月初执行提示活动结束",
-    "md5": "c63df0b5a7c81a63329c15fc316afd6d",
-    "updateTime": "2024-06-30 01:37:54"
+    "updateLog": "更新大会员师徒打卡、分享官网的任务参数",
+    "md5": "7697c29636cf11faa58cf85fa2e07e7b",
+    "updateTime": "2024-06-30 02:26:45"
 }
