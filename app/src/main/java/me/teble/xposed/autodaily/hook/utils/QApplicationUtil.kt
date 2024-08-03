@@ -32,4 +32,8 @@ object QApplicationUtil {
     fun send(toServiceMsg: ToServiceMsg) {
         msf.invoke("sendMsg", toServiceMsg)
     }
+
+    fun isNtQQ(): Boolean {
+        return load("com.tencent.qqnt.base.BaseActivity") != null
+    }
 }

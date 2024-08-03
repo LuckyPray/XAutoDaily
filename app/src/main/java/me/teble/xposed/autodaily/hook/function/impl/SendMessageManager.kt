@@ -6,13 +6,13 @@ import android.os.Parcelable
 import me.teble.xposed.autodaily.config.ChatActivityFacade
 import me.teble.xposed.autodaily.config.SessionInfo
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.BaseSendMessage
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Method
 
-open class SendMessageManager : BaseFunction(
+open class SendMessageManager : BaseSendMessage(
     TAG = "SendMessageManager"
 ) {
     private lateinit var sendMsgMethod: Method
@@ -59,8 +59,8 @@ open class SendMessageManager : BaseFunction(
         return ret as Parcelable
     }
 
-    open fun sendMessage(uin: String, msg: String, isGroup: Boolean = false): LongArray {
-        return sendMessage(
+    override fun sendTextMessage(uin: String, msg: String, isGroup: Boolean) {
+        sendMessage(
             QApplicationUtil.appInterface,
             QApplicationUtil.application,
             createSessionInfo(uin, isGroup),

@@ -42,6 +42,8 @@ object EnvFormatUtil {
 
     fun formatList(evalStr: String, qDomain: String?, env: MutableMap<String, Any>): List<String> {
         val values = mutableListOf<Any>()
+        // TODO 列表组合存在随机问题，例如发消息，多个好友对应同一条消息
+        //  formatValues -> [["xxx","xxxxx"],"🔥"]
         val args = ReUtil.findAllGroup1(ARG_REG, evalStr).apply {
             LogUtil.d("regex find result -> ${this.toJsonString()}")
             forEachIndexed { index, s ->
@@ -226,7 +228,11 @@ object EnvFormatUtil {
             else -> {
                 val argValue = env[argName] ?: error("没有找到对应的参数: $argName")
                 if (argValue is RandomEnv) {
-                    argValue.values.random()
+                    // argValue.values.random() 存在随机问题，总是使用相同的种子
+                    // TODO kotlin 1.7.20+ 修复此实现
+                    // https://stackoverflow.com/questions/73475522/kotlin-random-always-generates-the-same-random-numbers
+                    val randIndex = Random(System.currentTimeMillis()).nextInt(argValue.values.size)
+                    argValue.values[randIndex]
                 } else {
                     argValue
                 }

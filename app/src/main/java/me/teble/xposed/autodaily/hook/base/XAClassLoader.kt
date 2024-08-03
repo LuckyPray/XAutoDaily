@@ -33,6 +33,7 @@ class XAClassLoader(
             "com.tencent.mobileqq.",
             "com.tencent.qphone.base.",
             "com.tencent.widget.",
+            "com.tencent.qqnt.",
             "mqq.",
             "oicq.",
             "tencent.im",

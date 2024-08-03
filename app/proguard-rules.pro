@@ -92,7 +92,7 @@
 -keep class me.teble.xposed.autodaily.hook.function.proxy.* {
     <methods>;
 }
--keep class * extends me.teble.xposed.autodaily.hook.function.BaseFunction {
+-keep class * extends me.teble.xposed.autodaily.hook.function.base.BaseFunction {
     <methods>;
 }
 # ByteBuddy混淆

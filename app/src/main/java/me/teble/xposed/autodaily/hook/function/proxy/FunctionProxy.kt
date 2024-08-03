@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.hook.function.proxy
 
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import net.bytebuddy.implementation.bind.annotation.*
 import java.lang.reflect.Method
 import java.util.concurrent.Callable

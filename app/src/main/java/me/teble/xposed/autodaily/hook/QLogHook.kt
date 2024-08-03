@@ -15,7 +15,7 @@ class QLogHook : BaseHook() {
         get() = BuildConfig.DEBUG
 
     override val enabled: Boolean
-        get() = false
+        get() = true
 
     private val qTagFilter = persistentSetOf<String>(
 //        "PublicAccountManager",
@@ -32,6 +32,8 @@ class QLogHook : BaseHook() {
 //        "mqq",
 //        "TicketManager",
 //        "PskeyManagerImpl",
+//        "ChatActivityFacade",
+        "AIOMsgService"
     )
 
     private val ignoreTagFilter = setOf<String>(

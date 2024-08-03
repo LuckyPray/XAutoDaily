@@ -1,8 +1,8 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.function.BaseFunction
-import me.teble.xposed.autodaily.hook.function.FunctionInitException
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.FunctionInitException
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.utils.field
