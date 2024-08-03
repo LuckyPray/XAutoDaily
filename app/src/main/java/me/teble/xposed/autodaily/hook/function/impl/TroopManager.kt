@@ -1,16 +1,19 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
+import com.tencent.mobileqq.qroute.QRoute
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.base.loadAs
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.getMethods
+import me.teble.xposed.autodaily.utils.invokeAs
 import mqq.manager.Manager
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
-import java.util.*
+import java.util.LinkedList
 
 open class TroopManager : BaseFunction(
     TAG = "TroopManager"
@@ -37,6 +40,29 @@ open class TroopManager : BaseFunction(
     }
 
     open fun getTroopInfoList(): List<TroopInfo>? {
+        return load("com.tencent.qqnt.troop.ITroopListRepoApi")?.let {
+            getNtTroopInfoList()
+        } ?: run {
+            getOldTroopInfoList()
+        }
+    }
+
+    private fun getNtTroopInfoList(): List<TroopInfo> {
+        val troopListRepoApi = QRoute.api(loadAs("com.tencent.qqnt.troop.ITroopListRepoApi"))
+        val troopList: List<Any> = troopListRepoApi.invokeAs("getTroopListFromCache")!!
+        return mutableListOf<TroopInfo>().apply {
+            troopList.forEach { troop ->
+                kotlin.runCatching {
+                    // 解散的群聊可能会误入
+                    val troopUin = troop.fieldValue("troopuin") as String
+                    val troopName = troop.fieldValue("troopname") as String
+                    add(TroopInfo(troopName, troopUin))
+                }
+            }
+        }
+    }
+
+    private fun getOldTroopInfoList(): List<TroopInfo>? {
         var m0a: Method? = null
         var m0b: Method? = null
         troopManager.getMethods().forEach { m ->
@@ -56,6 +82,7 @@ open class TroopManager : BaseFunction(
                 }
             }
         }
+        m0a ?: return null
         val tx = if (m0b == null) {
             m0a!!.invoke(troopManager) as ArrayList<*>
         } else {
@@ -65,7 +92,6 @@ open class TroopManager : BaseFunction(
         val troopInfoList = LinkedList<TroopInfo>()
         val fTroopName = cTroopInfo.field("troopname")!!
         val fTroopUin = cTroopInfo.field("troopuin")!!
-        cTroopInfo
         tx.forEach {
             troopInfoList.add(
                 TroopInfo(
