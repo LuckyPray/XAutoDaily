@@ -1,7 +1,7 @@
 {
-    "version": 53,
-    "needAppVersion": 23080814,
-    "updateLog": "更新大会员师徒打卡、分享官网的任务参数",
-    "md5": "7697c29636cf11faa58cf85fa2e07e7b",
-    "updateTime": "2024-06-30 02:26:45"
+    "version": 54,
+    "needAppVersion": 24080405,
+    "updateLog": "修复大会员分享官网流程（默认会分享给自己，可以手动配置分享发送给小号）",
+    "md5": "1524fb341a62e3a07ddb4d4163f14be3",
+    "updateTime": "2024-08-04 05:27:32"
 }
