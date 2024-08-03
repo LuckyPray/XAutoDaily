@@ -37,11 +37,16 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.26-fix"
+val appVerName: String = "3.0.27"
 val updateLog = """
-    1. 优化续火随机字符串逻辑，避免重复发送同一条消息触发风控（建议添加足够多的续火语句用于随机）
-    2. 修复部分魔改系统使用 makeText 时触发空指针异常的问题
-    3. 修复 3.0.26 在部分系统可能导致崩溃的问题
+    【功能】
+    - 适配 续火支持 QQ v9.0.75 (6808) 及更高版本；
+    - 优化 NT 架构 QQ 好友续火相关业务逻辑，提升续火稳定性。
+    【体验】
+    - 优化 配置解析逻辑；
+    - 适配 新版配置。
+    【问题修复】
+    - 修复 在 QQ v9.0.75 (6808) 及更高版本中获取群列表可能发生闪退的问题。
 """.trimIndent()
 
 android {
