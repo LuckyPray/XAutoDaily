@@ -6,7 +6,7 @@ import me.teble.xposed.autodaily.config.MiniAppGetLoginCodeServlet
 import me.teble.xposed.autodaily.config.MsfService
 import me.teble.xposed.autodaily.hook.FromServiceMsgHook
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.WupUtil

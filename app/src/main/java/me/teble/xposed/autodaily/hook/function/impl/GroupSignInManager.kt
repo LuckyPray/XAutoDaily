@@ -7,7 +7,7 @@ import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.inject.ServletPool.troopClockInServlet
 import me.teble.xposed.autodaily.hook.inject.servlets.TroopClockInServlet
 import me.teble.xposed.autodaily.hook.oidb.cmd.oidb_0xeb7

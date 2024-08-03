@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.task.request.impl
 
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.favoriteManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.groupSignInManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.publicAccountManager
@@ -69,13 +69,13 @@ object FuncTaskReqUtil : ITaskReqUtil {
                 val uin = paramMap["uin"]!!
                 val data = paramMap["msg"]!!
                 manager = sendMessageManager
-                sendMessageManager.sendMessage(uin, data, false)
+                sendMessageManager.sendTextMessage(uin, data, false)
             }
             url.startsWith("xa://SendMessageManager/sendMessage/group") -> {
                 val uin = paramMap["uin"]!!
                 val data = paramMap["msg"]!!
                 manager = sendMessageManager
-                sendMessageManager.sendMessage(uin, data, true)
+                sendMessageManager.sendTextMessage(uin, data, true)
             }
             url.startsWith("xa://GroupSignInManager/signIn") -> {
                 val groupUin = paramMap["uin"]!!

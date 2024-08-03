@@ -7,15 +7,19 @@ import com.github.kyuubiran.ezxhelper.utils.paramCount
 import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.hook.base.load
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.inject.ServletPool.favoriteServlet
 import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appInterface
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.task.model.VoterInfo
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.fieldValue
+import me.teble.xposed.autodaily.utils.getFields
+import me.teble.xposed.autodaily.utils.getMethods
 import java.lang.reflect.Method
-import java.util.*
+import java.util.Date
 
 open class FavoriteManager : BaseFunction(
     TAG = "FavoriteManager"

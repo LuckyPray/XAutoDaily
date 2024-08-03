@@ -1,4 +1,4 @@
-package me.teble.xposed.autodaily.hook.function
+package me.teble.xposed.autodaily.hook.function.base
 
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil

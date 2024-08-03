@@ -1,6 +1,6 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
-import me.teble.xposed.autodaily.hook.function.BaseFunction
+import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import mqq.manager.TicketManager
 
