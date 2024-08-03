@@ -267,32 +267,33 @@ object TaskUtil {
             val confValue = getConfEnv(task.id, it.name)
             // 变量默认值为空表示强制要求用户填写，否则抛出异常
             if (it.default.isEmpty()) {
-                if (confValue == null || confValue.isEmpty()) {
+                if (confValue.isNullOrEmpty()) {
                     ToastUtil.send("任务【${task.id}】的变量${it.name}不能为空", true)
                     throw RuntimeException("任务【${task.id}】的变量${it.name}不能为空")
                 }
             }
+            val defaultValue = format(it.default, env)
             when (it.type) {
                 "num" -> {
-                    env[it.name] = confValue ?: it.default
+                    env[it.name] = confValue ?: defaultValue
                 }
 
                 "string" -> {
-                    env[it.name] = confValue ?: it.default
+                    env[it.name] = confValue ?: defaultValue
                 }
 
                 "randString" -> {
-                    env[it.name] = RandomEnv((confValue ?: it.default).split("|"))
+                    env[it.name] = RandomEnv((confValue ?: defaultValue).split("|"))
                 }
 
                 "list", "friend", "group" -> {
-                    val value = confValue ?: it.default
+                    val value = confValue ?: defaultValue
                     env[it.name] = value.split(",").toMutableList()
                 }
 
                 else -> throw RuntimeException("未处理的变量类型：${it.type}")
             }
-            LogUtil.d("开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${it.default}")
+            LogUtil.d("开始获取用户自定义变量：${it.name}, 用户自定义值为：${confValue}, 默认值：${defaultValue}")
         }
     }
 
@@ -300,9 +301,10 @@ object TaskUtil {
         val env = mutableMapOf<String, Any>()
         task.envs?.forEach {
             val confValue = getConfEnv(task.id, it.name)
+            val defaultValue = format(it.default, env)
             when (it.name) {
                 "hour", "minute" -> {
-                    env[it.name] = confValue ?: it.default
+                    env[it.name] = confValue ?: defaultValue
                 }
             }
         }

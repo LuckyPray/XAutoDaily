@@ -1,8 +1,8 @@
 package me.teble.xposed.autodaily.hook.function.proxy
 
 import android.content.Context
+import kotlinx.collections.immutable.toPersistentHashMap
 import me.teble.xposed.autodaily.hook.base.hostContext
-import me.teble.xposed.autodaily.hook.function.BaseFunction
 import me.teble.xposed.autodaily.hook.function.BaseSendMessage
 import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.function.impl.FavoriteManager
