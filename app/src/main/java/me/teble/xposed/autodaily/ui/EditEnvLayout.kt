@@ -47,6 +47,7 @@ import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskEnv
 import me.teble.xposed.autodaily.task.model.TroopInfo
 import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.task.util.EnvFormatUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import kotlin.concurrent.thread
 
@@ -84,7 +85,7 @@ fun EditEnvLayout(
     LaunchedEffect(envMap) {
         envList.forEach { env ->
             envMap[env.name] = mutableStateOf(
-                task!!.getVariable(env.name, env.default)
+                task!!.getVariable(env.name, EnvFormatUtil.format(env.default, HashMap()))
             )
             if (env.type == "friend") {
                 friendFlag.value = true
@@ -211,7 +212,7 @@ fun EditEnvLayout(
                                 mutableStateOf(false)
                             }
                             OutlinedTextField(
-                                value = envMap[env.name]?.value ?: env.default,
+                                value = envMap[env.name]!!.value,
                                 onValueChange = {
                                     if (env.limit >0) {
                                         when (env.type) {
