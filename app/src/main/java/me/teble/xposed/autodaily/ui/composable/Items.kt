@@ -2,9 +2,11 @@ package me.teble.xposed.autodaily.ui.composable
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -328,6 +330,7 @@ fun SwitchInfoItem(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SwitchInfoDivideItem(
     modifier: Modifier = Modifier,
@@ -336,6 +339,7 @@ fun SwitchInfoDivideItem(
     clickEnabled: () -> Boolean,
     enable: () -> Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     onChange: (Boolean) -> Unit
 ) {
 
@@ -358,10 +362,12 @@ fun SwitchInfoDivideItem(
             modifier = Modifier
                 .weight(1f)
                 .clip(SmootherShape(12.dp))
-                .clickable(
+                .combinedClickable(
                     role = Role.Button,
                     enabled = clickEnabled(),
-                    onClick = { onClick() })
+                    onClick = { onClick() },
+                    onLongClick = { onLongClick() }
+                )
                 .padding(vertical = 20.dp, horizontal = 16.dp),
         ) {
             Text(

@@ -357,6 +357,7 @@ private fun KeepTimeItem(
         infoText = info,
         clickEnabled = { shizukuEnable() && keepAlive() },
         onClick = onClick,
-        onChange = onChange
+        onLongClick = {  },
+        onChange = onChange,
     )
 }
