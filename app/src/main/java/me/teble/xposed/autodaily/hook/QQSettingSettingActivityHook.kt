@@ -140,8 +140,8 @@ class QQSettingSettingActivityHook : BaseHook() {
                 }
                 .sortedBy { it.name }
             LogUtil.d("listeners: $listeners")
-            if (listeners.size != 2) {
-                throw IllegalStateException("listeners.size != 2, count: ${listeners.size}")
+            if (listeners.size > 2) {
+                throw IllegalStateException("listeners.size > 2, count: ${listeners.size}")
             }
             val mSimpleItemProcessorOnClickListener = listeners.first()
             buildMethod.hookAfter {
