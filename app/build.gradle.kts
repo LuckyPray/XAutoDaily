@@ -37,16 +37,10 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.27"
+val appVerName: String = "3.0.29"
 val updateLog = """
-    【功能】
-    - 适配 续火支持 QQ v9.0.75 (6808) 及更高版本；
-    - 优化 NT 架构 QQ 好友续火相关业务逻辑，提升续火稳定性。
-    【体验】
-    - 优化 配置解析逻辑；
-    - 适配 新版配置。
     【问题修复】
-    - 修复 在 QQ v9.0.75 (6808) 及更高版本中获取群列表可能发生闪退的问题。
+    - 修复 在 QQ v9.1.20 灰度设置界面无法显示模块入口的问题。
 """.trimIndent()
 
 android {
