@@ -122,21 +122,31 @@ class QQSettingSettingActivityHook : BaseHook() {
         // 8.9.70+
         val cMainSettingFragment = load("com.tencent.mobileqq.setting.main.MainSettingFragment")
         cMainSettingFragment ?: return
+
+        val oldEntry = load("com.tencent.mobileqq.setting.main.MainSettingConfigProvider")
+        val newEntry = load("com.tencent.mobileqq.setting.main.NewSettingConfigProvider")
+
+        createEntry(oldEntry, false)
+        createEntry(newEntry, true)
+    }
+
+    private fun createEntry(settingConfigProviderClass: Class<*>?, isNewSetting: Boolean) {
+        settingConfigProviderClass ?: return
         try {
-            val cMainSettingConfigProvider =
-                load("com.tencent.mobileqq.setting.main.MainSettingConfigProvider")!!
-            val methods = cMainSettingConfigProvider.getMethods(false)
-            val returnTypes = methods.map { it.returnType }.distinct()
-            if (returnTypes.size != 2) {
-                throw IllegalStateException("returnTypes.size != 2")
+            val methods = settingConfigProviderClass.getMethods(false)
+            val cSimpleItemProcessor = methods.first {
+                LogUtil.d("param: ${it.parameterTypes.toList()}, ${it.returnType.name}")
+                it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
+                        && it.returnType.name.startsWith("com.tencent.mobileqq.setting.processor")
+            }.returnType
+            val buildMethod = methods.single {
+                it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
+                        && it.returnType == List::class.java
             }
-            val cSimpleItemProcessor = returnTypes.find { it.classes != List::class.java }!!
-            val buildMethod = methods.findMethod { returnType != cSimpleItemProcessor }
-            LogUtil.d("${cSimpleItemProcessor}, ${cSimpleItemProcessor.getMethods(false).toList()}")
             val listeners = cSimpleItemProcessor.getMethods(false)
                 .filter {
                     it.returnType == Void.TYPE && it.parameterTypes.size == 1
-                        && it.parameterTypes[0].name == "kotlin.jvm.functions.Function0"
+                            && it.parameterTypes[0].name == "kotlin.jvm.functions.Function0"
                 }
                 .sortedBy { it.name }
             LogUtil.d("listeners: $listeners")
@@ -144,10 +154,11 @@ class QQSettingSettingActivityHook : BaseHook() {
                 throw IllegalStateException("listeners.size > 2, count: ${listeners.size}")
             }
             val mSimpleItemProcessorOnClickListener = listeners.first()
-            buildMethod.hookAfter {
+            val hooker: Hooker = {
                 val context = it.args.first() as Context
                 val result = it.result as List<*>
-                val resId: Int = context.resources.getIdentifier("qui_tuning", "drawable", hostPackageName)
+                val resId: Int =
+                    context.resources.getIdentifier("qui_tuning", "drawable", hostPackageName)
                 injectRes()
                 val item = cSimpleItemProcessor.new(
                     context,
@@ -157,28 +168,36 @@ class QQSettingSettingActivityHook : BaseHook() {
                 )
                 val function0 = mSimpleItemProcessorOnClickListener.parameterTypes.first()
                 val unit = hostClassLoader.loadClass("kotlin.Unit").fieldValue("INSTANCE")!!
-                val proxy = Proxy.newProxyInstance(hostClassLoader, arrayOf(function0)) { _, method, args ->
-                    if (method.name == "invoke") {
-                        try {
-                            val intent = Intent(context, ModuleActivity::class.java)
-                            context.startActivity(intent)
-                        } catch (e: Exception) {
-                            LogUtil.e(e)
+                val proxy =
+                    Proxy.newProxyInstance(hostClassLoader, arrayOf(function0)) { _, method, args ->
+                        if (method.name == "invoke") {
+                            try {
+                                val intent = Intent(context, ModuleActivity::class.java)
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                LogUtil.e(e)
+                            }
                         }
+                        unit
                     }
-                    unit
-                }
                 mSimpleItemProcessorOnClickListener.invoke(item, proxy)
                 val groupClass = result.first()!!::class.java
                 LogUtil.d("groupClass: $groupClass")
-                val constructor = groupClass.getConstructor(java.util.List::class.java, CharSequence::class.java, CharSequence::class.java,
-                    Int::class.javaPrimitiveType, hostClassLoader.loadClass("kotlin.jvm.internal.DefaultConstructorMarker"))
+                val constructor = groupClass.getConstructor(
+                    java.util.List::class.java,
+                    CharSequence::class.java,
+                    CharSequence::class.java,
+                    Int::class.javaPrimitiveType,
+                    hostClassLoader.loadClass("kotlin.jvm.internal.DefaultConstructorMarker")
+                )
                 val group = constructor.newInstance(listOf(item), null, null, 6, null)
-                result.invoke("add", 0, group)
+                val insertIndex = if (isNewSetting) 1 else 0
+                result.invoke("add", insertIndex, group)
             }
+            buildMethod.hookAfter(hooker)
         } catch (e: Throwable) {
             LogUtil.e(e)
-            ToastUtil.send("新版设置创建入口失败")
+            ToastUtil.send("创建模块入口失败，如有需要临时通过模块本体的跳转进入设置界面")
         }
     }
 }
