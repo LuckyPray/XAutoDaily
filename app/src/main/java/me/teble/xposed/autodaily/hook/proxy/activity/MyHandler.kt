@@ -49,8 +49,8 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                         //获取列表
 //                        LogUtil.log("clientTransaction -> $cTrans")
                         val clientTransactionItems =
-                            cTrans.invoke("getCallbacks") as List<*>
-                        for (item in clientTransactionItems) {
+                            cTrans.invoke("getCallbacks") as List<*>?
+                        clientTransactionItems?.forEach { item ->
                             val clz = item!!::class.java
                             if (clz.name.contains("LaunchActivityItem")) {
                                 val fmIntent = item.field(Intent::class.java)!!
@@ -73,19 +73,27 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                                                 cActivityThread.getDeclaredMethod("currentActivityThread")
                                             currentActivityThread.isAccessible = true
                                             val activityThread = currentActivityThread.invoke(null)
-                                            val acr = activityThread.javaClass.getMethod(
-                                                "getLaunchingActivity",
-                                                IBinder::class.java
-                                            ).invoke(
-                                                activityThread,
-                                                cTrans.javaClass.getMethod("getActivityToken")
-                                                    .invoke(cTrans)
-                                            )
-                                            if (acr != null) {
-                                                val fAcrIntent =
-                                                    acr.javaClass.getDeclaredField("intent")
-                                                fAcrIntent.isAccessible = true
-                                                fAcrIntent[acr] = rIntent
+                                            try {
+                                                val acr = activityThread.javaClass.getMethod(
+                                                    "getLaunchingActivity",
+                                                    IBinder::class.java
+                                                ).invoke(
+                                                    activityThread,
+                                                    cTrans.javaClass.getMethod("getActivityToken")
+                                                        .invoke(cTrans)
+                                                )
+                                                if (acr != null) {
+                                                    val fAcrIntent =
+                                                        acr.javaClass.getDeclaredField("intent")
+                                                    fAcrIntent.isAccessible = true
+                                                    fAcrIntent[acr] = rIntent
+                                                }
+                                            } catch (e: NoSuchMethodException) {
+                                                if (Build.VERSION.SDK_INT >= 33) {
+                                                    // ignore
+                                                } else {
+                                                    throw e
+                                                }
                                             }
                                         }
                                     }
