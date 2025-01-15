@@ -1,7 +1,7 @@
 {
-    "version": 55,
+    "version": 56,
     "needAppVersion": 24080405,
-    "updateLog": "由于【每日发表说说】任务更新，使用web api发表说说无法完成该任务，暂时移除",
-    "md5": "810ae8ef352a39275578c0b217b087de",
-    "updateTime": "2024-10-09 18:09:05"
+    "updateLog": "移除失效的黄钻签到任务",
+    "md5": "6de6196e98c02e9f79bc5f27f49915e8",
+    "updateTime": "2025-01-15 23:05:06"
 }
