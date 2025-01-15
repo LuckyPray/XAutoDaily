@@ -14,6 +14,8 @@ for key, value in src.items():
     if os.path.exists(value):
         with open(value, 'r') as f:
             data = f.read()
+            if len(data.strip()) == 0:
+                data = None
     if data and value.endswith(".json"):
         data = json.loads(data)
     src[key] = data
