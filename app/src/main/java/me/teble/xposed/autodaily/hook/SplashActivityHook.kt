@@ -5,12 +5,14 @@ import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import com.github.kyuubiran.ezxhelper.utils.findMethod
 import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.activity.common.MainActivity
 import me.teble.xposed.autodaily.activity.module.ModuleActivity
 import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
@@ -20,6 +22,12 @@ import me.teble.xposed.autodaily.config.SplashActivity
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.hook.base.hostApp
+import me.teble.xposed.autodaily.hook.base.hostAppName
+import me.teble.xposed.autodaily.hook.base.hostVersionCode
+import me.teble.xposed.autodaily.hook.base.hostVersionName
+import me.teble.xposed.autodaily.hook.base.isInjectClassLoader
+import me.teble.xposed.autodaily.hook.base.modulePath
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.task.util.format
@@ -34,6 +42,8 @@ import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor.AUTO_EXEC
 import me.teble.xposed.autodaily.utils.TaskExecutor.handler
 import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.getArtApexVersion
+import me.teble.xposed.autodaily.utils.getModulePath
 import java.io.File
 import java.io.RandomAccessFile
 import java.nio.channels.FileLock
@@ -89,12 +99,13 @@ class SplashActivityHook : BaseHook() {
                 } else if (ConfUnit.needShowUpdateLog) {
                     context.openConfigUpdateLog()
                 }
+                if (isEnvDamage()) {
+                    context.openModuleErrorDialog()
+                }
             }
         }
     }
 }
-
-private lateinit var appUpdateDialog: AlertDialog
 
 private var lastAutoResetTime = 0L
 
@@ -125,6 +136,54 @@ private fun autoResetTask(isOnCreate: Boolean) {
         }
     }
 }
+
+fun isEnvDamage(): Boolean {
+    return !isInjectClassLoader
+}
+
+private lateinit var moduleErrorDialog: AlertDialog
+
+suspend fun Activity.openModuleErrorDialog() {
+    if (ConfUnit.disableDamageEnv) {
+        LogUtil.i("不再显示环境弹窗")
+        return
+    }
+    withContext(Dispatchers.IO) {
+        var builder: AlertDialog.Builder? = null
+        val isInitialized = ::moduleErrorDialog.isInitialized
+        if (!isInitialized) {
+            builder = AlertDialog.Builder(this@openModuleErrorDialog, 5).apply {
+                setTitle("模块环境异常")
+                val text = """
+                    模块初始化异常，部分功能可能无法正常使用！
+                    请使用完整适配当前安卓版本的框架加载模块！！！
+                    
+                    安卓版本: ${Build.VERSION.RELEASE}(${Build.VERSION.SDK_INT})
+                    ART版本: ${getArtApexVersion(hostApp)}
+                    QQ版本: $hostAppName-$hostVersionName($hostVersionCode)
+                    injectClassLoader: $isInjectClassLoader
+                    是否内置包: ${getModulePath().startsWith("/data/app").not()}
+                    模块版本: ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})
+                    模块路径: $modulePath
+                """.trimIndent()
+                setItems(arrayOf(text), null)
+                setPositiveButton("我已知晓，不再提示") { _, _ ->
+                    ConfUnit.disableDamageEnv = true
+                }
+            }
+        }
+        withContext(Dispatchers.Main) {
+            if (!isInitialized) {
+                moduleErrorDialog = builder!!.create()
+            }
+            if (!moduleErrorDialog.isShowing && !isFinishing) {
+                moduleErrorDialog.show()
+            }
+        }
+    }
+}
+
+private lateinit var appUpdateDialog: AlertDialog
 
 suspend fun Activity.openAppUpdateDialog() {
     withContext(Dispatchers.IO) {

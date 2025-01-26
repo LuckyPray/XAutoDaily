@@ -36,6 +36,7 @@ import me.teble.xposed.autodaily.hook.base.hostInit
 import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.base.hostProcessName
 import me.teble.xposed.autodaily.hook.base.hostVersionCode
+import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.base.injectClassLoader
 import me.teble.xposed.autodaily.hook.base.load
 import me.teble.xposed.autodaily.hook.base.moduleLoadInit
@@ -54,6 +55,8 @@ import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
+import me.teble.xposed.autodaily.utils.getArtApexVersion
+import me.teble.xposed.autodaily.utils.getModulePath
 import me.teble.xposed.autodaily.utils.new
 import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.query.enums.StringMatchType
@@ -115,8 +118,13 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                         // MMKV
                         Config.init()
                         injectClassLoader(hostClassLoader)
-                        LogUtil.i("qq version -> ${hostAppName}($hostVersionCode)")
-                        LogUtil.i("module version -> ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})")
+                        LogUtil.i("""
+                            android version: ${Build.VERSION.RELEASE}(${Build.VERSION.SDK_INT})
+                            art version: ${getArtApexVersion(hostApp)}
+                            qq version: ${hostAppName}-$hostVersionName($hostVersionCode)
+                            module version: ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})
+                            module path: ${getModulePath()}
+                        """.trimIndent())
                         LogUtil.d("init ActivityProxyManager")
                         ProxyManager.init
                         filterAndHook()

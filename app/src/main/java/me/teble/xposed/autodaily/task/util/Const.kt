@@ -22,6 +22,8 @@ object Const {
     const val ENABLE_DEBUG_LOG = "enable_debug_log"
     const val RETRY_COUNT = "retry_count"
 
+    const val DISABLE_DAMAGE_ENV = "damage_env"
+
     // -------------------------------------------------- //
     const val MOST_RECENT_EXEC_TIME = "most_recent_exec_time"
     const val NEXT_SHOULD_EXEC_TIME = "next_should_exec_time"
