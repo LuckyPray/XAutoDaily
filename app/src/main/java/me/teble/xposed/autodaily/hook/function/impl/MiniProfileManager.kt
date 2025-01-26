@@ -10,6 +10,7 @@ import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.WupUtil
+import me.teble.xposed.autodaily.task.exception.TaskTimeoutException
 import me.teble.xposed.autodaily.task.model.MiniProfile
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invokeAs
@@ -29,7 +30,7 @@ open class MiniProfileManager : BaseFunction(
             ?: throw RuntimeException("类加载失败 -> $GetProfileRequest")
     }
 
-    open fun syncGetProfile(miniAppId: String): MiniProfile? {
+    open fun syncGetProfile(miniAppId: String): MiniProfile {
         val startTime = System.currentTimeMillis()
         val id = "syncGetProfile"
         FromServiceMsgHook.resMap[id] = null
@@ -43,7 +44,7 @@ open class MiniProfileManager : BaseFunction(
             }
         }
         LogUtil.i("尝试小程序获取用户信息超时")
-        return null
+        throw TaskTimeoutException("尝试小程序获取用户信息超时")
     }
 
     private fun sendGetProfileRequest(miniAppId: String) {

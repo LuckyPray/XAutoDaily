@@ -12,6 +12,7 @@ import me.teble.xposed.autodaily.hook.inject.ServletPool.favoriteServlet
 import me.teble.xposed.autodaily.hook.inject.servlets.FavoriteServlet
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appInterface
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
+import me.teble.xposed.autodaily.task.exception.TaskTimeoutException
 import me.teble.xposed.autodaily.task.model.VoterInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
@@ -111,7 +112,7 @@ open class FavoriteManager : BaseFunction(
             return fromServiceMsg.isSuccess
         }
         LogUtil.i("执行点赞 $targetUin count: $count 超时")
-        throw RuntimeException("执行点赞 $targetUin count: $count 超时")
+        throw TaskTimeoutException("执行点赞 $targetUin count: $count 超时")
     }
 
     open fun syncGetVoterList(page: Int, pageSize: Int): List<VoterInfo>? {
@@ -142,7 +143,7 @@ open class FavoriteManager : BaseFunction(
             }
         }
         LogUtil.w("获取点赞列表超时")
-        throw RuntimeException("获取点赞列表超时")
+        throw TaskTimeoutException("获取点赞列表超时")
     }
 
     open fun getAllVoter(maxPage: Int, maxDays: Int = 2): List<VoterInfo> {

@@ -14,6 +14,7 @@ import me.teble.xposed.autodaily.hook.oidb.cmd.oidb_0xeb7
 import me.teble.xposed.autodaily.hook.utils.OidbUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.appInterface
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
+import me.teble.xposed.autodaily.task.exception.TaskTimeoutException
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.getFields
 import me.teble.xposed.autodaily.utils.getMethods
@@ -119,6 +120,6 @@ open class GroupSignInManager : BaseFunction(
             return parseOIDBPkg == 0
         }
         LogUtil.i("执行群签到 $groupUin 超时")
-        throw RuntimeException("执行群签到 $groupUin 超时")
+        throw TaskTimeoutException("执行群签到 $groupUin 超时")
     }
 }

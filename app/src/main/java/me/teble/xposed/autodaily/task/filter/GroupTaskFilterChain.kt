@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.task.filter
 
 import me.teble.xposed.autodaily.hook.notification.XANotification
+import me.teble.xposed.autodaily.task.exception.TaskTimeoutException
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskCheckExecuteFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskExecuteBasicFilter
 import me.teble.xposed.autodaily.task.filter.chain.GroupTaskPreFilter
@@ -14,8 +15,13 @@ import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
+import java.io.InterruptedIOException
+import java.net.ConnectException
+import java.net.SocketException
 import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.util.Date
+import javax.net.ssl.SSLHandshakeException
 
 class GroupTaskFilterChain(
     val taskGroup: TaskGroup
@@ -59,15 +65,26 @@ class GroupTaskFilterChain(
                 try {
                     XANotification.setContent("正在执行任务${task.id}")
                     TaskUtil.execute(reqType, task, relayTaskMap, env)
-                } catch (e: SocketTimeoutException) {
-                    LogUtil.e(e, "执行任务${task.id}异常: ")
                 } catch (e: Throwable) {
-                    LogUtil.e(e, "执行任务${task.id}异常: ")
-                    taskException.count++
-                    taskException.dateStr = Date(TimeUtil.localTimeMillis()).formatDate()
-                    task.errInfo = taskException
-                    if (taskException.count >= 3 && ConfUnit.enableTaskExceptionNotification) {
-                        XANotification.notify("任务${task.id}执行异常，本次启动跳过执行")
+                    when (e) {
+                        is ConnectException,
+                        is SocketException,
+                        is SocketTimeoutException,
+                        is UnknownHostException,
+                        is InterruptedIOException,
+                        is SSLHandshakeException,
+                        is TaskTimeoutException -> {
+                            LogUtil.e(e, "执行任务 ${task.id} 出现网络异常，等待重试: ")
+                        }
+                        else -> {
+                            LogUtil.e(e, "执行任务 ${task.id} 异常: ")
+                            taskException.count++
+                            taskException.dateStr = Date(TimeUtil.localTimeMillis()).formatDate()
+                            task.errInfo = taskException
+                            if (taskException.count >= 3 && ConfUnit.enableTaskExceptionNotification) {
+                                XANotification.notify("任务${task.id}执行异常，本次启动跳过执行")
+                            }
+                        }
                     }
                 }
             }
