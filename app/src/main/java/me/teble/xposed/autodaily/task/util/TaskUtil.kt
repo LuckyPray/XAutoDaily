@@ -229,7 +229,7 @@ object TaskUtil {
             var res: Any
             if (it.match.startsWith("$")) {
                 try {
-                    res = jsonNode!!.read<JsonElement>(it.match) ?: error("变量${it.key}提取失败")
+                    res = jsonNode!!.read<JsonElement>(it.match) ?: ""
                     // fix JsonString.toString to be quote
                     when {
                         res is JsonPrimitive && res.isString -> res = res.content
