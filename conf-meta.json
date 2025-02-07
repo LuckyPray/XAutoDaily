@@ -1,7 +1,7 @@
 {
-    "version": 56,
+    "version": 57,
     "needAppVersion": 24080405,
-    "updateLog": "移除失效的黄钻签到任务",
-    "md5": "6de6196e98c02e9f79bc5f27f49915e8",
-    "updateTime": "2025-01-15 23:05:06"
+    "updateLog": "新增璀璨黄钻每日领取",
+    "md5": "3d626313c00fc47937b94d255823acaf",
+    "updateTime": "2025-02-07 12:33:37"
 }
