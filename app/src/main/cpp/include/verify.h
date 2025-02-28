@@ -119,6 +119,9 @@ bool checkSignature(JNIEnv *env, bool isInHostAsModule) {
         return false;
     }
     auto signBlock = readSignBlock(fd);
+    if (isInHostAsModule) {
+        sys_close(fd);
+    }
     auto cert = getV2SignCert(signBlock);
     std::string cert_str(cert.begin(), cert.end());
     std::string md5 = getBlockMd5(cert_str);
