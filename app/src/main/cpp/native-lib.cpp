@@ -4,11 +4,11 @@
 #include <vector>
 #include <map>
 #include <sstream>
-#include "v2sign.h"
 #include "CaesarCipher.h"
 #include "base64.h"
 #include "rsa.h"
 #include "aes.h"
+#include "verify.h"
 
 #define JNI_ExceptionCheckAndClear(env) \
     if (env->ExceptionCheck()) { \
@@ -33,9 +33,14 @@ EXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     if (vm->GetEnv((void **) &env, JNI_VERSION_1_6) != JNI_OK) {
         return -1;
     }
+    jclass appInterface = env->FindClass("mqq/app/AppRuntime");
+    LOGD("appInterface: %p", appInterface);
+    if (appInterface == nullptr) {
+        env->ExceptionClear();
+    }
 #if defined(NDEBUG) || defined(TEST_SIGNATURE)
     // 模块签名不正确拒绝加载 jni
-    if (checkSignature(env) != JNI_TRUE) {
+    if (!checkSignature(env, appInterface != nullptr)) {
         return -2;
     }
     LOGI("signature pass");
@@ -126,10 +131,8 @@ std::string decryptXAConf(JNIEnv *env, const std::string &src) {
     return res;
 }
 
-const char *md5Hex(const std::string &value) {
-    static const char *ret;
-    ret = getBlockMd5(value).c_str();
-    return ret;
+std::string md5Hex(const std::string &value) {
+    return getBlockMd5(value);
 }
 
 EXPORT jbyteArray
@@ -152,9 +155,9 @@ Java_me_teble_xposed_autodaily_task_util_ConfigUtil_getMd5Hex(
     const char *p = env->GetStringUTFChars(value, nullptr);
     int len = env->GetStringUTFLength(value);
     std::string encValue(p, len);
-    const char *ret = md5Hex(encValue);
+    std::string ret = md5Hex(encValue);
     env->ReleaseStringUTFChars(value, p);
-    return env->NewStringUTF(ret);
+    return env->NewStringUTF(ret.c_str());
 }
 
 }

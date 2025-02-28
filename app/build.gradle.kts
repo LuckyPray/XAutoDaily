@@ -110,7 +110,8 @@ android {
         val debug by getting {
             versionNameSuffix = ".$buildNum-debug"
             val debugFlags = arrayOf<String>(
-                "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960",
+                "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600",
+                "-DPKG_NAME=${namespace}",
 //                "-DTEST_SIGNATURE",
             )
             externalNativeBuild {
@@ -143,6 +144,7 @@ android {
                     val configFlags = arrayOf(
                         "-Oz",
                         "-DNDEBUG",
+                        "-DPKG_NAME=${namespace}",
                         "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
                     ).joinToString(" ")
                     arguments(

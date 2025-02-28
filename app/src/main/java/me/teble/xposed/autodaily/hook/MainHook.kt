@@ -115,9 +115,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                     EzXHelperInit.initAppContext(hostApp)
                     hostClassLoader = hostApp.classLoader
                     if (ProcUtil.isMain) {
+                        injectClassLoader(hostClassLoader)
                         // MMKV
                         Config.init()
-                        injectClassLoader(hostClassLoader)
                         LogUtil.i("""
                             android version: ${Build.VERSION.RELEASE}(${Build.VERSION.SDK_INT})
                             art version: ${getArtApexVersion(hostApp)}

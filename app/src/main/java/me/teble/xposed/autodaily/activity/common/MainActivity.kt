@@ -166,6 +166,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         handler.post(peekServiceRunnable)
+        System.loadLibrary("xa_native")
         setContent {
             MaterialTheme(colors = colors()) {
                 Box(
