@@ -1,8 +1,17 @@
 package me.teble.xposed.autodaily.hook.function.impl
 
+import me.teble.xposed.autodaily.hook.base.hostClassLoader
+import me.teble.xposed.autodaily.hook.base.hostVersionCode
+import me.teble.xposed.autodaily.hook.base.loadAs
 import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.getFields
+import me.teble.xposed.autodaily.utils.getMethods
 import mqq.manager.TicketManager
+import java.lang.reflect.Proxy
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 open class TicketManager : BaseFunction(
     TAG = "TicketManager"
@@ -36,13 +45,21 @@ open class TicketManager : BaseFunction(
             "www.tencentwm.com", "qq.com", "500zhongcai.com", "weiyun.com", "m.tencent.com",
             "tenpay.com", "paipai.com"
         )
+
+        private val newTicketVersion = 9054 // v9.1.52 最后一个存在 getSuperKey 的正式版本
     }
 
     private val ticketManagerMap = mutableMapOf<String, TicketManager>()
     private val uin: String get() = "${QApplicationUtil.currentUin}"
+    // 9.1.55 彻底砍掉了 getSuperKey，需要通过 "com.tencent.mobileqq.thirdsig.api.IThirdSigService" 获取
+    private var thirdSigService: Any? = null
 
     override fun init() {
         getTicketManager()
+        if (hostVersionCode > newTicketVersion) {
+            thirdSigService = QApplicationUtil.appRuntime
+                .getRuntimeService(loadAs("com.tencent.mobileqq.thirdsig.api.IThirdSigService"), "all")
+        }
     }
 
     private fun getTicketManager(): TicketManager {
@@ -59,6 +76,40 @@ open class TicketManager : BaseFunction(
     }
 
     open fun getSuperkey(): String? {
+        thirdSigService?.let { service ->
+            LogUtil.d("getSuperKey use thirdSigService: ${service.javaClass}")
+            val countDownLatch = CountDownLatch(1)
+            var superKey: String? = null
+            try {
+                val getSuperKeyMethod = service.getMethods(false).first {
+                    it.name == "getSuperKey"
+                }
+                val callbackClass = getSuperKeyMethod.parameterTypes.last()
+
+                val callback = Proxy.newProxyInstance(hostClassLoader, arrayOf(callbackClass)) { _, method, args ->
+                    runCatching {
+                        if (args.size == 2) { // onFail
+                            LogUtil.d("getSuperKey fail, code: ${args[0]}, msg: ${args[1]}")
+                        } else { // onSuccess
+                            val thirdSigInfo = args[0]
+                            val fields = thirdSigInfo.getFields(false)
+                                .filter { it.type == ByteArray::class.java }
+                            val sigField = fields.sortedBy { it.name }.first()
+                            sigField.isAccessible = true
+                            val sig = sigField.get(thirdSigInfo)
+                            superKey = String(sig as ByteArray)
+                            LogUtil.d("getSuperKey success: $superKey")
+                        }
+                    }.onFailure {
+                        LogUtil.e(it, "new getSuperKey")
+                    }
+                }
+                getSuperKeyMethod.invoke(service, QApplicationUtil.currentUin, 16, callback)
+
+                countDownLatch.await(15000L, TimeUnit.MILLISECONDS)
+            } catch (_: InterruptedException) {}
+            return superKey
+        }
         return getTicketManager().getSuperkey(uin)
     }
 

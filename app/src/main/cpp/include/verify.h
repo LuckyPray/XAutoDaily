@@ -91,7 +91,7 @@ std::string getBlockMd5(const std::string &block) {
 }
 
 bool checkSignature(JNIEnv *env, bool isInHostAsModule) {
-    int fd = -1;
+    int fd;
     if (isInHostAsModule) {
         fd = getModulePathFd(env);
     } else {
