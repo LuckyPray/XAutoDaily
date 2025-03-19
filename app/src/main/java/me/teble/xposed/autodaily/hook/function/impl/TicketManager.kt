@@ -100,6 +100,7 @@ open class TicketManager : BaseFunction(
                             superKey = String(sig as ByteArray)
                             LogUtil.d("getSuperKey success: $superKey")
                         }
+                        countDownLatch.countDown()
                     }.onFailure {
                         LogUtil.e(it, "new getSuperKey")
                     }
