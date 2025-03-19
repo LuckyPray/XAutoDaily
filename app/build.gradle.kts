@@ -37,10 +37,11 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.29"
+val appVerName: String = "3.0.30"
 val updateLog = """
     【问题修复】
-    - 修复 在 QQ v9.1.20 灰度设置界面无法显示模块入口的问题。
+    - 修复 在 QQ v9.1.55 及以上版本中获取cookie失败的问题
+    - 其它修复与优化
 """.trimIndent()
 
 android {
