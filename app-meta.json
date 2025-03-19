@@ -1,6 +1,6 @@
 {
-    "versionName": "3.0.29",
-    "versionCode": 24112723,
-    "updateTime": "2024-11-27 23:49:21",
-    "updateLog": "【问题修复】\n- 修复 在 QQ v9.1.20 灰度设置界面无法显示模块入口的问题。"
+    "versionName": "3.0.30",
+    "versionCode": 25031915,
+    "updateTime": "2025-03-19 15:59:12",
+    "updateLog": "【问题修复】\n- 修复 在 QQ v9.1.55 及以上版本中获取cookie失败的问题\n- 其它修复与优化"
 }
