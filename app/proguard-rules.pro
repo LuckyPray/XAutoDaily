@@ -113,6 +113,10 @@
 -keep class me.teble.xposed.autodaily.hook.oidb.** {
     *;
 }
+# 异常类
+-keep class me.teble.xposed.autodaily.task.exception.** {
+    *;
+}
 
 ##########################################################################################################
 -assumenosideeffects class kotlin.jvm.internal.Intrinsics {
