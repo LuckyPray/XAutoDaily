@@ -15,7 +15,7 @@ fun RoundedSnackbar(data: SnackbarData) {
     Snackbar(
         snackbarData = data,
         shape = SmootherShape(12.dp),
-        containerColor = if (getCurrentTheme() == Light) DarkColorPalette.colorBgContainer else LightColorPalette.colorBgContainer,
-        contentColor = if (getCurrentTheme() == Light) DarkColorPalette.colorText else LightColorPalette.colorText
+        containerColor = if (getCurrentTheme() == Light) LightColorPalette.colorBgContainer else DarkColorPalette.colorBgContainer,
+        contentColor = if (getCurrentTheme() == Light) LightColorPalette.colorText else DarkColorPalette.colorText
     )
 }
