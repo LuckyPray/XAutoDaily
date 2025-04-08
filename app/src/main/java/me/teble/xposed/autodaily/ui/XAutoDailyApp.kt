@@ -37,6 +37,7 @@ import me.teble.xposed.autodaily.ui.scene.SettingScene
 import me.teble.xposed.autodaily.ui.scene.SignScene
 import me.teble.xposed.autodaily.ui.scene.SignStateScene
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
+import me.teble.xposed.autodaily.utils.LogUtil
 
 @Keep
 enum class Screen {
@@ -78,18 +79,30 @@ sealed class SceneItem(route: String) : NavigationItem(route) {
 
 @Stable
 sealed class DialogItem(route: String) : NavigationItem(route) {
-    data class Notice(val infoText: String) : DialogItem("${Dialog.Notice.name}/$infoText")
-    data object Theme : DialogItem(Dialog.Theme.name)
-    data class CheckFriends(val uinListStr: String) :
-        DialogItem("${Dialog.CheckFriends.name}/?uinListStr=$uinListStr")
+    data class Notice(
+        val notice: String
+    ) : DialogItem("${Dialog.Notice.name}/?notice=$notice")
 
-    data class Update(val info: String) : DialogItem("${Dialog.Update.name}/?info=$info")
+    data object Theme : DialogItem(Dialog.Theme.name)
+
+    data class CheckFriends(
+        val uinListStr: String
+    ) : DialogItem("${Dialog.CheckFriends.name}/?uinListStr=$uinListStr")
+
+    data class Update(
+        val info: String
+    ) : DialogItem("${Dialog.Update.name}/?info=$info")
+
     data object Restore : DialogItem(Dialog.Restore.name)
 
 }
 
 fun NavController.navigate(item: NavigationItem) {
-    this.navigate(item.route)
+    runCatching {
+        this.navigate(item.route)
+    }.onFailure {
+        LogUtil.e(it)
+    }
 }
 
 /**
@@ -261,6 +274,14 @@ fun NavGraphBuilder.addBottomSheetGraph(
         )
     }
 
+    bottomSheet(
+        route = "${Dialog.Notice.name}/?notice={notice}"
+    ) { backStackEntry ->
+        NoticeOverlayUI(
+            infoText = backStackEntry.arguments!!.getString("notice", ""),
+            onDismiss = navController::popBackStack
+        )
+    }
 
     bottomSheet(route = "${Dialog.CheckFriends.name}/?uinListStr={uinListStr}") { backStackEntry ->
         val uinListStr = backStackEntry.arguments!!.getString("uinListStr", "")
@@ -277,6 +298,7 @@ fun NavGraphBuilder.addBottomSheetGraph(
             onDismiss = navController::popBackStack
         )
     }
+
     bottomSheet(route = Dialog.Restore.name) { backStackEntry ->
         RestoreOverlayUI(
             onDismiss = navController::popBackStack
