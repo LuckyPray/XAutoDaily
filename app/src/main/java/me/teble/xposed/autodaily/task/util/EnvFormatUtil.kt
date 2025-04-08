@@ -205,7 +205,6 @@ object EnvFormatUtil {
             "mini_nick" -> {
                 val miniProfile = (env["mini_profile"] ?: let {
                     val profile = miniProfileManager.syncGetProfile(env["mini_app_id"] as String)
-                        ?: error("获取mini_profile失败")
                     env["mini_profile"] = profile
                     profile
                 }) as MiniProfile
@@ -215,7 +214,6 @@ object EnvFormatUtil {
             "mini_avatar" -> {
                 val miniProfile = (env["mini_profile"] ?: let {
                     val profile = miniProfileManager.syncGetProfile(env["mini_app_id"] as String)
-                        ?: error("获取mini_profile失败")
                     env["mini_profile"] = profile
                     profile
                 }) as MiniProfile
@@ -223,7 +221,6 @@ object EnvFormatUtil {
             }
 
             "mini_login_code" -> miniLoginManager.syncGetLoginCode(env["mini_app_id"] as String)
-                ?: error("获取mini_login_code失败")
 
             else -> {
                 val argValue = env[argName] ?: error("没有找到对应的参数: $argName")

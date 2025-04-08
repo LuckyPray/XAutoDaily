@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.task.util
 
-
 object Const {
     const val CONFIG_VERSION = "config_version"
     const val NEED_SHOW_LOG = "need_show_log"
@@ -22,6 +21,8 @@ object Const {
     const val LOG_TO_XPOSED = "log_to_xposed"
     const val ENABLE_DEBUG_LOG = "enable_debug_log"
     const val RETRY_COUNT = "retry_count"
+
+    const val DISABLE_DAMAGE_ENV = "damage_env"
 
     // 共用部分
     const val THEME = "theme"

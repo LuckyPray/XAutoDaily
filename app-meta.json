@@ -1,6 +1,6 @@
 {
-    "versionName": "3.0.23",
-    "versionCode": 23122214,
-    "updateTime": "2023-12-22 14:48:32",
-    "updateLog": "1. 修复模块在 QQ 9.0.8 上加载异常的问题\n2. 更新内置配置版本为 v44"
+    "versionName": "3.0.30-fix",
+    "versionCode": 25031916,
+    "updateTime": "2025-03-19 16:31:35",
+    "updateLog": "【问题修复】\n- 修复 在 QQ v9.1.55 及以上版本中获取cookie失败的问题\n- 其它修复与优化"
 }

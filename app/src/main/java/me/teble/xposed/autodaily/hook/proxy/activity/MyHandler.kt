@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.os.Message
 import me.teble.xposed.autodaily.hook.base.hostClassLoader
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
@@ -12,7 +13,6 @@ import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.invoke
-import org.lsposed.hiddenapibypass.HiddenApiBypass
 
 
 class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
@@ -35,7 +35,7 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                         if (intent.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
                             val rIntent = intent.getParcelableExtra<Intent>(
                                 ProxyManager.ACTIVITY_PROXY_INTENT
-                            )!!
+                            )
                             fIntent.set(record, rIntent)
                         }
                     }
@@ -51,55 +51,51 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
                         //获取列表
 //                        LogUtil.log("clientTransaction -> $cTrans")
                         val clientTransactionItems =
-                            cTrans.invoke("getCallbacks") as List<*>
-                        for (item in clientTransactionItems) {
+                            cTrans.invoke("getCallbacks") as List<*>?
+                        clientTransactionItems?.forEach { item ->
                             val clz = item!!::class.java
                             if (clz.name.contains("LaunchActivityItem")) {
                                 val fmIntent = item.field(Intent::class.java)!!
                                 val wrapper: Intent = fmIntent.get(item) as Intent
                                 //获取Bundle
                                 val bundle: Bundle? = wrapper.fieldValueAs("mExtras")
-
                                 //设置
                                 bundle?.let {
                                     it.classLoader = hostClassLoader
                                     if (wrapper.hasExtra(ProxyManager.ACTIVITY_PROXY_INTENT)) {
-                                        val rIntent =
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                                wrapper.getParcelableExtra(
-                                                    ProxyManager.ACTIVITY_PROXY_INTENT,
-                                                    Intent::class.java
-                                                )
-                                            } else {
-                                                wrapper.getParcelableExtra(
-                                                    ProxyManager.ACTIVITY_PROXY_INTENT
-                                                )
-                                            }!!
+                                        val rIntent = wrapper.getParcelableExtra<Intent>(
+                                            ProxyManager.ACTIVITY_PROXY_INTENT
+                                        )
                                         fmIntent.set(item, rIntent)
                                         // android 12
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        if (Build.VERSION.SDK_INT >= 31) {
                                             val cActivityThread =
                                                 Class.forName("android.app.ActivityThread")
-                                            val activityThread = HiddenApiBypass.invoke(
-                                                cActivityThread,
-                                                null,
-                                                "currentActivityThread"
-                                            )
-
-                                            // getLaunchingActivity 仅仅存在于 android 12
-                                            // android 12 14不存在
-                                            val acr = HiddenApiBypass.invoke(
-                                                activityThread.javaClass,
-                                                activityThread,
-                                                "getLaunchingActivity",
-                                                cTrans.javaClass.getMethod("getActivityToken")
-                                                    .invoke(cTrans)
-                                            )
-                                            if (acr != null) {
-                                                val fAcrIntent =
-                                                    acr.javaClass.getDeclaredField("intent")
-                                                fAcrIntent.isAccessible = true
-                                                fAcrIntent[acr] = rIntent
+                                            val currentActivityThread =
+                                                cActivityThread.getDeclaredMethod("currentActivityThread")
+                                            currentActivityThread.isAccessible = true
+                                            val activityThread = currentActivityThread.invoke(null)
+                                            try {
+                                                val acr = activityThread.javaClass.getMethod(
+                                                    "getLaunchingActivity",
+                                                    IBinder::class.java
+                                                ).invoke(
+                                                    activityThread,
+                                                    cTrans.javaClass.getMethod("getActivityToken")
+                                                        .invoke(cTrans)
+                                                )
+                                                if (acr != null) {
+                                                    val fAcrIntent =
+                                                        acr.javaClass.getDeclaredField("intent")
+                                                    fAcrIntent.isAccessible = true
+                                                    fAcrIntent[acr] = rIntent
+                                                }
+                                            } catch (e: NoSuchMethodException) {
+                                                if (Build.VERSION.SDK_INT >= 33) {
+                                                    // ignore
+                                                } else {
+                                                    throw e
+                                                }
                                             }
                                         }
                                     }
@@ -115,6 +111,5 @@ class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
         }
         return mDefault?.handleMessage(msg) ?: false
     }
-
 
 }

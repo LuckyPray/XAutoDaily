@@ -4,13 +4,16 @@ package me.teble.xposed.autodaily.utils
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import android.webkit.URLUtil
 import androidx.browser.customtabs.CustomTabsIntent
+import me.teble.xposed.autodaily.hook.MainHook
 import me.teble.xposed.autodaily.hook.base.moduleClassLoader
+import me.teble.xposed.autodaily.hook.base.modulePath
 import java.io.BufferedInputStream
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
@@ -120,4 +123,27 @@ fun Int.dp2px(ctx: Context): Int {
 
 fun Context.getDensity(): Float {
     return this.resources.displayMetrics.density
+}
+
+fun getArtApexVersion(context: Context): Long {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        return Build.VERSION.SDK_INT.toLong()
+    }
+
+    try {
+        val packageManager = context.packageManager
+        val info = packageManager.getPackageInfo("com.google.android.art", PackageManager.MATCH_APEX)
+        return info.longVersionCode
+    } catch (e: Throwable) {
+        return -1
+    }
+}
+
+fun getModulePath(): String {
+    runCatching {
+        return MainHook::class.java.classLoader!!
+            .invoke("findResource", "AndroidManifest.xml")!!
+            .invoke("getPath") as String
+    }
+    return modulePath
 }

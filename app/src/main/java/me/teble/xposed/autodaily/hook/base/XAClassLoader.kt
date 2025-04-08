@@ -60,6 +60,9 @@ fun injectClassLoader(hostClassLoader: ClassLoader) {
         if (XAClassLoader::class.java != parentClassloader.javaClass) {
             LogUtil.d("replace parent classloader")
             fParent.set(mClassloader, XAClassLoader(hostClassLoader, parentClassloader))
+            isInjectClassLoader = true
         }
     }.onFailure { LogUtil.e(it) }
 }
+
+var isInjectClassLoader = false

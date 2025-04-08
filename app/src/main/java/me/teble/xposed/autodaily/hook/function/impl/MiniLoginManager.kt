@@ -10,6 +10,7 @@ import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil.currentUin
 import me.teble.xposed.autodaily.hook.utils.WupUtil
+import me.teble.xposed.autodaily.task.exception.TaskTimeoutException
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
@@ -28,7 +29,7 @@ open class MiniLoginManager : BaseFunction(
             ?: throw RuntimeException("类加载失败 -> $GetLoginCodeRequest")
     }
 
-    open fun syncGetLoginCode(miniAppId: String): String? {
+    open fun syncGetLoginCode(miniAppId: String): String {
         val startTime = System.currentTimeMillis()
         val id = "syncGetLoginCode"
         FromServiceMsgHook.resMap[id] = null
@@ -42,7 +43,7 @@ open class MiniLoginManager : BaseFunction(
             }
         }
         LogUtil.i("尝试小程序登录，获取js_code超时")
-        return null
+        throw TaskTimeoutException("尝试小程序登录，获取js_code超时")
     }
 
     private fun sendLoginRequest(miniAppId: String) {

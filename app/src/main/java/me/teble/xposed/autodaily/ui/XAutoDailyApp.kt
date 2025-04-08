@@ -1,11 +1,5 @@
 package me.teble.xposed.autodaily.ui
 
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
-//noinspection UsingMaterialAndMaterial3Libraries
-
 import androidx.annotation.Keep
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.SpringSpec

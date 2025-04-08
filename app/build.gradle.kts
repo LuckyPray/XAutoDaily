@@ -39,11 +39,13 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.23-fix"
+val appVerName: String = "3.0.30-fix"
 val updateLog = """
-    1. 修复模块在 QQ 9.0.8 上加载异常的问题
-    2. 更新内置配置版本为 v44
-    fix. 修复模块在 QQ 8.9.68 上加载异常的问题
+    【问题修复】
+    - 修复 在 QQ v9.1.55 及以上版本中获取cookie失败的问题
+    - 其它修复与优化
+    
+    - 修复 3.0.30 存在的一个问题
 """.trimIndent()
 
 // 执行 gradle licenseReleaseReport
@@ -126,8 +128,9 @@ android {
         }
         val debug by getting {
             versionNameSuffix = ".$buildNum-debug"
-            val debugFlags = arrayOf(
-                "-DMODULE_SIGNATURE=E7A8AEB0A1431D12EB04BF1B7FC31960",
+            val debugFlags = arrayOf<String>(
+                "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600",
+                "-DPKG_NAME=${namespace}",
 //                "-DTEST_SIGNATURE",
             )
             externalNativeBuild {
@@ -147,7 +150,7 @@ android {
             proguardFiles("proguard-rules.pro")
             externalNativeBuild {
                 cmake {
-                    val releaseFlags = arrayOf(
+                    val releaseFlags = arrayOf<String>(
                         "-ffunction-sections",
                         "-fdata-sections",
                         "-Wl,--gc-sections",
@@ -160,6 +163,7 @@ android {
                     val configFlags = arrayOf(
                         "-Oz",
                         "-DNDEBUG",
+                        "-DPKG_NAME=${namespace}",
                         "-DMODULE_SIGNATURE=FF9FF61037FF85BEDDBA5C98A3CB7600"
                     ).joinToString(" ")
                     arguments(
@@ -187,13 +191,6 @@ android {
         )
     }
 
-    packaging {
-        resources {
-            excludes += arrayOf("**")
-        }
-    }
-
-
     lint {
         abortOnError = false
     }
@@ -216,6 +213,9 @@ android {
         }
     }
     packaging {
+        resources {
+            excludes += arrayOf("**")
+        }
         jniLibs.excludes += arrayOf("lib/**/liblog.so", "lib/**/libz.so")
     }
 }
@@ -298,16 +298,14 @@ androidComponents.onVariants { variant ->
             val versionJson = File(project.rootDir, "app-meta.json")
             val formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .format(LocalDateTime.now())
-            versionJson.writeText(
-                """
+            versionJson.writeText("""
                 {
                     "versionName": "$appVerName",
                     "versionCode": $appVerCode,
                     "updateTime": "$formatTime",
                     "updateLog": "${updateLog.replace("\n", "\\n")}"
                 }
-            """.trimIndent()
-            )
+            """.trimIndent())
         }
     }
 }
@@ -320,7 +318,6 @@ configurations.all {
 dependencies {
     implementation(project(":dexkit"))
     implementation(project(":mmkv"))
-
     compileOnly(project(":stub"))
     implementation(project(":system"))
 

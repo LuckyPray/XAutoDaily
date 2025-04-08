@@ -9,6 +9,7 @@ import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.util.Const.BLACK_THEME
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_VERSION
+import me.teble.xposed.autodaily.task.util.Const.DISABLE_DAMAGE_ENV
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_DEBUG_LOG
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_TASK_EXCEPTION_NOTIFICATION
@@ -93,6 +94,9 @@ object ConfUnit {
     var enableDebugLog: Boolean
         get() = xaConfig.getBoolean(ENABLE_DEBUG_LOG, false)
         set(value) = xaConfig.putBoolean(ENABLE_DEBUG_LOG, value)
+    var disableDamageEnv: Boolean
+        get() = xaConfig.getBoolean(DISABLE_DAMAGE_ENV, false)
+        set(value) = xaConfig.putBoolean(DISABLE_DAMAGE_ENV, value)
 
     // -------------------------------------------------- //
     var globalEnable: Boolean

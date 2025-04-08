@@ -22,14 +22,13 @@ object RepoFileLoader {
         "https://xa-vercel.luckypray.org",
         "https://xa-cloudflare.luckypray.org",
         "https://cdn.jsdelivr.net/gh/LuckyPray/XAutoDaily@pages",
-        "https://mirror.ghproxy.com/https://raw.githubusercontent.com/LuckyPray/XAutoDaily/pages",
     )
 
-    private var repoUrl = originRepoUrl
+    private var currUrl = originRepoUrl
 
-    private fun loadRepoFile(path: String, verifyJson: Boolean): String? {
-        LogUtil.d("curr repo url: $repoUrl")
-        val url = "$repoUrl/$path"
+    private fun loadRepoFile(path: String, verifyJson: Boolean, retryCnt: Int = 0): String? {
+        LogUtil.d("curr repo url: $currUrl")
+        val url = "$currUrl/$path"
         val req = Request.Builder().url(url).build()
         try {
             val response = client.newCall(req).execute()
@@ -49,10 +48,10 @@ object RepoFileLoader {
             return null
         } catch (e: Throwable) {
             LogUtil.e(e)
-            val index = repoUrls.indexOf(repoUrl)
-            if (index < repoUrls.size - 1) {
-                repoUrl = repoUrls[index + 1]
-                return loadRepoFile(path, verifyJson)
+            if (retryCnt < repoUrls.size) {
+                val index = repoUrls.indexOf(currUrl)
+                currUrl = repoUrls[(index + 1) % repoUrls.size]
+                return loadRepoFile(path, verifyJson, retryCnt + 1)
             }
             throw e
         }
