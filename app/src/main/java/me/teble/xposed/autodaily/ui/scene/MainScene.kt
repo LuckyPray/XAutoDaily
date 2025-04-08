@@ -56,6 +56,7 @@ import me.teble.xposed.autodaily.ui.theme.CardDisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.signFontFamily
 
 
 @Composable
@@ -125,7 +126,7 @@ private fun ColumnScope.Banner(execTaskNum: () -> Int, signClick: () -> Unit) {
                 fontWeight = FontWeight.Light,
                 color = Color(0xFF2ECC71),
                 textAlign = TextAlign.Center,
-//                fontFamily = signFontFamily
+                fontFamily = signFontFamily
             )
         )
         Text(

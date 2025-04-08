@@ -40,7 +40,7 @@ import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledFontAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
-import java.util.Locale
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.signFontFamily
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -120,7 +120,7 @@ internal fun TextPicker(
 ) {
 
     val state =
-        rememberLazyListState((Int.MAX_VALUE / 2) - (Int.MAX_VALUE / 2 % count) + startIndex)
+        rememberLazyListState(startIndex + Int.MAX_VALUE / 2 - Int.MAX_VALUE / 2 % count)
 
 
     val snappingLayout = remember(state) { SnapLayoutInfoProvider(state) }
@@ -153,10 +153,11 @@ internal fun TextPicker(
         items(
             Int.MAX_VALUE,
             key = { it },
-            contentType = { derivedStateOf { currentIndex == it }.value }) { size ->
+            contentType = { derivedStateOf { currentIndex == it }.value }
+        ) { index ->
             TextPickerItem(
                 currentIndex = { currentIndex },
-                index = size % count,
+                index = index % count,
                 itemHeight = itemHeight
             )
 
@@ -198,8 +199,8 @@ private fun TextPickerItem(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = { String.format(Locale.getDefault(), "%02d", index) },
-            color = { colors.colorText },
+            text = "%02d".format(index),
+            color = colors.colorText,
             maxLines = 1,
             modifier = Modifier.graphicsLayer {
                 this.scaleX = fontScale
@@ -208,7 +209,7 @@ private fun TextPickerItem(
             },
             style = TextStyle(
                 textAlign = TextAlign.Center,
-//                fontFamily = XAutodailyTheme.signFontFamily,
+                fontFamily = signFontFamily,
                 fontWeight = FontWeight(fontWeight),
                 fontSize = 48.sp
             )
