@@ -24,13 +24,11 @@ val LightColorPalette = XAutodailyColors(
     colorTextSearch = Color(0xFF999999),
     colorAboutText = Color(0xFF5F6368),
 
-
     colorSwitch = Color(0xFFE6E6E6),
     colorIcon = Color(0xFFE6E6E6),
     colorSelection = Color(0xFFD6DDE7),
     colorDialogDivider = Color(0xFFF7F7F7),
-
-    )
+)
 
 @Stable
 val DarkColorPalette = XAutodailyColors(

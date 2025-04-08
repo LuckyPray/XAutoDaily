@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,8 @@ import me.teble.xposed.autodaily.ui.icon.icons.Search
 import me.teble.xposed.autodaily.ui.layout.DialogHorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
+import kotlin.math.max
+import kotlin.math.min
 
 
 @Composable
@@ -51,93 +55,101 @@ fun CheckFriendsOverlayUI(
     onDismiss: () -> Unit,
     viewmodel: FriendViewModel = viewModel(),
 ) {
-    var searchText by remember { mutableStateOf("") }
-    DialogTopBar(
-        text = "好友列表（${viewmodel.friendsState.size}）",
-        iconClick = onDismiss
-    )
+    val configuration = LocalConfiguration.current
+    val heightInDp = remember {
+        val screenHeight = configuration.screenHeightDp
+        max(screenHeight - 70, min(640, screenHeight)).dp
+    }
 
-    HorizontalDivider(
-        color = colors.colorDialogDivider,
-        thickness = 1.dp,
-        modifier = Modifier
-            .padding(DialogHorizontalPadding)
-            .padding(bottom = 16.dp)
-    )
-
-    Column(
-        Modifier.padding(DialogHorizontalPadding)
-    ) {
-
-        SearchBar(
-            text = { searchText },
-        ) {
-            searchText = it
-        }
-
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalArrangement = Arrangement.End
-        ) {
-
-            TextButton(
-                text = "反选"
-            ) {
-
-            }
-
-            TextButton(
-                text = "全选"
-            ) {
-
-            }
-
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f, false)
-                .fillMaxWidth()
-                .clip(SmootherShape(12.dp))
-
-        ) {
-            items(
-                items = viewmodel.friendsState,
-                key = { it.uin },
-                contentType = { it.remark == null }) { friend ->
-                var itemEnable by remember {
-                    mutableStateOf(false)
-                }
-                SelectInfoItem(
-                    text = friend.remark ?: friend.nike,
-                    infoText = friend.uin,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(SmootherShape(12.dp)),
-                    clickEnabled = { true },
-                    enable = { itemEnable },
-                    onClick = {
-                        itemEnable = !itemEnable
-                    })
-            }
-
-
-        }
-
-        DialogButton(
-            text = "保存",
-            Modifier
-                .defaultNavigationBarPadding()
-                .padding(top = 24.dp)
-                .align(Alignment.CenterHorizontally)
-                .fillMaxWidth(),
-            onClick = {
-                onConfirm("1234")
-            }
+    Column(Modifier.heightIn(max = heightInDp)) {
+        var searchText by remember { mutableStateOf("") }
+        DialogTopBar(
+            text = "好友列表（${viewmodel.friendsState.size}）",
+            iconClick = onDismiss
         )
 
+        HorizontalDivider(
+            color = colors.colorDialogDivider,
+            thickness = 1.dp,
+            modifier = Modifier
+                .padding(DialogHorizontalPadding)
+                .padding(bottom = 16.dp)
+        )
+
+        Column(
+            Modifier.padding(DialogHorizontalPadding)
+        ) {
+
+            SearchBar(
+                text = { searchText },
+            ) {
+                searchText = it
+            }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+
+                TextButton(
+                    text = "反选"
+                ) {
+
+                }
+
+                TextButton(
+                    text = "全选"
+                ) {
+
+                }
+
+            }
+
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f, false)
+                    .fillMaxWidth()
+                    .clip(SmootherShape(12.dp))
+
+            ) {
+                items(
+                    items = viewmodel.friendsState,
+                    key = { it.uin },
+                    contentType = { it.remark == null }) { friend ->
+                    var itemEnable by remember {
+                        mutableStateOf(false)
+                    }
+                    SelectInfoItem(
+                        text = friend.remark ?: friend.nike,
+                        infoText = friend.uin,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(SmootherShape(12.dp)),
+                        clickEnabled = { true },
+                        enable = { itemEnable },
+                        onClick = {
+                            itemEnable = !itemEnable
+                        })
+                }
+
+
+            }
+
+            DialogButton(
+                text = "保存",
+                Modifier
+                    .defaultNavigationBarPadding()
+                    .padding(top = 24.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .fillMaxWidth(),
+                onClick = {
+                    onConfirm("1234")
+                }
+            )
+
+        }
     }
 }
 

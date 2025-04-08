@@ -248,13 +248,14 @@ fun NavGraphBuilder.addBottomSheetGraph(
     navController: NavController,
     themeViewModel: MainThemeViewModel
 ) {
-    bottomSheet(route = "${Dialog.Notice.name}/{infoText}") { backStackEntry ->
+    bottomSheet(
+        route = "${Dialog.Notice.name}/?notice={notice}"
+    ) { backStackEntry ->
         NoticeOverlayUI(
-            infoText = backStackEntry.arguments!!.getString("infoText", ""),
+            infoText = backStackEntry.arguments!!.getString("notice", ""),
             onDismiss = navController::popBackStack
         )
     }
-
 
     bottomSheet(
         route = "${Dialog.Update.name}/?info={info}"
@@ -274,18 +275,10 @@ fun NavGraphBuilder.addBottomSheetGraph(
         )
     }
 
-    bottomSheet(
-        route = "${Dialog.Notice.name}/?notice={notice}"
-    ) { backStackEntry ->
-        NoticeOverlayUI(
-            infoText = backStackEntry.arguments!!.getString("notice", ""),
-            onDismiss = navController::popBackStack
-        )
-    }
-
     bottomSheet(route = "${Dialog.CheckFriends.name}/?uinListStr={uinListStr}") { backStackEntry ->
         val uinListStr = backStackEntry.arguments!!.getString("uinListStr", "")
         val uinSet = uinListStr.split(",").toImmutableSet()
+
         CheckFriendsOverlayUI(
             uinListStr = uinSet,
             onConfirm = { string ->
