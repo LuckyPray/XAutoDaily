@@ -38,7 +38,7 @@ targetSdk = "34"
 buildTool = "35.0.0-rc1"
 ndk = "26.2.11394342"
 compose-compiler = "1.5.11"
-jvm-target = "21"
+jvm-target = "11"
 navigationCompose = "2.7.7"
 
 
