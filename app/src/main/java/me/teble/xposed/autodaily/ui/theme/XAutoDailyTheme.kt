@@ -19,7 +19,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import me.teble.xposed.autodaily.R
-import me.teble.xposed.autodaily.activity.common.AppConfUnit
 import me.teble.xposed.autodaily.ui.ConfUnit
 
 val LocalXAutodailyShapes = staticCompositionLocalOf {
@@ -68,12 +67,12 @@ object XAutodailyTheme {
 
     @JvmStatic
     fun getAppTheme(): Theme {
-        return AppConfUnit.theme
+        return ConfUnit.theme
     }
 
     @JvmStatic
     fun getAppBlack(): Boolean {
-        return AppConfUnit.blackTheme
+        return ConfUnit.blackTheme
     }
 
 }

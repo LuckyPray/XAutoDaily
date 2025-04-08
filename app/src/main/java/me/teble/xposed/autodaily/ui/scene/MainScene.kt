@@ -36,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
@@ -66,12 +67,16 @@ fun MainScene(
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
 
-    viewmodel: MainViewModel = viewModel()
+    themeViewModel: ThemeViewModel,
+    viewmodel: MainViewModel = viewModel(),
 ) {
     val colors = colors
     XaScaffold(
         snackbarHost = {
-            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
+            RoundedSnackbarHost(
+                hostState = viewmodel.snackbarHostState,
+                themeViewModel = themeViewModel
+            )
         }, topBar = {
             XAutoDailyTopBar(
                 modifier = Modifier

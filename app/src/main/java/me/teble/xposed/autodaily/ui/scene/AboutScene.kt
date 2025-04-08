@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
@@ -48,6 +49,8 @@ fun AboutScene(
     onNavigateToUpdate: (String) -> Unit,
     onNavigateToLicense: () -> Unit,
     onNavigateToDeveloper: () -> Unit,
+
+    themeViewModel: ThemeViewModel,
     viewmodel: AboutViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -57,7 +60,10 @@ fun AboutScene(
             TopBar(text = "关于", backClick = backClick, hasBackProvider = hasBackProvider)
         },
         snackbarHost = {
-            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
+            RoundedSnackbarHost(
+                hostState = viewmodel.snackbarHostState,
+                themeViewModel = themeViewModel
+            )
         },
         containerColor = colors.colorBgLayout
     ) {

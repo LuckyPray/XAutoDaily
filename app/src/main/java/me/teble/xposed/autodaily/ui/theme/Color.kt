@@ -62,11 +62,11 @@ val BlackColorPalette = XAutodailyColors(
     rippleColor = Color(0xFFFFFFFF),
     colorSuccess = Color(0xFF60D893),
 
-    colorBgLayout = Color(0xFF202124),
+    colorBgLayout = Color(0xFF000000),
     colorBgContainer = Color(0xFF303134),
     colorBgDialog = Color(0xFF3C4043),
     colorBgSearch = Color(0xFF4F5355),
-    colorBgMask = Color(0xFF202124).copy(0.38f),
+    colorBgMask = Color(0xFF000000).copy(0.38f),
     colorBgEdit = Color(0xFF3C4043),
 
     colorText = Color(0xFFFFFFFF),

@@ -17,6 +17,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.R
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.ImageItem
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.TopBar
@@ -29,6 +30,8 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun DeveloperScene(
     backClick: () -> Unit,
+
+    themeViewModel: ThemeViewModel,
     viewmodel: DeveloperViewModel = viewModel()
 ) {
 
@@ -38,7 +41,10 @@ fun DeveloperScene(
             TopBar(text = "开发者", backClick = backClick)
         },
         snackbarHost = {
-            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
+            RoundedSnackbarHost(
+                hostState = viewmodel.snackbarHostState,
+                themeViewModel = themeViewModel
+            )
         },
         containerColor = colors.colorBgLayout
     ) {

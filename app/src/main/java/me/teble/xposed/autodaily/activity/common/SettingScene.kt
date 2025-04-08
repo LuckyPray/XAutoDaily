@@ -49,7 +49,7 @@ import java.io.File
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingScene(
-    themeViewModel: ModuleThemeViewModel,
+    themeViewModel: ThemeViewModel,
     hasBackProvider: () -> Boolean,
     onBackClick: () -> Unit,
     viewmodel: SettingViewModel = viewModel()

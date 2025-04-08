@@ -25,6 +25,7 @@ import me.teble.xposed.autodaily.hook.JumpActivityHook
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import me.teble.xposed.autodaily.shizuku.UserService
+import me.teble.xposed.autodaily.ui.ConfUnit
 import rikka.shizuku.Shizuku
 
 @Stable
@@ -192,7 +193,7 @@ class ModuleViewModel : ViewModel() {
             return
         }
         viewModelScope.launch(IO) {
-            if (!AppConfUnit.keepAlive) {
+            if (!ConfUnit.keepAlive) {
                 showSnackbar("未启用保活，无需启动守护进程")
                 return@launch
             }

@@ -29,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
@@ -54,10 +55,20 @@ import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @Composable
-fun ModuleScene(onSettingClick: () -> Unit, viewmodel: ModuleViewModel = viewModel()) {
+fun ModuleScene(
+    onSettingClick: () -> Unit,
+
+    themeViewModel: ThemeViewModel,
+    viewmodel: ModuleViewModel = viewModel()
+) {
 
     XaScaffold(
-        snackbarHost = { RoundedSnackbarHost(hostState = viewmodel.snackbarHostState) },
+        snackbarHost = {
+            RoundedSnackbarHost(
+                hostState = viewmodel.snackbarHostState,
+                themeViewModel = themeViewModel
+            )
+        },
         topBar = { ModuleTopBar() },
         modifier = Modifier,
         containerColor = colors.colorBgLayout

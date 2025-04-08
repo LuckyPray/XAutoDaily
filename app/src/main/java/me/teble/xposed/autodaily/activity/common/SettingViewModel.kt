@@ -10,6 +10,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
+import me.teble.xposed.autodaily.ui.ConfUnit
 
 @Stable
 class SettingViewModel : ViewModel() {
@@ -19,46 +20,46 @@ class SettingViewModel : ViewModel() {
     }
 
 
-    var keepAlive by mutableStateOf(AppConfUnit.keepAlive)
+    var keepAlive by mutableStateOf(ConfUnit.keepAlive)
 
 
-    var qqKeepAlive by mutableStateOf(AppConfUnit.qKeepAlive)
+    var qqKeepAlive by mutableStateOf(ConfUnit.qKeepAlive)
 
-    var timKeepAlive by mutableStateOf(AppConfUnit.timKeepAlive)
+    var timKeepAlive by mutableStateOf(ConfUnit.timKeepAlive)
 
     var showThemeDialog by mutableStateOf(false)
 
-    var untrustedTouchEvents by mutableStateOf(AppConfUnit.untrustedTouchEvents)
+    var untrustedTouchEvents by mutableStateOf(ConfUnit.untrustedTouchEvents)
 
-    var hiddenAppIcon by mutableStateOf(AppConfUnit.hiddenAppIcon)
+    var hiddenAppIcon by mutableStateOf(ConfUnit.hiddenAppIcon)
 
     fun updateKeepAliveChecked(bool: Boolean) {
-        AppConfUnit.keepAlive = bool
+        ConfUnit.keepAlive = bool
         keepAlive = bool
 
     }
 
     fun updateQQKeepAlive(bool: Boolean) {
-        AppConfUnit.qKeepAlive = bool
+        ConfUnit.qKeepAlive = bool
         qqKeepAlive = bool
     }
 
 
     fun updateTimKeepAlive(bool: Boolean) {
-        AppConfUnit.timKeepAlive = bool
+        ConfUnit.timKeepAlive = bool
         timKeepAlive = bool
     }
 
 
     fun updateUntrustedTouchEvents(bool: Boolean) {
-        AppConfUnit.untrustedTouchEvents = bool
+        ConfUnit.untrustedTouchEvents = bool
         untrustedTouchEvents = bool
         ShizukuApi.setUntrustedTouchEvents(bool)
     }
 
 
     fun updateHiddenAppIcon(bool: Boolean) {
-        AppConfUnit.hiddenAppIcon = bool
+        ConfUnit.hiddenAppIcon = bool
         hiddenAppIcon = bool
         xaApp.packageManager.setComponentEnabledSetting(
             ComponentName(xaApp, MainActivity::class.java.name + "Alias"),

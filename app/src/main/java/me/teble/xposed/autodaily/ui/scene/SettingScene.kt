@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.datetime.Clock
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
@@ -35,6 +36,8 @@ fun SettingScene(
     onNavigateToTheme: () -> Unit,
     hasBackProvider: () -> Boolean,
     onNavigateToSignState: () -> Unit,
+
+    themeViewModel: ThemeViewModel,
     viewmodel: SettingViewModel = viewModel()
 ) {
     val logSaveLauncher = rememberLauncherForActivityResult(
@@ -52,7 +55,10 @@ fun SettingScene(
     )
     XaScaffold(
         snackbarHost = {
-            RoundedSnackbarHost(hostState = viewmodel.snackbarHostState)
+            RoundedSnackbarHost(
+                hostState = viewmodel.snackbarHostState,
+                themeViewModel = themeViewModel
+            )
         },
         topBar = {
             TopBar(text = "设置", backClick = backClick, hasBackProvider = hasBackProvider)

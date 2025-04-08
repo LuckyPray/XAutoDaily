@@ -17,7 +17,7 @@ import com.agoines.system.common.statusBarLightOldMode
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class MainActivity : ComponentActivity() {
-    private val viewModel: ModuleThemeViewModel by viewModels()
+    private val viewModel: ThemeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         setStatusBarTranslation()
         setNavigationBarTranslation()

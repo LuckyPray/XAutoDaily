@@ -45,10 +45,6 @@ object Config {
         ConfProxy(MMKV.mmkvWithID("XAHooks", MMKV.MULTI_PROCESS_MODE))
     }
 
-    val xaConfig by lazy {
-        ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.MULTI_PROCESS_MODE))
-    }
-
     private val confProxyMap = ConcurrentHashMap<Long, ConfProxy>(5)
 
     val accountConfig: ConfProxy

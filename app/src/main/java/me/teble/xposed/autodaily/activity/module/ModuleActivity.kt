@@ -13,6 +13,7 @@ import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.setNavigationBarTranslation
 import com.agoines.system.common.setStatusBarTranslation
 import com.agoines.system.common.statusBarLightMode
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
@@ -24,7 +25,7 @@ class ModuleActivity : BaseActivity() {
         var composeViewContext = WeakReference<Context>(null)
     }
 
-    private val viewModel: MainThemeViewModel by viewModels()
+    private val viewModel: ThemeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         setStatusBarTranslation()
         setNavigationBarTranslation()

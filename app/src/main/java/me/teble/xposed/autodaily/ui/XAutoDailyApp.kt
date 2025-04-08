@@ -22,7 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.collections.immutable.toImmutableSet
-import me.teble.xposed.autodaily.activity.module.MainThemeViewModel
+import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.ui.dialog.CheckFriendsOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.NoticeOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.RestoreOverlayUI
@@ -123,7 +123,7 @@ private fun rememberBottomSheetNavigator(
 }
 
 @Composable
-fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
+fun XAutoDailyApp(themeViewModel: ThemeViewModel) {
     val bottomSheetNavigator = rememberBottomSheetNavigator(skipHalfExpanded = true)
     val navController = rememberNavController(bottomSheetNavigator)
     ModalBottomSheetLayout(
@@ -141,19 +141,22 @@ fun XAutoDailyApp(themeViewModel: MainThemeViewModel) {
 @Composable
 private fun XAutoDailyNavHost(
     navController: NavHostController,
-    themeViewModel: MainThemeViewModel
+    themeViewModel: ThemeViewModel
 ) {
     NavHost(
         navController = navController,
         startDestination = SceneItem.Main.route
     ) {
-        addSceneGraph(navController)
+        addSceneGraph(navController, themeViewModel)
         addBottomSheetGraph(navController, themeViewModel)
 
     }
 }
 
-fun NavGraphBuilder.addSceneGraph(navController: NavController) {
+fun NavGraphBuilder.addSceneGraph(
+    navController: NavController,
+    themeViewModel: ThemeViewModel,
+) {
     composable(route = SceneItem.Main.route) {
         MainScene(
             onNavigateToNotice = {
@@ -167,7 +170,8 @@ fun NavGraphBuilder.addSceneGraph(navController: NavController) {
             },
             onNavigateToAbout = {
                 navController.navigate(SceneItem.About)
-            }
+            },
+            themeViewModel = themeViewModel
         )
     }
 
@@ -198,6 +202,7 @@ fun NavGraphBuilder.addSceneGraph(navController: NavController) {
             onNavigateToDeveloper = {
                 navController.navigate(SceneItem.Developer)
             },
+            themeViewModel = themeViewModel,
         )
     }
 
@@ -215,13 +220,17 @@ fun NavGraphBuilder.addSceneGraph(navController: NavController) {
                 navController.navigate(SceneItem.SignState)
             },
             hasBackProvider = { true },
+            themeViewModel = themeViewModel,
         )
     }
 
 
 
     composable(route = SceneItem.Developer.route) {
-        DeveloperScene(backClick = navController::popBackStack)
+        DeveloperScene(
+            backClick = navController::popBackStack,
+            themeViewModel = themeViewModel,
+        )
     }
 
     composable(route = SceneItem.License.route) {
@@ -246,7 +255,7 @@ fun NavGraphBuilder.addSceneGraph(navController: NavController) {
 
 fun NavGraphBuilder.addBottomSheetGraph(
     navController: NavController,
-    themeViewModel: MainThemeViewModel
+    themeViewModel: ThemeViewModel,
 ) {
     bottomSheet(
         route = "${Dialog.Notice.name}/?notice={notice}"

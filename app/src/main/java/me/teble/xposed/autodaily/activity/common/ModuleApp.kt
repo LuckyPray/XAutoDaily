@@ -20,7 +20,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ModuleApp(viewModel: ModuleThemeViewModel) {
+fun ModuleApp(viewModel: ThemeViewModel) {
 
 // Create the ListDetailPaneScaffoldState
 
@@ -48,7 +48,8 @@ fun ModuleApp(viewModel: ModuleThemeViewModel) {
                 ModuleScene(
                     onSettingClick = {
                         scaffoldNavigator.navigateTo(pane = ListDetailPaneScaffoldRole.Detail)
-                    }
+                    },
+                    themeViewModel = viewModel,
                 )
             }
         },
