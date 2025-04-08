@@ -187,15 +187,6 @@ android {
         )
     }
 
-    kotlin {
-        jvmToolchain(libs.versions.jvm.target.get().toInt())
-        sourceSets.all {
-            languageSettings {
-                enableLanguageFeature("ContextReceivers")
-            }
-        }
-    }
-
     packaging {
         resources {
             excludes += arrayOf("**")
@@ -226,6 +217,15 @@ android {
     }
     packaging {
         jniLibs.excludes += arrayOf("lib/**/liblog.so", "lib/**/libz.so")
+    }
+}
+
+kotlin {
+    jvmToolchain(libs.versions.jvm.target.get().toInt())
+    sourceSets.all {
+        languageSettings {
+            enableLanguageFeature("ContextReceivers")
+        }
     }
 }
 

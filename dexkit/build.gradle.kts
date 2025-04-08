@@ -14,10 +14,6 @@ android {
         minSdk = libs.versions.minSdk.get().toInt()
     }
 
-    kotlin {
-        jvmToolchain(libs.versions.jvm.target.get().toInt())
-    }
-
     compileOptions {
         sourceCompatibility(JavaVersion.VERSION_11)
         targetCompatibility(JavaVersion.VERSION_11)
@@ -31,6 +27,10 @@ android {
             res.setSrcDirs(listOf("DexKit/dexkit/src/main/res"))
         }
     }
+}
+
+kotlin {
+    jvmToolchain(libs.versions.jvm.target.get().toInt())
 }
 
 dependencies {
