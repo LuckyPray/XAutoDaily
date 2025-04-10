@@ -103,7 +103,7 @@ fun DatePicker(
                     .padding(horizontal = 48.dp, vertical = 31.dp)
             )
             Text(
-                text = "时",
+                text = "分",
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(end = 20.dp),
