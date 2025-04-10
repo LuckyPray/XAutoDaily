@@ -37,7 +37,6 @@ fun SettingScene(
     hasBackProvider: () -> Boolean,
     onNavigateToSignState: () -> Unit,
 
-    themeViewModel: ThemeViewModel,
     viewmodel: SettingViewModel = viewModel()
 ) {
     val logSaveLauncher = rememberLauncherForActivityResult(
@@ -57,7 +56,6 @@ fun SettingScene(
         snackbarHost = {
             RoundedSnackbarHost(
                 hostState = viewmodel.snackbarHostState,
-                themeViewModel = themeViewModel
             )
         },
         topBar = {

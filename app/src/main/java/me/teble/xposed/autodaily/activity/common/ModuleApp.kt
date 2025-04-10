@@ -49,7 +49,6 @@ fun ModuleApp(viewModel: ThemeViewModel) {
                     onSettingClick = {
                         scaffoldNavigator.navigateTo(pane = ListDetailPaneScaffoldRole.Detail)
                     },
-                    themeViewModel = viewModel,
                 )
             }
         },

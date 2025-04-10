@@ -31,7 +31,6 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 fun DeveloperScene(
     backClick: () -> Unit,
 
-    themeViewModel: ThemeViewModel,
     viewmodel: DeveloperViewModel = viewModel()
 ) {
 
@@ -43,7 +42,6 @@ fun DeveloperScene(
         snackbarHost = {
             RoundedSnackbarHost(
                 hostState = viewmodel.snackbarHostState,
-                themeViewModel = themeViewModel
             )
         },
         containerColor = colors.colorBgLayout

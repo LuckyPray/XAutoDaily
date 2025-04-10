@@ -10,13 +10,11 @@ import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 fun RoundedSnackbarHost(
     hostState: SnackbarHostState,
     modifier: Modifier = Modifier,
-
-    themeViewModel: ThemeViewModel,
 ) {
     SnackbarHost(
         hostState = hostState,
         modifier = modifier
     ) {
-        RoundedSnackbar(it, themeViewModel)
+        RoundedSnackbar(it)
     }
 }

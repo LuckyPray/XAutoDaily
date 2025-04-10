@@ -36,7 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.ui.composable.Icon
 import me.teble.xposed.autodaily.ui.composable.RoundedSnackbarHost
 import me.teble.xposed.autodaily.ui.composable.Text
@@ -67,7 +66,6 @@ fun MainScene(
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
 
-    themeViewModel: ThemeViewModel,
     viewmodel: MainViewModel = viewModel(),
 ) {
     val colors = colors
@@ -75,14 +73,13 @@ fun MainScene(
         snackbarHost = {
             RoundedSnackbarHost(
                 hostState = viewmodel.snackbarHostState,
-                themeViewModel = themeViewModel
             )
         }, topBar = {
             XAutoDailyTopBar(
                 modifier = Modifier
                     .padding(StatusBarsTopPadding)
                     .padding(HorizontalPadding)
-                    .padding(vertical = 20.dp),
+                    .padding(vertical = 20.dp, horizontal = 16.dp),
                 icon = Icons.Notice,
                 contentDescription = "公告",
                 iconClick = {

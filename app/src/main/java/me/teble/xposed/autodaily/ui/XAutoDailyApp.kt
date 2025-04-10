@@ -147,7 +147,7 @@ private fun XAutoDailyNavHost(
         navController = navController,
         startDestination = SceneItem.Main.route
     ) {
-        addSceneGraph(navController, themeViewModel)
+        addSceneGraph(navController)
         addBottomSheetGraph(navController, themeViewModel)
 
     }
@@ -155,7 +155,6 @@ private fun XAutoDailyNavHost(
 
 fun NavGraphBuilder.addSceneGraph(
     navController: NavController,
-    themeViewModel: ThemeViewModel,
 ) {
     composable(route = SceneItem.Main.route) {
         MainScene(
@@ -171,7 +170,6 @@ fun NavGraphBuilder.addSceneGraph(
             onNavigateToAbout = {
                 navController.navigate(SceneItem.About)
             },
-            themeViewModel = themeViewModel
         )
     }
 
@@ -202,7 +200,6 @@ fun NavGraphBuilder.addSceneGraph(
             onNavigateToDeveloper = {
                 navController.navigate(SceneItem.Developer)
             },
-            themeViewModel = themeViewModel,
         )
     }
 
@@ -220,7 +217,6 @@ fun NavGraphBuilder.addSceneGraph(
                 navController.navigate(SceneItem.SignState)
             },
             hasBackProvider = { true },
-            themeViewModel = themeViewModel,
         )
     }
 
@@ -229,7 +225,6 @@ fun NavGraphBuilder.addSceneGraph(
     composable(route = SceneItem.Developer.route) {
         DeveloperScene(
             backClick = navController::popBackStack,
-            themeViewModel = themeViewModel,
         )
     }
 

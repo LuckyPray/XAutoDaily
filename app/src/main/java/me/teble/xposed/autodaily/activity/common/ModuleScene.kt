@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.teble.xposed.autodaily.activity.common.ThemeViewModel
 import me.teble.xposed.autodaily.application.xaApp
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
@@ -50,7 +49,6 @@ import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Warn
 import me.teble.xposed.autodaily.ui.layout.HorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
-
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
@@ -58,7 +56,6 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 fun ModuleScene(
     onSettingClick: () -> Unit,
 
-    themeViewModel: ThemeViewModel,
     viewmodel: ModuleViewModel = viewModel()
 ) {
 
@@ -66,7 +63,6 @@ fun ModuleScene(
         snackbarHost = {
             RoundedSnackbarHost(
                 hostState = viewmodel.snackbarHostState,
-                themeViewModel = themeViewModel
             )
         },
         topBar = { ModuleTopBar() },
@@ -167,7 +163,7 @@ private fun ModuleTopBar() {
         modifier = Modifier
             .padding(StatusBarsTopPadding)
             .padding(HorizontalPadding)
-            .padding(vertical = 20.dp),
+            .padding(vertical = 20.dp, horizontal = 16.dp),
     )
 }
 

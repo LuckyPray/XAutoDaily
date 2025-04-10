@@ -50,7 +50,6 @@ fun AboutScene(
     onNavigateToLicense: () -> Unit,
     onNavigateToDeveloper: () -> Unit,
 
-    themeViewModel: ThemeViewModel,
     viewmodel: AboutViewModel = viewModel()
 ) {
     val context = LocalContext.current
@@ -62,7 +61,6 @@ fun AboutScene(
         snackbarHost = {
             RoundedSnackbarHost(
                 hostState = viewmodel.snackbarHostState,
-                themeViewModel = themeViewModel
             )
         },
         containerColor = colors.colorBgLayout
