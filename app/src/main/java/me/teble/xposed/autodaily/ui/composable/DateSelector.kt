@@ -7,6 +7,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.SnapLayoutInfoProvider
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -55,29 +56,35 @@ fun DatePicker(
 ) {
 
     val currentOnScrollFinish by rememberUpdatedState(onScrollFinish)
+
     Row(
-        modifier = modifier.height(IntrinsicSize.Min),
-        verticalAlignment = Alignment.CenterVertically
+        modifier = modifier.height(IntrinsicSize.Min).fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
     ) {
-
-        TextPicker(
-            count = 24,
-            startIndex = hour,
-            modifier = Modifier
-                .padding(start = 60.dp, top = 36.dp, bottom = 36.dp, end = 8.dp),
-            onScrollFinish = {
-                currentOnScrollFinish(it.hours + minute.minutes)
-            }
-        )
-
-        Text(
-            text = "时", modifier = Modifier.padding(end = 18.dp),
-            color = Color(0xFF4F5355),
-            style = TextStyle(
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp,
+        Box {
+            TextPicker(
+                count = 24,
+                startIndex = hour,
+                onScrollFinish = {
+                    currentOnScrollFinish(it.hours + minute.minutes)
+                },
+                modifier = Modifier
+                    .padding(horizontal = 48.dp, vertical = 31.dp)
             )
-        )
+
+            Text(
+                text = "时",
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 20.dp),
+                color = Color(0xFF4F5355),
+                style = TextStyle(
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                )
+            )
+        }
         VerticalDivider(
             color = colors.colorDialogDivider,
             thickness = 2.dp,
@@ -85,25 +92,28 @@ fun DatePicker(
                 .padding(vertical = 66.dp)
                 .clip(SmootherShape(1.dp)),
         )
-        TextPicker(
-            count = 60,
-            startIndex = minute,
-            modifier = Modifier
-                .padding(start = 48.dp, top = 36.dp, bottom = 36.dp, end = 8.dp),
-            onScrollFinish = {
-                currentOnScrollFinish(hour.hours + it.minutes)
-            }
-        )
-        Text(
-            text = "分",
-            modifier = Modifier
-                .padding(end = 36.dp),
-            color = Color(0xFF4F5355),
-            style = TextStyle(
-                fontWeight = FontWeight.Normal,
-                fontSize = 16.sp
+        Box {
+            TextPicker(
+                count = 60,
+                startIndex = minute,
+                onScrollFinish = {
+                    currentOnScrollFinish(hour.hours + it.minutes)
+                },
+                modifier = Modifier
+                    .padding(horizontal = 48.dp, vertical = 31.dp)
             )
-        )
+            Text(
+                text = "时",
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 20.dp),
+                color = Color(0xFF4F5355),
+                style = TextStyle(
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                )
+            )
+        }
     }
 
 

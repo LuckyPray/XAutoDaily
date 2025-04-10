@@ -75,7 +75,8 @@ fun TopBar(
         modifier = modifier
             .padding(HorizontalPadding)
             .padding(StatusBarsTopPadding)
-            .padding(bottom = 20.dp, top = 10.dp),
+            .padding(bottom = 20.dp, top = 10.dp)
+            .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (hasBackProvider()) {
