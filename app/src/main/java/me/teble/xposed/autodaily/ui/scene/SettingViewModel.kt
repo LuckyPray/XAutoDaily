@@ -1,24 +1,23 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import android.net.Uri
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.config.Config
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.scene.base.BaseViewModel
 import me.teble.xposed.autodaily.utils.FileUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.io.File
 
 @Stable
-class SettingViewModel : ViewModel() {
+class SettingViewModel : BaseViewModel() {
 
     var showTaskToast by mutableStateOf(ConfUnit.showTaskToast)
 
@@ -31,8 +30,6 @@ class SettingViewModel : ViewModel() {
     var logToXposed by mutableStateOf(ConfUnit.logToXposed)
 
     var debugLog by mutableStateOf(ConfUnit.enableDebugLog)
-
-    var snackbarHostState = SnackbarHostState()
 
 
     fun logSaveResult(uri: Uri?) {
@@ -79,13 +76,6 @@ class SettingViewModel : ViewModel() {
                     LogUtil.e(e, "save log failed")
                 }
             }
-        }
-    }
-
-
-    private fun showSnackbar(text: String) {
-        viewModelScope.launch {
-            snackbarHostState.showSnackbar(text)
         }
     }
 

@@ -1,13 +1,11 @@
 package me.teble.xposed.autodaily.ui.scene
 
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -16,10 +14,11 @@ import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.enable
+import me.teble.xposed.autodaily.ui.scene.base.BaseViewModel
 import me.teble.xposed.autodaily.utils.TaskExecutor
 
 @Stable
-class MainViewModel : ViewModel() {
+class MainViewModel : BaseViewModel() {
 
     private var lastClickTime by mutableLongStateOf(0L)
 
@@ -27,8 +26,6 @@ class MainViewModel : ViewModel() {
 
     var noticeText by mutableStateOf("")
     var turnTaskSize by mutableIntStateOf(0)
-
-    val snackbarHostState = SnackbarHostState()
 
     init {
         initExecTaskNum()
@@ -90,16 +87,6 @@ class MainViewModel : ViewModel() {
         }
         lastClickTime = currentTime
         TaskExecutor.handler.sendEmptyMessage(TaskExecutor.EXEC_TASK)
-    }
-
-    /**
-     * 展示对应 Snackbar
-     * @param text 文本内容
-     */
-    private fun showSnackbar(text: String) {
-        viewModelScope.launch {
-            snackbarHostState.showSnackbar(text)
-        }
     }
 
 }

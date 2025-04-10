@@ -178,12 +178,7 @@ fun NavGraphBuilder.addSceneGraph(
             backClick = navController::popBackStack,
             hasBackProvider = { true },
             onNavigateToEditEnvs = { groupId, taskId ->
-                navController.navigate(
-                    SceneItem.EditEnv(
-                        groupId,
-                        taskId
-                    )
-                )
+                navController.navigate(SceneItem.EditEnv(groupId, taskId))
             })
     }
 
@@ -237,12 +232,15 @@ fun NavGraphBuilder.addSceneGraph(
     }
 
     composable(route = "${Screen.EditEnv.name}/{taskGroup}/{taskId}") { backStackEntry ->
+        val groupId = backStackEntry.arguments!!.getString("taskGroup")!!
+        val taskId = backStackEntry.arguments!!.getString("taskId")!!
+
         EditEnvScene(
             onNavigateToCheckFriends = { navController.navigate(DialogItem.CheckFriends(it)) },
             backClick = navController::popBackStack,
             savedStateHandle = navController.currentBackStackEntry?.savedStateHandle,
-            groupId = backStackEntry.arguments!!.getString("taskGroup", ""),
-            taskId = backStackEntry.arguments!!.getString("taskId", "")
+            groupId = groupId,
+            taskId = taskId,
         )
     }
 

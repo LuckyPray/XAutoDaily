@@ -40,7 +40,7 @@ fun EditEnvScene(
     onNavigateToCheckFriends: (String) -> Unit,
     backClick: () -> Unit,
     savedStateHandle: SavedStateHandle?,
-    groupId: String?,
+    groupId: String,
     taskId: String
 ) {
     var editText by remember { mutableStateOf("") }

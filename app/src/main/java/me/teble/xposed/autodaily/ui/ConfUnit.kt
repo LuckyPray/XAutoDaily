@@ -1,5 +1,7 @@
+@file:SuppressLint("UnsafeOptInUsageError")
 package me.teble.xposed.autodaily.ui
 
+import android.annotation.SuppressLint
 import com.tencent.mmkv.MMKV
 import kotlinx.serialization.Serializable
 import me.teble.xposed.autodaily.BuildConfig

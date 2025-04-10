@@ -1,14 +1,12 @@
 package me.teble.xposed.autodaily.ui.scene
 
 import android.content.Context
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
@@ -18,12 +16,13 @@ import me.teble.xposed.autodaily.hook.base.hostVersionCode
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
+import me.teble.xposed.autodaily.ui.scene.base.BaseViewModel
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.openUrl
 
 @Stable
-class AboutViewModel : ViewModel() {
+class AboutViewModel : BaseViewModel() {
 
     var moduleVersionName by mutableStateOf("")
 
@@ -42,8 +41,6 @@ class AboutViewModel : ViewModel() {
 
 
     var hasUpdate by mutableStateOf(false)
-
-    val snackbarHostState = SnackbarHostState()
 
     private var lastClickTime by mutableLongStateOf(0L)
 
@@ -131,16 +128,6 @@ class AboutViewModel : ViewModel() {
                 LogUtil.e(e, "open alipay qr error: ")
                 context.openUrl("https://mobilecodec.alipay.com/client_download.htm?qrcode=$ALIPAY_QRCODE")
             }
-        }
-    }
-
-    /**
-     * 展示对应 Snackbar
-     * @param text 文本内容
-     */
-    private fun showSnackbar(text: String) {
-        viewModelScope.launch {
-            snackbarHostState.showSnackbar(text)
         }
     }
 }
