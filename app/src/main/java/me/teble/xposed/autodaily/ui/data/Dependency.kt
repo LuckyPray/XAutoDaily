@@ -7,6 +7,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SealedSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -47,6 +48,7 @@ class DependencyPersistentListSerializer(
     private val serializer: KSerializer<License>,
 ) : KSerializer<PersistentList<License>> {
 
+    @OptIn(SealedSerializationApi::class)
     private class PersistentListDescriptor :
         SerialDescriptor by serialDescriptor<List<License>>() {
         @ExperimentalSerializationApi

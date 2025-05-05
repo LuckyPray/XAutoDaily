@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidLibrary) apply false
     alias(libs.plugins.serialization) apply false
     alias(libs.plugins.licenses) apply false
+    alias(libs.plugins.kotlinCompose) apply false
 }
 
 tasks.register<Delete>("clean") {

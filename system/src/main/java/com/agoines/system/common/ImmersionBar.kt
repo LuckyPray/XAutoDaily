@@ -14,9 +14,9 @@ import com.highcapable.betterandroid.system.extension.tool.SystemKind
 import com.highcapable.betterandroid.system.extension.tool.SystemVersion
 
 
-context(Activity)
+context(activity: Activity)
 fun setStatusBarTranslation() {
-    window.setStatusBarTranslation()
+    activity.window.setStatusBarTranslation()
 }
 
 /**
@@ -39,9 +39,9 @@ fun Window.setStatusBarTranslation() {
 }
 
 
-context(Activity)
+context(activity: Activity)
 fun setNavigationBarTranslation() {
-    window.setNavigationBarTranslation()
+    activity.window.setNavigationBarTranslation()
 }
 
 /**
@@ -67,9 +67,9 @@ fun Window.setNavigationBarTranslation() {
 }
 
 
-context(Activity)
+context(activity: Activity)
 fun statusBarLightMode(enable: Boolean = true) {
-    window.statusBarLightMode(enable)
+    activity.window.statusBarLightMode(enable)
 }
 
 /**
@@ -105,9 +105,9 @@ fun Window.statusBarLightOldMode(enable: Boolean = true) {
 }
 
 
-context(Activity)
+context(activity: Activity)
 fun navigationBarLightMode(enable: Boolean = true) {
-    window.navigationBarLightMode(enable)
+    activity.window.navigationBarLightMode(enable)
 }
 
 /**

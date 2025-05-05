@@ -29,6 +29,7 @@ plugins {
     alias(libs.plugins.serialization)
     alias(libs.plugins.licenses)
     id("kotlin-parcelize")
+    alias(libs.plugins.kotlinCompose)
 }
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
@@ -55,7 +56,7 @@ licenses {
         html.enabled = false
         json {
             enabled = true
-            destination = file("./src/main/assets/licenses.json")
+            outputFile = file("./src/main/assets/licenses.json")
         }
     }
 }
@@ -177,8 +178,8 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_11)
-        targetCompatibility(JavaVersion.VERSION_11)
+        sourceCompatibility(JavaVersion.VERSION_21)
+        targetCompatibility(JavaVersion.VERSION_21)
         isCoreLibraryDesugaringEnabled = true
     }
 
@@ -224,7 +225,7 @@ kotlin {
     jvmToolchain(libs.versions.jvm.target.get().toInt())
     sourceSets.all {
         languageSettings {
-            enableLanguageFeature("ContextReceivers")
+            enableLanguageFeature("ContextParameters")
         }
     }
 }
@@ -272,6 +273,7 @@ androidComponents.onVariants { variant ->
     findInPath("git")?.let {
         val stdout = ByteArrayOutputStream()
         val appGradlePath = "app/build.gradle.kts"
+        // todo exec 等待迁移
         val cmd = exec {
             workingDir = project.rootDir
 
@@ -347,8 +349,10 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.materialWindow)
 
-    implementation(libs.androidx.material3.adaptive)
 
+    implementation(libs.androidx.material3.adaptive)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.adaptive.navigation)
     // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     // ViewModel utilities for Compose
@@ -372,13 +376,13 @@ val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.abs
 
 
 fun killApp(name: String) {
-    exec {
+    providers.exec {
         commandLine(adbExecutable, "shell", "am", "force-stop", name)
     }
 }
 
 fun startApp(name: String) {
-    exec {
+    providers.exec {
         commandLine(
             adbExecutable, "shell", "am", "start",
             "$(pm resolve-activity --components $name)"
@@ -391,31 +395,37 @@ fun restartApp(name: String) {
     startApp(name)
 }
 
-val restartQQ = task("restartQQ").doLast {
-    restartApp("com.tencent.mobileqq")
-}
-
-val restartTim = task("restartTim").doLast {
-    restartApp("com.tencent.tim")
-}
-
-val optimizeReleaseRes = task("optimizeReleaseRes").doLast {
-    val aapt2 = Paths.get(
-        project.android.sdkDirectory.path,
-        "build-tools", project.android.buildToolsVersion, "aapt2"
-    )
-    val zip = Paths.get(
-        project.layout.buildDirectory.asFile.get().path, "intermediates",
-        "optimized_processed_res", "release", "resources-release-optimize.ap_"
-    )
-    val optimized = File("${zip}.opt")
-    val cmd = exec {
-        commandLine(aapt2, "optimize", "--collapse-resource-names", "-o", optimized, zip)
-        isIgnoreExitValue = true
+val restartQQ = tasks.register("restartQQ") {
+    doLast {
+        restartApp("com.tencent.mobileqq")
     }
-    if (cmd.exitValue == 0) {
-        delete(zip)
-        optimized.renameTo(zip.toFile())
+}
+
+val restartTim = tasks.register("restartTim") {
+    doLast {
+        restartApp("com.tencent.tim")
+    }
+}
+
+val optimizeReleaseRes = tasks.register("optimizeReleaseRes") {
+    doLast {
+        val aapt2 = Paths.get(
+            project.android.sdkDirectory.path,
+            "build-tools", project.android.buildToolsVersion, "aapt2"
+        )
+        val zip = Paths.get(
+            project.layout.buildDirectory.asFile.get().path, "intermediates",
+            "optimized_processed_res", "release", "resources-release-optimize.ap_"
+        )
+        val optimized = File("${zip}.opt")
+        val cmd = providers.exec {
+            commandLine(aapt2, "optimize", "--collapse-resource-names", "-o", optimized, zip)
+            isIgnoreExitValue = true
+        }
+        if (cmd.result.get().exitValue == 0) {
+            delete(zip)
+            optimized.renameTo(zip.toFile())
+        }
     }
 }
 tasks.whenTaskAdded {

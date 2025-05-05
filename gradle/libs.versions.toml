@@ -1,51 +1,53 @@
 [versions]
 # 依赖版本号
-activityCompose = "1.8.2"
-agp = "8.3.1"
+activityCompose = "1.10.1"
+agp = "8.9.2"
 ahoCorasickDoubleArrayTrie = "1.2.3"
-annotation = "1.7.1"
+annotation = "1.9.1"
 apiVersion = "13.1.5"
-byteBuddyAndroid = "1.14.12"
-desugar_jdk_libs = "2.0.4"
+byteBuddyAndroid = "1.17.5"
+desugar_jdk_libs = "2.1.5"
 ezxhelper = "1.0.3"
 api = "82"
 flatbuffersJava = "23.5.26"
-hiddenapibypass = "4.3"
-kaml = "0.58.0"
-hutoolCore = "5.8.26"
-kotlin = "1.9.23"
-compose = "1.7.0-alpha05"
-kotlinxCollectionsImmutable = "0.3.7"
-kotlinxDatetime = "0.5.0"
-kotlinxSerializationJson = "1.6.3"
-lifecycle = "2.8.0-alpha03"
-material3Adaptive = "1.0.0-alpha06"
+hiddenapibypass = "6.1"
+kaml = "0.77.1"
+hutoolCore = "5.8.37"
+kotlin = "2.1.20"
+compose = "1.8.0"
+kotlinxCollectionsImmutable = "0.3.8"
+kotlinxDatetime = "0.6.2"
+kotlinxSerializationJson = "1.8.1"
+lifecycle = "2.8.7"
+material3Adaptive = "1.2.0-alpha04"
 okhttp = "4.12.0"
-protoc = "4.26.0"
+protoc = "4.30.2"
 multidex = "2.0.1"
 provider = "13.1.5"
-systemExtension = "1.0.1"
-material = "1.3.0-alpha03"
-
+systemExtension = "1.0.2"
+material = "1.3.2"
+navigationCompose = "2.8.9"
 browser = "1.8.0"
 
-licenses = "4.7.0"
+licenses = "5.0.0"
 
 # @keep
-compileSdk = "34"
+compileSdk = "36"
 minSdk = "24"
-targetSdk = "34"
-buildTool = "35.0.0-rc1"
+targetSdk = "36"
+buildTool = "36.0.0"
 ndk = "26.2.11394342"
-compose-compiler = "1.5.11"
-jvm-target = "11"
-navigationCompose = "2.7.7"
+compose-compiler = "1.5.15"
+jvm-target = "21"
+
 
 
 [libraries]
 
 aho-corasick-double-array-trie = { module = "com.hankcs:aho-corasick-double-array-trie", version.ref = "ahoCorasickDoubleArrayTrie" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "material3Adaptive" }
+androidx-adaptive-layout = { module = "androidx.compose.material3.adaptive:adaptive-layout", version.ref = "material3Adaptive" }
 androidx-annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
 
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
@@ -78,7 +80,7 @@ androidx-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compos
 androidx-compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
 androidx-compose-material-navigation = { module = "androidx.compose.material:material-navigation", version.ref = "compose" }
 
-androidx-material3-adaptive = { module = "androidx.compose.material3:material3-adaptive", version.ref = "material3Adaptive" }
+androidx-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive", version.ref = "material3Adaptive" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "material" }
 androidx-compose-materialWindow = { module = "androidx.compose.material3:material3-window-size-class", version.ref = "material" }
 
@@ -95,3 +97,4 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 licenses = { id = "com.cmgapps.licenses", version.ref = "licenses" }
+kotlinCompose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

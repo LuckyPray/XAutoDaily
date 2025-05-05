@@ -6,6 +6,7 @@ import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SealedSerializationApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -29,6 +30,7 @@ class ShizukuPersistentMapSerializer(
     private val valueSerializer: KSerializer<Boolean>
 ) : KSerializer<PersistentMap<String, Boolean>> {
 
+    @OptIn(SealedSerializationApi::class)
     private class PersistentMapDescriptor :
         SerialDescriptor by serialDescriptor<Map<String, Boolean>>() {
         @ExperimentalSerializationApi

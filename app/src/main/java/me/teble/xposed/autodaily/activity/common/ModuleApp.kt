@@ -2,19 +2,15 @@ package me.teble.xposed.autodaily.activity.common
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.adaptive.AnimatedPane
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.ListDetailPaneScaffold
-import androidx.compose.material3.adaptive.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.PaneScaffoldDirective
-import androidx.compose.material3.adaptive.calculateDensePaneScaffoldDirective
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import me.teble.xposed.autodaily.ui.layout.contentWindowInsets
+import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
@@ -22,32 +18,33 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun ModuleApp(viewModel: ThemeViewModel) {
 
-// Create the ListDetailPaneScaffoldState
+    val scope = rememberCoroutineScope()
 
-    val systemDirective = calculateDensePaneScaffoldDirective(currentWindowAdaptiveInfo())
-    val customDirective = PaneScaffoldDirective(
-        contentPadding = PaddingValues(0.dp),
-        maxHorizontalPartitions = systemDirective.maxHorizontalPartitions,
-        horizontalPartitionSpacerSize = 0.dp,
-        maxVerticalPartitions = systemDirective.maxVerticalPartitions,
-        verticalPartitionSpacerSize = systemDirective.verticalPartitionSpacerSize,
-        excludedBounds = systemDirective.excludedBounds
-    )
 
     val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator<Nothing>(scaffoldDirective = customDirective)
+        rememberListDetailPaneScaffoldNavigator<Nothing>()
 
-    BackHandler(scaffoldNavigator.canNavigateBack(), scaffoldNavigator::navigateBack)
+    BackHandler(scaffoldNavigator.canNavigateBack(), {
+        scope.launch {
+            scaffoldNavigator.navigateBack()
+        }
+
+    })
+
+
 
     ListDetailPaneScaffold(
-        scaffoldState = scaffoldNavigator.scaffoldState,
+        directive = scaffoldNavigator.scaffoldDirective,
         modifier = Modifier.background(color = colors.colorBgLayout),
-        windowInsets = contentWindowInsets,
+        scaffoldState = scaffoldNavigator.scaffoldState,
         listPane = {
-            AnimatedPane(Modifier) {
+            AnimatedPane(modifier = Modifier) {
                 ModuleScene(
                     onSettingClick = {
-                        scaffoldNavigator.navigateTo(pane = ListDetailPaneScaffoldRole.Detail)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(pane = ListDetailPaneScaffoldRole.Detail)
+                        }
+
                     },
                 )
             }
@@ -57,10 +54,16 @@ fun ModuleApp(viewModel: ThemeViewModel) {
                 SettingScene(
                     themeViewModel = viewModel,
                     hasBackProvider = scaffoldNavigator::canNavigateBack,
-                    onBackClick = scaffoldNavigator::navigateBack
-                )
+                    onBackClick = {
+                        scope.launch {
+                            scaffoldNavigator.navigateBack()
+                        }
 
+                    }
+                )
             }
         }
     )
+
+
 }

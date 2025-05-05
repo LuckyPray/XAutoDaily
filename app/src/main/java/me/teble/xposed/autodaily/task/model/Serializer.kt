@@ -1,3 +1,5 @@
+@file:OptIn(SealedSerializationApi::class)
+
 package me.teble.xposed.autodaily.task.model
 
 import kotlinx.collections.immutable.PersistentList
@@ -6,6 +8,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SealedSerializationApi
 import kotlinx.serialization.Serializer
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer

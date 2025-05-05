@@ -70,7 +70,7 @@ fun ThemeModelDialog(
             onDismissRequest = onDismiss,
             sheetState = sheetState,
             containerColor = colors.colorBgDialog,
-            windowInsets = contentWindowInsets,
+            contentWindowInsets = { contentWindowInsets },
             dragHandle = {},
             scrimColor = colors.colorBgMask,
             shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
