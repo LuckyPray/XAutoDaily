@@ -37,7 +37,6 @@ minSdk = "24"
 targetSdk = "36"
 buildTool = "36.0.0"
 ndk = "26.2.11394342"
-compose-compiler = "1.5.15"
 jvm-target = "21"
 
 

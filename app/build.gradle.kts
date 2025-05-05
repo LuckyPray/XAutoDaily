@@ -4,6 +4,7 @@ import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import java.io.ByteArrayOutputStream
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
@@ -59,6 +60,15 @@ licenses {
             outputFile = file("./src/main/assets/licenses.json")
         }
     }
+}
+
+composeCompiler {
+    includeSourceInformation = true
+
+    featureFlags = setOf(
+        ComposeFeatureFlag.StrongSkipping.disabled(),
+        ComposeFeatureFlag.OptimizeNonSkippingGroups
+    )
 }
 
 android {
@@ -203,10 +213,6 @@ android {
         additionalParameters += arrayOf("--allow-reserved-package-id", "--package-id", "0x62")
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
-
     externalNativeBuild {
         cmake {
             path("src/main/cpp/CMakeLists.txt")
@@ -341,7 +347,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
 
     implementation(libs.androidx.compose.ui)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.ui.tooling)
 
     implementation(libs.androidx.compose.material)
     implementation(libs.androidx.compose.material.navigation)
