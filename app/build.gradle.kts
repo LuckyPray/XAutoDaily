@@ -5,7 +5,6 @@ import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
-import java.io.ByteArrayOutputStream
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -277,32 +276,29 @@ androidComponents.onVariants { variant ->
     }
     // update version.json
     findInPath("git")?.let {
-        val stdout = ByteArrayOutputStream()
         val appGradlePath = "app/build.gradle.kts"
-        // todo exec 等待迁移
-        val cmd = exec {
-            workingDir = project.rootDir
-
-            val cmdLine = if (OperatingSystem.current().isWindows) {
-                arrayOf(
-                    "cmd",
-                    "/c",
-                    "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G"
-                )
-            } else {
-                arrayOf(
-                    "sh",
-                    "-c",
-                    "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'"
-                )
-            }
-            commandLine(*cmdLine)
-            standardOutput = stdout
-            // 没有更新版本号，会返回非0导致构建失败
-            isIgnoreExitValue = true
+        val cmdLine = if (OperatingSystem.current().isWindows) {
+            arrayOf(
+                "cmd",
+                "/c",
+                "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G"
+            )
+        } else {
+            arrayOf(
+                "sh",
+                "-c",
+                "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'"
+            )
         }
-        if (cmd.exitValue == 0 && stdout.size() > 0) {
-            println("version be updated to ${stdout.toString().trim()}")
+
+        val output = providers.exec {
+            isIgnoreExitValue = true
+            commandLine(*cmdLine)
+        }
+        val stdout = output.standardOutput.asText.get()
+        val exitValue = output.result.get().exitValue
+        if (exitValue == 0 && stdout.isNotEmpty()) {
+            println("version be updated to ${stdout.trim()}")
             val versionJson = File(project.rootDir, "app-meta.json")
             val formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .format(LocalDateTime.now())
