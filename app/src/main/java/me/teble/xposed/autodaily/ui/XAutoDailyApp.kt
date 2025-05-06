@@ -97,7 +97,7 @@ sealed class DialogItem(route: String) : NavigationItem(route) {
 
 }
 
-fun NavController.navigate(item: NavigationItem) {
+fun NavController.navigateItem(item: NavigationItem) {
     runCatching {
         this.navigate(item.route)
     }.onFailure {
@@ -159,16 +159,16 @@ fun NavGraphBuilder.addSceneGraph(
     composable(route = SceneItem.Main.route) {
         MainScene(
             onNavigateToNotice = {
-                navController.navigate(DialogItem.Notice(it))
+                navController.navigateItem(DialogItem.Notice(it))
             },
             onNavigateToSign = {
-                navController.navigate(SceneItem.Sign)
+                navController.navigateItem(SceneItem.Sign)
             },
             onNavigateToSetting = {
-                navController.navigate(SceneItem.Setting)
+                navController.navigateItem(SceneItem.Setting)
             },
             onNavigateToAbout = {
-                navController.navigate(SceneItem.About)
+                navController.navigateItem(SceneItem.About)
             },
         )
     }
@@ -178,7 +178,7 @@ fun NavGraphBuilder.addSceneGraph(
             backClick = navController::popBackStack,
             hasBackProvider = { true },
             onNavigateToEditEnvs = { groupId, taskId ->
-                navController.navigate(SceneItem.EditEnv(groupId, taskId))
+                navController.navigateItem(SceneItem.EditEnv(groupId, taskId))
             })
     }
 
@@ -187,13 +187,13 @@ fun NavGraphBuilder.addSceneGraph(
             hasBackProvider = { true },
             backClick = navController::popBackStack,
             onNavigateToUpdate = {
-                navController.navigate(DialogItem.Update(it))
+                navController.navigateItem(DialogItem.Update(it))
             },
             onNavigateToLicense = {
-                navController.navigate(SceneItem.License)
+                navController.navigateItem(SceneItem.License)
             },
             onNavigateToDeveloper = {
-                navController.navigate(SceneItem.Developer)
+                navController.navigateItem(SceneItem.Developer)
             },
         )
     }
@@ -203,13 +203,13 @@ fun NavGraphBuilder.addSceneGraph(
         SettingScene(
             backClick = navController::popBackStack,
             onNavigateToRestore = {
-                navController.navigate(DialogItem.Restore)
+                navController.navigateItem(DialogItem.Restore)
             },
             onNavigateToTheme = {
-                navController.navigate(DialogItem.Theme)
+                navController.navigateItem(DialogItem.Theme)
             },
             onNavigateToSignState = {
-                navController.navigate(SceneItem.SignState)
+                navController.navigateItem(SceneItem.SignState)
             },
             hasBackProvider = { true },
         )
@@ -236,7 +236,7 @@ fun NavGraphBuilder.addSceneGraph(
         val taskId = backStackEntry.arguments!!.getString("taskId")!!
 
         EditEnvScene(
-            onNavigateToCheckFriends = { navController.navigate(DialogItem.CheckFriends(it)) },
+            onNavigateToCheckFriends = { navController.navigateItem(DialogItem.CheckFriends(it)) },
             backClick = navController::popBackStack,
             savedStateHandle = navController.currentBackStackEntry?.savedStateHandle,
             groupId = groupId,
