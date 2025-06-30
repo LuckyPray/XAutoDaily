@@ -5,6 +5,7 @@ import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.function.base.FunctionInitException
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.task.model.Friend
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.getMethods
@@ -22,6 +23,8 @@ open class FriendsManager : BaseFunction(
 
     override fun init() {
         cFriends = load("Lcom/tencent/mobileqq/data/Friends;")
+            // 临时修复
+            ?: load("Lcom/tencent/qqnt/ntrelation/friendsinfo/bean/d;")
             ?: throw RuntimeException("类加载失败 -> Friends")
         load("Lcom/tencent/mobileqq/app/QQManagerFactory;")?.let {
             it.fieldValue("FRIENDS_MANAGER").let {
@@ -46,7 +49,7 @@ open class FriendsManager : BaseFunction(
     open fun getFriends(): List<Friend>? {
         val map = getFriendsMap(friendsManager)
         val friendsList = LinkedList<Friend>()
-        val fNike = cFriends.field("name")!!
+        val fNike = cFriends.field("name") ?: cFriends.field("nick")!!
         val fRemarke = cFriends.field("remark")!!
         val fUin = cFriends.field("uin")!!
         map.entries.forEach {
@@ -91,6 +94,7 @@ open class FriendsManager : BaseFunction(
                 && it.returnType == ConcurrentHashMap::class.java
             ) {
                 it.isAccessible = true
+                LogUtil.d("好友分组管理: $it")
                 return it.invoke(manager, true) as ConcurrentHashMap<*, *>
             }
         }
