@@ -139,6 +139,13 @@ class QQSettingSettingActivityHook : BaseHook() {
                 it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
                         && it.returnType.name.startsWith("com.tencent.mobileqq.setting.processor")
             }.returnType
+            val cSimpleItemProcessorArgc = cSimpleItemProcessor.constructors.first {
+                it.parameterTypes.size < 6 && it.parameterTypes[0] == Context::class.java
+                        && it.parameterTypes[1] == Int::class.java
+                        && it.parameterTypes[2] == CharSequence::class.java
+                        && it.parameterTypes[3] == Int::class.java
+                        && (it.parameterTypes.size < 5 || it.parameterTypes[4] == String::class.java)
+            }.parameterTypes.size
             val buildMethod = methods.single {
                 it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
                         && it.returnType == List::class.java
@@ -161,10 +168,13 @@ class QQSettingSettingActivityHook : BaseHook() {
                     context.resources.getIdentifier("qui_tuning", "drawable", hostPackageName)
                 injectRes()
                 val item = cSimpleItemProcessor.new(
-                    context,
-                    R.id.setting2Activity_settingEntryItem,
-                    "XAutoDaily",
-                    resId
+                    *listOf(
+                        context,
+                        R.id.setting2Activity_settingEntryItem,
+                        "XAutoDaily",
+                        resId,
+                        ""
+                    ).take(cSimpleItemProcessorArgc).toTypedArray()
                 )
                 val function0 = mSimpleItemProcessorOnClickListener.parameterTypes.first()
                 val unit = hostClassLoader.loadClass("kotlin.Unit").fieldValue("INSTANCE")!!

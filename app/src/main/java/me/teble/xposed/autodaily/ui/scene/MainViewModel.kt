@@ -16,6 +16,8 @@ import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.scene.base.BaseViewModel
 import me.teble.xposed.autodaily.utils.TaskExecutor
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Stable
 class MainViewModel : BaseViewModel() {
@@ -42,7 +44,9 @@ class MainViewModel : BaseViewModel() {
             }
             meta?.let {
                 withContext(Dispatchers.Main) {
-                    noticeText = it.notice?.trimEnd() ?: "暂无公告"
+                    noticeText = it.notice?.let {
+                        URLEncoder.encode(it, StandardCharsets.UTF_8.name())
+                    }?.trimEnd() ?: "暂无公告"
                 }
             } ?: run {
                 showSnackbar("拉取公告失败")
@@ -68,7 +72,7 @@ class MainViewModel : BaseViewModel() {
         }
     }
 
-    fun initTurnTaskSize() {
+    private fun initTurnTaskSize() {
         viewModelScope.launch(Dispatchers.IO) {
             val turnTaskState = ConfigUtil.loadSaveConf().taskGroups.map { it.tasks }.flatten()
                 .filter { it.enable }
