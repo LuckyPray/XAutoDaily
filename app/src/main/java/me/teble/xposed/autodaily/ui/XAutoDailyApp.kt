@@ -11,9 +11,11 @@ import androidx.compose.material.navigation.ModalBottomSheetLayout
 import androidx.compose.material.navigation.bottomSheet
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -23,6 +25,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.collections.immutable.toImmutableSet
 import me.teble.xposed.autodaily.activity.common.ThemeViewModel
+import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.ui.dialog.CheckFriendsOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.NoticeOverlayUI
 import me.teble.xposed.autodaily.ui.dialog.RestoreOverlayUI
@@ -124,6 +127,10 @@ private fun rememberBottomSheetNavigator(
 
 @Composable
 fun XAutoDailyApp(themeViewModel: ThemeViewModel) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        injectRes(context.resources)
+    }
     val bottomSheetNavigator = rememberBottomSheetNavigator(skipHalfExpanded = true)
     val navController = rememberNavController(bottomSheetNavigator)
     ModalBottomSheetLayout(

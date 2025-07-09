@@ -1,13 +1,11 @@
 package me.teble.xposed.autodaily.activity.module
 
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.view.Window
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowCompat
 import com.agoines.system.common.navigationBarLightMode
 import com.agoines.system.common.setNavigationBarTranslation
@@ -18,12 +16,8 @@ import me.teble.xposed.autodaily.hook.proxy.activity.BaseActivity
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.ui.XAutoDailyApp
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
-import java.lang.ref.WeakReference
 
 class ModuleActivity : BaseActivity() {
-    companion object {
-        var composeViewContext = WeakReference<Context>(null)
-    }
 
     private val viewModel: ThemeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,9 +35,9 @@ class ModuleActivity : BaseActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+        injectRes(this.resources)
         setContent {
 
-            composeViewContext = WeakReference(LocalContext.current)
             when (viewModel.currentTheme) {
                 XAutodailyTheme.Theme.Light -> setSystemBarMode()
                 XAutodailyTheme.Theme.Dark -> setSystemBarMode(false)
@@ -83,15 +77,11 @@ class ModuleActivity : BaseActivity() {
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        composeViewContext.get()?.let {
-            injectRes(it.resources)
-        }
+        injectRes(this.resources)
     }
 
     override fun onResume() {
         super.onResume()
-        composeViewContext.get()?.let {
-            injectRes(it.resources)
-        }
+        injectRes(this.resources)
     }
 }
