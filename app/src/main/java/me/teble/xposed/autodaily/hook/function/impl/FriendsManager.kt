@@ -23,8 +23,7 @@ open class FriendsManager : BaseFunction(
 
     override fun init() {
         cFriends = load("Lcom/tencent/mobileqq/data/Friends;")
-            // 临时修复
-            ?: load("Lcom/tencent/qqnt/ntrelation/friendsinfo/bean/d;")
+            ?: load("Lcom/tencent/qqnt/ntrelation/friendsinfo/bean/NTFriendSimpleInfo;")
             ?: throw RuntimeException("类加载失败 -> Friends")
         load("Lcom/tencent/mobileqq/app/QQManagerFactory;")?.let {
             it.fieldValue("FRIENDS_MANAGER").let {

@@ -69,6 +69,9 @@ object Config {
         "Lcom/tencent/mobileqq/service/MobileQQServiceBase;" to setOf(
             "^req_pb_protocol_flag$", "^MobileQQServiceBase$"
         ),
+        "Lcom/tencent/qqnt/ntrelation/friendsinfo/bean/NTFriendSimpleInfo;" to setOf(
+            "^NTFriendSimpleInfo uin"
+        )
     )
     const val hooksVersion = 2
     val confuseInfo = mutableMapOf<String, Set<String>>().apply {
