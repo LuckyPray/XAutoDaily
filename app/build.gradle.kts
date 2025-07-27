@@ -37,13 +37,11 @@ val appVerCode: Int by lazy {
     versionCode.toInt()
 }
 val buildNum: String get() = SimpleDateFormat("MMddHH", Locale.ENGLISH).format(Date())
-val appVerName: String = "3.0.30-fix"
+val appVerName: String = "3.0.31"
 val updateLog = """
     【问题修复】
-    - 修复 在 QQ v9.1.55 及以上版本中获取cookie失败的问题
-    - 其它修复与优化
-    
-    - 修复 3.0.30 存在的一个问题
+    - 修复 QQ 9.1.90+ 模块入口创建失败
+    - 修复 QQ 9.1.95+ 好友列表获取
 """.trimIndent()
 
 android {
