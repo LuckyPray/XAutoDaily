@@ -1,6 +1,6 @@
 {
-    "versionName": "3.0.36",
-    "versionCode": 26052717,
-    "updateTime": "2026-05-27 17:20:25",
-    "updateLog": "【功能】\n- 新增 亲密空间任务\n- 修复 旧版cookie获取失败的问题"
+    "versionName": "3.0.37",
+    "versionCode": 26070323,
+    "updateTime": "2026-07-03 23:33:49",
+    "updateLog": "【功能】\n- 修复 a16+ 插件加载失败的问题\n- 修复 旧版 QQ cookie 获取兼容问题"
 }
