@@ -1,7 +1,7 @@
 {
-    "version": 67,
+    "version": 69,
     "needAppVersion": 26041109,
-    "updateLog": "新增搭子空间打卡",
-    "md5": "ad95792e8fc0228c5fd6b89161f21dd1",
-    "updateTime": "2026-05-27 17:31:33"
+    "updateLog": "移除已下线的波点音乐听歌任务",
+    "md5": "5c496975dbb34363279faad4c2609afd",
+    "updateTime": "2026-07-22 08:33:56"
 }
