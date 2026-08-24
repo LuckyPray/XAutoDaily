@@ -72,6 +72,9 @@ object Config {
         "Lcom/tencent/qqnt/ntrelation/friendsinfo/bean/NTFriendSimpleInfo;" to setOf(
             "^NTFriendSimpleInfo uin"
         ),
+        "Lcom/tencent/mobileqq/setting/main/NewSettingConfigProvider;" to setOf(
+            "140134.140135", "功能", "隐私"
+        ),
         "Lcom/tencent/mobileqq/setting/processor/SimpleItemProcessor;" to setOf(
             "SimpleItemProcessor"
         ),

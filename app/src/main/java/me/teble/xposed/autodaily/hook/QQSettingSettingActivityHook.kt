@@ -124,14 +124,10 @@ class QQSettingSettingActivityHook : BaseHook() {
         cMainSettingFragment ?: return
 
         val oldEntry = load("com.tencent.mobileqq.setting.main.MainSettingConfigProvider")
-        val newEntry = load("com.tencent.mobileqq.setting.main.NewSettingConfigProvider")
+        val newEntry = load("Lcom/tencent/mobileqq/setting/main/NewSettingConfigProvider;")
 
         createEntry(oldEntry, false)
         createEntry(newEntry, true)
-
-        // 9.2.30 临时修复
-        val newObfEntry = load("com.tencent.mobileqq.setting.main.b")
-        createEntry(newObfEntry, true)
     }
 
     private fun createEntry(settingConfigProviderClass: Class<*>?, isNewSetting: Boolean) {
