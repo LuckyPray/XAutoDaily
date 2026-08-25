@@ -19,6 +19,9 @@ import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
+import de.robv.android.xposed.XC_MethodHook
+import de.robv.android.xposed.XC_MethodHook.MethodHookParam
+import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
@@ -28,6 +31,7 @@ import me.teble.xposed.autodaily.config.NewRuntime
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.hook.base.BaseHook
 import me.teble.xposed.autodaily.hook.base.ProcUtil
+import me.teble.xposed.autodaily.hook.base.clearClassCache
 import me.teble.xposed.autodaily.hook.base.hostApp
 import me.teble.xposed.autodaily.hook.base.hostAppName
 import me.teble.xposed.autodaily.hook.base.hostClassLoader
@@ -55,11 +59,14 @@ import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
+import me.teble.xposed.autodaily.utils.field
+import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.getArtApexVersion
 import me.teble.xposed.autodaily.utils.getModulePath
 import me.teble.xposed.autodaily.utils.new
 import org.luckypray.dexkit.DexKitBridge
 import org.luckypray.dexkit.query.enums.StringMatchType
+import org.luckypray.dexkit.wrap.DexMethod
 import java.lang.reflect.Method
 
 class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
@@ -79,6 +86,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private lateinit var mLoadPackageParam: LoadPackageParam
     private lateinit var mStartupParam: IXposedHookZygoteInit.StartupParam
     private var dexIsInit = false
+    private var baseApplicationOnCreateHookInstalled = false
 
     override fun initZygote(startupParam: IXposedHookZygoteInit.StartupParam) {
         mStartupParam = startupParam
@@ -106,45 +114,75 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             hostPackageName = loadPackageParam.packageName
             hostProcessName = loadPackageParam.processName
             hostClassLoader = loadPackageParam.classLoader
+            TinkerStartupHook.initializeBeforeAppCreate(
+                loadPackageParam.classLoader,
+                loadPackageParam.packageName,
+                ::initializeAfterTinkerApplied,
+            )
+        }
+    }
 
-            findMethod(loadPackageParam.classLoader.loadClass(BaseApplicationImpl)) {
-                name == "onCreate"
-            }.hookBefore {
-                if (hostInit) return@hookBefore
-                runCatching {
-                    hostApp = it.thisObject as Application
-                    EzXHelperInit.initAppContext(hostApp)
-                    hostClassLoader = hostApp.classLoader
-                    if (ProcUtil.isMain) {
-                        injectClassLoader(hostClassLoader)
-                        // MMKV
-                        Config.init()
-                        LogUtil.i("""
-                            android version: ${Build.VERSION.RELEASE}(${Build.VERSION.SDK_INT})
-                            art version: ${getArtApexVersion(hostApp)}
-                            qq version: ${hostAppName}-$hostVersionName($hostVersionCode)
-                            module version: ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})
-                            module path: ${getModulePath()}
-                        """.trimIndent())
-                        LogUtil.d("init ActivityProxyManager")
-                        ProxyManager.init
-                        filterAndHook()
-                    }
+    private fun initializeAfterTinkerApplied(runtimeClassLoader: ClassLoader) {
+        updateHostClassLoader(runtimeClassLoader)
+        if (baseApplicationOnCreateHookInstalled) {
+            return
+        }
 
-                    if (ProcUtil.isMain) {
-                        doInit()
-                    }
-                    if (ProcUtil.isTool) {
-                        Log.d("XALog", "tool进程：" + loadPackageParam.processName)
-                        toolsHook()
-                    }
-                }.onFailure {
-                    moduleLoadInit = true
-                    ToastUtil.send(it.stackTraceToString(), true)
-                    Log.e("XALog", it.stackTraceToString())
-                    return@hookBefore
-                }
+        val baseApplicationClass = runtimeClassLoader.loadClass(BaseApplicationImpl)
+        val onCreate = findMethod(baseApplicationClass) {
+            name == "onCreate" && emptyParam
+        }
+        onCreate.hookBefore {
+            if (hostInit) return@hookBefore
+
+            val application = it.thisObject as Application
+            val finalClassLoader = application.javaClass.classLoader ?: runtimeClassLoader
+            updateHostClassLoader(finalClassLoader)
+            initializeHost(application)
+        }
+        baseApplicationOnCreateHookInstalled = true
+    }
+
+    private fun updateHostClassLoader(classLoader: ClassLoader) {
+        val changed = hostClassLoader !== classLoader
+        if (changed) {
+            clearClassCache()
+        }
+        hostClassLoader = classLoader
+        EzXHelperInit.setEzClassLoader(classLoader)
+        if (changed) {
+            Log.i("XALog", "Host class loader updated: $classLoader")
+        }
+    }
+
+    private fun initializeHost(application: Application) {
+        runCatching {
+            hostApp = application
+            EzXHelperInit.initAppContext(application)
+            if (ProcUtil.isMain) {
+                injectClassLoader(hostClassLoader)
+                // MMKV
+                Config.init()
+                LogUtil.i("""
+                    android version: ${Build.VERSION.RELEASE}(${Build.VERSION.SDK_INT})
+                    art version: ${getArtApexVersion(hostApp)}
+                    qq version: ${hostAppName}-$hostVersionName($hostVersionCode)
+                    module version: ${BuildConfig.VERSION_NAME}(${BuildConfig.VERSION_CODE})
+                    module path: ${getModulePath()}
+                """.trimIndent())
+                LogUtil.d("init ActivityProxyManager")
+                ProxyManager.init
+                filterAndHook()
+                doInit()
             }
+            if (ProcUtil.isTool) {
+                Log.d("XALog", "tool process: $hostProcessName")
+                toolsHook()
+            }
+        }.onFailure {
+            moduleLoadInit = true
+            ToastUtil.send(it.stackTraceToString(), true)
+            Log.e("XALog", it.stackTraceToString())
         }
     }
 
@@ -204,19 +242,21 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val enabledHooks = subHookClasses
             .map { it.new() }
             .filter { it.enabled }
-        if (enabledHooks.isNotEmpty()) {
-            // 加载资源注入
-            LogUtil.d("injectRes")
-            injectRes(hostContext.resources)
-            // dex相关
-            LogUtil.d("doDexInit")
-            doDexInit()
-            //初始化hook
-            LogUtil.d("initHook")
-            initHook(enabledHooks)
+        if (enabledHooks.isEmpty()) {
             moduleLoadInit = true
-            TaskExecutor.startCorn()
+            return
         }
+        // 加载资源注入
+        LogUtil.d("injectRes")
+        injectRes(hostContext.resources)
+        // dex相关
+        LogUtil.d("doDexInit")
+        doDexInit()
+        //初始化hook
+        LogUtil.d("initHook")
+        initHook(enabledHooks)
+        moduleLoadInit = true
+        TaskExecutor.startCorn()
     }
 
     private fun onStart() {
@@ -319,7 +359,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         val info = needLocateClasses.associateWith { confuseInfo[it]!! }
         var locateNum = 0
         try {
-            DexKitBridge.create(hostApp.applicationInfo.sourceDir)?.use { bridge ->
+            DexKitBridge.create(hostApp.classLoader, false)?.use { bridge ->
                 bridge.batchFindClassUsingStrings {
                     info.forEach { (key, valueSet) ->
                         addSearchGroup(key, valueSet.toList(), StringMatchType.SimilarRegex)

@@ -28,11 +28,16 @@ fun getSimpleName(className: String): String {
     return name
 }
 
+fun clearClassCache() {
+    mClassCache.clear()
+}
+
 @JvmOverloads
 fun load(className: String, classLoader: ClassLoader = hostClassLoader): Class<*>? {
     // 获取正常类名
     val name = getSimpleName(className)
-    if (classLoader == hostClassLoader && mClassCache.containsKey(className)) {
+    val useHostCache = classLoader === hostClassLoader
+    if (useHostCache && mClassCache.containsKey(name)) {
         return mClassCache[name]
     }
     if (confusedClass.contains(name)) {
@@ -41,14 +46,18 @@ fun load(className: String, classLoader: ClassLoader = hostClassLoader): Class<*
         LogUtil.d("混淆缓存：${name}#${hostVersionCode} -> $realClassName")
         realClassName?.let {
             val clazz = classLoader.loadClass(getSimpleName(realClassName))
-            mClassCache[name] = clazz
+            if (useHostCache) {
+                mClassCache[name] = clazz
+            }
             return clazz
         }
         return null
     }
     runCatching {
         val clazz = classLoader.loadClass(name)
-        mClassCache[name] = clazz
+        if (useHostCache) {
+            mClassCache[name] = clazz
+        }
         return clazz
     }.onFailure { LogUtil.log("没有找到类：$name") }
     return null
