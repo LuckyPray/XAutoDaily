@@ -94,4 +94,11 @@ object Config {
             put(getSimpleName(k), v)
         }
     }
+
+    fun clearAllConf() {
+        classCache.clearAll()
+        xaConfig.clearAll()
+        accountConfig.clearAll()
+        mmkvDir.deleteRecursively()
+    }
 }

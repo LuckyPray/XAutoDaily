@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import me.teble.xposed.autodaily.task.model.Friend
 import me.teble.xposed.autodaily.task.model.GuildInfo
 import me.teble.xposed.autodaily.task.model.TroopInfo
@@ -405,11 +406,16 @@ fun ConfirmDialog(
     text: String,
     onConfirmText: String,
     onConfirm: () -> Unit,
-    onDismissText: String,
-    onDismiss: () -> Unit
+    onDismissText: String? = null,
+    onDismiss: (() -> Unit)? = null,
+    cancelable: Boolean = true
 ) {
     Dialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = { onDismiss?.invoke() },
+        properties = DialogProperties(
+            dismissOnBackPress = cancelable,
+            dismissOnClickOutside = cancelable
+        )
     ) {
         Surface(
             shape = MaterialTheme.shapes.medium,
@@ -431,8 +437,10 @@ fun ConfirmDialog(
                 )
                 LineSpacer()
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                    TextButton(onClick = onDismiss) {
-                        Text(text = onDismissText)
+                    if (onDismissText != null && onDismiss != null) {
+                        TextButton(onClick = onDismiss) {
+                            Text(text = onDismissText)
+                        }
                     }
                     TextButton(onClick = onConfirm) {
                         Text(text = onConfirmText)

@@ -87,6 +87,18 @@ fun OtherLayout(navController: NavHostController) {
             }
         )
     }
+    var forceRestartDialog by remember { mutableStateOf(false) }
+    if (forceRestartDialog) {
+        ConfirmDialog(
+            title = "立即重启",
+            text = "配置修改需要重启应用才能生效",
+            onConfirmText = "现在重启",
+            onConfirm = {
+                exitProcess(0)
+            },
+            cancelable = false
+        )
+    }
     LaunchedEffect(fileUri) {
         launch(IO) {
             fileUri?.let {
@@ -213,6 +225,17 @@ fun OtherLayout(navController: NavHostController) {
                     desc = "选择待恢复配置文件",
                     onClick = {
                         restoreLauncher.launch("application/zip")
+                    },
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+            item {
+                LineButton(
+                    title = "配置清空",
+                    desc = "清空配置文件",
+                    onClick = {
+                        Config.clearAllConf()
+                        forceRestartDialog = true
                     },
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
