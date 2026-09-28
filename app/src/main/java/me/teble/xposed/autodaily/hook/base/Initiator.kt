@@ -40,26 +40,23 @@ fun load(className: String, classLoader: ClassLoader = hostClassLoader): Class<*
     if (useHostCache && mClassCache.containsKey(name)) {
         return mClassCache[name]
     }
-    if (confusedClass.contains(name)) {
+    val resolvedName = if (confusedClass.contains(name)) {
         // 使用正常类名获取混淆类名
         val realClassName = classCache.getString("${name}#${hostVersionCode}")
         LogUtil.d("混淆缓存：${name}#${hostVersionCode} -> $realClassName")
-        realClassName?.let {
-            val clazz = classLoader.loadClass(getSimpleName(realClassName))
-            if (useHostCache) {
-                mClassCache[name] = clazz
-            }
-            return clazz
-        }
-        return null
+        // 空字符串表示 DexKit 已搜索过，但当前宿主中没有匹配的类。
+        if (realClassName.isNullOrBlank()) return null
+        getSimpleName(realClassName)
+    } else {
+        name
     }
     runCatching {
-        val clazz = classLoader.loadClass(name)
+        val clazz = classLoader.loadClass(resolvedName)
         if (useHostCache) {
             mClassCache[name] = clazz
         }
         return clazz
-    }.onFailure { LogUtil.log("没有找到类：$name") }
+    }.onFailure { LogUtil.log("没有找到类：$resolvedName") }
     return null
 }
 

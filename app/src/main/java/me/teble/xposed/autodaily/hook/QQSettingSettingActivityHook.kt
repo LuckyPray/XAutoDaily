@@ -123,16 +123,14 @@ class QQSettingSettingActivityHook : BaseHook() {
         val cMainSettingFragment = load("com.tencent.mobileqq.setting.main.MainSettingFragment")
         cMainSettingFragment ?: return
 
-        val oldEntry = load("com.tencent.mobileqq.setting.main.MainSettingConfigProvider")
-        val newEntry = load("Lcom/tencent/mobileqq/setting/main/NewSettingConfigProvider;")
-
-        createEntry(oldEntry, false)
-        createEntry(newEntry, true)
+        // 分别加载并注册，避免某一种设置页的适配失败阻断另一种入口。
+        createEntry("com.tencent.mobileqq.setting.main.MainSettingConfigProvider", false)
+        createEntry("Lcom/tencent/mobileqq/setting/main/NewSettingConfigProvider;", true)
     }
 
-    private fun createEntry(settingConfigProviderClass: Class<*>?, isNewSetting: Boolean) {
-        settingConfigProviderClass ?: return
+    private fun createEntry(settingConfigProviderClassName: String, isNewSetting: Boolean) {
         try {
+            val settingConfigProviderClass = load(settingConfigProviderClassName) ?: return
             val methods = settingConfigProviderClass.getMethods(false)
             val cSimpleItemProcessor = methods.firstOrNull {
                 LogUtil.d("param: ${it.parameterTypes.toList()}, ${it.returnType.name}")
