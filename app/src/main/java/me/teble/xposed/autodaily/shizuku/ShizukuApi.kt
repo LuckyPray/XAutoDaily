@@ -13,8 +13,11 @@ import me.teble.xposed.autodaily.application.xaApp
 import rikka.shizuku.Shizuku
 
 object ShizukuApi {
-    var binderAvailable = false
-    var serviceBinderAvailable = false
+
+    var binderAvailable by mutableStateOf(false)
+
+    private var serviceBinderAvailable by mutableStateOf(false)
+
     var isPermissionGranted by mutableStateOf(false)
     private lateinit var service: IUserService
 
@@ -31,12 +34,19 @@ object ShizukuApi {
     fun init() {
         Shizuku.addBinderReceivedListenerSticky {
             binderAvailable = true
-            isPermissionGranted = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            isPermissionGranted =
+                Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
         }
         Shizuku.addBinderDeadListener {
             binderAvailable = false
             isPermissionGranted = false
         }
+    }
+
+
+    fun checkSelfPermission() {
+        isPermissionGranted =
+            Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
     }
 
     fun startService(packageName: String, className: String, args: Array<String>) {

@@ -1,14 +1,18 @@
+@file:SuppressLint("UnsafeOptInUsageError")
 package me.teble.xposed.autodaily.task.model
 
+import android.annotation.SuppressLint
+import androidx.compose.runtime.Immutable
 import kotlinx.serialization.Serializable
 
-
+@Immutable
 @Serializable
 data class TroopInfo(
     val name: String,
     val uin: String,
 )
 
+@Immutable
 @Serializable
 data class GuildInfo(
     val uin: String,
@@ -29,6 +33,7 @@ data class VoterInfo(
     val availableCnt: Short,
 )
 
+@Immutable
 @Serializable
 data class Friend(
     val uin: String,
@@ -36,12 +41,14 @@ data class Friend(
     val remark: String?,
 )
 
+@Immutable
 @Serializable
 data class MiniProfile(
     val avatar: String,
     val nick: String
 )
 
+@Immutable
 @Serializable
 data class AppMeta(
     val versionName: String,
@@ -50,6 +57,7 @@ data class AppMeta(
     val updateLog: String?,
 )
 
+@Immutable
 @Serializable
 data class ConfigMeta(
     val version: Int,
@@ -59,6 +67,7 @@ data class ConfigMeta(
     val updateTime: String,
 )
 
+@Immutable
 @Serializable
 data class MetaInfo(
     val app: AppMeta,

@@ -12,12 +12,11 @@ enum class QQTypeEnum(
     QQ(PACKAGE_NAME_QQ, "QQ"),
     TIM(PACKAGE_NAME_TIM, "TIM"),
     INTERNATIONAL(PACKAGE_NAME_QQ_INTERNATIONAL, "QQ国际版"),
-    LITE(PACKAGE_NAME_QQ_LITE, "QQ极速版"),
-    ;
+    LITE(PACKAGE_NAME_QQ_LITE, "QQ极速版");
 
     companion object {
         fun valueOfPackage(packageName: String): QQTypeEnum {
-            val qqTypeEnums = values()
+            val qqTypeEnums = entries.toTypedArray()
             for (qqTypeEnum in qqTypeEnums) {
                 if (qqTypeEnum.packageName == packageName) {
                     return qqTypeEnum
@@ -27,7 +26,7 @@ enum class QQTypeEnum(
         }
 
         fun contain(packageName: String): Boolean {
-            val qqTypeEnums = values()
+            val qqTypeEnums = entries.toTypedArray()
             for (qqTypeEnum in qqTypeEnums) {
                 if (qqTypeEnum.packageName == packageName) {
                     return true

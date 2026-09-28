@@ -100,9 +100,9 @@ class TimerTaskList : Delayed {
         )
     }
 
-    override operator fun compareTo(o: Delayed): Int {
-        return if (o is TimerTaskList) {
-            expire.get().compareTo(o.expire.get())
+    override operator fun compareTo(other: Delayed): Int {
+        return if (other is TimerTaskList) {
+            expire.get().compareTo(other.expire.get())
         } else 0
     }
 

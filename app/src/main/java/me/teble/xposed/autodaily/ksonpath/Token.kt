@@ -1,6 +1,13 @@
 package me.teble.xposed.autodaily.ksonpath
 
-import kotlinx.serialization.json.*
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonArrayBuilder
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonArray
 
 internal data class ArrayAccessorToken(val index: Int) : Token {
     override fun read(json: JsonElement): JsonElement? {
@@ -44,14 +51,14 @@ internal data class ArrayAccessorToken(val index: Int) : Token {
     }
 }
 
-internal data class MultiArrayAccessorToken(val indices: List<Int>) : Token {
-    override fun read(json: JsonElement): JsonElement? {
+internal data class MultiArrayAccessorToken(val indices: ImmutableList<Int>) : Token {
+    override fun read(json: JsonElement): JsonElement {
 //        println("MultiArrayAccessorToken: json -> $json")
         return buildJsonArray {
             indices.forEach {
-                ArrayAccessorToken.read(json, it)?.let {
-                    if (it.isNotNullOrMissing()) {
-                        add(it)
+                ArrayAccessorToken.read(json, it)?.let { jsonElement ->
+                    if (jsonElement.isNotNullOrMissing()) {
+                        add(jsonElement)
                     }
                 }
             }
@@ -85,7 +92,7 @@ internal data class ArrayLengthBasedRangeAccessorToken(
         } else size + offsetFromEnd - 1
 
         return if (start in 0..endInclusive) {
-            MultiArrayAccessorToken(IntRange(start, endInclusive).toList())
+            MultiArrayAccessorToken(IntRange(start, endInclusive).toImmutableList())
         } else null
     }
 }
@@ -115,8 +122,8 @@ internal data class ObjectAccessorToken(val key: String) : Token {
     }
 }
 
-internal data class MultiObjectAccessorToken(val keys: List<String>) : Token {
-    override fun read(json: JsonElement): JsonElement? {
+internal data class MultiObjectAccessorToken(val keys: ImmutableList<String>) : Token {
+    override fun read(json: JsonElement): JsonElement {
 //        println("MultiObjectAccessorToken: json -> $json")
         if (json !is JsonObject) {
             throw IllegalArgumentException("JsonElement cannot be cast JsonObject")
@@ -129,8 +136,8 @@ internal data class MultiObjectAccessorToken(val keys: List<String>) : Token {
     }
 }
 
-internal data class DeepScanObjectAccessorToken(val targetKeys: List<String>) : Token {
-    override fun read(json: JsonElement): JsonElement? {
+internal data class DeepScanObjectAccessorToken(val targetKeys: ImmutableList<String>) : Token {
+    override fun read(json: JsonElement): JsonElement {
 //        println("DeepScanObjectAccessorToken: json -> $json")
         return buildJsonArray {
             scan(json, this)
@@ -163,8 +170,8 @@ internal data class DeepScanObjectAccessorToken(val targetKeys: List<String>) : 
     }
 }
 
-internal data class DeepScanArrayAccessorToken(val indices: List<Int>) : Token {
-    override fun read(json: JsonElement): JsonElement? {
+internal data class DeepScanArrayAccessorToken(val indices: ImmutableList<Int>) : Token {
+    override fun read(json: JsonElement): JsonElement {
 //        println("DeepScanArrayAccessorToken: json -> $json")
         return buildJsonArray {
             scan(json, this)
@@ -208,7 +215,7 @@ internal data class DeepScanLengthBasedArrayAccessorToken(
     val endIndex: Int? = null,
     val offsetFromEnd: Int = 0
 ) : Token {
-    override fun read(json: JsonElement): JsonElement? {
+    override fun read(json: JsonElement): JsonElement {
 //        println("DeepScanLengthBasedArrayAccessorToken: json -> $json")
         return buildJsonArray {
             scan(json, this)
@@ -243,7 +250,7 @@ internal data class DeepScanLengthBasedArrayAccessorToken(
 }
 
 internal class WildcardToken : Token {
-    override fun read(json: JsonElement): JsonElement? {
+    override fun read(json: JsonElement): JsonElement {
 //        println("WildcardToken: json -> $json")
         return buildJsonArray {
             when (json) {
@@ -266,7 +273,7 @@ internal class WildcardToken : Token {
 }
 
 internal class DeepScanWildcardToken : Token {
-    override fun read(json: JsonElement): JsonElement? {
+    override fun read(json: JsonElement): JsonElement {
 //        println("DeepScanWildcardToken: json -> $json")
         return buildJsonArray {
             scan(json, this)
@@ -274,11 +281,11 @@ internal class DeepScanWildcardToken : Token {
     }
 
     private fun scan(node: JsonElement, result: JsonArrayBuilder) {
-        WildcardToken().read(node)?.let {
+        WildcardToken().read(node).let {
             if (it is JsonArray) {
-                it.forEach {
-                    if (it.isNotNullOrMissing()) {
-                        result.add(it)
+                it.forEach { element ->
+                    if (element.isNotNullOrMissing()) {
+                        result.add(element)
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package me.teble.xposed.autodaily.hook.inject
 
 import android.content.Intent
+import android.os.Build
 import com.tencent.qphone.base.remote.FromServiceMsg
 import com.tencent.qphone.base.remote.ToServiceMsg
 import me.teble.xposed.autodaily.utils.LogUtil
@@ -28,9 +29,17 @@ abstract class BaseServlet: MSFServlet() {
         return null
     }
 
+    @Suppress("DEPRECATION")
     override fun onReceive(intent: Intent, fromServiceMsg: FromServiceMsg) {
         val toServiceMsg: ToServiceMsg =
-            intent.getParcelableExtra(ToServiceMsg::class.java.simpleName)!!
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(
+                    ToServiceMsg::class.java.simpleName,
+                    ToServiceMsg::class.java
+                )
+            } else {
+                intent.getParcelableExtra(ToServiceMsg::class.java.simpleName)
+            }!!
         fromServiceMsg.attributes[FromServiceMsg::class.java.simpleName] = toServiceMsg
         LogUtil.d(toServiceMsg.toString())
         LogUtil.d(toServiceMsg.extraData.toMap().toString())
@@ -39,9 +48,17 @@ abstract class BaseServlet: MSFServlet() {
         seqReceiveMap[toServiceMsg.appSeq] = fromServiceMsg
     }
 
+    @Suppress("DEPRECATION")
     override fun onSend(intent: Intent, packet: Packet) {
         val toServiceMsg: ToServiceMsg? =
-            intent.getParcelableExtra(ToServiceMsg::class.java.simpleName)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(
+                    ToServiceMsg::class.java.simpleName,
+                    ToServiceMsg::class.java
+                )
+            } else {
+                intent.getParcelableExtra(ToServiceMsg::class.java.simpleName)
+            }
         toServiceMsg?.let {
             packet.setSSOCommand(toServiceMsg.serviceCmd)
             packet.putSendData(toServiceMsg.wupBuffer)

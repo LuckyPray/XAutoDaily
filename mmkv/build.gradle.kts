@@ -1,17 +1,26 @@
 @file:Suppress("UnstableApiUsage")
 
 plugins {
-    id("com.android.library")
+    alias(libs.plugins.androidLibrary)
 }
 
 android {
-    compileSdk = 32
+    namespace = "com.tencent.mmkv"
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTool.get()
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
-        minSdk = 24
-        targetSdk = 31
+        minSdk = libs.versions.minSdk.get().toInt()
 
         buildConfigField("String", "FLAVOR", "\"StaticCpp\"")
+    }
+
+    compileOptions {
+        sourceCompatibility(JavaVersion.VERSION_21)
+        targetCompatibility(JavaVersion.VERSION_21)
     }
 
     sourceSets {
@@ -24,8 +33,8 @@ android {
             assets.setSrcDirs(listOf("MMKV/Android/MMKV/mmkv/src/main/assets"))
         }
     }
+}
 
-    dependencies {
-        compileOnly("androidx.annotation:annotation:1.4.0")
-    }
+dependencies {
+    compileOnly(libs.androidx.annotation)
 }

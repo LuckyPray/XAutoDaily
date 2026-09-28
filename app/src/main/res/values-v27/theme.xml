@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Base.Theme.XAutoDaily" parent="Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowSoftInputMode">adjustNothing</item>
+        <item name="android:fitsSystemWindows">false</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowLayoutInDisplayCutoutMode">
+            shortEdges
+        </item>
+    </style>
+    <style name="Theme.XAutoDaily" parent="Base.Theme.XAutoDaily">
+        <item name="isLightTheme">true</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+</resources>

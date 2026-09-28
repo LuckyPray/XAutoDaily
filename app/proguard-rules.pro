@@ -20,6 +20,39 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+# WindowManager 通过反射探测设备提供的可选接口，这些类不随 APK 打包。
+-dontwarn androidx.window.extensions.WindowExtensions
+-dontwarn androidx.window.extensions.WindowExtensionsProvider
+-dontwarn androidx.window.extensions.area.ExtensionWindowAreaPresentation
+-dontwarn androidx.window.extensions.core.util.function.Consumer
+-dontwarn androidx.window.extensions.core.util.function.Function
+-dontwarn androidx.window.extensions.core.util.function.Predicate
+-dontwarn androidx.window.extensions.layout.DisplayFeature
+-dontwarn androidx.window.extensions.layout.FoldingFeature
+-dontwarn androidx.window.extensions.layout.WindowLayoutComponent
+-dontwarn androidx.window.extensions.layout.WindowLayoutInfo
+-dontwarn androidx.window.sidecar.SidecarDeviceState
+-dontwarn androidx.window.sidecar.SidecarDisplayFeature
+-dontwarn androidx.window.sidecar.SidecarInterface$SidecarCallback
+-dontwarn androidx.window.sidecar.SidecarInterface
+-dontwarn androidx.window.sidecar.SidecarProvider
+-dontwarn androidx.window.sidecar.SidecarWindowLayoutInfo
+
+# 本项目使用 Byte Buddy 的 AndroidClassLoadingStrategy.Wrapping，
+# 不使用依赖 JNA 或 java.lang.instrument 的桌面 JVM 注入功能。
+-dontwarn com.sun.jna.FunctionMapper
+-dontwarn com.sun.jna.JNIEnv
+-dontwarn com.sun.jna.Library
+-dontwarn com.sun.jna.Native
+-dontwarn com.sun.jna.NativeLibrary
+-dontwarn com.sun.jna.Platform
+-dontwarn java.lang.instrument.ClassDefinition
+-dontwarn java.lang.instrument.IllegalClassFormatException
+-dontwarn java.lang.instrument.UnmodifiableClassException
+
+# Byte Buddy 使用的编译期静态分析注解。
+-dontwarn edu.umd.cs.findbugs.annotations.SuppressFBWarnings
+
 # Keep `Companion` object fields of serializable classes.
 # This avoids serializer lookup through `getDeclaredClasses` as done for named companion objects.
 -if @kotlinx.serialization.Serializable class **

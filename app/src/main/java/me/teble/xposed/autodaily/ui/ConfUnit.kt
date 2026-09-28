@@ -1,13 +1,19 @@
+@file:SuppressLint("UnsafeOptInUsageError")
 package me.teble.xposed.autodaily.ui
 
+import android.annotation.SuppressLint
+import com.tencent.mmkv.MMKV
 import kotlinx.serialization.Serializable
 import me.teble.xposed.autodaily.BuildConfig
+import me.teble.xposed.autodaily.hook.config.ConfProxy
 import me.teble.xposed.autodaily.hook.config.Config.accountConfig
-import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.model.MetaInfo
 import me.teble.xposed.autodaily.task.model.Task
+import me.teble.xposed.autodaily.task.util.Const
+import me.teble.xposed.autodaily.task.util.Const.BLACK_THEME
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_ONE_DAY
 import me.teble.xposed.autodaily.task.util.Const.BLOCK_UPDATE_VERSION
+import me.teble.xposed.autodaily.task.util.Const.CN_TIME_DIFF
 import me.teble.xposed.autodaily.task.util.Const.DISABLE_DAMAGE_ENV
 import me.teble.xposed.autodaily.task.util.Const.ENABLE
 import me.teble.xposed.autodaily.task.util.Const.ENABLE_DEBUG_LOG
@@ -27,21 +33,35 @@ import me.teble.xposed.autodaily.task.util.Const.RETRY_COUNT
 import me.teble.xposed.autodaily.task.util.Const.SHOW_TASK_TOAST
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXCEPTION_COUNT
 import me.teble.xposed.autodaily.task.util.Const.TASK_EXEC_STATUS
+import me.teble.xposed.autodaily.task.util.Const.THEME
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
+import me.teble.xposed.autodaily.task.util.Const.XA_CONFIG
+import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 import me.teble.xposed.autodaily.utils.parse
+import me.teble.xposed.autodaily.utils.toCode
 import me.teble.xposed.autodaily.utils.toJsonString
+import me.teble.xposed.autodaily.utils.toTheme
 
 object ConfUnit {
-    val needUpdate: Boolean get() {
-        metaInfoCache?.let {
-            if (BuildConfig.VERSION_CODE < it.app.versionCode) {
-                return true
-            }
-        }
-        return false
+    private val xaConfig by lazy {
+        ConfProxy(MMKV.mmkvWithID("XAConfig", MMKV.MULTI_PROCESS_MODE))
     }
 
-    // -------------------------------------------------- //\
+    internal fun clearGlobalConfig() {
+        xaConfig.clearAll()
+    }
+
+    val needUpdate: Boolean
+        get() {
+            metaInfoCache?.let {
+                if (BuildConfig.VERSION_CODE < it.app.versionCode) {
+                    return true
+                }
+            }
+            return false
+        }
+
+    // -------------------------------------------------- //
     var metaInfoCache: MetaInfo?
         get() {
             val str = xaConfig.getString(META_INFO_CACHE, "")
@@ -55,6 +75,9 @@ object ConfUnit {
         set(value) {
             xaConfig.putString(META_INFO_CACHE, value.toJsonString())
         }
+    var encConfStr: String?
+        get() = xaConfig.getString(XA_CONFIG)
+        set(value) = xaConfig.putString(XA_CONFIG, value)
     var lastModuleVersion: Int
         get() = xaConfig.getInt(LastModuleVersion, 0)
         set(value) = xaConfig.putInt(LastModuleVersion, value)
@@ -88,14 +111,45 @@ object ConfUnit {
     var enableDebugLog: Boolean
         get() = xaConfig.getBoolean(ENABLE_DEBUG_LOG, false)
         set(value) = xaConfig.putBoolean(ENABLE_DEBUG_LOG, value)
+    var cnTimeDiff: Long
+        get() = xaConfig.getLong(CN_TIME_DIFF, 0)
+        set(value) = xaConfig.putLong(CN_TIME_DIFF, value)
     var disableDamageEnv: Boolean
         get() = xaConfig.getBoolean(DISABLE_DAMAGE_ENV, false)
         set(value) = xaConfig.putBoolean(DISABLE_DAMAGE_ENV, value)
 
     // -------------------------------------------------- //
+
+
+    var keepAlive: Boolean
+        get() = xaConfig.getBoolean(Const.KEEP_ALIVE, false)
+        set(value) = xaConfig.putBoolean(Const.KEEP_ALIVE, value)
+    var qKeepAlive: Boolean
+        get() = xaConfig.getBoolean(Const.Q_KEEP_ALIVE, false)
+        set(value) = xaConfig.putBoolean(Const.Q_KEEP_ALIVE, value)
+    var timKeepAlive: Boolean
+        get() = xaConfig.getBoolean(Const.TIM_KEEP_ALIVE, false)
+        set(value) = xaConfig.putBoolean(Const.TIM_KEEP_ALIVE, value)
+    var untrustedTouchEvents: Boolean
+        get() = xaConfig.getBoolean(Const.UNTRUSTED_TOUCH_EVENTS, false)
+        set(value) = xaConfig.putBoolean(Const.UNTRUSTED_TOUCH_EVENTS, value)
+    var hiddenAppIcon: Boolean
+        get() = xaConfig.getBoolean(Const.HIDDEN_APP_ICON, false)
+        set(value) = xaConfig.putBoolean(Const.HIDDEN_APP_ICON, value)
+
+    // -------------------------------------------------- //
     var globalEnable: Boolean
         get() = accountConfig.getBoolean(GLOBAL_ENABLE, false)
         set(value) = accountConfig.putBoolean(GLOBAL_ENABLE, value)
+
+    var theme: XAutodailyTheme.Theme
+        get() = xaConfig.getInt(THEME, 0).toTheme()
+        set(value) = xaConfig.putInt(THEME, value.toCode())
+
+
+    var blackTheme: Boolean
+        get() = xaConfig.getBoolean(BLACK_THEME, false)
+        set(value) = xaConfig.putBoolean(BLACK_THEME, value)
 }
 
 // -------------------------------------------------- //
@@ -180,6 +234,7 @@ data class TaskErrorInfo(
     override fun toString(): String {
         return "${dateStr}|${count}"
     }
+
     companion object {
         fun valueOf(str: String): TaskErrorInfo {
             runCatching {

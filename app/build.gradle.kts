@@ -3,8 +3,11 @@
 import com.android.build.api.artifact.ArtifactTransformationRequest
 import com.android.build.api.artifact.SingleArtifact
 import com.android.build.api.variant.BuiltArtifact
+import com.cmgapps.license.AndroidLicensesTask
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import org.gradle.internal.os.OperatingSystem
-import java.io.ByteArrayOutputStream
+import org.jetbrains.kotlin.compose.compiler.gradle.ComposeFeatureFlag
 import java.nio.file.Paths
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -24,9 +27,12 @@ fun findInPath(executable: String): String? {
 }
 
 plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    id("kotlinx-serialization")
+    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.serialization)
+    alias(libs.plugins.licenses)
+    id("kotlin-parcelize")
+    alias(libs.plugins.kotlinCompose)
 }
 val signingPropFile = File(projectDir, "signing.properties")
 val performSigning = signingPropFile.exists()
@@ -44,19 +50,44 @@ val updateLog = """
 - 修复 旧版 QQ cookie 获取兼容问题
 """.trimIndent()
 
+licenses {
+    additionalProjects(":dexkit", ":mmkv", ":stub", ":system")
+    reports {
+        html.enabled = false
+        json {
+            enabled = true
+        }
+    }
+}
+
+composeCompiler {
+    includeSourceInformation = true
+
+    featureFlags = setOf(
+        ComposeFeatureFlag.StrongSkipping.disabled(),
+        ComposeFeatureFlag.OptimizeNonSkippingGroups
+    )
+}
+
 android {
     namespace = "me.teble.xposed.autodaily"
-
-    compileSdk = 33
-    buildToolsVersion = "33.0.1"
-    ndkVersion = "27.0.12077973"
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    buildToolsVersion = libs.versions.buildTool.get()
+    ndkVersion = libs.versions.ndk.get()
 
     defaultConfig {
         applicationId = "me.teble.xposed.autodaily"
-        minSdk = 24
-        targetSdk = 33
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = appVerCode
         versionName = appVerName
+
+        buildFeatures {
+            buildConfig = true
+            aidl = true
+            prefab = true
+            compose = true
+        }
 
         externalNativeBuild {
             cmake {
@@ -98,10 +129,6 @@ android {
         }
     }
 
-    buildFeatures {
-        prefab = true
-    }
-
     buildTypes {
         all {
             signingConfig =
@@ -126,7 +153,7 @@ android {
                 }
             }
         }
-        val release by getting  {
+        val release by getting {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles("proguard-rules.pro")
@@ -159,13 +186,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_11)
-        targetCompatibility(JavaVersion.VERSION_11)
+        sourceCompatibility(JavaVersion.VERSION_21)
+        targetCompatibility(JavaVersion.VERSION_21)
         isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = "11"
         freeCompilerArgs = listOf(
             "-Xno-param-assertions",
             "-Xno-call-assertions",
@@ -173,13 +199,6 @@ android {
             "-opt-in=kotlin.RequiresOptIn",
         )
     }
-
-    packagingOptions {
-        resources {
-            excludes += arrayOf("**")
-        }
-    }
-
 
     lint {
         abortOnError = false
@@ -191,12 +210,6 @@ android {
     androidResources {
         additionalParameters += arrayOf("--allow-reserved-package-id", "--package-id", "0x62")
     }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = rootProject.extra["composeVersion"] as String
-    }
 
     externalNativeBuild {
         cmake {
@@ -204,9 +217,73 @@ android {
             version = "3.22.1+"
         }
     }
-    packagingOptions {
+    packaging {
+        resources {
+            excludes += arrayOf("**")
+        }
         jniLibs.excludes += arrayOf("lib/**/liblog.so", "lib/**/libz.so")
     }
+}
+
+kotlin {
+    jvmToolchain(libs.versions.jvm.target.get().toInt())
+    sourceSets.all {
+        languageSettings {
+            enableLanguageFeature("ContextParameters")
+        }
+    }
+}
+
+@CacheableTask
+abstract class GenerateLicenseAssetsTask : DefaultTask() {
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val reportFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
+
+    @TaskAction
+    fun generate() {
+        @Suppress("UNCHECKED_CAST")
+        val dependencies = JsonSlurper().parse(reportFile.get().asFile) as List<Map<String, Any?>>
+        check(dependencies.isNotEmpty()) { "License report is empty" }
+        val normalized = dependencies.map { dependency ->
+            val coordinates = dependency["mavenCoordinates"] as Map<*, *>
+            val artifactId = coordinates["artifactId"] as String
+            val name = (dependency["name"] as? String)
+                ?.takeUnless { it.isBlank() || it.contains("\${") }
+                ?: artifactId
+            dependency + mapOf(
+                "name" to name,
+                "description" to (dependency["description"] as? String).orEmpty()
+            )
+        }.sortedBy { (it["name"] as String).lowercase(Locale.ROOT) }
+
+        outputDirectory.file("licenses.json").get().asFile.apply {
+            parentFile.mkdirs()
+            writeText(JsonOutput.prettyPrint(JsonOutput.toJson(normalized)) + "\n")
+        }
+    }
+}
+
+androidComponents.onVariants { variant ->
+    val variantName = variant.name.replaceFirstChar { it.uppercaseChar() }
+    val licenseReportFile = layout.buildDirectory.file(
+        "reports/licenses/license${variantName}Report/licenses.json"
+    )
+    val licenseReport = tasks.named<AndroidLicensesTask>("license${variantName}Report") {
+        reports.json.outputLocation.set(licenseReportFile)
+    }
+    val licenseAssets = tasks.register<GenerateLicenseAssetsTask>("generate${variantName}LicenseAssets") {
+        dependsOn(licenseReport)
+        reportFile.set(licenseReportFile)
+    }
+    // 通过生成资源 API 保证清单先于 assets 合并完成，Debug / Release 各自生成。
+    variant.sources.assets?.addGeneratedSourceDirectory(
+        licenseAssets,
+        GenerateLicenseAssetsTask::outputDirectory
+    )
 }
 
 abstract class CopyApksTask : DefaultTask() {
@@ -230,7 +307,15 @@ abstract class CopyApksTask : DefaultTask() {
 
 androidComponents.onVariants { variant ->
     if (variant.name != "release") return@onVariants
-    val updateArtifact = project.tasks.register<CopyApksTask>("copy${variant.name.capitalize()}Apk")
+    val updateArtifact = project.tasks.register<CopyApksTask>(
+        "copy${
+            variant.name.replaceFirstChar {
+                if (it.isLowerCase()) it.titlecase(
+                    Locale.getDefault()
+                ) else it.toString()
+            }
+        }Apk"
+    )
     val transformationRequest = variant.artifacts.use(updateArtifact)
         .wiredWithDirectories(CopyApksTask::apkFolder, CopyApksTask::outFolder)
         .toTransformMany(SingleArtifact.APK)
@@ -242,23 +327,29 @@ androidComponents.onVariants { variant ->
     }
     // update version.json
     findInPath("git")?.let {
-        val stdout = ByteArrayOutputStream()
         val appGradlePath = "app/build.gradle.kts"
-        val cmd = exec {
-            workingDir = project.rootDir
-
-            val cmdLine = if (OperatingSystem.current().isWindows) {
-                arrayOf("cmd", "/c", "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G")
-            } else {
-                arrayOf("sh", "-c", "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'")
-            }
-            commandLine(*cmdLine)
-            standardOutput = stdout
-            // 没有更新版本号，会返回非0导致构建失败
-            isIgnoreExitValue = true
+        val cmdLine = if (OperatingSystem.current().isWindows) {
+            arrayOf(
+                "cmd",
+                "/c",
+                "for /f usebackq^ tokens^=2^ delims^=^\" %G in (`git diff $appGradlePath ^| findstr /r /c:\"^+val[ ]appVerName\"`) do @echo %G"
+            )
+        } else {
+            arrayOf(
+                "sh",
+                "-c",
+                "git diff $appGradlePath | grep -e '^+val appVerName' | awk -F '\"' '{print \$2}'"
+            )
         }
-        if (cmd.exitValue == 0 && stdout.size() > 0) {
-            println("version be updated to ${stdout.toString().trim()}")
+
+        val output = providers.exec {
+            isIgnoreExitValue = true
+            commandLine(*cmdLine)
+        }
+        val stdout = output.standardOutput.asText.get()
+        val exitValue = output.result.get().exitValue
+        if (exitValue == 0 && stdout.isNotEmpty()) {
+            println("version be updated to ${stdout.trim()}")
             val versionJson = File(project.rootDir, "app-meta.json")
             val formatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                 .format(LocalDateTime.now())
@@ -283,64 +374,111 @@ dependencies {
     implementation(project(":dexkit"))
     implementation(project(":mmkv"))
     compileOnly(project(":stub"))
+    implementation(project(":system"))
 
-    compileOnly("de.robv.android.xposed:api:82")
-    implementation("com.github.kyuubiran:EzXHelper:1.0.3")
+    implementation(libs.androidx.multidex)
+    implementation(libs.hiddenapibypass)
 
-    implementation("com.google.protobuf:protobuf-kotlin-lite:3.21.2")
-    compileOnly("com.google.protobuf:protoc:3.21.2")
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.5")
+    compileOnly(libs.api)
+    implementation(libs.ezxhelper)
+    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.protobuf.kotlin.lite)
+    compileOnly(libs.protoc)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    implementation(libs.kotlinx.datetime)
+
+
+    implementation(libs.androidx.browser)
     // jetpack compose
-    implementation("androidx.activity:activity-compose:1.4.0")
-    implementation("androidx.compose.ui:ui:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.compose.ui:ui-tooling:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.compose.material:material:${rootProject.extra["composeVersion"]}")
-    implementation("androidx.navigation:navigation-compose:2.5.0-alpha04")
-    implementation("cn.hutool:hutool-core:5.8.0.M1")
-    implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    implementation(libs.androidx.activity.compose)
+
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material.navigation)
+
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.materialWindow)
+
+
+    implementation(libs.androidx.material3.adaptive)
+    implementation(libs.androidx.adaptive.layout)
+    implementation(libs.androidx.adaptive.navigation)
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // ViewModel utilities for Compose
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation(libs.hutool.core)
+    implementation(libs.okhttp)
     // Other
-    implementation("com.hankcs:aho-corasick-double-array-trie:1.2.3")
-    implementation("net.bytebuddy:byte-buddy-android:1.18.8")
-    implementation("com.charleskorn.kaml:kaml:0.44.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation(libs.aho.corasick.double.array.trie)
+    implementation(libs.byte.buddy.android)
+    implementation(libs.kaml)
     // implementation ("org.apache-extras.beanshell:bsh:2.0b6")
     // shizuku
-    implementation("dev.rikka.shizuku:api:13.1.3")
-    implementation("dev.rikka.shizuku:provider:13.1.3")
+    implementation(libs.shizuku.api)
+    implementation(libs.provider)
+
+    implementation(libs.androidx.navigation.compose)
 }
 
 val adbExecutable: String = androidComponents.sdkComponents.adb.get().asFile.absolutePath
 
-val restartQQ = task("restartQQ").doLast {
-    exec {
-        commandLine(adbExecutable, "shell", "am", "force-stop", "com.tencent.mobileqq")
-    }
-    exec {
+
+fun killApp(name: String) {
+    providers.exec {
+        commandLine(adbExecutable, "shell", "am", "force-stop", name)
+    }.standardOutput.asText.get().isNotEmpty()
+}
+
+fun startApp(name: String) {
+    providers.exec {
         commandLine(
             adbExecutable, "shell", "am", "start",
-            "$(pm resolve-activity --components com.tencent.mobileqq)"
+            "$(pm resolve-activity --components $name)"
         )
+    }.standardOutput.asText.get().isNotEmpty()
+}
+
+fun restartApp(name: String) {
+    killApp(name)
+    startApp(name)
+}
+
+val restartQQ = tasks.register("restartQQ") {
+    doLast {
+        restartApp("com.tencent.mobileqq")
     }
 }
 
-val optimizeReleaseRes = task("optimizeReleaseRes").doLast {
-    val aapt2 = Paths.get(
-        project.android.sdkDirectory.path,
-        "build-tools", project.android.buildToolsVersion, "aapt2"
-    )
-    val zip = Paths.get(
-        project.buildDir.path, "intermediates",
-        "optimized_processed_res", "release", "resources-release-optimize.ap_"
-    )
-    val optimized = File("${zip}.opt")
-    val cmd = exec {
-        commandLine(aapt2, "optimize", "--collapse-resource-names", "-o", optimized, zip)
-        isIgnoreExitValue = true
+val restartTim = tasks.register("restartTim") {
+    doLast {
+        restartApp("com.tencent.tim")
     }
-    if (cmd.exitValue == 0) {
-        delete(zip)
-        optimized.renameTo(zip.toFile())
+}
+
+val optimizeReleaseRes = tasks.register("optimizeReleaseRes") {
+    doLast {
+        val aapt2 = Paths.get(
+            project.android.sdkDirectory.path,
+            "build-tools", project.android.buildToolsVersion, "aapt2"
+        )
+        val zip = Paths.get(
+            project.layout.buildDirectory.asFile.get().path, "intermediates",
+            "optimized_processed_res", "release", "resources-release-optimize.ap_"
+        )
+        val optimized = File("${zip}.opt")
+        val cmd = providers.exec {
+            commandLine(aapt2, "optimize", "--collapse-resource-names", "-o", optimized, zip)
+            isIgnoreExitValue = true
+        }
+        if (cmd.result.get().exitValue == 0) {
+            delete(zip)
+            optimized.renameTo(zip.toFile())
+        }
     }
 }
 tasks.whenTaskAdded {
@@ -348,7 +486,10 @@ tasks.whenTaskAdded {
         "optimizeReleaseResources" -> {
             finalizedBy(optimizeReleaseRes)
         }
+
         "installDebug" -> {
+            // 不知道怎么判断，先这样写
+//            finalizedBy(restartTim)
             finalizedBy(restartQQ)
         }
     }

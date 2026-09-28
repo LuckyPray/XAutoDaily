@@ -3,6 +3,9 @@ package me.teble.xposed.autodaily.shizuku
 import android.annotation.SuppressLint
 import android.os.Build
 import android.util.Log
+import kotlinx.collections.immutable.PersistentMap
+import kotlinx.collections.immutable.persistentHashMapOf
+import kotlinx.collections.immutable.toPersistentHashMap
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.config.DataMigrationService
@@ -24,7 +27,7 @@ class UserService : IUserService.Stub() {
     /**
      * package -> daemonLock
      */
-    private val daemonFileLockMap = HashMap<String, FileLock>()
+    private lateinit var daemonFileLockMap: PersistentMap<String, FileLock>
 
     init {
         Executors.newSingleThreadExecutor().execute {
@@ -36,25 +39,28 @@ class UserService : IUserService.Stub() {
             }
             Log.d("XALog", "保活进程正在执行")
             val enablePackage = mutableListOf<String>()
-            conf.alivePackages.forEach { (packageName, enable) ->
-                if (enable) {
+
+            daemonFileLockMap =
+                conf.alivePackages.filterValues { it }.mapValues { (packageName, _) ->
                     enablePackage.add(packageName)
                     val file = getDaemonLockFile(packageName)
                     val fileD = RandomAccessFile(file, "rw")
                     val lock = fileD.channel.lock()
-                    daemonFileLockMap[packageName] = lock
                     Log.d("XALog", "package: $packageName daemonLockFile lock success!")
-                }
-            }
+                    lock
+                }.toPersistentHashMap()
+
             while (true) {
                 enablePackage.forEach { packageName ->
                     runCatching {
                         if (!isAlive(packageName)) {
                             Log.d("XALog", "package: $packageName is died, try start")
-                            startService(packageName, DataMigrationService,
+                            startService(
+                                packageName, DataMigrationService,
                                 arrayOf(
                                     "-e", CORE_SERVICE_FLAG, "$"
-                                ))
+                                )
+                            )
                         }
                     }.onFailure {
                         Log.e("XALog", it.stackTraceToString())
@@ -104,7 +110,7 @@ class UserService : IUserService.Stub() {
         runCatching {
             return confFile.readText().parse()
         }
-        return ShizukuConf(false, HashMap())
+        return ShizukuConf(false, persistentHashMapOf())
     }
 
     override fun destroy() {

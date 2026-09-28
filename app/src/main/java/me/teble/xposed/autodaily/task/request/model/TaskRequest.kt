@@ -1,5 +1,7 @@
+@file:SuppressLint("UnsafeOptInUsageError")
 package me.teble.xposed.autodaily.task.request.model
 
+import android.annotation.SuppressLint
 import kotlinx.serialization.Serializable
 
 @Serializable

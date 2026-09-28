@@ -14,9 +14,11 @@ import me.teble.xposed.autodaily.utils.field
 import me.teble.xposed.autodaily.utils.fieldValueAs
 import me.teble.xposed.autodaily.utils.invoke
 
+
 class MyHandler(private val mDefault: Handler.Callback?) : Handler.Callback {
 
-    @SuppressLint("PrivateApi", "DiscouragedPrivateApi")
+    @SuppressLint("PrivateApi")
+    @Suppress("DEPRECATION")
     override fun handleMessage(msg: Message): Boolean {
         when (msg.what) {
             // LAUNCH_ACTIVITY     sdk <= 8.0

@@ -1,21 +1,17 @@
 package me.teble.xposed.autodaily.ksonpath
 
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.serialization.json.*
 import kotlinx.serialization.serializer
 
 
 class JsonPath(path: String) {
 
-    private val path: String
-    val tokens: List<Token>
-
     /**
      * Trim given path string and compile it on initialization
      */
-    init {
-        this.path = path.trim()
-        tokens = PathCompiler.compile(this.path)
-    }
+    private val path: String = path.trim()
+    val tokens: ImmutableList<Token> = PathCompiler.compile(this.path)
 
     /**
      * Read the value at path in given JSON string

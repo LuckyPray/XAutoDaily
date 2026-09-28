@@ -102,7 +102,7 @@ object XANotification {
         }
         injectRes()
         builder = builder.setContentTitle("XAutoDaily")
-            .setSmallIcon(R.drawable.icon_x_auto_daily_2)
+            .setSmallIcon(R.mipmap.ic_launcher_round)
             .setOngoing(true)
             .setShowWhen(true)
 

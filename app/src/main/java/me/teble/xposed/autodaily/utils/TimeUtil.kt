@@ -1,7 +1,7 @@
 package me.teble.xposed.autodaily.utils
 
-import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.task.util.millisecond
+import me.teble.xposed.autodaily.ui.ConfUnit
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDateTime
@@ -30,9 +30,9 @@ object TimeUtil {
         LogUtil.d("networkTime: $networkTime")
         networkTime?.let {
             timeDiff = it - getCNTime()
-            xaConfig.putLong("cnTimeDiff", timeDiff)
+            ConfUnit.cnTimeDiff = timeDiff
         } ?: run {
-            timeDiff = xaConfig.getLong("cnTimeDiff", 0)
+            timeDiff = ConfUnit.cnTimeDiff
         }
     }
 

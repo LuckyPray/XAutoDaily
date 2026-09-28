@@ -9,7 +9,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ActivityInfo
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.IBinder
+import android.os.Looper
+import android.os.PersistableBundle
+import android.os.TestLooperManager
 import android.view.KeyEvent
 import android.view.MotionEvent
 import androidx.annotation.RequiresApi
@@ -25,6 +30,7 @@ class MyInstrumentation(private val mBase: Instrumentation) : Instrumentation() 
         } catch (e: Exception) {
             if (className!!.startsWith(BuildConfig.APPLICATION_ID)) {
                 return moduleClassLoader.loadClass(className)
+                    .getDeclaredConstructor()
                     .newInstance() as Activity
             }
             throw e
@@ -343,11 +349,13 @@ class MyInstrumentation(private val mBase: Instrumentation) : Instrumentation() 
         mBase.callActivityOnPictureInPictureRequested(activity)
     }
 
+    @Deprecated("Deprecated in Java")
     @Suppress("DEPRECATION")
     override fun startAllocCounting() {
         mBase.startAllocCounting()
     }
 
+    @Deprecated("Deprecated in Java")
     @Suppress("DEPRECATION")
     override fun stopAllocCounting() {
         mBase.stopAllocCounting()

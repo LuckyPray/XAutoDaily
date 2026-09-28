@@ -29,7 +29,7 @@ class CronTimer
         var thisTime = TimeUtil.cnTimeMillis()
         var nextTime: Long
         var sleep: Long
-        while (false == isStop) {
+        while (!isStop) {
             //下一时间计算是按照上一个执行点开始时间计算的
             //此处除以定时单位是为了清零单位以下部分，例如单位是分则秒和毫秒清零
             nextTime = (thisTime / timerUnit + 1) * timerUnit

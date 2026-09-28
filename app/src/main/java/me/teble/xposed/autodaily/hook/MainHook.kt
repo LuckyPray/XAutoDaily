@@ -23,6 +23,8 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam
 import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
+import kotlinx.collections.immutable.PersistentSet
+import kotlinx.collections.immutable.persistentSetOf
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.R
 import me.teble.xposed.autodaily.config.BaseApplicationImpl
@@ -73,7 +75,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
 //    private lateinit var subHookClasses: Set<String>
 
-    private val subHookClasses: Set<Class<out BaseHook>> = setOf(
+    private val subHookClasses: PersistentSet<Class<out BaseHook>> = persistentSetOf(
         FromServiceMsgHook::class.java,
         QLogHook::class.java,
         QQSettingSettingActivityHook::class.java,
@@ -222,7 +224,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 }
                 injectRes()
                 builder = builder.setContentTitle("XAutoDaily")
-                    .setSmallIcon(R.drawable.icon_x_auto_daily_2)
+                    .setSmallIcon(R.mipmap.ic_launcher_round)
                     .setOngoing(false)
                     .setShowWhen(true)
                 val notification = builder.setContentText("正在唤醒主进程").build()

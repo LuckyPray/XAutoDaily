@@ -18,6 +18,8 @@ object ToastUtil {
     }
 
     private fun toast(context: Context, msg: String, longDuration: Boolean) {
+        // TODO 灵动岛
+        // MiuiStringToast.showStringToast(context, text = msg, longDuration = longDuration)
         lateinit var toast: Toast
         runCatching {
             toast = Toast.makeText(context, null, parse(longDuration))

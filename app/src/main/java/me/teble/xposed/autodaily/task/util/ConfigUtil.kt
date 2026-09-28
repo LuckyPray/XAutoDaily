@@ -3,9 +3,9 @@ package me.teble.xposed.autodaily.task.util
 import cn.hutool.core.codec.Base64Decoder
 import cn.hutool.core.util.ReUtil
 import com.charleskorn.kaml.Yaml
+import kotlinx.collections.immutable.persistentListOf
 import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.base.hostContext
-import me.teble.xposed.autodaily.hook.config.Config.xaConfig
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
@@ -18,11 +18,18 @@ import me.teble.xposed.autodaily.ui.ConfUnit.metaInfoCache
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.lastExecTime
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
-import me.teble.xposed.autodaily.utils.*
+import me.teble.xposed.autodaily.utils.FileEnum
+import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.RepoFileLoader
+import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.getTextFromModuleAssets
+import me.teble.xposed.autodaily.utils.parse
+import me.teble.xposed.autodaily.utils.runRetry
 import java.io.File
 import java.security.KeyFactory
 import java.security.spec.X509EncodedKeySpec
-import java.util.*
+import java.util.Date
+import java.util.TimeZone
 import java.util.concurrent.locks.ReentrantLock
 import java.util.regex.Pattern
 import javax.crypto.Cipher
@@ -66,6 +73,7 @@ object ConfigUtil {
         }
     }
 
+    // todo 需要拆分一个给 UI，也就是没有 Toast
     fun checkUpdate(showToast: Boolean): Boolean {
         val info = fetchMeta()
         info?.let {
@@ -135,7 +143,7 @@ object ConfigUtil {
     }
 
     private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {
-        xaConfig.putString("xa_conf", encConfStr)
+        ConfUnit.encConfStr = encConfStr
         // clear cache
         _conf = null
         LogUtil.d("clear conf cache")
@@ -156,7 +164,7 @@ object ConfigUtil {
         defaultConf ?: let {
             LogUtil.w("加载默认配置失败")
             ToastUtil.send("加载默认配置失败")
-            return TaskProperties(0, 0, listOf(), listOf())
+            return TaskProperties(0, 0, persistentListOf(), persistentListOf())
         }
         if (conf == null) {
             conf = defaultConf
@@ -182,8 +190,7 @@ object ConfigUtil {
     }
 
     private fun loadConf(): TaskProperties? {
-        val encodeConfStr = xaConfig.getString("xa_conf")
-        return encodeConfStr?.let {
+        return ConfUnit.encConfStr?.let {
             loadConf(it)
         }
     }
@@ -268,9 +275,6 @@ object ConfigUtil {
                 return true
             }
         }
-        if (nextShouldExecTime <= now.format()) {
-            return true
-        }
-        return false
+        return nextShouldExecTime <= now.format()
     }
 }
