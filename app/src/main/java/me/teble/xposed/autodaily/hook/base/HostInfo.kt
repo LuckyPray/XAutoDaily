@@ -7,6 +7,7 @@ import me.teble.xposed.autodaily.utils.getAppVersionCode
 import me.teble.xposed.autodaily.utils.getAppVersionName
 
 lateinit var hostApp: Application
+@Volatile
 lateinit var hostClassLoader: ClassLoader
 lateinit var hostPackageName: String
 lateinit var hostProcessName: String

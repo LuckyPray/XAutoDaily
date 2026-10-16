@@ -5,12 +5,12 @@ import android.util.Log
 import dalvik.system.BaseDexClassLoader
 import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedBridge
-import me.teble.xposed.autodaily.utils.LogUtil
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
 internal object TinkerStartupHook {
 
+    // 宿主桥接尚未安装，此阶段只能使用系统日志，不能触发 LogUtil 的业务依赖初始化。
     private const val TAG = "XALog"
     private const val QFIX_APPLICATION_IMPL_PROXY =
         "com.tencent.common.app.QFixApplicationImplProxy"
@@ -43,14 +43,14 @@ internal object TinkerStartupHook {
             }
             callingThread.set(null)
             cleanup()
-            LogUtil.i("Using host runtime class loader: $runtimeClassLoader")
+            Log.i(TAG, "Using host runtime class loader: $runtimeClassLoader")
             try {
                 onRuntimeClassLoaderReady(runtimeClassLoader)
             } catch (e: Throwable) {
                 if (runtimeClassLoader === initialClassLoader) {
                     throw e
                 }
-                LogUtil.e(e, "Runtime class loader initialization failed, trying initial loader")
+                Log.e(TAG, "Runtime class loader initialization failed, trying initial loader", e)
                 onRuntimeClassLoaderReady(initialClassLoader)
             }
         }
@@ -85,7 +85,7 @@ internal object TinkerStartupHook {
                             }
 
                             if (capturedClassLoader.compareAndSet(null, classLoader)) {
-                                LogUtil.i("Captured Tinker class loader: $classLoader")
+                                Log.i(TAG, "Captured Tinker class loader: $classLoader")
                             }
                         }
                     },
@@ -96,7 +96,7 @@ internal object TinkerStartupHook {
         } catch (e: NoSuchMethodException) {
             complete(initialClassLoader)
         } catch (e: Throwable) {
-            LogUtil.e(e, "Failed to install Tinker startup hook, using initial class loader")
+            Log.e(TAG, "Failed to install Tinker startup hook, using initial class loader", e)
             complete(initialClassLoader)
         }
     }

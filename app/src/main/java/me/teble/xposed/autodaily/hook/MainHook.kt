@@ -138,7 +138,8 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             if (hostInit) return@hookBefore
 
             val application = it.thisObject as Application
-            val finalClassLoader = application.javaClass.classLoader ?: runtimeClassLoader
+            // Tinker 更新的是 Context 的运行时 loader，Application 类本身可能仍由旧 loader 定义。
+            val finalClassLoader = application.classLoader ?: runtimeClassLoader
             updateHostClassLoader(finalClassLoader)
             initializeHost(application)
         }
@@ -147,10 +148,12 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun updateHostClassLoader(classLoader: ClassLoader) {
         val changed = hostClassLoader !== classLoader
+        hostClassLoader = classLoader
+        // 先建立宿主委托，再初始化缓存、日志和进程工具，避免 R8 合并的 lambda 提前解析宿主类。
+        injectClassLoader()
         if (changed) {
             clearClassCache()
         }
-        hostClassLoader = classLoader
         EzXHelperInit.setEzClassLoader(classLoader)
         if (changed) {
             Log.i("XALog", "Host class loader updated: $classLoader")
@@ -162,7 +165,6 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             hostApp = application
             EzXHelperInit.initAppContext(application)
             if (ProcUtil.isMain) {
-                injectClassLoader(hostClassLoader)
                 // MMKV
                 Config.init()
                 LogUtil.i("""

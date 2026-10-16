@@ -1,26 +1,24 @@
 package me.teble.xposed.autodaily.hook.base
 
-import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.field
-import me.teble.xposed.autodaily.utils.fieldValue
+import android.util.Log
 import java.net.URL
 
 class XAClassLoader(
-    private val qClassLoader: ClassLoader,
     private val mParentClassLoader: ClassLoader
 ) : ClassLoader() {
 
+    // Tinker 可能替换宿主 ClassLoader，每次委托时读取当前值，不能保存注入时的快照。
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
         return if (switchHostClass(name)) {
-            qClassLoader.loadClass(name)
+            hostClassLoader.loadClass(name)
         } else {
             mParentClassLoader.loadClass(name)
         }
     }
 
     override fun getResource(name: String): URL? {
-        return mParentClassLoader.getResource(name) ?: qClassLoader.getResource(name)
+        return mParentClassLoader.getResource(name) ?: hostClassLoader.getResource(name)
     }
 
     companion object {
@@ -52,17 +50,22 @@ class XAClassLoader(
     }
 }
 
-fun injectClassLoader(hostClassLoader: ClassLoader) {
-    val fParent = ClassLoader::class.java.field("parent")!!
-    val mClassloader = moduleClassLoader
-    val parentClassloader = mClassloader.fieldValue("parent", true) as ClassLoader
-    runCatching {
+fun injectClassLoader() {
+    // 注入完成之前不能调用 LogUtil 或其他可能间接引用宿主类的工具。
+    try {
+        val fParent = ClassLoader::class.java.getDeclaredField("parent")
+        fParent.isAccessible = true
+        val mClassloader = moduleClassLoader
+        val parentClassloader = fParent.get(mClassloader) as ClassLoader
         if (XAClassLoader::class.java != parentClassloader.javaClass) {
-            LogUtil.d("replace parent classloader")
-            fParent.set(mClassloader, XAClassLoader(hostClassLoader, parentClassloader))
-            isInjectClassLoader = true
+            fParent.set(mClassloader, XAClassLoader(parentClassloader))
+            Log.d("XALog", "replace parent classloader")
         }
-    }.onFailure { LogUtil.e(it) }
+        isInjectClassLoader = true
+    } catch (e: Throwable) {
+        Log.e("XALog", "Failed to inject host class loader", e)
+        throw e
+    }
 }
 
 var isInjectClassLoader = false

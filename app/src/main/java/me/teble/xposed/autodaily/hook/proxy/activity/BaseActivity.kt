@@ -30,7 +30,6 @@ open class BaseActivity : ComponentActivity() {
 class BaseActivityClassLoader(referencer: ClassLoader) :
     ClassLoader() {
     private val mBaseReferencer: ClassLoader = referencer
-    private val mHostReferencer: ClassLoader = hostClassLoader
 
     @Throws(ClassNotFoundException::class)
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
@@ -51,7 +50,7 @@ class BaseActivityClassLoader(referencer: ClassLoader) :
                 || name == "androidx.lifecycle.ViewModelStoreOwner"
                 || name == "androidx.savedstate.SavedStateRegistryOwner"
             ) {
-                return mHostReferencer.loadClass(name)
+                return hostClassLoader.loadClass(name)
             }
         } catch (ignored: ClassNotFoundException) {
             LogUtil.e(ignored, "loadClass -> $name")
