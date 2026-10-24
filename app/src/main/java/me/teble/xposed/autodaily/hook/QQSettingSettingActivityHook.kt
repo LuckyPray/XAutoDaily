@@ -32,6 +32,7 @@ import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.dp2px
 import me.teble.xposed.autodaily.utils.fieldValue
+import me.teble.xposed.autodaily.utils.getFields
 import me.teble.xposed.autodaily.utils.getMethods
 import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.invokeAs
@@ -124,10 +125,28 @@ class QQSettingSettingActivityHook : BaseHook() {
         cMainSettingFragment ?: return
 
         val oldEntry = load("com.tencent.mobileqq.setting.main.MainSettingConfigProvider")
-        val newEntry = load("Lcom/tencent/mobileqq/setting/main/NewSettingConfigProvider;")
+        var newEntry = load("Lcom/tencent/mobileqq/setting/main/NewSettingConfigProvider;")
+        if (newEntry == null) {
+            // QQ 9.3.x 起 NewSettingConfigProvider 被混淆改名（9.3.75 实测为 setting.main.b），
+            // MainSettingFragment 持有 SettingConfigProvider 具体类型的字段，直接反查真实类型
+            newEntry = findProviderFromFragment(cMainSettingFragment)
+            newEntry?.let { LogUtil.i("入口提供者反查成功：$it") }
+        }
 
         createEntry(oldEntry, false)
         createEntry(newEntry, true)
+    }
+
+    private fun findProviderFromFragment(fragmentClass: Class<*>): Class<*>? {
+        return runCatching {
+            val providerBase = load("com.tencent.mobileqq.setting.processor.SettingConfigProvider")
+                ?: return null
+            fragmentClass.getFields(false)
+                .map { it.type }
+                .firstOrNull { it != providerBase && providerBase.isAssignableFrom(it) }
+        }.onFailure {
+            LogUtil.e(it)
+        }.getOrNull()
     }
 
     private fun createEntry(settingConfigProviderClass: Class<*>?, isNewSetting: Boolean) {
@@ -138,7 +157,11 @@ class QQSettingSettingActivityHook : BaseHook() {
                 LogUtil.d("param: ${it.parameterTypes.toList()}, ${it.returnType.name}")
                 it.parameterTypes.size == 1 && it.parameterTypes[0] == Context::class.java
                         && it.returnType.name.startsWith("com.tencent.mobileqq.setting.processor")
-            }?.returnType ?: load("Lcom/tencent/mobileqq/setting/processor/SimpleItemProcessor;")!!
+            }?.returnType ?: load("Lcom/tencent/mobileqq/setting/processor/SimpleItemProcessor;")
+            if (cSimpleItemProcessor == null) {
+                LogUtil.w("未找到设置项类（SimpleItemProcessor），入口创建跳过")
+                return
+            }
             val cSimpleItemProcessorArgc = cSimpleItemProcessor.constructors.first {
                 it.parameterTypes.size < 6 && it.parameterTypes[0] == Context::class.java
                         && it.parameterTypes[1] == Int::class.java
