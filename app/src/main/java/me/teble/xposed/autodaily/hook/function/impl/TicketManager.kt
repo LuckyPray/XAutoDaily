@@ -125,7 +125,16 @@ open class TicketManager : BaseFunction(
             }
             superKey?.let { return it }
         }
-        return getTicketManager().getSuperkey(uin)
+        // QQ 9.1.55+ 已移除 TicketManager.getSuperkey(String)，编译期绑定的直调会 NoSuchMethodError，
+        // 改为反射调用，方法不存在时返回 null
+        return runCatching {
+            val manager = getTicketManager()
+            val method = manager.javaClass.getMethod("getSuperkey", String::class.java)
+            method.isAccessible = true
+            method.invoke(manager, uin) as? String
+        }.onFailure {
+            LogUtil.w("TicketManager.getSuperkey 反射调用失败：${it.javaClass.simpleName}: ${it.message}")
+        }.getOrNull()
     }
 
     open fun getPt4Token(domain: String?): String? {

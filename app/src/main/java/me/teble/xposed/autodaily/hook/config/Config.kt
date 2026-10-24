@@ -88,7 +88,8 @@ object Config {
             "QZIntimateCheckInViewModel", "[doCheckInRequest] space id is "
         )
     )
-    const val hooksVersion = 2
+    // v3: QQ 9.3.x 混淆改名后清空历史毒缓存（NewSettingConfigProvider 搜索失败后缓存空串导致永不重试）
+    const val hooksVersion = 3
     val confuseInfo = mutableMapOf<String, Set<String>>().apply {
         obfuscate.forEach { (k, v) ->
             put(getSimpleName(k), v)
