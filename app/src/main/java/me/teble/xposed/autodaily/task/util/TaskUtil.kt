@@ -229,7 +229,8 @@ object TaskUtil {
             var res: Any
             if (it.match.startsWith("$")) {
                 try {
-                    res = jsonNode!!.read<JsonElement>(it.match) ?: ""
+                    // 响应非 JSON（如网关 404 HTML 页）时 jsonNode 为 null，按提取失败处理而不是 NPE
+                    res = jsonNode?.read<JsonElement>(it.match) ?: ""
                     // fix JsonString.toString to be quote
                     when {
                         res is JsonPrimitive && res.isString -> res = res.content
