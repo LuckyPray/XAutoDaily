@@ -49,6 +49,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Configuration
 import me.teble.xposed.autodaily.ui.icon.icons.Notice
 import me.teble.xposed.autodaily.ui.icon.icons.Script
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
+import me.teble.xposed.autodaily.ui.icon.icons.Status
 import me.teble.xposed.autodaily.ui.layout.HorizontalPadding
 import me.teble.xposed.autodaily.ui.layout.StatusBarsTopPadding
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
@@ -63,6 +64,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.signFontFamily
 fun MainScene(
     onNavigateToNotice: (String) -> Unit,
     onNavigateToSign: () -> Unit,
+    onNavigateToSignState: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
 
@@ -99,6 +101,7 @@ fun MainScene(
             Banner(execTaskNum = viewmodel::execTaskNum, signClick = viewmodel::signClick)
             GridLayout(
                 onNavigateToSign = onNavigateToSign,
+                onNavigateToSignState = onNavigateToSignState,
                 onNavigateToSetting = onNavigateToSetting,
                 onNavigateToAbout = onNavigateToAbout,
                 turnTaskSize = viewmodel::turnTaskSize
@@ -179,6 +182,7 @@ private fun ColumnScope.Banner(execTaskNum: () -> Int, signClick: () -> Unit) {
 @Composable
 private fun GridLayout(
     onNavigateToSign: () -> Unit,
+    onNavigateToSignState: () -> Unit,
     onNavigateToSetting: () -> Unit,
     onNavigateToAbout: () -> Unit,
     turnTaskSize: () -> Int
@@ -212,6 +216,7 @@ private fun GridLayout(
                     drawRect(colors.colorBgContainer)
                 },
         ) {
+            TextItem(iconColor = Color(0xFF57D5AF), Icons.Status, "签到状态", onNavigateToSignState)
             TextItem(iconColor = Color(0xFF60D893), Icons.Setting, "设置", onNavigateToSetting)
             TextItem(iconColor = Color(0xFFFFBC04), Icons.About, "关于", onNavigateToAbout)
 

@@ -24,6 +24,7 @@ import me.teble.xposed.autodaily.ui.icon.icons.Search
 import me.teble.xposed.autodaily.ui.icon.icons.SelectNormal
 import me.teble.xposed.autodaily.ui.icon.icons.SelectSelectd
 import me.teble.xposed.autodaily.ui.icon.icons.Setting
+import me.teble.xposed.autodaily.ui.icon.icons.Status
 import me.teble.xposed.autodaily.ui.icon.icons.Sun
 import me.teble.xposed.autodaily.ui.icon.icons.TIM
 import me.teble.xposed.autodaily.ui.icon.icons.Text
@@ -45,6 +46,7 @@ public val Icons.AllIcons: ____KtList<ImageVector>
           Configuration,
           About,
           Setting,
+          Status,
           Notice,
           ChevronRight,
           Info,

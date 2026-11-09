@@ -173,6 +173,9 @@ fun NavGraphBuilder.addSceneGraph(
             onNavigateToSign = {
                 navController.navigateItem(SceneItem.Sign)
             },
+            onNavigateToSignState = {
+                navController.navigateItem(SceneItem.SignState)
+            },
             onNavigateToSetting = {
                 navController.navigateItem(SceneItem.Setting)
             },
@@ -216,9 +219,6 @@ fun NavGraphBuilder.addSceneGraph(
             },
             onNavigateToTheme = {
                 navController.navigateItem(DialogItem.Theme)
-            },
-            onNavigateToSignState = {
-                navController.navigateItem(SceneItem.SignState)
             },
             hasBackProvider = { true },
         )

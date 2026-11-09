@@ -4,22 +4,26 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.Text
@@ -30,6 +34,7 @@ import me.teble.xposed.autodaily.ui.lastExecMsg
 import me.teble.xposed.autodaily.ui.lastExecTime
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
+import me.teble.xposed.autodaily.ui.reset
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 
@@ -37,6 +42,7 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 fun SignStateScene(
     backClick: () -> Unit
 ) {
+    val colors = colors
     XaScaffold(
         text = "签到状态",
         backClick = backClick,
@@ -54,14 +60,16 @@ fun SignStateScene(
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
-            SmallTitle(
-                title = "已启用的项目",
-                modifier = Modifier
-                    .padding(bottom = 8.dp, start = 16.dp, top = 8.dp)
-            )
+            Column(Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp)) {
+                SmallTitle(title = "已启用的项目", modifier = Modifier)
+                Text(
+                    text = "长按任务可重置执行记录",
+                    modifier = Modifier.padding(top = 4.dp),
+                    style = TextStyle(fontSize = 12.sp),
+                    color = { colors.colorTextSecondary },
+                )
+            }
         }
-        val colors = colors
-
         Column(
             modifier = Modifier
                 .clip(SmootherShape(12.dp))
@@ -72,43 +80,51 @@ fun SignStateScene(
         ) {
 
             turnTaskState.forEach { task ->
-                val title by remember {
-                    derivedStateOf { task.id }
+                var resetVersion by remember(task.id) { mutableIntStateOf(0) }
+                // 执行记录保存在 MMKV 中，重置后通过版本变化立即刷新当前行。
+                val lastExecTime = remember(task.id, resetVersion) {
+                    task.lastExecTime ?: "从未执行"
                 }
-
-                val lastExecTime by remember {
-                    derivedStateOf { task.lastExecTime ?: "从未执行" }
+                val lastExecMsg = remember(task.id, resetVersion) {
+                    task.lastExecMsg ?: "从未执行"
                 }
-
-
-                val lastExecMsg by remember {
-                    derivedStateOf { task.lastExecMsg ?: "从未执行" }
-                }
-
-                val nextShouldExecTime by remember {
-                    derivedStateOf { task.nextShouldExecTime ?: "从未执行" }
+                val nextShouldExecTime = remember(task.id, resetVersion) {
+                    task.nextShouldExecTime ?: "从未执行"
                 }
 
                 StateItem(
-                    text = title, infoText =
+                    text = task.id, infoText =
                     "上次: $lastExecTime, 响应: $lastExecMsg\n" +
-                            "下次: $nextShouldExecTime"
+                            "下次: $nextShouldExecTime",
+                    onLongClick = {
+                        task.reset()
+                        resetVersion++
+                        ToastUtil.send("已重置执行记录")
+                    },
                 )
             }
         }
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StateItem(
     modifier: Modifier = Modifier,
     text: String,
     infoText: String,
+    onLongClick: () -> Unit,
 ) {
     val colors = colors
     Column(
         modifier = modifier
             .fillMaxWidth()
+            .clip(SmootherShape(12.dp))
+            .combinedClickable(
+                onClick = {},
+                onLongClickLabel = "重置执行记录",
+                onLongClick = onLongClick,
+            )
             .padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
         Text(

@@ -23,7 +23,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.model.TaskGroup
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
@@ -34,7 +33,6 @@ import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
-import me.teble.xposed.autodaily.ui.reset
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
@@ -163,10 +161,6 @@ private fun SignItem(
                             onClick = {
                                 onNavigateToEditEnvs(taskGroup.id, task.id)
                             },
-                            onLongClick = {
-                                ToastUtil.send("正在重置上次执行时间")
-                                task.reset()
-                            },
                             onChange = {
                                 checked = it
                                 task.enable = it
@@ -201,10 +195,6 @@ private fun SignItem(
                             clickEnabled = enable,
                             onClick = {
                                 onNavigateToEditEnvs(taskGroup.id, task.id)
-                            },
-                            onLongClick = {
-                                ToastUtil.send("正在重置上次执行时间")
-                                task.reset()
                             },
                             onChange = {
                                 checked = it

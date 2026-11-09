@@ -25,7 +25,6 @@ import me.teble.xposed.autodaily.ui.composable.SelectionItem
 import me.teble.xposed.autodaily.ui.composable.SmallTitle
 import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.TextInfoItem
-import me.teble.xposed.autodaily.ui.composable.TextItem
 import me.teble.xposed.autodaily.ui.composable.TopBar
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
@@ -40,7 +39,6 @@ fun SettingScene(
     onNavigateToRestore: () -> Unit,
     onNavigateToTheme: () -> Unit,
     hasBackProvider: () -> Boolean,
-    onNavigateToSignState: () -> Unit,
 
     viewmodel: SettingViewModel = viewModel()
 ) {
@@ -87,7 +85,6 @@ fun SettingScene(
         },
         containerColor = colors.colorBgLayout
     ) {
-        // Screen content
         Column(
             Modifier
                 .fillMaxSize()
@@ -96,7 +93,6 @@ fun SettingScene(
                 .defaultNavigationBarPadding()
         ) {
 
-            EntryLayout(onNavigateToSignState)
             ConfigLayout(
                 showTaskToast = viewmodel::showTaskToast,
                 usedThreadPool = viewmodel::usedThreadPool,
@@ -128,26 +124,6 @@ fun SettingScene(
         }
     }
 
-}
-
-@Composable
-private fun EntryLayout(onNavigateToSignState: () -> Unit) {
-    val backgroundColor = colors.colorBgContainer
-    SmallTitle(
-        title = "状态",
-        modifier = Modifier
-            .padding(bottom = 8.dp, start = 16.dp, top = 8.dp)
-    )
-    TextItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(SmootherShape(12.dp))
-            .drawBehind {
-                drawRect(backgroundColor)
-            },
-        text = "签到状态",
-        onClick = onNavigateToSignState
-    )
 }
 
 @Composable

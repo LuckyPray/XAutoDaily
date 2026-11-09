@@ -339,7 +339,7 @@ fun SwitchInfoDivideItem(
     clickEnabled: () -> Boolean,
     enable: () -> Boolean,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
     onChange: (Boolean) -> Unit
 ) {
 
@@ -366,7 +366,7 @@ fun SwitchInfoDivideItem(
                     role = Role.Button,
                     enabled = clickEnabled(),
                     onClick = { onClick() },
-                    onLongClick = { onLongClick() }
+                    onLongClick = onLongClick
                 )
                 .padding(vertical = 20.dp, horizontal = 16.dp),
         ) {
