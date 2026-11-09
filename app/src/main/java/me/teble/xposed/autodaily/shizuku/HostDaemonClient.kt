@@ -4,25 +4,22 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.net.Uri
 import android.os.Binder
 import android.os.Build
-import android.os.Bundle
 import android.os.Process
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import me.teble.xposed.autodaily.IHostCallback
 import me.teble.xposed.autodaily.IHostBootstrap
 import me.teble.xposed.autodaily.IHostSession
 import me.teble.xposed.autodaily.hook.base.hostApp
-import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
@@ -34,7 +31,6 @@ import me.teble.xposed.autodaily.utils.TaskSchedulePublisher
 object HostDaemonClient {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
-    private val bridge = Uri.parse("content://${WakeProtocol.AUTHORITY}")
     @Volatile
     private var session: IHostSession? = null
     @Volatile
@@ -43,7 +39,14 @@ object HostDaemonClient {
     private var runtimeReady = false
     @Volatile
     private var generation = 0
+    @Volatile
+    private var protectedRunId: String? = null
     private var connectionJob: Job? = null
+
+    val isConnected: Boolean
+        get() = currentSession() != null
+
+    private fun currentSession(): IHostSession? = session?.takeIf { it.asBinder().isBinderAlive }
 
     fun start() {
         if (started) return
@@ -67,8 +70,10 @@ object HostDaemonClient {
         }
         // 通过 DUMP 权限限制会话交接广播的发送方，阻止未获特权授权的普通应用冒充守护。
         val filter = IntentFilter(WakeProtocol.ACTION_SESSION)
-        if (Build.VERSION.SDK_INT >= 33) hostApp.registerReceiver(receiver, filter, "android.permission.DUMP", null, Context.RECEIVER_EXPORTED)
-        else hostApp.registerReceiver(receiver, filter, "android.permission.DUMP", null)
+        runCatching {
+            if (Build.VERSION.SDK_INT >= 33) hostApp.registerReceiver(receiver, filter, "android.permission.DUMP", null, Context.RECEIVER_EXPORTED)
+            else hostApp.registerReceiver(receiver, filter, "android.permission.DUMP", null)
+        }.onFailure { LogUtil.w("注册任务守护接收器失败，普通签到仍可使用: ${it.message}") }
         TaskSchedulePublisher.install()
         reconnect()
     }
@@ -78,42 +83,30 @@ object HostDaemonClient {
     }
     @Synchronized
     fun reconnect() {
-        if (!started || connectionJob?.isActive == true) return
+        if (!started || !isConnected || connectionJob?.isActive == true) return
         connectionJob = scope.launch {
             repeat(3) { attempt ->
                 try {
-                    connect()
+                    connect() ?: return@launch
                     TaskSchedulePublisher.changed()
                     return@launch
                 } catch (e: Exception) {
+                    if (e is CancellationException) throw e
                     LogUtil.w("宿主连接任务守护失败: ${e.message}")
                     delay((attempt + 1) * 3_000L)
                 }
             }
         }
     }
-    suspend fun connect(): IHostSession? {
-        // 守护可直接向已运行的宿主主进程交接受限 Binder，无需启动模块应用。
-        // 等待期间不持有互斥锁，避免阻塞广播接收端接纳新会话。
-        repeat(24) {
-            session?.takeIf { it.asBinder().isBinderAlive }?.let { connected ->
-                if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
-                return connected
-            }
-            delay(250)
-        }
-        return mutex.withLock {
-            session?.takeIf { it.asBinder().isBinderAlive }?.let {
-                if (runtimeReady && QApplicationUtil.currentUin > 10000) it.ready()
-                return@withLock it
-            }
-            val epoch = ++generation
-            val reply = checkNotNull(hostApp.contentResolver.call(bridge, "connect", hostPackageName,
-                Bundle().apply { putBinder("callback", callback(epoch)); putInt("version", WakeProtocol.VERSION) })) { "模块通信入口不可用" }
-            if (!reply.getBoolean("enabled")) return@withLock null
-            check(reply.getInt("version") == WakeProtocol.VERSION) { "宿主与模块协议不一致，请重启宿主" }
-            adopt(IHostSession.Stub.asInterface(checkNotNull(reply.getBinder("session"))), epoch)
-        }
+    /**
+     * 使用守护主动交接的会话；尚未连接时按普通模式执行，不依赖模块 Provider。
+     *
+     * @return 当前可用的守护会话，未连接时返回 null
+     */
+    private suspend fun connect(): IHostSession? = mutex.withLock {
+        val connected = currentSession() ?: return@withLock null
+        if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
+        connected
     }
 
     private fun callback(epoch: Int) = object : IHostCallback.Stub() {
@@ -127,7 +120,7 @@ object HostDaemonClient {
         override fun onSessionClosed(reason: String) {
             if (trusted()) {
                 session = null
-                TaskExecutor.cancelActiveRun(reason)
+                cancelProtectedRun(reason)
                 reconnect()
             }
         }
@@ -136,7 +129,7 @@ object HostDaemonClient {
         connected.asBinder().linkToDeath({
             if (epoch == generation) {
                 session = null
-                TaskExecutor.cancelActiveRun("守护进程连接中断")
+                cancelProtectedRun("守护进程连接中断")
                 reconnect()
             }
         }, 0)
@@ -149,16 +142,31 @@ object HostDaemonClient {
     suspend fun begin(runId: String): IHostSession? {
         val connected = connect() ?: return null
         check(runtimeReady && QApplicationUtil.currentUin > 10000) { "宿主账号尚未就绪" }
-        connected.ready()
-        val result = connected.beginRun(runId)
-        check(result.getBoolean("success")) { result.getString("error") ?: "无法申请任务防冻结保护" }
-        if (result.getBoolean("disabled")) return null
-        return connected
+        // 先记录申请中的任务，确保 Binder 在申请过程中断开时也能取消对应任务。
+        protectedRunId = runId
+        try {
+            val result = connected.beginRun(runId)
+            check(result.getBoolean("success")) { result.getString("error") ?: "无法申请任务防冻结保护" }
+            if (result.getBoolean("disabled")) {
+                protectedRunId = null
+                return null
+            }
+            return connected
+        } catch (e: Exception) {
+            finish(runId, connected)
+            throw e
+        }
+    }
+    private fun cancelProtectedRun(reason: String) {
+        protectedRunId?.let { TaskExecutor.cancelRun(it, reason) }
     }
     fun finish(runId: String, connected: IHostSession? = session) {
         runCatching { connected?.finishRun(runId) }.onFailure { LogUtil.w("释放任务保护失败，将由守护进程超时清理: ${it.message}") }
+        if (protectedRunId == runId) protectedRunId = null
     }
-    fun publish(nextAt: Long) {
-        runBlocking { connect() }?.publishSchedule(nextAt)
+    fun publish(nextAt: Long): Boolean {
+        val connected = currentSession() ?: return false
+        connected.publishSchedule(nextAt)
+        return true
     }
 }

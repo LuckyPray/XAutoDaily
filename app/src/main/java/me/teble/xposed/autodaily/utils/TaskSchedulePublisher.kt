@@ -43,7 +43,7 @@ object TaskSchedulePublisher {
     fun install() { installed = true; TaskScheduleEvents.listener = ::changed }
     @Synchronized
     fun changed() {
-        if (!installed) return
+        if (!installed || !HostDaemonClient.isConnected) return
         if (calculating || TaskExecutor.isRunning) { dirty = true; return }
         job?.cancel()
         job = scope.launch {
@@ -72,6 +72,10 @@ object TaskSchedulePublisher {
     }
     @Synchronized
     private fun publish() {
+        if (!HostDaemonClient.isConnected) {
+            lastPublishSucceeded = false
+            return
+        }
         calculating = true
         dirty = false
         lastPublishSucceeded = false
@@ -79,7 +83,7 @@ object TaskSchedulePublisher {
             val account = QApplicationUtil.currentUin
             if (!ConfUnit.globalEnable || account <= 10000) {
                 if (publication.publish(account, 0)) LogUtil.i("已取消宿主预唤醒计划")
-                lastPublishSucceeded = true
+                lastPublishSucceeded = HostDaemonClient.isConnected
                 return
             }
             val now = System.currentTimeMillis()
@@ -99,7 +103,7 @@ object TaskSchedulePublisher {
             if (publication.publish(account, cronCheck)) {
                 LogUtil.i("发布宿主下次 Cron 检查时间: $cronCheck")
             }
-            lastPublishSucceeded = true
+            lastPublishSucceeded = HostDaemonClient.isConnected
         } catch (e: Exception) { LogUtil.e(e, "发布任务时间失败") }
         finally {
             calculating = false

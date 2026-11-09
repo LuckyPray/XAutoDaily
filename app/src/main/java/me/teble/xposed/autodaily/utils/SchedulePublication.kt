@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong
 /**
  * 仅缓存已确认的计划；发送失败或对端连接变化后，仍需重新同步。
  */
-internal class SchedulePublication(private val send: (Long) -> Unit) {
+internal class SchedulePublication(private val send: (Long) -> Boolean) {
     private data class Plan(val account: Long, val nextAt: Long, val generation: Long)
     private var acknowledged: Plan? = null
     private val generation = AtomicLong()
@@ -19,7 +19,7 @@ internal class SchedulePublication(private val send: (Long) -> Unit) {
     fun publish(account: Long, nextAt: Long): Boolean {
         val plan = Plan(account, nextAt, generation.get())
         if (plan == acknowledged) return false
-        send(nextAt)
+        if (!send(nextAt)) return false
         acknowledged = plan
         return true
     }
