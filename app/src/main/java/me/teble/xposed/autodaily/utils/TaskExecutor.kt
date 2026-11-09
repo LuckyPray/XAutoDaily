@@ -3,15 +3,19 @@ package me.teble.xposed.autodaily.utils
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Message
-import cn.hutool.core.thread.ThreadUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
+import me.teble.xposed.autodaily.IHostSession
 import me.teble.xposed.autodaily.hook.base.moduleLoadInit
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.shizuku.HostDaemonClient
+import me.teble.xposed.autodaily.shizuku.WakeProtocol
 import me.teble.xposed.autodaily.task.cron.CronUtil
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.TaskGroup
@@ -24,10 +28,13 @@ import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.ui.retryCount
 import java.time.LocalDateTime
 import java.util.TimeZone
+import java.util.UUID
 import java.util.concurrent.CompletableFuture.runAsync
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.thread
 import kotlin.concurrent.withLock
 
 object TaskExecutor {
@@ -44,6 +51,12 @@ object TaskExecutor {
         HandlerThread("CoreServiceHookThread").apply { start() }
     }
     private val runtimeTasks = mutableSetOf<TaskGroup>()
+    private val running = AtomicBoolean(false)
+    val isRunning get() = running.get()
+    @Volatile
+    private var activeControl: TaskRunControl? = null
+    @Volatile
+    private var activePool: ExecutorService? = null
 
     val handler = object : Handler(handlerThread.looper) {
         override fun handleMessage(msg: Message) {
@@ -55,34 +68,69 @@ object TaskExecutor {
         }
     }
 
+    fun cancelRun(runId: String, reason: String) {
+        if (activeControl?.id == runId) cancelActiveRun(reason)
+    }
+
+    fun cancelActiveRun(reason: String) {
+        activeControl?.cancel(reason)
+        activePool?.shutdownNow()
+    }
+
     fun runTasks(userExec: Boolean) {
         scope.launch(Dispatchers.IO) {
-            while (!moduleLoadInit) {
-                LogUtil.d("等待初始化完毕")
-                delay(500)
-            }
-            val globalEnable = ConfUnit.globalEnable
-            if (!globalEnable) {
-                if (userExec) {
-                    ToastUtil.send("未启用总开关，跳过执行")
-                }
+            if (!running.compareAndSet(false, true)) {
+                if (userExec) ToastUtil.send("已有任务正在执行")
                 return@launch
             }
-            if (userExec) {
-                ToastUtil.send("开始执行签到")
-            } else {
-                LogUtil.i("定时执行")
-            }
-            runCatching {
-                executorTask(ConfigUtil.loadSaveConf())
-            }.onFailure {
-                LogUtil.e(it)
+            val runId = UUID.randomUUID().toString()
+            val control = TaskRunControl(runId, WakeProtocol.MAX_RUN_MS)
+            activeControl = control
+            var session: IHostSession? = null
+            var heartbeat: Job? = null
+            try {
+                withTimeout(WakeProtocol.BOOTSTRAP_MS) { while (!moduleLoadInit) delay(200) }
+                if (!ConfUnit.globalEnable) {
+                    if (userExec) ToastUtil.send("未启用总开关，跳过执行")
+                    return@launch
+                }
+                executorTask(ConfigUtil.loadSaveConf(), control) {
+                    session = HostDaemonClient.begin(runId)
+                    val connected = session
+                    if (connected != null) heartbeat = scope.launch(Dispatchers.IO) {
+                        while (isActive) {
+                            delay(WakeProtocol.HEARTBEAT_MS)
+                            if (!runCatching { connected.heartbeat(runId) }.getOrDefault(false)) {
+                                cancelRun(runId, "任务防冻结保护续期失败")
+                                break
+                            }
+                        }
+                    }
+                    if (userExec) ToastUtil.send("开始执行签到") else LogUtil.i("定时执行 run=$runId")
+                }
+            } catch (e: Exception) {
+                control.cancel(e.message ?: "任务失败")
+                LogUtil.e(e, "本次任务已停止")
+                if (userExec) ToastUtil.send("任务停止: ${e.message}", true)
+            } finally {
+                heartbeat?.cancel()
+                if (session != null) HostDaemonClient.finish(runId, session)
+                val remaining = activePool
+                activeControl = null
+                if (remaining != null && !remaining.isTerminated) {
+                    // 等待无法中断的旧工作线程真正退出后，才允许下一批任务开始。
+                    scope.launch(Dispatchers.IO) {
+                        while (!remaining.awaitTermination(1, TimeUnit.SECONDS)) delay(100)
+                        activePool = null; running.set(false)
+                    }
+                } else {
+                    activePool = null; running.set(false)
+                }
             }
         }
     }
 
-    private suspend fun executorTask(conf: TaskProperties) {
-        val executeTime = System.currentTimeMillis()
+    private suspend fun executorTask(conf: TaskProperties, control: TaskRunControl, protect: suspend () -> Unit) {
         val needExecGroups = mutableListOf<TaskGroup>()
         val currDateStr = TimeUtil.getCNDate().formatDate()
         lock.withLock {
@@ -109,45 +157,34 @@ object TaskExecutor {
         if (needExecGroups.isEmpty()) {
             return
         }
+        protect()
+        val threadPool = Executors.newFixedThreadPool(if (ConfUnit.usedThreadPool) 5 else 1)
+        activePool = threadPool
         try {
+            control.check()
             XANotification.start()
-            runtimeTasks.addAll(needExecGroups)
-            var threadCount = 1
-            if (ConfUnit.usedThreadPool) {
-                threadCount = 5
-            }
-            val threadPool = ThreadUtil.newExecutor(threadCount, threadCount)
+            lock.withLock { runtimeTasks.addAll(needExecGroups) }
             for (taskGroup in needExecGroups) {
-                threadPool.execute(
-                    thread(false) {
-                        try {
+                threadPool.execute {
+                    try {
+                        control.within {
                             GroupTaskFilterChain.build(taskGroup)
                                 .doFilter(mutableMapOf(), mutableListOf(), mutableMapOf())
-                        } catch (e: Exception) {
-                            LogUtil.e(e)
                         }
+                    } catch (e: Exception) {
+                        LogUtil.e(e)
                     }
-                )
+                }
             }
             threadPool.shutdown()
-            while (!withContext(Dispatchers.IO) {
-                    threadPool.awaitTermination(1, TimeUnit.SECONDS)
-                }) {
-                if (System.currentTimeMillis() - executeTime > 20 * 60 * 1000) {
-                    // 关闭运行时间超过20分钟的任务
-                    threadPool.shutdownNow()
-                }
-            }
+            while (!threadPool.awaitTermination(1, TimeUnit.SECONDS)) control.check()
+            control.check()
         } finally {
-            needExecGroups.forEach {
-                if (runtimeTasks.contains(it)) {
-                    runtimeTasks.remove(it)
-                }
-            }
-            XANotification.setContent("签到执行完毕", onGoing = false, isTask = true)
-            withContext(Dispatchers.IO) {
-                delay(5000)
-            }
+            control.cancel(control.cancelled ?: "本批任务已结束")
+            threadPool.shutdownNow()
+            threadPool.awaitTermination(5, TimeUnit.SECONDS)
+            lock.withLock { runtimeTasks.removeAll(needExecGroups.toSet()) }
+            XANotification.setContent("任务执行已结束", onGoing = false, isTask = true)
             XANotification.stop()
         }
     }

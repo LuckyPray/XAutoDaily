@@ -2,7 +2,6 @@ package me.teble.xposed.autodaily.hook
 
 import android.app.Activity
 import android.app.AlertDialog
-import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -13,10 +12,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.activity.common.MainActivity
 import me.teble.xposed.autodaily.activity.module.ModuleActivity
 import me.teble.xposed.autodaily.config.GITHUB_RELEASE_URL
-import me.teble.xposed.autodaily.config.PACKAGE_NAME_SELF
 import me.teble.xposed.autodaily.config.PAN_URL
 import me.teble.xposed.autodaily.config.SplashActivity
 import me.teble.xposed.autodaily.hook.annotation.MethodHook
@@ -28,6 +25,7 @@ import me.teble.xposed.autodaily.hook.base.hostVersionCode
 import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.hook.base.isInjectClassLoader
 import me.teble.xposed.autodaily.hook.base.modulePath
+import me.teble.xposed.autodaily.shizuku.HostDaemonClient
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.task.util.format
@@ -44,9 +42,6 @@ import me.teble.xposed.autodaily.utils.TaskExecutor.handler
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.getArtApexVersion
 import me.teble.xposed.autodaily.utils.getModulePath
-import java.io.File
-import java.io.RandomAccessFile
-import java.nio.channels.FileLock
 
 class SplashActivityHook : BaseHook() {
 
@@ -61,21 +56,8 @@ class SplashActivityHook : BaseHook() {
     @MethodHook("SplashActivity Hook")
     private fun splashActivityHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
-            val context = it.thisObject as Activity
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    val daemonDir = context.getExternalFilesDir("xa_daemon")
-                    val file = File(daemonDir, ".init_service")
-                    if (file.exists()) {
-                        runCatching {
-                            val accessFile = RandomAccessFile(file, "rw")
-                            val lock = accessFile.channel.tryLock()
-                            lock?.let {
-                                LogUtil.d("获取文件锁成功，守护进程未在运行？")
-                                context.openJumpModuleDialog(lock, file)
-                            }
-                        }.onFailure { LogUtil.e(it, "try lock fail: ") }
-                    }
                     ConfUnit.metaInfoCache ?: ConfigUtil.checkUpdate(false)
                     autoResetTask(true)
                     resetTasksNextExecTime()
@@ -86,6 +68,8 @@ class SplashActivityHook : BaseHook() {
 
         findMethod(SplashActivity) { name == "doOnStart" }.hookAfter {
             val context = it.thisObject as Activity
+            // 宿主进入前台时异步重连守护，连接状态不再通过旧版文件锁判断。
+            HostDaemonClient.reconnect()
             scope.launch {
                 withContext(Dispatchers.IO) {
                     if (ConfUnit.metaInfoCache == null
@@ -263,40 +247,6 @@ suspend fun Activity.openConfigUpdateLog() {
     }
 }
 
-
-private lateinit var jumpModuleDialog: AlertDialog
-suspend fun Activity.openJumpModuleDialog(lock: FileLock, file: File) {
-    withContext(Dispatchers.IO) {
-        var builder: AlertDialog.Builder? = null
-        val isInitialized = ::jumpModuleDialog.isInitialized
-        if (!isInitialized) {
-            builder = AlertDialog.Builder(this@openJumpModuleDialog, 5).apply {
-                setTitle("守护进程提示")
-                setMessage("检测到守护进程异常退出，是否前往模块启动？")
-                setNegativeButton("我不需要") { _, _ ->
-                    runCatching {
-                        lock.release()
-                        file.delete()
-                    }
-                }
-                setPositiveButton("前往模块") { _, _ ->
-                    val intent = Intent().apply {
-                        component = ComponentName(PACKAGE_NAME_SELF, MainActivity::class.java.name)
-                    }
-                    context.startActivity(intent)
-                }
-            }
-        }
-        withContext(Dispatchers.Main) {
-            if (!isInitialized) {
-                configUpdateDialog = builder!!.create()
-            }
-            if (!configUpdateDialog.isShowing && !isFinishing) {
-                configUpdateDialog.show()
-            }
-        }
-    }
-}
 
 suspend fun resetTasksNextExecTime() {
     withContext(Dispatchers.IO) {

@@ -16,6 +16,7 @@ import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TaskRunControl
 import me.teble.xposed.autodaily.utils.TimeUtil
 import java.io.InterruptedIOException
 import java.net.ConnectException
@@ -23,6 +24,7 @@ import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.util.Date
+import java.util.concurrent.CancellationException
 import javax.net.ssl.SSLHandshakeException
 
 class GroupTaskFilterChain(
@@ -66,6 +68,8 @@ class GroupTaskFilterChain(
                     XANotification.setContent("正在执行任务${task.id}")
                     TaskUtil.execute(reqType, task, relayTaskMap, env)
                 } catch (e: Throwable) {
+                    TaskRunControl.ensureActive()
+                    if (e is CancellationException || e is InterruptedException) throw e
                     when (e) {
                         is ConnectException,
                         is SocketException,

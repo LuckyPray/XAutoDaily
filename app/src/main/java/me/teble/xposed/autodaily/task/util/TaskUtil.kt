@@ -27,6 +27,7 @@ import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.ui.taskExecStatus
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
+import me.teble.xposed.autodaily.utils.TaskRunControl
 import me.teble.xposed.autodaily.utils.parse
 import me.teble.xposed.autodaily.utils.toJsonString
 import java.util.Date
@@ -40,6 +41,7 @@ object TaskUtil {
         relayMap: Map<String, Task>,
         env: MutableMap<String, Any>
     ): Boolean {
+        TaskRunControl.ensureActive()
         LogUtil.i("开始执行任务：${task.id}")
         val relays: List<Task> = task.relay?.let {
             mutableListOf<Task>().apply {
@@ -67,6 +69,7 @@ object TaskUtil {
             LogUtil.i("检测到任务中断，可能是执行过程中异常退出导致，从上次位置（index: ${status.reqCount}）执行继续执行")
         }
         for (cnt in 0 until repeatNum) {
+            TaskRunControl.ensureActive()
             // 执行依赖任务
             relays.forEach {
                 LogUtil.i("开始执行依赖任务列表: ${task.relay}")
@@ -102,8 +105,11 @@ object TaskUtil {
             val startIdx =
                 if (task.isBasic || task.isRelayTask) 0 else status.reqCount % requests.size
             for (i in startIdx until requests.size) {
+                TaskRunControl.ensureActive()
                 Thread.sleep((task.delay * 1000).toLong())
+                TaskRunControl.ensureActive()
                 val response = taskReqUtil.executor(requests[i])
+                TaskRunControl.ensureActive()
                 val result = handleCallback(response, task, env)
                 lastMsg = result.msg
                 if (result.success) {
@@ -126,6 +132,7 @@ object TaskUtil {
             }
         }
         // 正常cron任务，需要计算下次执行时间
+        TaskRunControl.ensureActive()
         if (task.cron != null && task.cron != "basic") {
             val now = TimeUtil.getCNDate()
             task.lastExecTime = now.format()
@@ -230,7 +237,7 @@ object TaskUtil {
             if (it.match.startsWith("$")) {
                 try {
                     res = jsonNode!!.read<JsonElement>(it.match) ?: ""
-                    // fix JsonString.toString to be quote
+                    // 提取字符串内容，避免直接调用 toString 时保留 JSON 引号。
                     when {
                         res is JsonPrimitive && res.isString -> res = res.content
                         res is JsonArray -> res = res.map { (it as JsonPrimitive).content }

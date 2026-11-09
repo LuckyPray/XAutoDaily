@@ -21,6 +21,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
+import me.teble.xposed.autodaily.shizuku.DaemonConnectionManager
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
 import rikka.shizuku.Shizuku
 
@@ -52,6 +53,7 @@ class XaApplication : MultiDexApplication() {
         MMKV.initialize(this) {
             System.loadLibrary("xa_native")
         }
+        DaemonConnectionManager.initialize()
     }
 
     override fun onLowMemory() {

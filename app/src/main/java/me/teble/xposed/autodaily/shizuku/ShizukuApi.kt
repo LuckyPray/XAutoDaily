@@ -1,8 +1,8 @@
 package me.teble.xposed.autodaily.shizuku
 
 import android.content.pm.PackageManager
-import android.os.Build
 import android.os.IBinder
+import android.os.RemoteException
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
@@ -22,13 +22,24 @@ object ShizukuApi {
     private lateinit var service: IUserService
 
     fun initBinder(binder: IBinder) {
-        if (serviceBinderAvailable && ShizukuApi::service.isInitialized) return
+        if (serviceBinderAvailable && ShizukuApi::service.isInitialized && service.asBinder() == binder) return
         service = IUserService.Stub.asInterface(binder)
         serviceBinderAvailable = true
-        binder.linkToDeath({
+        try {
+            binder.linkToDeath({
+                if (ShizukuApi::service.isInitialized && service.asBinder() == binder) {
+                    serviceBinderAvailable = false
+                    Log.w("XALog", "UserService binderDied")
+                }
+            }, 0)
+        } catch (e: RemoteException) {
             serviceBinderAvailable = false
-            Log.w("XALog", "UserService binderDied")
-        }, 0)
+            throw e
+        }
+    }
+
+    fun clearUserServiceBinder() {
+        serviceBinderAvailable = false
     }
 
     fun init() {
@@ -36,10 +47,17 @@ object ShizukuApi {
             binderAvailable = true
             isPermissionGranted =
                 Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+            if (isPermissionGranted) DaemonConnectionManager.recover()
         }
         Shizuku.addBinderDeadListener {
             binderAvailable = false
             isPermissionGranted = false
+            serviceBinderAvailable = false
+            DaemonConnectionManager.disconnected()
+        }
+        Shizuku.addRequestPermissionResultListener { _, result ->
+            isPermissionGranted = result == PackageManager.PERMISSION_GRANTED
+            if (isPermissionGranted) DaemonConnectionManager.configChanged()
         }
     }
 
@@ -47,15 +65,6 @@ object ShizukuApi {
     fun checkSelfPermission() {
         isPermissionGranted =
             Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
-    }
-
-    fun startService(packageName: String, className: String, args: Array<String>) {
-        if (!isPermissionGranted) return
-        val arg = args.joinToString(" ")
-        val command =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) "start-foreground-service"
-            else "startservice"
-        shizukuShell("am $command -n $packageName/$className $arg")
     }
 
     fun setUntrustedTouchEvents(disabled: Boolean) {

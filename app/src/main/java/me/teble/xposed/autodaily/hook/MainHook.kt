@@ -8,6 +8,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.res.XModuleResources
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -19,9 +20,6 @@ import com.github.kyuubiran.ezxhelper.utils.hookAfter
 import com.github.kyuubiran.ezxhelper.utils.hookBefore
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.IXposedHookZygoteInit
-import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XC_MethodHook.MethodHookParam
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam
 import kotlinx.collections.immutable.PersistentSet
 import kotlinx.collections.immutable.persistentSetOf
@@ -56,13 +54,13 @@ import me.teble.xposed.autodaily.hook.inject.ServletPool
 import me.teble.xposed.autodaily.hook.proxy.ProxyManager
 import me.teble.xposed.autodaily.hook.proxy.activity.injectRes
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.shizuku.HostDaemonClient
+import me.teble.xposed.autodaily.shizuku.WakeProtocol
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_FLAG
 import me.teble.xposed.autodaily.utils.TaskExecutor.CORE_SERVICE_TOAST_FLAG
-import me.teble.xposed.autodaily.utils.field
-import me.teble.xposed.autodaily.utils.fieldValue
 import me.teble.xposed.autodaily.utils.getArtApexVersion
 import me.teble.xposed.autodaily.utils.getModulePath
 import me.teble.xposed.autodaily.utils.new
@@ -143,6 +141,9 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             updateHostClassLoader(finalClassLoader)
             initializeHost(application)
         }
+        onCreate.hookAfter {
+            if (ProcUtil.isMain) HostDaemonClient.start()
+        }
         baseApplicationOnCreateHookInstalled = true
     }
 
@@ -165,7 +166,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
             hostApp = application
             EzXHelperInit.initAppContext(application)
             if (ProcUtil.isMain) {
-                // MMKV
+                // 初始化 MMKV。
                 Config.init()
                 LogUtil.i("""
                     android version: ${Build.VERSION.RELEASE}(${Build.VERSION.SDK_INT})
@@ -178,10 +179,13 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 ProxyManager.init
                 filterAndHook()
                 doInit()
+                installWakeProviderHook()
             }
             if (ProcUtil.isTool) {
                 Log.d("XALog", "tool process: $hostProcessName")
-                toolsHook()
+                runCatching {
+                    toolsHook()
+                }
             }
         }.onFailure {
             moduleLoadInit = true
@@ -193,7 +197,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
     private var hookIsInit: Boolean = false
 
     private fun toolsHook() {
-        val cmdClass: Class<*> by lazy { load(DataMigrationService)!! }
+        val cmdClass = load(DataMigrationService) ?: return
         findMethod(cmdClass) {
             name == "onStartCommand"
         }.hookAfter {
@@ -269,14 +273,14 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
 
     private fun findInjectStepMethod(): Method {
         val cl = hostClassLoader
-        // classic
+        // 查找旧版 QQ 的运行环境初始化入口。
         try {
             val kNewRuntime = cl.loadClass(NewRuntime)
             return findMethod(kNewRuntime) { returnType == Boolean::class.java && emptyParam }
         } catch (ignored: ClassNotFoundException) {
-            // ignore
+            // 旧版入口不存在时，继续查找 NT QQ 的初始化入口。
         }
-        // for NT QQ
+        // 查找 NT QQ 的内核初始化任务。
         val cKernelInitTask = load("Lcom/tencent/mobileqq/startup/task/KernelInitTask;")!!
         val method = cKernelInitTask.declaredMethods.first {
             it.returnType == Void.TYPE &&
@@ -297,6 +301,7 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
                 // 启动前数据迁移/初始化
                 onStart()
                 hookIsInit = true
+                HostDaemonClient.markReady()
                 // 等待hook执行完毕
                 while (!moduleLoadInit) {
                     Thread.sleep(100)
@@ -313,10 +318,26 @@ class MainHook : IXposedHookLoadPackage, IXposedHookZygoteInit {
         }
     }
 
+    private fun installWakeProviderHook() {
+        listOf("com.tencent.mqq.shared_file_accessor.ContentProviderImpl",
+            "androidx.lifecycle.ProcessLifecycleOwnerInitializer").forEach { name ->
+            runCatching {
+                val type = hostClassLoader.loadClass(name)
+                findMethod(type) { this.name == "getType" && parameterTypes.contentEquals(arrayOf(Uri::class.java)) }
+                    .hookAfter {
+                        val uri = it.args.firstOrNull() as? Uri
+                        if (uri?.path == WakeProtocol.WAKE_PATH) {
+                            HostDaemonClient.reconnect()
+                        }
+                    }
+            }.onFailure { LogUtil.d("可选唤醒 Provider 不可用: $name") }
+        }
+    }
+
     private fun doDexInit() {
         val cache = Config.classCache
         // dex解析
-        // qq dex
+        // 解析 QQ 的 DEX 文件。
         val confuseInfoKeys = confuseInfo.keys
         val needLocateClasses = mutableSetOf<String>()
         // 清空混淆缓存

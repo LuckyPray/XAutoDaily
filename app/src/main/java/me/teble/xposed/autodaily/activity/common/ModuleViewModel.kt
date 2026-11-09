@@ -3,9 +3,6 @@ package me.teble.xposed.autodaily.activity.common
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.IBinder
-import android.os.RemoteException
 import android.util.Log
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Stable
@@ -16,23 +13,20 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.teble.xposed.autodaily.BuildConfig
-import me.teble.xposed.autodaily.IUserService
 import me.teble.xposed.autodaily.config.JUMP_ACTIVITY
 import me.teble.xposed.autodaily.hook.JumpActivityHook
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
 import me.teble.xposed.autodaily.shizuku.ShizukuApi
-import me.teble.xposed.autodaily.shizuku.UserService
+import me.teble.xposed.autodaily.shizuku.DaemonConnectionManager
 import me.teble.xposed.autodaily.ui.ConfUnit
 import rikka.shizuku.Shizuku
 
 @Stable
 class ModuleViewModel : ViewModel() {
-    private var shizukuDaemonRunning by mutableStateOf(false)
-    private var shizukuErrInfo by mutableStateOf("")
-
+    private val shizukuDaemonRunning get() = DaemonConnectionManager.running
+    private val shizukuDaemonStarting get() = DaemonConnectionManager.starting
+    private val shizukuErrInfo get() = DaemonConnectionManager.error
 
     val shizukuState by derivedStateOf {
         if (ShizukuApi.binderAvailable) {
@@ -41,7 +35,11 @@ class ModuleViewModel : ViewModel() {
             } else if (!shizukuDaemonRunning) {
                 ShizukuState.Warn(
                     Shizuku.getVersion(),
-                    if (shizukuErrInfo.isEmpty()) "守护进程未在运行，点击运行" else "守护进程启动失败: $shizukuErrInfo"
+                    when {
+                        shizukuDaemonStarting -> "守护进程正在初始化"
+                        shizukuErrInfo.isNotEmpty() -> "守护进程启动失败: $shizukuErrInfo"
+                        else -> "守护进程未在运行，点击运行"
+                    }
                 )
             } else {
                 ShizukuState.Activated(Shizuku.getVersion())
@@ -55,98 +53,13 @@ class ModuleViewModel : ViewModel() {
 
     val snackbarHostState = SnackbarHostState()
 
-    private val peekServiceJob
-        get() = viewModelScope.launch(IO) {
-            while (!shizukuDaemonRunning) {
-                shizukuDaemonRunning = peekUserService()
-                delay(1000)
-
-            }
-            bindUserService()
-        }
-
-    /**
-     * 用于与Shizuku服务的连接和断开
-     */
-    private var userServiceConnection = object : ServiceConnection {
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            if (binder != null && binder.pingBinder()) {
-                val service = IUserService.Stub.asInterface(binder)
-                ShizukuApi.initBinder(binder)
-                try {
-                    if (service.isRunning) {
-                        shizukuErrInfo = ""
-                        shizukuDaemonRunning = true
-                    }
-                } catch (e: RemoteException) {
-                    Log.e("XALog", e.stackTraceToString())
-                    shizukuErrInfo = "守护进程连接失败"
-                }
-            } else {
-                shizukuErrInfo = "invalid binder for $name received"
-            }
-        }
-
-        override fun onServiceDisconnected(name: ComponentName?) {
-            shizukuErrInfo = ""
-            shizukuDaemonRunning = false
-        }
-    }
-
-
-    private val userServiceArgs = Shizuku.UserServiceArgs(
-        ComponentName(
-            BuildConfig.APPLICATION_ID,
-            UserService::class.java.name
-        )
-    )
-        .daemon(true)
-        .processNameSuffix("service")
-        .debuggable(BuildConfig.DEBUG)
-        .version(BuildConfig.VERSION_CODE)
-
-
     fun rebindUserService() {
-        unbindUserService() && bindUserService()
-    }
-
-    private fun bindUserService(): Boolean {
-        try {
-            Shizuku.bindUserService(
-                userServiceArgs,
-                userServiceConnection
-            )
-            return true
-        } catch (e: Throwable) {
-            Log.e("XALog", e.stackTraceToString())
+        viewModelScope.launch(IO) {
+            runCatching {
+                DaemonConnectionManager.stop()
+                DaemonConnectionManager.start()
+            }.onFailure { showSnackbar("重启守护进程失败: ${it.message}") }
         }
-        return false
-    }
-
-    private fun unbindUserService(): Boolean {
-        try {
-            Shizuku.unbindUserService(
-                userServiceArgs,
-                userServiceConnection, true
-            )
-            shizukuDaemonRunning = false
-            return true
-        } catch (e: Throwable) {
-            Log.e("XALog", e.stackTraceToString())
-        }
-        return false
-    }
-
-    private fun peekUserService(): Boolean {
-        try {
-            return Shizuku.peekUserService(
-                userServiceArgs,
-                userServiceConnection
-            ) == 0
-        } catch (e: Throwable) {
-            Log.e("XALog", e.stackTraceToString())
-        }
-        return false
     }
 
     /**
@@ -180,30 +93,19 @@ class ModuleViewModel : ViewModel() {
     }
 
     fun shizukuClickable() {
+        if (shizukuDaemonStarting) return
         if (ShizukuApi.binderAvailable && !ShizukuApi.isPermissionGranted) {
             Shizuku.requestPermission(1101)
-
-            viewModelScope.launch(IO) {
-                while (!ShizukuApi.isPermissionGranted) {
-                    ShizukuApi.checkSelfPermission()
-                    delay(500)
-                }
-            }
-            Log.d("TAG", "shizukuClickable: 被调用")
             return
         }
         viewModelScope.launch(IO) {
-            if (!ConfUnit.keepAlive) {
-                showSnackbar("未启用保活，无需启动守护进程")
-                return@launch
-            }
-            if (!shizukuDaemonRunning) {
-                bindUserService()
-                peekServiceJob.start()
-                showSnackbar("正在启动守护进程，请稍后")
-            } else {
-                unbindUserService()
-            }
+            runCatching {
+                if (shizukuDaemonRunning) DaemonConnectionManager.stop()
+                else {
+                    check(ConfUnit.keepAlive) { "请先在更多设置中启用任务守护" }
+                    DaemonConnectionManager.start()
+                }
+            }.onFailure { showSnackbar(it.message ?: "守护进程操作失败") }
         }
     }
 }
