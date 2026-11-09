@@ -37,6 +37,7 @@ import me.teble.xposed.autodaily.task.util.Const.THEME
 import me.teble.xposed.autodaily.task.util.Const.USED_THREAD_POOL
 import me.teble.xposed.autodaily.task.util.Const.XA_CONFIG
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
+import me.teble.xposed.autodaily.utils.TaskScheduleEvents
 import me.teble.xposed.autodaily.utils.parse
 import me.teble.xposed.autodaily.utils.toCode
 import me.teble.xposed.autodaily.utils.toJsonString
@@ -140,7 +141,11 @@ object ConfUnit {
     // -------------------------------------------------- //
     var globalEnable: Boolean
         get() = accountConfig.getBoolean(GLOBAL_ENABLE, false)
-        set(value) = accountConfig.putBoolean(GLOBAL_ENABLE, value)
+        set(value) {
+            if (globalEnable == value) return
+            accountConfig.putBoolean(GLOBAL_ENABLE, value)
+            TaskScheduleEvents.changed()
+        }
 
     var theme: XAutodailyTheme.Theme
         get() = xaConfig.getInt(THEME, 0).toTheme()
@@ -155,7 +160,11 @@ object ConfUnit {
 // -------------------------------------------------- //
 var Task.enable: Boolean
     get() = accountConfig.getBoolean("${this.id}#${ENABLE}", false)
-    set(value) = accountConfig.putBoolean("${this.id}#${ENABLE}", value)
+    set(value) {
+        if (enable == value) return
+        accountConfig.putBoolean("${this.id}#${ENABLE}", value)
+        TaskScheduleEvents.changed()
+    }
 
 var Task.lastExecTime: String?
     get() = accountConfig.getString("${this.id}#${LAST_EXEC_TIME}")
@@ -163,7 +172,11 @@ var Task.lastExecTime: String?
 
 var Task.nextShouldExecTime: String?
     get() = accountConfig.getString("${this.id}#${NEXT_SHOULD_EXEC_TIME}")
-    set(value) = accountConfig.putString("${this.id}#${NEXT_SHOULD_EXEC_TIME}", value)
+    set(value) {
+        if (nextShouldExecTime == value) return
+        accountConfig.putString("${this.id}#${NEXT_SHOULD_EXEC_TIME}", value)
+        TaskScheduleEvents.changed()
+    }
 
 var Task.lastExecMsg: String?
     get() = accountConfig.getString("${this.id}#${LAST_EXEC_MSG}")

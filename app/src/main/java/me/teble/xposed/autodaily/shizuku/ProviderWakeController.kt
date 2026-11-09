@@ -51,6 +51,8 @@ internal class ProviderWakeController(private val userId: Int) {
         method.invoke(activityManager(), null, intent, null, null, 0, null, null, null, -1, null, false, false, userId)
     }
 
+    fun recoverModule() = mime(Uri.parse("content://${WakeProtocol.AUTHORITY}${WakeProtocol.RECOVER_PATH}"))
+
     private fun mime(uri: Uri) {
         val am = activityManager()
         val iam = Class.forName("android.app.IActivityManager")

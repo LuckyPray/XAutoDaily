@@ -15,6 +15,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import me.teble.xposed.autodaily.IHostCallback
@@ -25,6 +26,7 @@ import me.teble.xposed.autodaily.hook.base.hostPackageName
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
+import me.teble.xposed.autodaily.utils.TaskSchedulePublisher
 
 /**
  * 运行于已注入模块的宿主主进程，负责连接守护，不依赖模块应用进程中的全局对象。
@@ -58,6 +60,7 @@ object HostDaemonClient {
                             val epoch = ++generation
                             adopt(offer.connect(WakeProtocol.VERSION, callback(epoch)), epoch)
                         }
+                        TaskSchedulePublisher.changed()
                     }.onFailure { LogUtil.w("守护 Binder 交接失败: ${it.message}") }
                 }
             }
@@ -66,6 +69,7 @@ object HostDaemonClient {
         val filter = IntentFilter(WakeProtocol.ACTION_SESSION)
         if (Build.VERSION.SDK_INT >= 33) hostApp.registerReceiver(receiver, filter, "android.permission.DUMP", null, Context.RECEIVER_EXPORTED)
         else hostApp.registerReceiver(receiver, filter, "android.permission.DUMP", null)
+        TaskSchedulePublisher.install()
         reconnect()
     }
     fun markReady() {
@@ -79,6 +83,7 @@ object HostDaemonClient {
             repeat(3) { attempt ->
                 try {
                     connect()
+                    TaskSchedulePublisher.changed()
                     return@launch
                 } catch (e: Exception) {
                     LogUtil.w("宿主连接任务守护失败: ${e.message}")
@@ -136,6 +141,7 @@ object HostDaemonClient {
             }
         }, 0)
         session = connected
+        TaskSchedulePublisher.connectionChanged()
         if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
         LogUtil.i("任务守护连接成功 pid=${Process.myPid()} ready=$runtimeReady")
         return connected
@@ -151,5 +157,8 @@ object HostDaemonClient {
     }
     fun finish(runId: String, connected: IHostSession? = session) {
         runCatching { connected?.finishRun(runId) }.onFailure { LogUtil.w("释放任务保护失败，将由守护进程超时清理: ${it.message}") }
+    }
+    fun publish(nextAt: Long) {
+        runBlocking { connect() }?.publishSchedule(nextAt)
     }
 }

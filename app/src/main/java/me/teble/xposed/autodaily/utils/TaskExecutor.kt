@@ -114,6 +114,8 @@ object TaskExecutor {
                 if (userExec) ToastUtil.send("任务停止: ${e.message}", true)
             } finally {
                 heartbeat?.cancel()
+                // 在宿主仍持有防冻结保护和 CPU 唤醒锁时，发布下一次唤醒计划。
+                TaskSchedulePublisher.publishBeforeRelease()
                 if (session != null) HostDaemonClient.finish(runId, session)
                 val remaining = activePool
                 activeControl = null
@@ -121,10 +123,10 @@ object TaskExecutor {
                     // 等待无法中断的旧工作线程真正退出后，才允许下一批任务开始。
                     scope.launch(Dispatchers.IO) {
                         while (!remaining.awaitTermination(1, TimeUnit.SECONDS)) delay(100)
-                        activePool = null; running.set(false)
+                        activePool = null; running.set(false); TaskSchedulePublisher.afterRun()
                     }
                 } else {
-                    activePool = null; running.set(false)
+                    activePool = null; running.set(false); TaskSchedulePublisher.afterRun()
                 }
             }
         }
@@ -196,6 +198,7 @@ object TaskExecutor {
         }
         runAsync {
             TimeUtil.init()
+            TaskSchedulePublisher.changed()
             CronUtil.setMatchSecond(true)
             scheduler.setTimeZone(TimeZone.getTimeZone("GMT+8"))
             try {

@@ -138,6 +138,9 @@
 -keep class me.teble.xposed.autodaily.shizuku.UserService {
     *;
 }
+-keep class me.teble.xposed.autodaily.shizuku.DaemonAlarmProcess {
+    public static void main(java.lang.String[]);
+}
 # servlet混淆
 -keep class me.teble.xposed.autodaily.hook.inject.** {
     *;

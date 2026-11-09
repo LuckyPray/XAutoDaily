@@ -68,6 +68,7 @@ object DaemonConnectionManager {
 
     fun initialize() {
         applicationReady.complete(Unit)
+        HostAlarmMigration.cancelLegacy()
         if (ConfUnit.keepAlive && !paused) scope.launch { runCatching { ensureConnected() } }
     }
     suspend fun awaitApplicationReady() = withTimeout(5_000) { applicationReady.await() }
@@ -112,6 +113,7 @@ object DaemonConnectionManager {
             service = remote
             ShizukuApi.initBinder(remote.asBinder())
             running = true
+            HostAlarmMigration.migrate(remote)
             remote
         } catch (e: Exception) {
             error = e.message ?: e.javaClass.simpleName
@@ -128,6 +130,7 @@ object DaemonConnectionManager {
     }
     suspend fun stop() {
         preferences.edit().putBoolean("paused", true).commit()
+        HostAlarmMigration.cancelLegacy()
         ShizukuConfigStore.saveCurrent()
         mutex.withLock {
             withContext(Dispatchers.Main) { Shizuku.unbindUserService(args, connection, true) }
@@ -140,6 +143,7 @@ object DaemonConnectionManager {
                 awaitApplicationReady()
                 ShizukuConfigStore.saveCurrent()
                 service?.reloadConfig()
+                HostAlarmMigration.cancelLegacy()
                 if (ConfUnit.keepAlive && !paused) ensureConnected()
             }.onFailure { Log.w("XALog", "更新任务守护配置失败", it) }
         }

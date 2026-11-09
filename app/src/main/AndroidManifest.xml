@@ -4,6 +4,7 @@
 
     <!-- MIUI 和 HyperOS 将此权限作为运行时权限提供，其他 ROM 可能未定义该权限。 -->
     <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <queries>
@@ -58,6 +59,15 @@
             android:name=".shizuku.HostBridgeProvider"
             android:authorities="${applicationId}.hostbridge"
             android:exported="true" />
+
+        <receiver android:name=".shizuku.HostWakeReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="xposedmodule"

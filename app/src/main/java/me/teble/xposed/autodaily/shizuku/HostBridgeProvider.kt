@@ -8,13 +8,11 @@ import android.os.Binder
 import android.os.Bundle
 import android.os.Process
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.IHostCallback
-import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
-import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
-import me.teble.xposed.autodaily.ui.ConfUnit
 
 /**
- * 提供守护连接的启动兜底，调用者身份由 Binder 提供，不采信传入的 UID 和 PID。
+ * 提供守护连接的启动兜底及恢复入口，调用者身份由 Binder 提供，不采信传入的 UID 和 PID。
  */
 class HostBridgeProvider : ContentProvider() {
     override fun onCreate() = true
@@ -28,8 +26,12 @@ class HostBridgeProvider : ContentProvider() {
         try {
             // Provider 可能早于 Application.onCreate 中的 MMKV 初始化完成对外发布。
             runBlocking { DaemonConnectionManager.awaitApplicationReady() }
+            if (method == "schedule") {
+                runBlocking { DaemonConnectionManager.ensureConnected().publishSchedule(pkg, extras?.getLong("nextAt") ?: 0, false) }
+                return Bundle.EMPTY
+            }
             require(method == "connect")
-            if (!enabled(pkg)) return Bundle().apply { putBoolean("enabled", false) }
+            if (!HostAlarmMigration.enabled(pkg)) return Bundle().apply { putBoolean("enabled", false) }
             check(extras?.getInt("version") == WakeProtocol.VERSION) { "宿主协议已更新，请重启宿主" }
             val callback = IHostCallback.Stub.asInterface(requireNotNull(extras?.getBinder("callback")))
             return runBlocking {
@@ -43,12 +45,15 @@ class HostBridgeProvider : ContentProvider() {
             }
         } finally { Binder.restoreCallingIdentity(token) }
     }
-    private fun enabled(pkg: String) = ConfUnit.keepAlive && !DaemonConnectionManager.paused && when (pkg) {
-        PACKAGE_NAME_QQ -> ConfUnit.qKeepAlive
-        PACKAGE_NAME_TIM -> ConfUnit.timKeepAlive
-        else -> false
+    override fun getType(uri: Uri): String? {
+        if (uri.path != WakeProtocol.RECOVER_PATH) return null
+        // getType 可能由 system_server 转发；此入口不接受调用者传入的参数或命令。
+        if (Binder.getCallingUid() !in setOf(0, 1000, 2000)) return null
+        DaemonConnectionManager.scope.launch {
+            runCatching { DaemonConnectionManager.ensureConnected() }
+        }
+        return "vnd.android.cursor.item/vnd.xautodaily.recover"
     }
-    override fun getType(uri: Uri): String? = null
     override fun query(uri: Uri, projection: Array<out String>?, selection: String?, selectionArgs: Array<out String>?, sortOrder: String?): Cursor? = null
     override fun insert(uri: Uri, values: ContentValues?): Uri? = null
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<out String>?): Int = 0

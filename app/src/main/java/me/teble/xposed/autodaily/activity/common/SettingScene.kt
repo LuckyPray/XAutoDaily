@@ -257,7 +257,7 @@ private fun ShizukuLayout(
                 .clip(SmootherShape(12.dp)),
             enable = keepAlive,
             text = "启用任务守护",
-            infoText = "任务执行时保持应用运行，减少后台休眠导致的中断。需保持 Shizuku 运行。",
+            infoText = "提前唤醒应用，减少后台休眠导致的任务中断。需保持 Shizuku 运行。",
             clickEnabled = shizukuEnable,
             onClick = updateKeepAliveChecked
         )

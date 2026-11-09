@@ -22,10 +22,11 @@ import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import java.util.UUID
 import kotlin.system.exitProcess
 
 /**
- * 以 Shizuku 授予的身份管理宿主会话、任务保护和手动唤醒。
+ * 以 Shizuku 授予的身份管理宿主会话、任务保护和预唤醒计划。
  *
  * @param context 模块应用上下文
  */
@@ -38,7 +39,11 @@ class UserService(private val context: Context) : IUserService.Stub() {
     private val am = AmUnfreezeController()
     private val directory = File("/storage/emulated/$userId/Android/data/${BuildConfig.APPLICATION_ID}/files/conf")
     private val journal = AtomicFile(File(directory, "sticky-leases.json"))
+    private lateinit var schedules: DaemonScheduleStore
+    private var alarms: DaemonAlarmBackend? = null
+    private val armed = mutableMapOf<String, String>()
     private val offeredAt = mutableMapOf<HostProcess, Long>()
+    private var lastAlarmAt = 0L
     private val bootId = File("/proc/sys/kernel/random/boot_id").readText().trim()
     private var conf = ShizukuConf(false, persistentHashMapOf())
     private val sessions = mutableMapOf<String, Session>()
@@ -70,7 +75,9 @@ class UserService(private val context: Context) : IUserService.Stub() {
                     check(Process.myUid() in setOf(0, 2000)) { "守护进程必须以 root/shell 身份运行" }
                     leases.sweep()
                     loadConfig()
+                    schedules = DaemonScheduleStore(directory)
                     initialized = true
+                    reconcileAlarms()
                     Log.i("XALog", "任务守护进程已就绪 protocol=${WakeProtocol.VERSION}")
                 }.onFailure { Log.e("XALog", "守护进程初始化失败", it) }
             }
@@ -79,6 +86,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
             synchronized(guard) {
                 runCatching { watch() }.onFailure { Log.e("XALog", "任务保护清理失败，将重试", it) }
                 if (initialized) {
+                    runCatching { reconcileAlarms() }.onFailure { Log.e("XALog", "登记特权预唤醒失败，将重试", it) }
                     runCatching { offerRunningHosts() }.onFailure { Log.w("XALog", "宿主 Binder 交接失败，将重试", it) }
                 }
             }
@@ -100,7 +108,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
     override fun isRunning(): Boolean {
         admin()
         return synchronized(guard) {
-            initialized && !stopping
+            initialized && !stopping && (WakeProtocol.hosts.none(::enabled) || alarms?.alive == true)
         }
     }
     override fun reloadConfig() {
@@ -110,6 +118,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
             sessions.values.toList().filter { !enabled(it.pkg) }.forEach { it.close("宿主任务守护已关闭") }
             pending.keys.toList().filter { !enabled(it) }.forEach { finishWake(it, "宿主任务守护已关闭") }
             offeredAt.clear()
+            reconcileAlarms()
         }
     }
 
@@ -223,6 +232,10 @@ class UserService(private val context: Context) : IUserService.Stub() {
                 } else if (pending[pkg]?.id == runId) finishWake(pkg, "宿主跳过本次任务")
             }
         }
+        override fun publishSchedule(nextAt: Long) {
+            authenticate()
+            synchronized(guard) { saveSchedule(pkg, nextAt, false) }
+        }
         fun close(reason: String) {
             if (closed) return
             closed = true
@@ -328,8 +341,84 @@ class UserService(private val context: Context) : IUserService.Stub() {
                 .apply {
                     putInt("daemonUid", Process.myUid()); putInt("daemonPid", Process.myPid())
                     putBoolean("connected", sessions[pkg]?.closed == false)
+                    putInt("alarmUid", alarms?.uid ?: -1); putBoolean("alarmAlive", alarms?.alive == true)
+                    putLong("lastAlarmAt", lastAlarmAt)
+                    if (::schedules.isInitialized) schedules.plans[pkg]?.let {
+                        putLong("target", it.target); putLong("checkAt", it.checkAt)
+                        putLong("revision", it.revision); putInt("attempts", it.attempts)
+                        putBoolean("armed", armed.containsKey(pkg))
+                    }
                 }
         }
+    }
+
+    override fun publishSchedule(pkg: String, nextAt: Long, onlyIfAbsent: Boolean) {
+        admin(); require(pkg in WakeProtocol.hosts)
+        synchronized(guard) { saveSchedule(pkg, nextAt, onlyIfAbsent) }
+    }
+
+    private fun saveSchedule(pkg: String, nextAt: Long, onlyIfAbsent: Boolean) {
+        require(nextAt >= 0)
+        check(initialized && !stopping)
+        val previous = schedules.plans[pkg]
+        if (onlyIfAbsent && previous != null) return
+        val updated = WakePlan.replace(previous, nextAt)
+        if (updated != previous) {
+            schedules.save(pkg, updated)
+            Log.i("XALog", "守护已保存宿主计划 $pkg target=$nextAt revision=${updated.revision}")
+        }
+        reconcileAlarms()
+    }
+
+    private fun reconcileAlarms() {
+        if (stopping) return
+        if (alarms?.alive != true) {
+            alarms?.close(); alarms = null; armed.clear()
+            // 即使当前没有计划任务，也保留辅助进程的管道，用于守护异常退出后的恢复。
+            if (WakeProtocol.hosts.none(::enabled)) return
+            alarms = DaemonAlarmBackend(context, userId) { token, release ->
+                worker.execute {
+                    try { synchronized(guard) { alarmFired(token) } }
+                    catch (e: Exception) { Log.e("XALog", "守护预唤醒失败", e) }
+                    finally { release() }
+                }
+            }
+        }
+        val backend = alarms ?: return
+        WakeProtocol.hosts.forEach { pkg ->
+            val previous = schedules.plans[pkg]
+            val plan = previous?.catchUp(System.currentTimeMillis())
+            if (plan != null && plan != previous) schedules.save(pkg, plan)
+            val token = plan?.takeIf { enabled(pkg) && it.active }?.let { "$pkg:${it.revision}" }
+            if (armed[pkg] == token) return@forEach
+            armed.remove(pkg)?.let(backend::remove)
+            if (token != null) {
+                val at = plan.alarmAt(System.currentTimeMillis())
+                backend.set(token, at)
+                armed[pkg] = token
+                Log.i("XALog", "守护已登记预唤醒 $pkg at=$at target=${plan.checkAt} alarmUid=${backend.uid}")
+            }
+        }
+    }
+
+    private fun alarmFired(token: String) {
+        val pkg = armed.entries.firstOrNull { it.value == token }?.key ?: return
+        armed.remove(pkg)
+        if (!enabled(pkg)) return
+        val plan = schedules.plans[pkg] ?: return
+        val now = System.currentTimeMillis()
+        // 系统时间变化或闹钟投递延迟时，改为准备下一次 Cron 检查。
+        val current = plan.catchUp(now)
+        if (current != plan || current.checkAt - now > WakeProtocol.PRE_WAKE_MS + 1_000) {
+            if (current != plan) schedules.save(pkg, current)
+            reconcileAlarms(); return
+        }
+        // 调用 Provider 前先保存重试计划，避免守护退出后丢失唯一的唤醒机会。
+        schedules.save(pkg, plan.consumed())
+        lastAlarmAt = now
+        Log.i("XALog", "守护预唤醒触发 $pkg target=${plan.checkAt} now=$now")
+        prepareHost(pkg, UUID.randomUUID().toString(), plan.checkAt)
+        reconcileAlarms()
     }
 
     private fun acquireCpu(id: String, timeout: Long) {
@@ -380,6 +469,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         synchronized(guard) {
             if (stopping) return
             stopping = true; initialized = false
+            alarms?.close(); alarms = null; armed.clear()
             sessions.values.toList().forEach { session -> runCatching { session.close("守护进程停止") } }
             runCatching { leases.close() }.onFailure { Log.e("XALog", "退出时恢复防冻结失败，已保留恢复记录", it) }
             wakeLocks.keys.toList().forEach(::releaseCpu)

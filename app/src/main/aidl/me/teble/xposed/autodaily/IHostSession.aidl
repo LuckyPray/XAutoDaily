@@ -32,4 +32,11 @@ interface IHostSession {
      * @param runId 任务或唤醒请求的唯一标识
      */
     void finishRun(String runId);
+
+    /**
+     * 同步并持久化宿主的下次 Cron 检查时间。
+     *
+     * @param nextAt 下次检查的 Unix 毫秒时间戳，为 0 时取消计划
+     */
+    void publishSchedule(long nextAt);
 }

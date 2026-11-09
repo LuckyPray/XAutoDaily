@@ -20,7 +20,7 @@ interface IUserService {
     void exit() = 1;
 
     /**
-     * 检查守护是否已完成初始化且尚未停止。
+     * 检查守护是否已就绪，已启用宿主时还会检查闹钟辅助进程是否存活。
      *
      * @return 守护是否具备运行条件
      */
@@ -71,7 +71,7 @@ interface IUserService {
     void wakeHost(String packageName, String runId, long scheduledAt) = 7;
 
     /**
-     * 获取宿主连接、唤醒及防冻结恢复状态。
+     * 获取宿主连接、唤醒计划及防冻结恢复状态。
      *
      * @param packageName 宿主包名
      * @return 当前宿主状态快照
@@ -79,7 +79,16 @@ interface IUserService {
     Bundle getHostStatus(String packageName) = 8;
 
     /**
-     * 重新读取用户配置，并更新会话和任务保护。
+     * 重新读取用户配置，并更新会话、任务保护和唤醒计划。
      */
     void reloadConfig() = 9;
+
+    /**
+     * 供模块应用迁移或诊断唤醒计划，宿主日常发布使用 IHostSession。
+     *
+     * @param packageName 宿主包名
+     * @param nextAt 下次 Cron 检查的 Unix 毫秒时间戳，为 0 时取消计划
+     * @param onlyIfAbsent 是否仅在守护中没有该宿主计划时保存
+     */
+    void publishSchedule(String packageName, long nextAt, boolean onlyIfAbsent) = 10;
 }

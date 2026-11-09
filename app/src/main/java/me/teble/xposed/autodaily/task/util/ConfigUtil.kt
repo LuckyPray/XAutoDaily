@@ -21,6 +21,7 @@ import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import me.teble.xposed.autodaily.utils.FileEnum
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.RepoFileLoader
+import me.teble.xposed.autodaily.utils.TaskScheduleEvents
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.getTextFromModuleAssets
 import me.teble.xposed.autodaily.utils.parse
@@ -55,7 +56,7 @@ object ConfigUtil {
     external fun getMd5Hex(value: String): String
 
     @JvmStatic
-    @Throws(java.lang.Exception::class)
+    @Throws(Exception::class)
     fun decryptByPublicKey(
         encrypted: ByteArray,
         publicKey: ByteArray
@@ -144,8 +145,9 @@ object ConfigUtil {
 
     private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {
         ConfUnit.encConfStr = encConfStr
-        // clear cache
+        // 清空配置缓存。
         _conf = null
+        TaskScheduleEvents.changed()
         LogUtil.d("clear conf cache")
         return true
     }
