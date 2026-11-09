@@ -16,7 +16,11 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-fun ModuleApp(viewModel: ThemeViewModel) {
+fun ModuleApp(
+    viewModel: ThemeViewModel,
+    onRequestHostAccess: () -> Unit,
+    onOpenHostAccessSettings: () -> Unit,
+) {
 
     val scope = rememberCoroutineScope()
 
@@ -40,6 +44,8 @@ fun ModuleApp(viewModel: ThemeViewModel) {
         listPane = {
             AnimatedPane(modifier = Modifier) {
                 ModuleScene(
+                    onRequestHostAccess = onRequestHostAccess,
+                    onOpenHostAccessSettings = onOpenHostAccessSettings,
                     onSettingClick = {
                         scope.launch {
                             scaffoldNavigator.navigateTo(pane = ListDetailPaneScaffoldRole.Detail)

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import me.teble.xposed.autodaily.application.xaApp
+import me.teble.xposed.autodaily.application.HostAppListState
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 import me.teble.xposed.autodaily.hook.enums.QQTypeEnum
@@ -55,6 +57,8 @@ import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 @Composable
 fun ModuleScene(
     onSettingClick: () -> Unit,
+    onRequestHostAccess: () -> Unit,
+    onOpenHostAccessSettings: () -> Unit,
 
     viewmodel: ModuleViewModel = viewModel()
 ) {
@@ -135,6 +139,8 @@ fun ModuleScene(
 
 
             EntryLayout(
+                onRequestHostAccess = onRequestHostAccess,
+                onOpenHostAccessSettings = onOpenHostAccessSettings,
                 openTimSetting = {
                     viewmodel.openHostSetting(context, QQTypeEnum.TIM)
                 },
@@ -231,17 +237,22 @@ private fun ShizukuCard(
 private fun EntryLayout(
     openQQSetting: () -> Unit,
     openTimSetting: () -> Unit,
+    onRequestHostAccess: () -> Unit,
+    onOpenHostAccessSettings: () -> Unit,
 ) {
+    val state = xaApp.hostAppListState
+    val hasHosts = xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM) ||
+        xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)
+    SmallTitle(
+        title = "模块入口",
+        modifier = Modifier.padding(bottom = 8.dp, start = 16.dp, top = 16.dp),
+    )
+    if (state == HostAppListState.PermissionRequired || state == HostAppListState.Failed || !hasHosts) {
+        HostAccessNotice(state, onRequestHostAccess, onOpenHostAccessSettings)
+    }
     if (
-        xaApp.qPackageState.containsKey(PACKAGE_NAME_TIM)
-        || xaApp.qPackageState.containsKey(PACKAGE_NAME_QQ)
+        hasHosts && state != HostAppListState.PermissionRequired
     ) {
-        SmallTitle(
-            title = "模块入口",
-            modifier = Modifier
-                .padding(bottom = 8.dp, start = 16.dp, top = 16.dp)
-        )
-
         Column(
             Modifier
                 .fillMaxWidth()
@@ -266,6 +277,51 @@ private fun EntryLayout(
                     info = "TIM 侧滑 > 设置 > XAutoDaily",
                     onClick = openTimSetting
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun HostAccessNotice(
+    state: HostAppListState,
+    onRequestHostAccess: () -> Unit,
+    onOpenHostAccessSettings: () -> Unit,
+) {
+    val title = when (state) {
+        HostAppListState.Checking -> "正在检测 QQ/TIM…"
+        HostAppListState.PermissionRequired -> "需要读取应用列表权限"
+        HostAppListState.Ready -> "未检测到 QQ 或 TIM"
+        HostAppListState.Failed -> "暂时无法检测 QQ/TIM"
+    }
+    Column(
+        Modifier.fillMaxWidth()
+            .clip(SmootherShape(12.dp))
+            .background(colors.colorBgContainer)
+            .padding(16.dp),
+    ) {
+        Text(title, style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Bold), color = colors.colorText)
+        if (state != HostAppListState.Checking) {
+            Text(
+                if (state == HostAppListState.PermissionRequired) {
+                    "用于识别已安装的 QQ/TIM，授权后即可显示模块入口。"
+                } else {
+                    "如果已经安装，请检查系统中的应用列表权限，然后重新检测。"
+                },
+                modifier = Modifier.padding(top = 8.dp),
+                style = TextStyle(fontSize = 14.sp),
+                color = colors.colorTextSecondary,
+            )
+            Row(Modifier.padding(top = 8.dp)) {
+                TextButton(onClick = onRequestHostAccess) {
+                    Text(
+                        if (state == HostAppListState.PermissionRequired) "去授权" else "重新检测",
+                        color = colors.themeColor,
+                    )
+                }
+                TextButton(onClick = onOpenHostAccessSettings) {
+                    Text("应用权限设置", color = colors.themeColor)
+                }
             }
         }
     }

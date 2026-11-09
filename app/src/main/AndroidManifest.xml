@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- MIUI 和 HyperOS 将此权限作为运行时权限提供，其他 ROM 可能未定义该权限。 -->
+    <uses-permission android:name="com.android.permission.GET_INSTALLED_APPS" />
+
     <queries>
         <package android:name="com.tencent.mobileqq" />
         <package android:name="com.tencent.tim" />
