@@ -82,16 +82,20 @@ class ModuleActivity : BaseActivity() {
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
+        injectActivityResources()
         super.onConfigurationChanged(newConfig)
-        composeViewContext.get()?.let {
-            injectRes(it.resources)
-        }
     }
 
     override fun onResume() {
+        injectActivityResources()
         super.onResume()
-        composeViewContext.get()?.let {
-            injectRes(it.resources)
+    }
+
+    private fun injectActivityResources() {
+        val activityResources = resources
+        injectRes(activityResources)
+        composeViewContext.get()?.resources?.let { composeResources ->
+            if (composeResources !== activityResources) injectRes(composeResources)
         }
     }
 }

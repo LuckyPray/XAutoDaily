@@ -37,6 +37,7 @@ import me.teble.xposed.autodaily.utils.invoke
 import me.teble.xposed.autodaily.utils.invokeAs
 import me.teble.xposed.autodaily.utils.new
 import java.lang.reflect.Proxy
+import java.util.List as JavaList
 
 /**
  * @author teble
@@ -192,7 +193,7 @@ class QQSettingSettingActivityHook : BaseHook() {
                 val groupClass = result.first()!!::class.java
                 LogUtil.d("groupClass: $groupClass")
                 val constructor = groupClass.getConstructor(
-                    java.util.List::class.java,
+                    JavaList::class.java,
                     CharSequence::class.java,
                     CharSequence::class.java,
                     Int::class.javaPrimitiveType,
