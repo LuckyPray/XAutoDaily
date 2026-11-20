@@ -1,7 +1,7 @@
 {
-    "version": 69,
+    "version": 70,
     "needAppVersion": 26041109,
-    "updateLog": "移除已下线的波点音乐听歌任务",
-    "md5": "5c496975dbb34363279faad4c2609afd",
-    "updateTime": "2026-07-22 08:33:56"
+    "updateLog": "加好友任务移除小冰",
+    "md5": "c3448f0d215b5f497bd0ee3260f5e532",
+    "updateTime": "2026-11-20 13:56:18"
 }
