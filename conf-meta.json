@@ -1,7 +1,7 @@
 {
-    "version": 70,
+    "version": 71,
     "needAppVersion": 26041109,
-    "updateLog": "加好友任务移除小冰",
-    "md5": "c3448f0d215b5f497bd0ee3260f5e532",
-    "updateTime": "2026-11-20 13:56:18"
+    "updateLog": "添加机器人失败后不会让任务失败",
+    "md5": "4776acd1e7e545a14bc537df00914c89",
+    "updateTime": "2026-11-20 19:04:30"
 }
