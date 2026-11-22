@@ -55,7 +55,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
     private var conf = ShizukuConf(false, persistentHashMapOf())
     private val sessions = mutableMapOf<String, Session>()
     private data class Wake(val id: String, val scheduledAt: Long, val deadline: Long,
-        var prepared: Boolean = false, var delivered: Boolean = false)
+        var prepared: Boolean = false, var delivered: Boolean = false, var protectionReady: Boolean = false)
     private val pending = mutableMapOf<String, Wake>()
     private val status = mutableMapOf<String, Bundle>()
     private val handshakes = mutableMapOf<String, HostHandshakeStatus>()
@@ -74,6 +74,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         },
         journal = ::writeJournal,
         recovered = readJournal(),
+        unavailable = am::isUnavailable,
     )
 
     init {
@@ -250,23 +251,44 @@ class UserService(private val context: Context) : IUserService.Stub() {
             authenticate(); validId(runId)
             return synchronized(guard) {
                 if (!enabled(pkg)) return@synchronized Bundle().apply { putBoolean("success", true); putBoolean("disabled", true) }
-                check(run == null) { "已有任务执行中" }
+                if (run != null) return@synchronized Bundle().apply {
+                    putBoolean("success", true)
+                    putBoolean("disabled", true)
+                    putString("protectionError", "上一批任务保护尚未结束")
+                }
                 runCatching {
                     check(enabled(pkg) && ready && run == null) { "宿主尚未就绪或已有任务执行中" }
-                    leases.acquire(runId, HostProcess.find(pkg, identity.uid).also { check(identity in it) }, WakeProtocol.MAX_RUN_MS, WakeProtocol.LEASE_TTL_MS)
+                    val protected = protect(pkg) {
+                        leases.acquire(runId, HostProcess.find(pkg, identity.uid).also { check(identity in it) },
+                            WakeProtocol.MAX_RUN_MS, WakeProtocol.LEASE_TTL_MS)
+                    }
+                    if (!protected) {
+                        consumeWake(pkg)
+                        val reason = if (am.isUnavailable) "当前系统不支持任务防冻结" else "任务防冻结未能开启"
+                        setStatus(pkg, runId, "unprotected", "$reason，本次任务按普通模式执行")
+                        return@synchronized Bundle().apply {
+                            putBoolean("success", true)
+                            putBoolean("disabled", true)
+                            putBoolean("unfreezeUnsupported", am.isUnavailable)
+                            putString("protectionError", reason)
+                        }
+                    }
                     acquireCpu(runId, WakeProtocol.MAX_RUN_MS)
                     run = runId
-                    pending[pkg]?.let {
-                        leases.release("wake:${it.id}")
-                        releaseCpu("wake:${it.id}")
-                        pending.remove(pkg)
-                    }
+                    consumeWake(pkg)
                     setStatus(pkg, runId, "running", "任务执行中")
                     Bundle().apply { putBoolean("success", true) }
                 }.getOrElse {
                     run = null
-                    leases.release(runId); releaseCpu(runId)
-                    Bundle().apply { putBoolean("success", false); putString("error", it.message) }
+                    releaseProtection(runId)
+                    consumeWake(pkg)
+                    Log.w("XALog", "申请任务保护失败，签到继续按普通模式执行", it)
+                    setStatus(pkg, runId, "unprotected", "任务保护不可用，本次任务按普通模式执行")
+                    Bundle().apply {
+                        putBoolean("success", true)
+                        putBoolean("disabled", true)
+                        putString("protectionError", it.message ?: "无法申请任务保护")
+                    }
                 }
             }
         }
@@ -284,7 +306,8 @@ class UserService(private val context: Context) : IUserService.Stub() {
             authenticate()
             synchronized(guard) {
                 if (run == runId) {
-                    try { leases.release(runId) } finally { releaseCpu(runId); run = null }
+                    releaseProtection(runId)
+                    run = null
                     setStatus(pkg, runId, "finished", "任务已结束，已请求解除防冻结")
                 } else if (pending[pkg]?.id == runId) finishWake(pkg, "宿主跳过本次任务")
             }
@@ -326,23 +349,33 @@ class UserService(private val context: Context) : IUserService.Stub() {
             pending[pkg] = Wake(runId, scheduledAt, SystemClock.elapsedRealtime() + duration)
             setStatus(pkg, runId, "waking", "正在通过 Provider 唤醒并等待宿主就绪")
             try { acquireCpu("wake:$runId", duration) }
-            catch (e: Exception) { pending.remove(pkg); throw e }
+            catch (e: Exception) {
+                finishWake(pkg, e.message ?: "无法申请唤醒保护")
+                throw e
+            }
         }
         worker.execute {
             runCatching {
                 val uid = checkNotNull(providerWake.packageInfo(pkg).applicationInfo).uid
                 val existing = HostProcess.find(pkg, uid)
+                var protectionReady = false
                 synchronized(guard) {
                     if (pending[pkg]?.id != runId) return@execute
-                    if (existing.isNotEmpty()) leases.acquire("wake:$runId", existing, duration, duration)
+                    if (existing.isNotEmpty()) {
+                        protectionReady = protect(pkg) { leases.acquire("wake:$runId", existing, duration, duration) }
+                    }
                 }
                 providerWake.wake(pkg)
                 synchronized(guard) {
                     if (pending[pkg]?.id != runId) return@execute
                     val processes = HostProcess.find(pkg, uid)
                     check(processes.any { it.name == pkg }) { "Provider 调用后仍未找到宿主主进程" }
-                    if (existing.isEmpty()) leases.acquire("wake:$runId", processes, duration, duration)
-                    else leases.attach("wake:$runId", processes)
+                    val protected = protect(pkg) {
+                        if (!protectionReady) leases.acquire("wake:$runId", processes, duration, duration)
+                        else leases.attach("wake:$runId", processes)
+                    }
+                    if (!protected) releaseProtection("wake:$runId")
+                    pending[pkg]?.protectionReady = protected
                     pending[pkg]?.prepared = true
                     if (sessions[pkg] == null) {
                         val main = processes.first { it.name == pkg }
@@ -363,11 +396,40 @@ class UserService(private val context: Context) : IUserService.Stub() {
         if (request.scheduledAt > 0) {
             setStatus(pkg, request.id, "waiting", "宿主已提前唤醒，等待原有 Cron 执行")
             session.callback.onWakeReady(request.id, request.scheduledAt)
-        } else finishWake(pkg, "Provider 唤醒、宿主握手和防冻结恢复测试成功", true)
+        } else finishWake(pkg, when {
+            am.isUnavailable -> "宿主已唤醒，当前系统不支持任务防冻结"
+            !request.protectionReady -> "宿主已唤醒，防冻结未能开启，签到仍可正常执行"
+            else -> "Provider 唤醒、宿主握手和防冻结恢复测试成功"
+        }, true)
+    }
+
+    /**
+     * 尝试申请防冻结，失败时继续普通唤醒和签到，未确认的恢复记录仍由租约管理器保留。
+     *
+     * @return 是否实际申请了防冻结保护
+     */
+    private fun protect(pkg: String, action: () -> Unit): Boolean {
+        if (!am.isUnavailable) {
+            try {
+                action()
+                return true
+            } catch (e: Exception) {
+                Log.w("XALog", "防冻结未能开启，继续普通唤醒和签到 $pkg", e)
+            }
+        }
+        return false
+    }
+
+    /**
+     * 原有 Cron 开始任务后结束对应预唤醒，防止普通执行仍被记为等待 Cron 超时。
+     */
+    private fun consumeWake(pkg: String) {
+        val request = pending.remove(pkg) ?: return
+        releaseProtection("wake:${request.id}")
     }
     private fun finishWake(pkg: String, message: String, success: Boolean = false) {
         val request = pending.remove(pkg) ?: return
-        try { leases.release("wake:${request.id}") } finally { releaseCpu("wake:${request.id}") }
+        releaseProtection("wake:${request.id}")
         val restored = !leases.hasPendingRestore()
         setStatus(pkg, request.id, if (success && restored) "ready" else "error",
             if (restored) message else "防冻结恢复未获确认，守护进程会继续重试")
@@ -379,8 +441,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         leases.sweep().forEach { id ->
             sessions.values.firstOrNull { it.run == id }?.let { session ->
                 session.run = null
-                runCatching { session.callback.cancelRun(id, "任务保护超时或进程退出") }
-                setStatus(session.pkg, id, "error", "任务保护超时或进程退出")
+                setStatus(session.pkg, id, "unprotected", "任务保护已结束，签到继续按普通模式执行")
             }
             releaseCpu(id)
         }
@@ -411,6 +472,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
                     putString("sessionId", connected?.id)
                     putInt("hostPid", connected?.identity?.pid ?: -1)
                     putBundle("handshake", handshakes[pkg]?.snapshot())
+                    putBoolean("unfreezeUnsupported", am.isUnavailable)
                     putInt("alarmUid", alarms?.uid ?: -1); putBoolean("alarmAlive", alarms?.alive == true)
                     putLong("lastAlarmAt", lastAlarmAt)
                     if (::schedules.isInitialized) schedules.plans[pkg]?.let {
@@ -501,6 +563,14 @@ class UserService(private val context: Context) : IUserService.Stub() {
         wakeLocks.put(id, lock)?.let { if (it.isHeld) it.release() }
     }
     private fun releaseCpu(id: String) { wakeLocks.remove(id)?.let { if (it.isHeld) it.release() } }
+
+    /**
+     * 释放辅助保护，恢复失败时保留租约记录供后续重试，不向签到流程传播异常。
+     */
+    private fun releaseProtection(id: String) {
+        runCatching { leases.release(id) }.onFailure { Log.w("XALog", "恢复任务保护失败，将继续重试 run=$id", it) }
+        runCatching { releaseCpu(id) }.onFailure { Log.w("XALog", "释放任务唤醒锁失败 run=$id", it) }
+    }
 
     private fun readJournal(): Set<HostProcess> = runCatching {
         val json = JSONObject(journal.openRead().bufferedReader().use { it.readText() })

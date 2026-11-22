@@ -7,10 +7,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import me.teble.xposed.autodaily.IHostSession
+import kotlinx.coroutines.withTimeoutOrNull
 import me.teble.xposed.autodaily.hook.base.moduleLoadInit
 import me.teble.xposed.autodaily.hook.notification.XANotification
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
@@ -86,8 +85,7 @@ object TaskExecutor {
             val runId = UUID.randomUUID().toString()
             val control = TaskRunControl(runId, WakeProtocol.MAX_RUN_MS)
             activeControl = control
-            var session: IHostSession? = null
-            var heartbeat: Job? = null
+            var protection: Job? = null
             try {
                 withTimeout(WakeProtocol.BOOTSTRAP_MS) { while (!moduleLoadInit) delay(200) }
                 if (!ConfUnit.globalEnable) {
@@ -95,17 +93,7 @@ object TaskExecutor {
                     return@launch
                 }
                 executorTask(ConfigUtil.loadSaveConf(), control) {
-                    session = HostDaemonClient.begin(runId)
-                    val connected = session
-                    if (connected != null) heartbeat = scope.launch(Dispatchers.IO) {
-                        while (isActive) {
-                            delay(WakeProtocol.HEARTBEAT_MS)
-                            if (!runCatching { connected.heartbeat(runId) }.getOrDefault(false)) {
-                                cancelRun(runId, "任务防冻结保护续期失败")
-                                break
-                            }
-                        }
-                    }
+                    protection = HostDaemonClient.protect(runId)
                     if (userExec) ToastUtil.send("开始执行签到") else LogUtil.i("定时执行 run=$runId")
                 }
             } catch (e: Exception) {
@@ -113,20 +101,28 @@ object TaskExecutor {
                 LogUtil.e(e, "本次任务已停止")
                 if (userExec) ToastUtil.send("任务停止: ${e.message}", true)
             } finally {
-                heartbeat?.cancel()
-                // 在宿主仍持有防冻结保护和 CPU 唤醒锁时，发布下一次唤醒计划。
-                TaskSchedulePublisher.publishBeforeRelease()
-                if (session != null) HostDaemonClient.finish(runId, session)
                 val remaining = activePool
                 activeControl = null
                 if (remaining != null && !remaining.isTerminated) {
+                    protection?.cancel()
                     // 等待无法中断的旧工作线程真正退出后，才允许下一批任务开始。
                     scope.launch(Dispatchers.IO) {
                         while (!remaining.awaitTermination(1, TimeUnit.SECONDS)) delay(100)
                         activePool = null; running.set(false); TaskSchedulePublisher.afterRun()
                     }
                 } else {
-                    activePool = null; running.set(false); TaskSchedulePublisher.afterRun()
+                    activePool = null
+                    running.set(false)
+                    val publication = TaskSchedulePublisher.afterRun()
+                    val currentProtection = protection
+                    scope.launch {
+                        try {
+                            // 给最终计划同步预留有限时间，守护失去响应时仍释放保护并允许后续签到。
+                            withTimeoutOrNull(3_000) { publication.join() }
+                        } finally {
+                            currentProtection?.cancel()
+                        }
+                    }
                 }
             }
         }

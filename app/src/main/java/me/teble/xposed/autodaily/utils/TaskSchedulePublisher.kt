@@ -41,7 +41,6 @@ object TaskSchedulePublisher {
     private var dirty = false
     @Volatile
     private var retryNotBefore = 0L
-    private var lastPublishSucceeded = false
     fun install() { installed = true; TaskScheduleEvents.listener = ::changed }
     @Synchronized
     fun changed() {
@@ -59,13 +58,15 @@ object TaskSchedulePublisher {
     fun connectionChanged() {
         publication.invalidate()
     }
+    /**
+     * 异步发布本批任务结束后的计划，守护响应缓慢时不占用签到的执行状态。
+     *
+     * @return 本次计划发布作业，调用方可在有限等待后释放任务保护
+     */
+    fun afterRun(): Job = scope.launch { publishAfterRun() }
+
     @Synchronized
-    fun afterRun() {
-        // 最终计划快照已在释放任务保护前发送，此处仅处理后续变更或发布失败。
-        if (dirty || !lastPublishSucceeded) changed()
-    }
-    @Synchronized
-    fun publishBeforeRelease() {
+    private fun publishAfterRun() {
         if (!installed) return
         job?.cancel()
         job = null
@@ -75,17 +76,14 @@ object TaskSchedulePublisher {
     @Synchronized
     private fun publish() {
         if (!HostDaemonClient.isConnected) {
-            lastPublishSucceeded = false
             return
         }
         calculating = true
         dirty = false
-        lastPublishSucceeded = false
         try {
             val account = QApplicationUtil.currentUin
             if (!ConfUnit.globalEnable || account <= 10000) {
                 if (publication.publish(account, 0)) LogUtil.i("已取消宿主预唤醒计划")
-                lastPublishSucceeded = HostDaemonClient.isConnected
                 return
             }
             val now = System.currentTimeMillis()
@@ -109,7 +107,6 @@ object TaskSchedulePublisher {
             if (publication.publish(account, cronCheck)) {
                 LogUtil.i("发布宿主下次 Cron 检查时间: $cronCheck")
             }
-            lastPublishSucceeded = HostDaemonClient.isConnected
         } catch (e: Exception) { LogUtil.e(e, "发布任务时间失败") }
         finally {
             calculating = false

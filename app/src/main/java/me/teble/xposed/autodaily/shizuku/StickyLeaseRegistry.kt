@@ -9,6 +9,7 @@ internal class StickyLeaseRegistry<P>(
     private val unfreeze: (P, Boolean) -> Boolean,
     private val journal: (Set<P>) -> Unit,
     recovered: Set<P> = emptySet(),
+    private val unavailable: () -> Boolean = { false },
 ) {
     private data class Lease<P>(val processes: MutableSet<P>, val deadline: Long, var expires: Long)
     private val leases = mutableMapOf<String, Lease<P>>()
@@ -34,9 +35,11 @@ internal class StickyLeaseRegistry<P>(
         for (process in processes) {
             check(alive(process)) { "宿主进程已退出" }
             if (leases.values.none { process in it.processes }) {
+                check(!unavailable()) { "当前系统不支持 am unfreeze" }
                 journal(protected + process)
                 protected.add(process)
-                check(unfreeze(process, true)) { "ROM 未确认 am unfreeze --sticky，任务未开始" }
+                check(unfreeze(process, true)) { "任务防冻结未能开启，请在模块中检查唤醒能力" }
+                check(alive(process)) { "宿主进程已退出或已更换，无法继续保护" }
             }
             lease.processes.add(process)
         }
@@ -78,7 +81,9 @@ internal class StickyLeaseRegistry<P>(
     private fun restoreUnused() {
         val owned = leases.values.flatMap { it.processes }.toSet()
         // 恢复失败的进程继续保留在记录中，由定期清理任务或重启后的守护进程重试。
-        val removed = protected.filter { it !in owned && (!alive(it) || unfreeze(it, false)) }
+        // 同一次开机内明确缺少命令时，旧版记录对应的操作没有生效，无需继续尝试恢复。
+        val removed = protected.filter { it !in owned &&
+            (!alive(it) || unavailable() || unfreeze(it, false) || unavailable()) }
         if (removed.isNotEmpty()) {
             val remaining = protected - removed.toSet()
             journal(remaining)

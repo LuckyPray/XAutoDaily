@@ -13,10 +13,10 @@ oneway interface IHostCallback {
     void onWakeReady(String wakeId, long scheduledAt);
 
     /**
-     * 通知宿主取消指定任务。
+     * 接收旧版守护的保护失效通知，仅用于诊断，不取消签到任务。
      *
      * @param runId 任务的唯一标识
-     * @param reason 取消原因
+     * @param reason 保护失效原因
      */
     void cancelRun(String runId, String reason);
 

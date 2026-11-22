@@ -14,7 +14,7 @@ interface IHostSession {
      * 为任务申请有时限的防冻结保护，并接管预唤醒阶段的保护。
      *
      * @param runId 本次任务的唯一标识
-     * @return 保护申请结果，包含是否成功、是否关闭守护及错误信息
+     * @return 保护申请结果，disabled 表示继续普通签到，protectionError 记录未启用保护的原因
      */
     Bundle beginRun(String runId);
 
@@ -27,7 +27,7 @@ interface IHostSession {
     boolean heartbeat(String runId);
 
     /**
-     * 结束任务或跳过唤醒准备，并释放对应的保护。
+     * 结束任务保护或跳过唤醒准备，并释放对应的保护，不影响签到业务。
      *
      * @param runId 任务或唤醒请求的唯一标识
      */

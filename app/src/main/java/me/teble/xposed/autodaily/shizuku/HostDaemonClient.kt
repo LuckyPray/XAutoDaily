@@ -14,6 +14,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -24,7 +26,6 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.base.hostApp
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
-import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskSchedulePublisher
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -34,6 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger
 object HostDaemonClient {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
+    private val protectionMutex = Mutex()
     private val generations = AtomicInteger()
     @Volatile
     private var session: IHostSession? = null
@@ -45,8 +47,6 @@ object HostDaemonClient {
     private var runtimeReady = false
     @Volatile
     private var generation = 0
-    @Volatile
-    private var protectedRunId: String? = null
     private var connectionJob: Job? = null
 
     val isConnected: Boolean
@@ -166,7 +166,7 @@ object HostDaemonClient {
             if (trusted()) LogUtil.i("宿主提前唤醒就绪，等待原有 Cron 检查 at=$scheduledAt wake=$wakeId")
         }
         override fun cancelRun(runId: String, reason: String) {
-            if (trusted()) TaskExecutor.cancelRun(runId, reason)
+            if (trusted()) LogUtil.w("任务保护已失效，签到继续按普通模式执行 run=$runId: $reason")
         }
         override fun onSessionClosed(reason: String) {
             val allowed = Binder.getCallingUid() in setOf(0, 2000)
@@ -174,7 +174,7 @@ object HostDaemonClient {
                 mutex.withLock {
                     if (epoch == generation) {
                         session = null
-                        cancelProtectedRun(reason)
+                        LogUtil.w("任务守护已断开，普通签到不受影响: $reason")
                     }
                 }
                 reconnect()
@@ -203,7 +203,7 @@ object HostDaemonClient {
                 mutex.withLock {
                     if (epoch == generation && session?.asBinder() == connected.asBinder()) {
                         session = null
-                        cancelProtectedRun("守护进程连接中断")
+                        LogUtil.w("守护进程连接中断，普通签到不受影响")
                     }
                 }
                 reconnect()
@@ -226,30 +226,51 @@ object HostDaemonClient {
                 .onFailure { LogUtil.w("关闭旧守护会话失败，将由守护超时清理: ${it.message}") }
         }
     }
-    suspend fun begin(runId: String): IHostSession? {
-        val connected = connect() ?: return null
-        check(runtimeReady && QApplicationUtil.currentUin > 10000) { "宿主账号尚未就绪" }
-        // 先记录申请中的任务，确保 Binder 在申请过程中断开时也能取消对应任务。
-        protectedRunId = runId
+    /**
+     * 独立申请和续期任务保护，失败或守护响应缓慢时不阻塞签到线程。
+     * 任务结束后取消返回的作业；即使申请结果迟到，也会释放对应租约。
+     *
+     * @param runId 本批签到的唯一标识
+     * @return 负责申请、续期及释放保护的后台作业
+     */
+    fun protect(runId: String): Job = scope.launch {
+        if (!protectionMutex.tryLock()) {
+            LogUtil.w("上一次任务保护尚未清理完成，本次签到按普通模式执行")
+            return@launch
+        }
+        var connected: IHostSession? = null
         try {
-            val result = connected.beginRun(runId)
+            val available = connect() ?: return@launch
+            coroutineContext.ensureActive()
+            check(runtimeReady && QApplicationUtil.currentUin > 10000) { "宿主账号尚未就绪" }
+            connected = available
+            val result = available.beginRun(runId)
+            coroutineContext.ensureActive()
             check(result.getBoolean("success")) { result.getString("error") ?: "无法申请任务防冻结保护" }
             if (result.getBoolean("disabled")) {
-                protectedRunId = null
-                return null
+                result.getString("protectionError")?.let { LogUtil.w("未启用任务保护，签到继续按普通模式执行: $it") }
+                return@launch
             }
-            return connected
+            while (isActive) {
+                delay(WakeProtocol.HEARTBEAT_MS)
+                if (!available.heartbeat(runId)) {
+                    LogUtil.w("任务保护续期失败，签到继续按普通模式执行 run=$runId")
+                    break
+                }
+            }
         } catch (e: Exception) {
-            finish(runId, connected)
-            throw e
+            if (e is CancellationException) throw e
+            LogUtil.w("任务保护不可用，签到继续按普通模式执行 run=$runId: ${e.message}")
+        } finally {
+            try {
+                connected?.let { finish(runId, it) }
+            } finally {
+                protectionMutex.unlock()
+            }
         }
     }
-    private fun cancelProtectedRun(reason: String) {
-        protectedRunId?.let { TaskExecutor.cancelRun(it, reason) }
-    }
-    fun finish(runId: String, connected: IHostSession? = session) {
-        runCatching { connected?.finishRun(runId) }.onFailure { LogUtil.w("释放任务保护失败，将由守护进程超时清理: ${it.message}") }
-        if (protectedRunId == runId) protectedRunId = null
+    private fun finish(runId: String, connected: IHostSession) {
+        runCatching { connected.finishRun(runId) }.onFailure { LogUtil.w("释放任务保护失败，将由守护进程超时清理: ${it.message}") }
     }
     fun publish(nextAt: Long): Boolean {
         val connected = currentSession() ?: return false
