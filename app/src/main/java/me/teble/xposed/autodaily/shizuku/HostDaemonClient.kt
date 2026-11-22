@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Binder
 import android.os.Build
+import android.os.Bundle
 import android.os.Process
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
@@ -19,11 +20,13 @@ import kotlinx.coroutines.sync.withLock
 import me.teble.xposed.autodaily.IHostCallback
 import me.teble.xposed.autodaily.IHostBootstrap
 import me.teble.xposed.autodaily.IHostSession
+import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.hook.base.hostApp
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor
 import me.teble.xposed.autodaily.utils.TaskSchedulePublisher
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * 运行于已注入模块的宿主主进程，负责连接守护，不依赖模块应用进程中的全局对象。
@@ -31,8 +34,11 @@ import me.teble.xposed.autodaily.utils.TaskSchedulePublisher
 object HostDaemonClient {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
+    private val generations = AtomicInteger()
     @Volatile
     private var session: IHostSession? = null
+    private var sessionInfo: Bundle? = null
+    private var incompatibleSession: Pair<String, Int>? = null
     @Volatile
     private var started = false
     @Volatile
@@ -51,21 +57,10 @@ object HostDaemonClient {
     fun start() {
         if (started) return
         started = true
+        hostApp.registerActivityLifecycleCallbacks(DaemonVersionNotice)
         val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                if (intent.getIntExtra("pid", -1) != Process.myPid() ||
-                    intent.getIntExtra("version", -1) != WakeProtocol.VERSION) return
-                val offer = IHostBootstrap.Stub.asInterface(intent.extras?.getBinder("bootstrap")) ?: return
-                scope.launch {
-                    runCatching {
-                        mutex.withLock {
-                            if (session?.asBinder()?.isBinderAlive == true) return@withLock
-                            val epoch = ++generation
-                            adopt(offer.connect(WakeProtocol.VERSION, callback(epoch)), epoch)
-                        }
-                        TaskSchedulePublisher.changed()
-                    }.onFailure { LogUtil.w("守护 Binder 交接失败: ${it.message}") }
-                }
+                acceptOffer(intent)
             }
         }
         // 通过 DUMP 权限限制会话交接广播的发送方，阻止未获特权授权的普通应用冒充守护。
@@ -76,6 +71,55 @@ object HostDaemonClient {
         }.onFailure { LogUtil.w("注册任务守护接收器失败，普通签到仍可使用: ${it.message}") }
         TaskSchedulePublisher.install()
         reconnect()
+    }
+
+    /**
+     * 响应守护实际发出的交接请求，不以旧 Binder 仍存活为由忽略重连。
+     * 新连接验证成功后才替换本地会话，迟到的旧回调不能清除新连接。
+     */
+    private fun acceptOffer(intent: Intent): Job = scope.launch {
+        try {
+            check(intent.getIntExtra("pid", -1) == Process.myPid()) { "交接目标 PID 不匹配" }
+            mutex.withLock {
+                val protocol = intent.getIntExtra("version", -1)
+                if (protocol != WakeProtocol.VERSION) {
+                    if (!isConnected) DaemonVersionNotice.protocolMismatch(protocol)
+                    return@launch
+                }
+                val instance = checkNotNull(intent.getStringExtra("daemonInstance"))
+                incompatibleSession?.let { (rejectedInstance, actualProtocol) ->
+                    if (instance == rejectedInstance) {
+                        if (!isConnected) DaemonVersionNotice.protocolMismatch(actualProtocol)
+                        return@launch
+                    }
+                }
+                val offer = checkNotNull(IHostBootstrap.Stub.asInterface(intent.extras?.getBinder("bootstrap")))
+                LogUtil.i("收到守护交接 pid=${Process.myPid()} instance=$instance offer=${intent.getStringExtra("offerId")}")
+                val previous = session
+                val epoch = generations.incrementAndGet()
+                val hostInfo = Bundle().apply {
+                    putInt("hostVersionCode", BuildConfig.VERSION_CODE)
+                    putString("hostVersionName", BuildConfig.VERSION_NAME)
+                }
+                val candidate = offer.connect(WakeProtocol.VERSION, callback(epoch), hostInfo)
+                try {
+                    if (!adopt(candidate, epoch, instance)) {
+                        if (candidate.asBinder() != previous?.asBinder()) disconnect(candidate, "守护协议不匹配")
+                        return@launch
+                    }
+                } catch (e: Exception) {
+                    if (candidate.asBinder() != previous?.asBinder()) disconnect(candidate, "宿主未接受会话: ${e.message}")
+                    throw e
+                }
+                if (previous != null && previous.asBinder() != candidate.asBinder()) {
+                    disconnect(previous, "宿主已切换到新的守护会话")
+                }
+            }
+            TaskSchedulePublisher.changed()
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
+            LogUtil.w("守护 Binder 交接失败: ${e.message}")
+        }
     }
     fun markReady() {
         runtimeReady = true
@@ -105,8 +149,15 @@ object HostDaemonClient {
      */
     private suspend fun connect(): IHostSession? = mutex.withLock {
         val connected = currentSession() ?: return@withLock null
-        if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
-        connected
+        try {
+            connected.sessionInfo
+            if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
+            connected
+        } catch (e: Exception) {
+            if (session === connected) session = null
+            disconnect(connected, "宿主检测到会话已失效")
+            throw e
+        }
     }
 
     private fun callback(epoch: Int) = object : IHostCallback.Stub() {
@@ -118,26 +169,62 @@ object HostDaemonClient {
             if (trusted()) TaskExecutor.cancelRun(runId, reason)
         }
         override fun onSessionClosed(reason: String) {
-            if (trusted()) {
-                session = null
-                cancelProtectedRun(reason)
+            val allowed = Binder.getCallingUid() in setOf(0, 2000)
+            if (allowed) scope.launch {
+                mutex.withLock {
+                    if (epoch == generation) {
+                        session = null
+                        cancelProtectedRun(reason)
+                    }
+                }
                 reconnect()
             }
         }
     }
-    private fun adopt(connected: IHostSession, epoch: Int): IHostSession {
+    private fun adopt(connected: IHostSession, epoch: Int, instance: String): Boolean {
+        val info = connected.sessionInfo
+        check(info.getString("daemonInstance") == instance) { "交接来源与实际守护实例不一致" }
+        check(info.getInt("hostPid") == Process.myPid() && info.getInt("hostUid") == Process.myUid()) { "会话宿主身份不匹配" }
+        val protocol = info.getInt("daemonProtocol")
+        if (protocol != WakeProtocol.VERSION) {
+            incompatibleSession = instance to protocol
+            if (!isConnected) DaemonVersionNotice.protocolMismatch(protocol)
+            return false
+        }
+        val previousInfo = sessionInfo
+        check(currentSession() == null || previousInfo?.getString("daemonInstance") == instance ||
+            (previousInfo?.getLong("daemonStartedElapsed") ?: 0) <= info.getLong("daemonStartedElapsed")) {
+            "当前已连接更新的守护实例，忽略迟到的旧交接"
+        }
+        if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
+        val confirmed = connected.sessionInfo
         connected.asBinder().linkToDeath({
-            if (epoch == generation) {
-                session = null
-                cancelProtectedRun("守护进程连接中断")
+            scope.launch {
+                mutex.withLock {
+                    if (epoch == generation && session?.asBinder() == connected.asBinder()) {
+                        session = null
+                        cancelProtectedRun("守护进程连接中断")
+                    }
+                }
                 reconnect()
             }
         }, 0)
+        generation = epoch
         session = connected
+        sessionInfo = confirmed
+        incompatibleSession = null
+        DaemonVersionNotice.connected(confirmed)
         TaskSchedulePublisher.connectionChanged()
-        if (runtimeReady && QApplicationUtil.currentUin > 10000) connected.ready()
-        LogUtil.i("任务守护连接成功 pid=${Process.myPid()} ready=$runtimeReady")
-        return connected
+        LogUtil.i("任务守护连接成功 pid=${Process.myPid()} ready=${confirmed.getBoolean("hostReady")} " +
+            "daemonPid=${confirmed.getInt("daemonPid")} instance=$instance session=${confirmed.getString("sessionId")}")
+        return true
+    }
+
+    private fun disconnect(connected: IHostSession, reason: String) {
+        scope.launch {
+            runCatching { connected.disconnect(reason) }
+                .onFailure { LogUtil.w("关闭旧守护会话失败，将由守护超时清理: ${it.message}") }
+        }
     }
     suspend fun begin(runId: String): IHostSession? {
         val connected = connect() ?: return null

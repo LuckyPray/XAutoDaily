@@ -28,6 +28,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import me.teble.xposed.autodaily.application.HostAppAccess
 import me.teble.xposed.autodaily.application.fetchAppList
+import me.teble.xposed.autodaily.shizuku.DaemonConnectionManager
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme
 
 class MainActivity : ComponentActivity() {
@@ -89,6 +90,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onPostResume() {
         super.onPostResume()
+        if (!DaemonConnectionManager.running && !DaemonConnectionManager.starting) {
+            DaemonConnectionManager.recover()
+        }
         // 首页展示读取宿主列表所需权限的说明，并在页面可见后自动请求一次。
         window.decorView.post {
             if (isFinishing || isDestroyed ||

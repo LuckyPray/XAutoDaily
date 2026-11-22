@@ -36,6 +36,13 @@ class UserService(private val context: Context) : IUserService.Stub() {
     private val moduleUid = context.applicationInfo.uid
     private val userId = moduleUid / 100000
     private val providerWake = ProviderWakeController(userId)
+    private val daemonInfo = DaemonBuild.read(context).apply {
+        putString("daemonInstance", UUID.randomUUID().toString())
+        putInt("daemonUid", Process.myUid())
+        putInt("daemonPid", Process.myPid())
+        putLong("daemonStartedAt", System.currentTimeMillis())
+        putLong("daemonStartedElapsed", SystemClock.elapsedRealtime())
+    }
     private val am = AmUnfreezeController()
     private val directory = File("/storage/emulated/$userId/Android/data/${BuildConfig.APPLICATION_ID}/files/conf")
     private val journal = AtomicFile(File(directory, "sticky-leases.json"))
@@ -51,6 +58,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         var prepared: Boolean = false, var delivered: Boolean = false)
     private val pending = mutableMapOf<String, Wake>()
     private val status = mutableMapOf<String, Bundle>()
+    private val handshakes = mutableMapOf<String, HostHandshakeStatus>()
     private val wakeLocks = mutableMapOf<String, PowerManager.WakeLock>()
     @Volatile
     private var initialized = false
@@ -78,7 +86,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
                     schedules = DaemonScheduleStore(directory)
                     initialized = true
                     reconcileAlarms()
-                    Log.i("XALog", "任务守护进程已就绪 protocol=${WakeProtocol.VERSION}")
+                    Log.i("XALog", "任务守护进程已就绪 protocol=${WakeProtocol.VERSION} pid=${Process.myPid()} instance=${daemonInfo.getString("daemonInstance")}")
                 }.onFailure { Log.e("XALog", "守护进程初始化失败", it) }
             }
         }
@@ -105,6 +113,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
     }
 
     override fun getProtocolVersion(): Int { admin(); return WakeProtocol.VERSION }
+    override fun getDaemonInfo(): Bundle { admin(); return Bundle(daemonInfo) }
     override fun isRunning(): Boolean {
         admin()
         return synchronized(guard) {
@@ -133,10 +142,13 @@ class UserService(private val context: Context) : IUserService.Stub() {
         }
     }
 
-    private fun createSession(pkg: String, identity: HostProcess, callback: IHostCallback): IHostSession {
+    private fun createSession(pkg: String, identity: HostProcess, callback: IHostCallback): Session {
         check(initialized && !stopping) { "守护进程尚未就绪" }
         sessions.remove(pkg)?.close("宿主连接被替换")
-        return Session(pkg, identity, callback).also { sessions[pkg] = it }
+        return Session(pkg, identity, callback).also {
+            sessions[pkg] = it
+            handshakes.getOrPut(pkg) { HostHandshakeStatus() }.connected(it.id)
+        }
     }
 
     private fun offerRunningHosts() {
@@ -152,21 +164,49 @@ class UserService(private val context: Context) : IUserService.Stub() {
         val now = SystemClock.elapsedRealtime()
         if (now - (offeredAt[identity] ?: -60_000) < 10_000) return
         offeredAt[identity] = now
+        val offerId = UUID.randomUUID().toString()
+        val trace = handshakes.getOrPut(identity.name) { HostHandshakeStatus() }
+        trace.offer(identity, offerId)
         val offer = object : IHostBootstrap.Stub() {
-            override fun connect(version: Int, callback: IHostCallback): IHostSession {
-                check(version == WakeProtocol.VERSION) { "宿主与守护协议不一致，请重启宿主" }
-                check(Binder.getCallingUid() == identity.uid && Binder.getCallingPid() == identity.pid && identity.isAlive())
-                check(SystemClock.elapsedRealtime() - now < 30_000) { "Binder 交接已过期" }
-                return synchronized(guard) { createSession(identity.name, identity, callback) }
+            override fun connect(version: Int, callback: IHostCallback, hostInfo: Bundle): IHostSession {
+                return synchronized(guard) {
+                    if (!trace.isCurrent(offerId)) {
+                        trace.rejected(offerId, "已有更新的交接请求")
+                        error("交接请求已被更新，请等待新的广播")
+                    }
+                    trace.received(offerId, version, hostInfo)
+                    try {
+                        check(Binder.getCallingUid() == identity.uid) { "宿主 UID 与交接目标不一致" }
+                        check(Binder.getCallingPid() == identity.pid) { "宿主 PID 与交接目标不一致" }
+                        check(identity.isAlive()) { "宿主进程身份已变化或无法读取" }
+                        check(version == WakeProtocol.VERSION) { "宿主与守护协议不一致，请重启宿主" }
+                        check(SystemClock.elapsedRealtime() - now < 30_000) { "Binder 交接已过期" }
+                        check(enabled(identity.name)) { "宿主任务守护已关闭" }
+                        createSession(identity.name, identity, callback)
+                    } catch (e: Exception) {
+                        trace.failure(e.message ?: e.javaClass.simpleName)
+                        throw e
+                    }
+                }
             }
         }
-        providerWake.offer(Intent(WakeProtocol.ACTION_SESSION).setPackage(identity.name)
-            .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
-            .putExtra("pid", identity.pid).putExtra("version", WakeProtocol.VERSION)
-            .putExtras(Bundle().apply { putBinder("bootstrap", offer) }))
+        try {
+            val result = providerWake.offer(Intent(WakeProtocol.ACTION_SESSION).setPackage(identity.name)
+                .addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY or Intent.FLAG_RECEIVER_FOREGROUND)
+                .putExtra("pid", identity.pid).putExtra("version", WakeProtocol.VERSION)
+                .putExtra("daemonInstance", daemonInfo.getString("daemonInstance"))
+                .putExtra("offerId", offerId)
+                .putExtras(Bundle().apply { putBinder("bootstrap", offer) }))
+            trace.broadcast(result)
+            Log.i("XALog", "宿主交接广播 ${identity.name} pid=${identity.pid} result=$result offer=$offerId")
+        } catch (e: Exception) {
+            trace.failure(e.cause?.message ?: e.message ?: e.javaClass.simpleName)
+            Log.w("XALog", "发送宿主交接失败，将重试", e)
+        }
     }
 
     private inner class Session(val pkg: String, val identity: HostProcess, val callback: IHostCallback) : IHostSession.Stub() {
+        val id = UUID.randomUUID().toString()
         var ready = false
         @Volatile
         var closed = false
@@ -185,9 +225,26 @@ class UserService(private val context: Context) : IUserService.Stub() {
             synchronized(guard) {
                 if (ready) return
                 ready = true
-                Log.i("XALog", "宿主握手就绪 $pkg pid=${identity.pid}")
+                handshakes[pkg]?.ready(id)
+                Log.i("XALog", "宿主握手就绪 $pkg pid=${identity.pid} daemon=${Process.myPid()} session=$id")
                 deliver(pkg)
             }
+        }
+        override fun getSessionInfo(): Bundle {
+            authenticate()
+            return synchronized(guard) {
+                check(sessions[pkg] === this && !closed) { "宿主会话已被替换" }
+                Bundle(daemonInfo).apply {
+                    putString("sessionId", id)
+                    putInt("hostPid", identity.pid)
+                    putInt("hostUid", identity.uid)
+                    putBoolean("hostReady", ready)
+                }
+            }
+        }
+        override fun disconnect(reason: String) {
+            check(Binder.getCallingUid() == identity.uid && Binder.getCallingPid() == identity.pid)
+            synchronized(guard) { close(reason.take(512)) }
         }
         override fun beginRun(runId: String): Bundle {
             authenticate(); validId(runId)
@@ -239,6 +296,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         fun close(reason: String) {
             if (closed) return
             closed = true
+            handshakes[pkg]?.closed(id, reason)
             runCatching { callback.onSessionClosed(reason) }
             val previousRun = run
             try {
@@ -315,6 +373,9 @@ class UserService(private val context: Context) : IUserService.Stub() {
             if (restored) message else "防冻结恢复未获确认，守护进程会继续重试")
     }
     private fun watch() {
+        sessions.values.toList().filter {
+            !it.identity.isAlive() || !it.callback.asBinder().isBinderAlive
+        }.forEach { it.close("宿主进程或回调已退出") }
         leases.sweep().forEach { id ->
             sessions.values.firstOrNull { it.run == id }?.let { session ->
                 session.run = null
@@ -324,8 +385,12 @@ class UserService(private val context: Context) : IUserService.Stub() {
             releaseCpu(id)
         }
         pending.filterValues { SystemClock.elapsedRealtime() >= it.deadline }.keys.toList().forEach {
-            finishWake(it, if (pending[it]?.delivered == true) "等待 Cron 超时，已请求解除防冻结" else
-                "宿主就绪超时，请确认模块已加载且账号已登录")
+            val message = when {
+                pending[it]?.delivered == true -> "等待 Cron 超时，已请求解除防冻结"
+                sessions[it]?.closed == false -> "宿主已连接，但未在规定时间内确认账号与模块就绪"
+                else -> "宿主会话建立超时，请查看连接交接记录"
+            }
+            finishWake(it, message)
         }
     }
     private fun setStatus(pkg: String, id: String, state: String, message: String) {
@@ -337,10 +402,15 @@ class UserService(private val context: Context) : IUserService.Stub() {
     override fun getHostStatus(pkg: String): Bundle {
         admin(); require(pkg in WakeProtocol.hosts)
         return synchronized(guard) {
+            val connected = sessions[pkg]?.takeIf { !it.closed && it.identity.isAlive() && it.callback.asBinder().isBinderAlive }
             (status[pkg]?.let(::Bundle) ?: Bundle()).apply { putBoolean("pendingRestore", leases.hasPendingRestore()) }
                 .apply {
-                    putInt("daemonUid", Process.myUid()); putInt("daemonPid", Process.myPid())
-                    putBoolean("connected", sessions[pkg]?.closed == false)
+                    putAll(daemonInfo)
+                    putBoolean("connected", connected != null)
+                    putBoolean("hostReady", connected?.ready == true)
+                    putString("sessionId", connected?.id)
+                    putInt("hostPid", connected?.identity?.pid ?: -1)
+                    putBundle("handshake", handshakes[pkg]?.snapshot())
                     putInt("alarmUid", alarms?.uid ?: -1); putBoolean("alarmAlive", alarms?.alive == true)
                     putLong("lastAlarmAt", lastAlarmAt)
                     if (::schedules.isInitialized) schedules.plans[pkg]?.let {

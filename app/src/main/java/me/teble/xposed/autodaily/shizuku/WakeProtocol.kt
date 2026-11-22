@@ -5,7 +5,7 @@ import me.teble.xposed.autodaily.config.PACKAGE_NAME_QQ
 import me.teble.xposed.autodaily.config.PACKAGE_NAME_TIM
 
 object WakeProtocol {
-    const val VERSION = 5
+    const val VERSION = 6
     const val AUTHORITY = BuildConfig.APPLICATION_ID + ".hostbridge"
     const val WAKE_PATH = "/xautodaily/wake"
     const val RECOVER_PATH = "/xautodaily/recover"

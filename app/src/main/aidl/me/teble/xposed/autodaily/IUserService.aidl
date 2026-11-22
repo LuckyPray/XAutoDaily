@@ -91,4 +91,9 @@ interface IUserService {
      * @param onlyIfAbsent 是否仅在守护中没有该宿主计划时保存
      */
     void publishSchedule(String packageName, long nextAt, boolean onlyIfAbsent) = 10;
+
+    /**
+     * 返回守护启动时加载的安装版本和实例身份，避免将模块应用版本当作守护版本。
+     */
+    Bundle getDaemonInfo() = 11;
 }

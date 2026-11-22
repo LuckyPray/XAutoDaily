@@ -38,7 +38,6 @@ object DaemonConnectionManager {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val mutex = Mutex()
     private val applicationReady = CompletableDeferred<Unit>()
-    private var awaiting: CompletableDeferred<IUserService>? = null
     @Volatile
     private var service: IUserService? = null
     private var recovery: Job? = null
@@ -47,23 +46,35 @@ object DaemonConnectionManager {
     var error by mutableStateOf(""); private set
     private val preferences get() = xaApp.getSharedPreferences("task_daemon", 0)
     val paused get() = preferences.getBoolean("paused", false)
+    private val installedBuild by lazy { DaemonBuild.read(xaApp) }
     private val args by lazy {
         Shizuku.UserServiceArgs(ComponentName(BuildConfig.APPLICATION_ID, UserService::class.java.name))
             .daemon(true).processNameSuffix("service").debuggable(BuildConfig.DEBUG)
-            .version(BuildConfig.VERSION_CODE * 10 + WakeProtocol.VERSION)
+            .version(DaemonBuild.serviceVersion(installedBuild))
     }
-    private val connection = object : ServiceConnection {
+    private var connection: ServiceConnection? = null
+
+    /**
+     * 每次绑定使用独立回调，旧绑定迟到的连接或断线通知不得覆盖当前守护。
+     */
+    private fun newConnection(awaiting: CompletableDeferred<IUserService>) = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            if (connection !== this) return
             if (binder == null || !binder.pingBinder()) {
-                awaiting?.completeExceptionally(IllegalStateException("守护进程 Binder 无效")); return
+                awaiting.completeExceptionally(IllegalStateException("守护进程 Binder 无效")); return
             }
             val remote = IUserService.Stub.asInterface(binder)
             runCatching {
                 binder.linkToDeath({ if (service?.asBinder() == binder) disconnected() }, 0)
-                awaiting?.complete(remote)
-            }.onFailure { awaiting?.completeExceptionally(it) }
+                awaiting.complete(remote)
+            }.onFailure { awaiting.completeExceptionally(it) }
         }
-        override fun onServiceDisconnected(name: ComponentName?) = disconnected()
+        override fun onServiceDisconnected(name: ComponentName?) {
+            if (connection === this) {
+                awaiting.completeExceptionally(IllegalStateException("守护连接已断开"))
+                disconnected()
+            }
+        }
     }
 
     fun initialize() {
@@ -100,19 +111,35 @@ object DaemonConnectionManager {
         starting = true; error = ""
         try {
             ShizukuConfigStore.saveCurrent()
-            val deferred = CompletableDeferred<IUserService>()
-            awaiting = deferred
-            withContext(Dispatchers.Main) { Shizuku.bindUserService(args, connection) }
-            val remote = withTimeout(10_000) {
-                val candidate = deferred.await()
-                check(candidate.protocolVersion == WakeProtocol.VERSION) { "守护进程协议版本不一致，请重新运行" }
+            var verified: IUserService? = null
+            for (attempt in 0..1) {
+                val deferred = CompletableDeferred<IUserService>()
+                val listener = newConnection(deferred)
+                connection = listener
+                withContext(Dispatchers.Main) { Shizuku.bindUserService(args, listener) }
+                val candidate = withTimeout(10_000) { deferred.await() }
+                val matches = runCatching {
+                    candidate.protocolVersion == WakeProtocol.VERSION && DaemonBuild.matches(candidate.daemonInfo, installedBuild)
+                }.getOrDefault(false)
+                if (matches) {
+                    verified = candidate
+                    break
+                }
+                withContext(Dispatchers.Main) { Shizuku.unbindUserService(args, listener, true) }
+                check(attempt == 0) { "守护未加载当前安装版本，请重新启动任务守护" }
+                Log.w("XALog", "守护安装版本不一致，已请求重建")
+            }
+            val remote = checkNotNull(verified)
+            withTimeout(10_000) {
+                val candidate = remote
                 while (!candidate.isRunning) delay(100)
-                candidate
             }
             check(!paused && ConfUnit.keepAlive)
             service = remote
             ShizukuApi.initBinder(remote.asBinder())
             running = true
+            val info = remote.daemonInfo
+            Log.i("XALog", "模块已连接守护 pid=${info.getInt("daemonPid")} instance=${info.getString("daemonInstance")}")
             HostAlarmMigration.migrate(remote)
             remote
         } catch (e: Exception) {
@@ -121,7 +148,7 @@ object DaemonConnectionManager {
             runCatching { withContext(Dispatchers.Main) { Shizuku.unbindUserService(args, connection, false) } }
             Log.w("XALog", "连接守护进程失败: $error")
             throw e
-        } finally { awaiting = null; starting = false }
+        } finally { starting = false }
     }
     suspend fun start() {
         preferences.edit().putBoolean("paused", false).commit()

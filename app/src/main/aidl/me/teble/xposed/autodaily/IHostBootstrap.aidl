@@ -1,4 +1,5 @@
 package me.teble.xposed.autodaily;
+import android.os.Bundle;
 import me.teble.xposed.autodaily.IHostCallback;
 import me.teble.xposed.autodaily.IHostSession;
 
@@ -11,7 +12,8 @@ interface IHostBootstrap {
      *
      * @param version 宿主使用的协议版本
      * @param callback 宿主回调接口
+     * @param hostInfo 宿主实际加载的模块版本，用于诊断更新和连接状态
      * @return 仅限该宿主进程使用的会话
      */
-    IHostSession connect(int version, IHostCallback callback);
+    IHostSession connect(int version, IHostCallback callback, in Bundle hostInfo);
 }

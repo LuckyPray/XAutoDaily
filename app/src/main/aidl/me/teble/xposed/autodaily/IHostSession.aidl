@@ -39,4 +39,14 @@ interface IHostSession {
      * @param nextAt 下次检查的 Unix 毫秒时间戳，为 0 时取消计划
      */
     void publishSchedule(long nextAt);
+
+    /**
+     * 校验会话仍然有效，并返回实际守护实例、宿主身份及就绪状态。
+     */
+    Bundle getSessionInfo();
+
+    /**
+     * 宿主切换连接时释放旧会话，不影响宿主中的签到任务。
+     */
+    void disconnect(String reason);
 }

@@ -45,10 +45,10 @@ internal class ProviderWakeController(private val userId: Int) {
         runCatching { ActivityManager::class.java.getDeclaredMethod("getService").invoke(null) }
             .getOrElse { Class.forName("android.app.ActivityManagerNative").getMethod("getDefault").invoke(null) }
 
-    fun offer(intent: Intent) {
+    fun offer(intent: Intent): Int {
         val iam = Class.forName("android.app.IActivityManager")
         val method = iam.methods.first { it.name == "broadcastIntent" && it.parameterTypes.size == 13 }
-        method.invoke(activityManager(), null, intent, null, null, 0, null, null, null, -1, null, false, false, userId)
+        return method.invoke(activityManager(), null, intent, null, null, 0, null, null, null, -1, null, false, false, userId) as Int
     }
 
     fun recoverModule() = mime(Uri.parse("content://${WakeProtocol.AUTHORITY}${WakeProtocol.RECOVER_PATH}"))
