@@ -23,9 +23,8 @@ import me.teble.xposed.autodaily.task.model.TaskProperties
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.TaskErrorInfo
+import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.errInfo
-import me.teble.xposed.autodaily.ui.retryCount
 import java.time.LocalDateTime
 import java.util.TimeZone
 import java.util.UUID
@@ -81,6 +80,7 @@ object TaskExecutor {
         scope.launch(Dispatchers.IO) {
             if (!running.compareAndSet(false, true)) {
                 if (userExec) ToastUtil.send("已有任务正在执行")
+                else LogUtil.w("自动检查被跳过：上一批任务仍在执行或尚未完成清理")
                 return@launch
             }
             val runId = UUID.randomUUID().toString()
@@ -134,31 +134,44 @@ object TaskExecutor {
 
     private suspend fun executorTask(conf: TaskProperties, control: TaskRunControl, protect: suspend () -> Unit) {
         val needExecGroups = mutableListOf<TaskGroup>()
+        val dueTasks = mutableListOf<String>()
+        var enabledTaskCount = 0
+        var blockedTaskCount = 0
+        val runningGroups = mutableSetOf<String>()
         val currDateStr = TimeUtil.getCNDate().formatDate()
         lock.withLock {
             for (group in conf.taskGroups) {
+                var hasEligibleTask = false
                 for (task in group.tasks) {
-                    val taskException = task.errInfo
-                    // 重置历史异常数据
-                    if (taskException.dateStr.isNotEmpty() && taskException.dateStr != currDateStr) {
-                        if (task.retryCount != 0) {
-                            LogUtil.d("重置任务${task.id}历史异常数据")
-                            task.retryCount = 0
-                            task.errInfo = TaskErrorInfo()
-                        }
-                    }
-                    if (ConfigUtil.checkExecuteTask(task) && task.errInfo.count < 3) {
-                        if (!runtimeTasks.contains(group)) {
-                            needExecGroups.add(group)
-                        }
-                        break
+                    if (!task.enable) continue
+                    enabledTaskCount++
+                    if (!ConfigUtil.checkExecuteTask(task)) continue
+                    val name = "${group.id}/${task.id}"
+                    val errors = task.errInfo
+                    if (errors.isBlockedOn(currDateStr)) {
+                        dueTasks.add("$name(${errors.dateStr} 异常 ${errors.count} 次)")
+                        blockedTaskCount++
+                    } else {
+                        dueTasks.add(name)
+                        hasEligibleTask = true
                     }
                 }
+                if (!hasEligibleTask) continue
+                if (group in runtimeTasks) runningGroups.add(group.id) else needExecGroups.add(group)
             }
         }
         if (needExecGroups.isEmpty()) {
+            LogUtil.i(
+                "自动检查未找到可执行任务 enabled=$enabledTaskCount due=${dueTasks.size} " +
+                    "blocked=$blockedTaskCount runningGroup=${runningGroups.size} " +
+                    "dueTasks=${dueTasks.take(20).joinToString(",")}"
+            )
             return
         }
+        LogUtil.i(
+            "自动检查选择任务组 groups=${needExecGroups.joinToString(",") { it.id }} " +
+                "dueTasks=${dueTasks.take(20).joinToString(",")}"
+        )
         protect()
         val threadPool = Executors.newFixedThreadPool(if (ConfUnit.usedThreadPool) 5 else 1)
         activePool = threadPool
@@ -222,6 +235,10 @@ object TaskExecutor {
                 ConfigUtil.checkUpdate(false)
             }
             LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
+            // 宿主可能在任务到期后才重新启动，不能等待下一次十分钟 Cron 检查才补执行。
+            // SplashActivityHook 也会触发一次检查，running 状态会合并重复请求。
+            LogUtil.i("调度器启动后将在十秒内执行一次到期任务补偿检查")
+            handler.sendEmptyMessageDelayed(AUTO_EXEC, 10_000)
         }
     }
 }

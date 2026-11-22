@@ -16,6 +16,8 @@ import me.teble.xposed.autodaily.ui.enable
 import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.ui.nextShouldExecTime
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.ZoneId
 import java.util.Locale
 
 /**
@@ -87,16 +89,20 @@ object TaskSchedulePublisher {
                 return
             }
             val now = System.currentTimeMillis()
-            val taskNow = TimeUtil.getCNDate().time
+            val taskNow = TimeUtil.getCNDate()
             val format = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
+            val taskClock = taskNow.toInstant().atZone(ZoneId.systemDefault())
+            val day = taskClock.toLocalDate()
+            val nextDay = day.plusDays(1).atStartOfDay(taskClock.zone)
+            val nextDayAt = now + Duration.between(taskClock, nextDay).toMillis()
             val next = ConfigUtil.loadSaveConf().taskGroups.flatMap { it.tasks }.filter { it.enable }
                 .mapNotNull { task ->
                     runCatching {
                         val due = ConfigUtil.checkExecuteTask(task)
                         // 按任务引擎的时间计算执行间隔，再转换为 RTC 闹钟使用的设备时间。
-                        if (task.errInfo.count >= 3) now + 24 * 60 * 60_000L
-                        else if (due) maxOf(now + 1_000, retryNotBefore)
-                        else task.nextShouldExecTime?.let { now + (format.parse(it)!!.time - taskNow).coerceAtLeast(1_000) }
+                        val earliest = if (task.errInfo.isBlockedOn(day.toString())) nextDayAt else now + 1_000
+                        if (due) maxOf(earliest, retryNotBefore)
+                        else task.nextShouldExecTime?.let { maxOf(earliest, now + (format.parse(it)!!.time - taskNow.time)) }
                     }.onFailure { LogUtil.e(it, "计算任务 ${task.id} 下次唤醒失败") }.getOrNull()
                 }.minOrNull() ?: 0
             val cronCheck = if (next == 0L) 0 else WakeProtocol.nextCronCheck(next, now)

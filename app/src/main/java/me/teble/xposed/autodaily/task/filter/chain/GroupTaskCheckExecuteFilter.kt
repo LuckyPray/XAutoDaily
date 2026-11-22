@@ -5,8 +5,10 @@ import me.teble.xposed.autodaily.task.filter.GroupTaskFilter
 import me.teble.xposed.autodaily.task.filter.GroupTaskFilterChain
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.util.ConfigUtil
+import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.utils.LogUtil
+import me.teble.xposed.autodaily.utils.TimeUtil
 
 class GroupTaskCheckExecuteFilter : GroupTaskFilter(
     TAG = "GroupTaskCheckExecuteFilter"
@@ -19,8 +21,9 @@ class GroupTaskCheckExecuteFilter : GroupTaskFilter(
         chain: FilterChain
     ) {
         val taskGroup = (chain as GroupTaskFilterChain).taskGroup
+        val day = TimeUtil.getCNDate().formatDate()
         taskGroup.tasks.forEach {
-            if (ConfigUtil.checkExecuteTask(it) && it.errInfo.count < 3) {
+            if (ConfigUtil.checkExecuteTask(it) && !it.errInfo.isBlockedOn(day)) {
                 LogUtil.d("task -> ${it.id} 将被执行")
                 taskList.add(it)
             }

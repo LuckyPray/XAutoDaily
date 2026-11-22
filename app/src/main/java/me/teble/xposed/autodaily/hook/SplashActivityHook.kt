@@ -31,10 +31,9 @@ import me.teble.xposed.autodaily.task.util.ConfigUtil.loadSaveConf
 import me.teble.xposed.autodaily.task.util.format
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
-import me.teble.xposed.autodaily.ui.TaskErrorInfo
-import me.teble.xposed.autodaily.ui.errInfo
 import me.teble.xposed.autodaily.ui.lastExecTime
 import me.teble.xposed.autodaily.ui.reset
+import me.teble.xposed.autodaily.ui.retryAfterErrors
 import me.teble.xposed.autodaily.ui.retryCount
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskExecutor.AUTO_EXEC
@@ -56,6 +55,7 @@ class SplashActivityHook : BaseHook() {
     @MethodHook("SplashActivity Hook")
     private fun splashActivityHook() {
         findMethod(SplashActivity) { name == "doOnCreate" }.hookAfter {
+            LogUtil.i("SplashActivity 已进入，发送启动补偿检查")
             scope.launch {
                 withContext(Dispatchers.IO) {
                     ConfUnit.metaInfoCache ?: ConfigUtil.checkUpdate(false)
@@ -101,21 +101,11 @@ private fun autoResetTask(isOnCreate: Boolean) {
     lastAutoResetTime = System.currentTimeMillis()
     val conf = loadSaveConf()
     val currDateStr = TimeUtil.getCNDate().formatDate()
+    val retryLimit = if (isOnCreate) 3 else 2
     conf.taskGroups.forEach { group ->
         group.tasks.forEach { task ->
-            val errInfo = task.errInfo
-            if (errInfo.dateStr.isNotEmpty() && errInfo.dateStr != currDateStr) {
-                if (task.retryCount != 0) {
-                    task.retryCount = 0
-                    task.errInfo = TaskErrorInfo()
-                }
-            } else if (errInfo.count >= 3) {
-                if ((!isOnCreate && task.retryCount < 2) ||
-                    (isOnCreate && task.retryCount < 3)) {
-                    task.errInfo = TaskErrorInfo()
-                    task.retryCount++
-                    LogUtil.d("重置task: ${task.id} retryCount: ${task.retryCount}")
-                }
+            if (task.retryAfterErrors(currDateStr, retryLimit)) {
+                LogUtil.d("重置task: ${task.id} retryCount: ${task.retryCount}")
             }
         }
     }

@@ -200,11 +200,36 @@ var Task.retryCount: Int
     get() = accountConfig.getInt("${this.id}#${RETRY_COUNT}", 0)
     set(value) = accountConfig.putInt("${this.id}#${RETRY_COUNT}", value)
 
+/**
+ * 按异常发生时的签到日期累计次数，跨天后的第一次异常重新从一次计起。
+ */
+@Synchronized
+internal fun Task.recordError(day: String): TaskErrorInfo {
+    val previous = errInfo
+    val count = if (previous.dateStr == day) previous.count + 1 else {
+        retryCount = 0
+        1
+    }
+    return TaskErrorInfo(day, count).also { errInfo = it }
+}
+
+/**
+ * 当天达到异常上限后，按前台重试额度重新开放一次执行机会。
+ */
+@Synchronized
+internal fun Task.retryAfterErrors(day: String, limit: Int): Boolean {
+    if (!errInfo.isBlockedOn(day) || retryCount >= limit) return false
+    retryCount++
+    errInfo = TaskErrorInfo(day, 0)
+    return true
+}
+
 fun Task.reset() {
     this.lastExecTime = null
     this.lastExecMsg = null
     this.nextShouldExecTime = null
     this.errInfo = TaskErrorInfo()
+    this.retryCount = 0
     this.taskExecStatus = TaskStatus()
 }
 
@@ -243,6 +268,11 @@ data class TaskErrorInfo(
     var dateStr: String = "",
     var count: Int = 0
 ) {
+
+    /**
+     * 三次异常只暂停记录当日的任务，旧版本保存的历史计数也按此规则读取。
+     */
+    fun isBlockedOn(day: String): Boolean = dateStr == day && count >= 3
 
     override fun toString(): String {
         return "${dateStr}|${count}"

@@ -15,6 +15,7 @@ import me.teble.xposed.autodaily.task.util.TaskUtil
 import me.teble.xposed.autodaily.task.util.formatDate
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.errInfo
+import me.teble.xposed.autodaily.ui.recordError
 import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TaskRunControl
 import me.teble.xposed.autodaily.utils.TimeUtil
@@ -23,7 +24,6 @@ import java.net.ConnectException
 import java.net.SocketException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
-import java.util.Date
 import java.util.concurrent.CancellationException
 import javax.net.ssl.SSLHandshakeException
 
@@ -59,9 +59,8 @@ class GroupTaskFilterChain(
         } else {
             val reqType = ReqType.getType(taskGroup.type.split("|").first())
             for (task in taskList) {
-                val taskException = task.errInfo
-                if (taskException.count >= 3) {
-                    LogUtil.i("任务${task.id}执行错误次数超过3次，本次启动暂停执行")
+                if (task.errInfo.isBlockedOn(TimeUtil.getCNDate().formatDate())) {
+                    LogUtil.i("任务${task.id}今日异常已达上限，跳过本次执行")
                     continue
                 }
                 try {
@@ -82,10 +81,8 @@ class GroupTaskFilterChain(
                         }
                         else -> {
                             LogUtil.e(e, "执行任务 ${task.id} 异常: ")
-                            taskException.count++
-                            taskException.dateStr = Date(TimeUtil.localTimeMillis()).formatDate()
-                            task.errInfo = taskException
-                            if (taskException.count >= 3 && ConfUnit.enableTaskExceptionNotification) {
+                            val day = TimeUtil.getCNDate().formatDate()
+                            if (task.recordError(day).isBlockedOn(day) && ConfUnit.enableTaskExceptionNotification) {
                                 XANotification.notify("任务${task.id}执行异常，本次启动跳过执行")
                             }
                         }
