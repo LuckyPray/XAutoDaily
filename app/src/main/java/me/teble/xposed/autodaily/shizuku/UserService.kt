@@ -58,6 +58,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         var prepared: Boolean = false, var delivered: Boolean = false, var protectionReady: Boolean = false)
     private val pending = mutableMapOf<String, Wake>()
     private val status = mutableMapOf<String, Bundle>()
+    private val diagnostics = mutableMapOf<String, WakeDiagnostics>()
     private val handshakes = mutableMapOf<String, HostHandshakeStatus>()
     private val wakeLocks = mutableMapOf<String, PowerManager.WakeLock>()
     @Volatile
@@ -70,6 +71,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
         unfreeze = { process: HostProcess, sticky ->
             val result = am.unfreeze(process.name, process.pid, sticky)
             Log.i("XALog", "task protection ${process.name}/${process.pid} sticky=$sticky success=${result.success} ${result.error}")
+            diagnostics[process.name.substringBefore(':')]?.command(process, sticky, result)
             result.success
         },
         journal = ::writeJournal,
@@ -258,7 +260,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
                 }
                 runCatching {
                     check(enabled(pkg) && ready && run == null) { "宿主尚未就绪或已有任务执行中" }
-                    val protected = protect(pkg) {
+                    val protected = protect(pkg, runId) {
                         leases.acquire(runId, HostProcess.find(pkg, identity.uid).also { check(identity in it) },
                             WakeProtocol.MAX_RUN_MS, WakeProtocol.LEASE_TTL_MS)
                     }
@@ -346,6 +348,8 @@ class UserService(private val context: Context) : IUserService.Stub() {
         synchronized(guard) {
             check(initialized && enabled(pkg)) { "未启用宿主任务守护" }
             if (pending.containsKey(pkg) || sessions[pkg]?.run != null) return
+            if (scheduledAt == 0L) diagnostics[pkg] = WakeDiagnostics(runId)
+            else diagnostics.remove(pkg)
             pending[pkg] = Wake(runId, scheduledAt, SystemClock.elapsedRealtime() + duration)
             setStatus(pkg, runId, "waking", "正在通过 Provider 唤醒并等待宿主就绪")
             try { acquireCpu("wake:$runId", duration) }
@@ -362,15 +366,17 @@ class UserService(private val context: Context) : IUserService.Stub() {
                 synchronized(guard) {
                     if (pending[pkg]?.id != runId) return@execute
                     if (existing.isNotEmpty()) {
-                        protectionReady = protect(pkg) { leases.acquire("wake:$runId", existing, duration, duration) }
+                        protectionReady = protect(pkg, runId) { leases.acquire("wake:$runId", existing, duration, duration) }
                     }
+                    diagnostics[pkg]?.step("provider", "running")
                 }
                 providerWake.wake(pkg)
                 synchronized(guard) {
                     if (pending[pkg]?.id != runId) return@execute
                     val processes = HostProcess.find(pkg, uid)
                     check(processes.any { it.name == pkg }) { "Provider 调用后仍未找到宿主主进程" }
-                    val protected = protect(pkg) {
+                    diagnostics[pkg]?.step("provider", "passed")
+                    val protected = protect(pkg, runId) {
                         if (!protectionReady) leases.acquire("wake:$runId", processes, duration, duration)
                         else leases.attach("wake:$runId", processes)
                     }
@@ -408,15 +414,20 @@ class UserService(private val context: Context) : IUserService.Stub() {
      *
      * @return 是否实际申请了防冻结保护
      */
-    private fun protect(pkg: String, action: () -> Unit): Boolean {
+    private fun protect(pkg: String, runId: String, action: () -> Unit): Boolean {
+        val diagnostic = diagnostics[pkg]?.takeIf { it.runId == runId && it.active }
         if (!am.isUnavailable) {
+            diagnostic?.step("protection", "running")
             try {
                 action()
+                diagnostic?.step("protection", "passed")
                 return true
             } catch (e: Exception) {
                 Log.w("XALog", "防冻结未能开启，继续普通唤醒和签到 $pkg", e)
+                diagnostic?.protectionFailure(e.message ?: "无法申请防冻结保护")
             }
         }
+        if (am.isUnavailable) diagnostic?.unavailable(am.unavailableResult?.output.orEmpty())
         return false
     }
 
@@ -426,12 +437,20 @@ class UserService(private val context: Context) : IUserService.Stub() {
     private fun consumeWake(pkg: String) {
         val request = pending.remove(pkg) ?: return
         releaseProtection("wake:${request.id}")
+        diagnostics[pkg]?.takeIf { it.runId == request.id && it.active }
+            ?.finish("检查已由正在执行的任务接管", false, !leases.hasPendingRestore())
     }
     private fun finishWake(pkg: String, message: String, success: Boolean = false) {
         val request = pending.remove(pkg) ?: return
         releaseProtection("wake:${request.id}")
         val restored = !leases.hasPendingRestore()
-        setStatus(pkg, request.id, if (success && restored) "ready" else "error",
+        diagnostics[pkg]?.takeIf { it.runId == request.id }?.finish(message, success, restored)
+        val state = when {
+            !success || !restored -> "error"
+            !request.protectionReady -> "partial"
+            else -> "ready"
+        }
+        setStatus(pkg, request.id, state,
             if (restored) message else "防冻结恢复未获确认，守护进程会继续重试")
     }
     private fun watch() {
@@ -473,6 +492,7 @@ class UserService(private val context: Context) : IUserService.Stub() {
                     putInt("hostPid", connected?.identity?.pid ?: -1)
                     putBundle("handshake", handshakes[pkg]?.snapshot())
                     putBoolean("unfreezeUnsupported", am.isUnavailable)
+                    putBundle("wakeDiagnostic", diagnostics[pkg]?.snapshot())
                     putInt("alarmUid", alarms?.uid ?: -1); putBoolean("alarmAlive", alarms?.alive == true)
                     putLong("lastAlarmAt", lastAlarmAt)
                     if (::schedules.isInitialized) schedules.plans[pkg]?.let {

@@ -35,6 +35,7 @@ import me.teble.xposed.autodaily.ui.composable.SwitchInfoItem
 import me.teble.xposed.autodaily.ui.composable.SwitchTextItem
 import me.teble.xposed.autodaily.ui.composable.XaScaffold
 import me.teble.xposed.autodaily.ui.dialog.ThemeModelDialog
+import me.teble.xposed.autodaily.ui.dialog.WakeDiagnosticDialog
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.layout.defaultNavigationBarPadding
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
@@ -49,8 +50,11 @@ fun SettingScene(
     onBackClick: () -> Unit,
     viewmodel: SettingViewModel = viewModel()
 ) {
-
-
+    if (DaemonConnectionManager.wakeTestVisible) {
+        DaemonConnectionManager.wakeTestResult?.let { result ->
+            WakeDiagnosticDialog(result, DaemonConnectionManager::dismissWakeTest)
+        }
+    }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
 
@@ -266,7 +270,7 @@ private fun ShizukuLayout(
 
             KeepTimeItem(
                 title = "QQ 任务守护",
-                info = "点击尝试唤醒 QQ，不执行签到。",
+                info = "点击检查 QQ 唤醒能力，不执行签到。",
                 keepAlive = keepAlive,
                 shizukuEnable = shizukuEnable,
                 hostKeepAlive = qqKeepAlive,
@@ -282,7 +286,7 @@ private fun ShizukuLayout(
 
             KeepTimeItem(
                 title = "TIM 任务守护",
-                info = "点击尝试唤醒 TIM，不执行签到。",
+                info = "点击检查 TIM 唤醒能力，不执行签到。",
                 keepAlive = keepAlive,
                 shizukuEnable = shizukuEnable,
                 hostKeepAlive = timKeepAlive,
