@@ -9,6 +9,7 @@ import me.teble.xposed.autodaily.hook.base.hostContext
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
 import me.teble.xposed.autodaily.task.cron.pattent.CronPattern
 import me.teble.xposed.autodaily.task.cron.pattent.CronPatternUtil
+import me.teble.xposed.autodaily.task.model.AppMeta
 import me.teble.xposed.autodaily.task.model.MetaInfo
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.model.TaskProperties
@@ -34,6 +35,7 @@ import java.util.TimeZone
 import java.util.concurrent.locks.ReentrantLock
 import java.util.regex.Pattern
 import javax.crypto.Cipher
+import kotlin.concurrent.withLock
 
 
 object ConfigUtil {
@@ -46,7 +48,6 @@ object ConfigUtil {
 
     private val confDir = File(hostContext.filesDir, "xa_conf")
     private val MIN_APP_VERSION_REG = Pattern.compile("minAppVersion:\\s+(\\d+)")
-    private val CONFIG_VERSION_REG = Pattern.compile("version:\\s+(\\d+)")
 
     private val lock = ReentrantLock()
     private var _conf: TaskProperties? = null
@@ -74,62 +75,50 @@ object ConfigUtil {
         }
     }
 
-    // todo 需要拆分一个给 UI，也就是没有 Toast
-    fun checkUpdate(showToast: Boolean): Boolean {
-        val info = fetchMeta()
-        info?.let {
-            val currConfVer = loadSaveConf().version
-            if (currConfVer < info.config.version) {
-                if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
-                    updateConfig(showToast)
-                } else {
-//                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
-                }
-            }
-            if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-                if (showToast) {
-                    ToastUtil.send("插件版本存在更新")
-                }
-                return true
-            }
+    data class UpdateResult(val configVersion: Int, val appUpdate: AppMeta?, val message: String)
+
+    /**
+     * 检查模块版本，并应用当前模块支持的新配置。
+     *
+     * @param notifyConfigUpdate 后台检查时通过系统提示告知配置更新结果
+     * @return 本次检查结果，获取版本信息失败时返回 null
+     */
+    fun checkUpdate(notifyConfigUpdate: Boolean = true): UpdateResult? {
+        val info = fetchMeta() ?: return null
+        val appUpdate = info.app.takeIf { it.versionCode > BuildConfig.VERSION_CODE }
+        val message = when {
+            loadSaveConf().version >= info.config.version ->
+                if (appUpdate == null) "模块和配置均已是最新版本" else "发现模块新版本 ${appUpdate.versionName}"
+            info.config.needAppVersion > BuildConfig.VERSION_CODE ->
+                "请先更新模块，再使用配置 v${info.config.version}"
+            else -> updateConfig(info.config.version, notifyConfigUpdate)
         }
-        if (showToast) {
-            ToastUtil.send("当前插件与配置均是最新版本")
-        }
-        return false
+        return UpdateResult(loadSaveConf().version, appUpdate, message)
     }
 
-    private fun updateConfig(showToast: Boolean): Boolean {
-        try {
-            val encRes = RepoFileLoader.load(FileEnum.CONF) ?: return false
-            val res = decodeConfStr(encRes)
-            res ?: let {
-                LogUtil.w("配置文件获取失败")
-                return false
+    private fun updateConfig(expectedVersion: Int, notify: Boolean): String {
+        return try {
+            val encoded = RepoFileLoader.load(FileEnum.CONF) ?: return "下载配置失败，请稍后重试"
+            val config = loadConf(encoded) ?: return "无法加载下载的配置，请查看日志"
+            if (config.version < expectedVersion) {
+                LogUtil.w("配置版本尚未同步，预期 v$expectedVersion，实际 v${config.version}")
+                return "配置 v$expectedVersion 尚未同步，请稍后重试"
             }
-            val minAppVersion = ReUtil.getGroup1(MIN_APP_VERSION_REG, res).toInt()
-            val confVersion = ReUtil.getGroup1(CONFIG_VERSION_REG, res).toInt()
-            if (minAppVersion > BuildConfig.VERSION_CODE) {
-                if (showToast) {
-                    ToastUtil.send("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置", true)
-                }
-                LogUtil.i("插件版本号低于${minAppVersion}，无法使用v${confVersion}版本的配置")
-                return false
+            lock.withLock {
+                val currentVersion = loadSaveConf().version
+                if (config.version <= currentVersion) return "当前配置已是 v$currentVersion"
+                saveConfFile(encoded, config)
+                ConfUnit.needShowUpdateLog = true
             }
-            if (confVersion <= loadSaveConf().version) {
-                if (showToast) {
-                    ToastUtil.send("当前配置已是最新，无需更新")
-                }
-                return false
-            }
-            saveConfFile(encRes, confVersion)
-            ConfUnit.needShowUpdateLog = true
-            ToastUtil.send("配置文件更新完毕，如有选项更新，请前往配置目录进行勾选")
-            return true
+            val message = "配置已更新至 v${config.version}"
+            LogUtil.i(message)
+            if (notify) ToastUtil.send(message)
+            message
         } catch (e: Exception) {
-            LogUtil.e(e)
-            ToastUtil.send("更新配置文件失败，详情请看日志")
-            return false
+            LogUtil.e(e, "更新配置失败")
+            val message = "更新配置失败，请查看日志"
+            if (notify) ToastUtil.send(message)
+            message
         }
     }
 
@@ -143,36 +132,31 @@ object ConfigUtil {
         return String(res)
     }
 
-    private fun saveConfFile(encConfStr: String, configVersion: Int): Boolean {
+    private fun saveConfFile(encConfStr: String, config: TaskProperties) {
         ConfUnit.encConfStr = encConfStr
-        // 清空配置缓存。
-        _conf = null
+        _conf = config
         TaskScheduleEvents.changed()
-        LogUtil.d("clear conf cache")
-        return true
     }
 
     private fun getDefaultConf(): String {
         return getTextFromModuleAssets("default_conf")
     }
 
-    fun loadSaveConf(): TaskProperties {
-        if (_conf != null) {
-            return _conf as TaskProperties
-        }
+    fun loadSaveConf(): TaskProperties = lock.withLock {
+        _conf?.let { return@withLock it }
         var conf: TaskProperties? = loadConf()
         val encodeConfig = getDefaultConf()
         val defaultConf = loadConf(encodeConfig)
         defaultConf ?: let {
             LogUtil.w("加载默认配置失败")
             ToastUtil.send("加载默认配置失败")
-            return TaskProperties(0, 0, persistentListOf(), persistentListOf())
+            return@withLock TaskProperties(0, 0, persistentListOf(), persistentListOf())
         }
         if (conf == null) {
             conf = defaultConf
             ToastUtil.send("配置文件不存在/加载失败，正在解压默认配置，详情请看日志")
             LogUtil.i("defaultConf version -> ${defaultConf.version}")
-            saveConfFile(encodeConfig, defaultConf.version)
+            saveConfFile(encodeConfig, defaultConf)
             ConfUnit.needShowUpdateLog = true
         } else {
             // 配置正常加载，表示配置版本与当前model一致，判断内置文件版本是否需要覆盖当前配置
@@ -183,12 +167,12 @@ object ConfigUtil {
                     ConfUnit.needShowUpdateLog = true
                 }
                 conf = defaultConf
-                saveConfFile(encodeConfig, defaultConf.version)
+                saveConfFile(encodeConfig, defaultConf)
                 ToastUtil.send("正在解压内置配置文件，如有选项更新，请前往配置目录进行勾选")
             }
         }
         _conf = conf
-        return conf
+        conf
     }
 
     private fun loadConf(): TaskProperties? {
@@ -244,8 +228,10 @@ object ConfigUtil {
         }.onFailure {
             LogUtil.e(it, "解析meta失败：")
         }.getOrNull()
-        metaInfoCache = meta
-        lastFetchTime = System.currentTimeMillis()
+        if (meta != null) {
+            metaInfoCache = meta
+            lastFetchTime = System.currentTimeMillis()
+        }
         return meta
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -17,6 +18,7 @@ import me.teble.xposed.autodaily.hook.base.hostVersionName
 import me.teble.xposed.autodaily.task.util.ConfigUtil
 import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.ui.scene.base.BaseViewModel
+import me.teble.xposed.autodaily.utils.LogUtil
 import me.teble.xposed.autodaily.utils.TimeUtil
 import me.teble.xposed.autodaily.utils.openUrl
 
@@ -36,8 +38,8 @@ class AboutViewModel : BaseViewModel() {
     var configVersion by mutableIntStateOf(0)
 
 
-    var updateDialogText by mutableStateOf("")
-
+    var checkingUpdate by mutableStateOf(false)
+        private set
 
     var hasUpdate by mutableStateOf(false)
 
@@ -50,48 +52,42 @@ class AboutViewModel : BaseViewModel() {
         qqVersionCode = hostVersionCode
         viewModelScope.launch {
             configVersion = withContext(IO) { ConfigUtil.loadSaveConf().version }
-            withContext(IO) { ConfigUtil.fetchMeta() }?.let {
-                // 检查新版本
-                hasUpdate = BuildConfig.VERSION_CODE < it.app.versionCode
+            withContext(IO) { ConfUnit.metaInfoCache ?: ConfigUtil.fetchMeta() }?.let {
+                if (lastClickTime == 0L) hasUpdate = BuildConfig.VERSION_CODE < it.app.versionCode
             }
         }
     }
 
 
     fun updateApp(onNavigateToUpdate: (String) -> Unit) {
+        if (checkingUpdate) return
         val time = TimeUtil.cnTimeMillis()
         if (time - lastClickTime < 15_000) {
-            showSnackbar("不要频繁点击哦~")
+            showSnackbar("请稍后再检查")
             return
         }
         lastClickTime = time
 
-        showSnackbar("正在检测更新")
+        checkingUpdate = true
         viewModelScope.launch {
-            val info = withContext(IO) { ConfigUtil.fetchMeta() }
-            info?.let {
-                val currConfVer = withContext(IO) { ConfigUtil.loadSaveConf().version }
-                if (currConfVer < info.config.version) {
-                    if (BuildConfig.VERSION_CODE >= info.config.needAppVersion) {
-                        return@launch
-                    } else {
-//                    XANotification.notify("插件版本过低，无法应用最新配置，推荐更新插件")
-                        return@launch
-                    }
-                }
-                if (BuildConfig.VERSION_CODE < info.app.versionCode) {
-                    hasUpdate = true
-                    updateDialogText =
-                        ConfUnit.metaInfoCache?.app?.updateLog ?: ""
-                    onNavigateToUpdate(updateDialogText)
-                    showSnackbar("插件版本存在更新")
+            try {
+                val result = withContext(IO) { ConfigUtil.checkUpdate(notifyConfigUpdate = false) }
+                if (result == null) {
+                    showSnackbar("获取更新信息失败，请稍后重试")
                     return@launch
                 }
+                configVersion = result.configVersion
+                hasUpdate = result.appUpdate != null
+                showSnackbar(result.message)
+                result.appUpdate?.let { onNavigateToUpdate(it.updateLog.orEmpty()) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                LogUtil.e(e, "检查更新失败")
+                showSnackbar("检查更新失败，请查看日志")
+            } finally {
+                checkingUpdate = false
             }
-            showSnackbar("当前插件与配置均是最新版本")
-
-
-            configVersion = withContext(IO) { ConfigUtil.loadSaveConf().version }
         }
     }
 

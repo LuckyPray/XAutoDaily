@@ -81,6 +81,7 @@ fun AboutScene(
                 qqVersionName = viewmodel::qqVersionName,
                 qqVersionCode = viewmodel::qqVersionCode,
                 configVersion = viewmodel::configVersion,
+                checkingUpdate = viewmodel.checkingUpdate,
                 hasUpdate = viewmodel::hasUpdate,
                 updateApp = {
                     viewmodel.updateApp(onNavigateToUpdate)
@@ -137,6 +138,7 @@ private fun UpdateLayout(
     qqVersionName: () -> String,
     qqVersionCode: () -> Long,
     configVersion: () -> Int,
+    checkingUpdate: Boolean,
     hasUpdate: () -> Boolean,
     updateApp: () -> Unit
 ) {
@@ -149,7 +151,7 @@ private fun UpdateLayout(
             .drawBehind {
                 drawRect(colors.colorBgContainer)
             }
-            .clickable(role = Role.Button, onClick = updateApp)
+            .clickable(enabled = !checkingUpdate, role = Role.Button, onClick = updateApp)
             .padding(vertical = 20.dp, horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -157,7 +159,7 @@ private fun UpdateLayout(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = "检查更新",
+                text = if (checkingUpdate) "正在检查更新…" else "检查更新",
                 maxLines = 1,
                 style = TextStyle(
                     fontSize = 18.sp,

@@ -58,7 +58,7 @@ class SplashActivityHook : BaseHook() {
             LogUtil.i("SplashActivity 已进入，发送启动补偿检查")
             scope.launch {
                 withContext(Dispatchers.IO) {
-                    ConfUnit.metaInfoCache ?: ConfigUtil.checkUpdate(false)
+                    ConfUnit.metaInfoCache ?: ConfigUtil.checkUpdate()
                     autoResetTask(true)
                     resetTasksNextExecTime()
                 }
@@ -74,7 +74,7 @@ class SplashActivityHook : BaseHook() {
                 withContext(Dispatchers.IO) {
                     if (ConfUnit.metaInfoCache == null
                         || System.currentTimeMillis() - ConfUnit.lastFetchTime > 1 * 60 * 60_000L) {
-                        ConfigUtil.checkUpdate(false)
+                        ConfigUtil.checkUpdate()
                     }
                     autoResetTask(false)
                 }

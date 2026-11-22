@@ -228,7 +228,7 @@ object TaskExecutor {
                 "check_update_task",
                 "0 0 9/3 * * *"
             ) {
-                ConfigUtil.checkUpdate(false)
+                ConfigUtil.checkUpdate()
             }
             LogUtil.d("任务调度器存在任务：${scheduler.taskTable.ids}")
             // 宿主可能在任务到期后才重新启动，不能等待下一次十分钟 Cron 检查才补执行。
