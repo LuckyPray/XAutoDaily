@@ -3,9 +3,12 @@ package me.teble.xposed.autodaily.task.request.impl
 import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.favoriteManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.groupSignInManager
+import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.levelVideoManager
+import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.novelReadManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.publicAccountManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.qzIntimateSpaceManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.sendMessageManager
+import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.welfareSignManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.yunDongStepsManager
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
@@ -95,6 +98,18 @@ object FuncTaskReqUtil : ITaskReqUtil {
                 val spaceId = paramMap["spaceId"]!!
                 manager = qzIntimateSpaceManager
                 qzIntimateSpaceManager.doCheckInRequest(spaceId)
+            }
+            url.startsWith("xa://WelfareSignManager/signIn") -> {
+                manager = welfareSignManager
+                welfareSignManager.syncSignIn()
+            }
+            url.startsWith("xa://NovelReadManager/completeRead") -> {
+                manager = novelReadManager
+                novelReadManager.syncCompleteRead()
+            }
+            url.startsWith("xa://LevelVideoManager/completeVideo") -> {
+                manager = levelVideoManager
+                levelVideoManager.syncCompleteVideo()
             }
             else -> return TaskResponse(null, "不支持的功能", 500)
         }
