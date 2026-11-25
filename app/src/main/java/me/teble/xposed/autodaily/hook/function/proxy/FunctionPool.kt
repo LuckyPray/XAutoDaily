@@ -9,17 +9,15 @@ import me.teble.xposed.autodaily.hook.function.impl.FavoriteManager
 import me.teble.xposed.autodaily.hook.function.impl.FriendsManager
 import me.teble.xposed.autodaily.hook.function.impl.GroupSignInManager
 import me.teble.xposed.autodaily.hook.function.impl.GuildManager
-import me.teble.xposed.autodaily.hook.function.impl.LevelVideoManager
+import me.teble.xposed.autodaily.hook.function.impl.LevelTaskManager
 import me.teble.xposed.autodaily.hook.function.impl.MiniLoginManager
 import me.teble.xposed.autodaily.hook.function.impl.MiniProfileManager
-import me.teble.xposed.autodaily.hook.function.impl.NovelReadManager
 import me.teble.xposed.autodaily.hook.function.impl.NtSendMessageManager
 import me.teble.xposed.autodaily.hook.function.impl.PublicAccountManager
 import me.teble.xposed.autodaily.hook.function.impl.QZIntimateSpaceManager
 import me.teble.xposed.autodaily.hook.function.impl.SendMessageManager
 import me.teble.xposed.autodaily.hook.function.impl.TicketManager
 import me.teble.xposed.autodaily.hook.function.impl.TroopManager
-import me.teble.xposed.autodaily.hook.function.impl.WelfareSignManager
 import me.teble.xposed.autodaily.hook.function.impl.YunDongStepsManager
 import me.teble.xposed.autodaily.hook.utils.QApplicationUtil
 import net.bytebuddy.ByteBuddy
@@ -45,9 +43,7 @@ object FunctionPool {
         PublicAccountManager::class.java,
         YunDongStepsManager::class.java,
         QZIntimateSpaceManager::class.java,
-        WelfareSignManager::class.java,
-        NovelReadManager::class.java,
-        LevelVideoManager::class.java,
+        LevelTaskManager::class.java,
     )
 
     private val strategy = AndroidClassLoadingStrategy.Wrapping(
@@ -106,9 +102,5 @@ object FunctionPool {
 
     val qzIntimateSpaceManager by lazy { getFunction(QZIntimateSpaceManager::class.java) }
 
-    val welfareSignManager by lazy { getFunction(WelfareSignManager::class.java) }
-
-    val novelReadManager by lazy { getFunction(NovelReadManager::class.java) }
-
-    val levelVideoManager by lazy { getFunction(LevelVideoManager::class.java) }
+    val levelTaskManager by lazy { getFunction(LevelTaskManager::class.java) }
 }

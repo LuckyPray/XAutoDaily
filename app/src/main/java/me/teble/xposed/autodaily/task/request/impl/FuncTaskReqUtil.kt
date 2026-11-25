@@ -3,12 +3,10 @@ package me.teble.xposed.autodaily.task.request.impl
 import me.teble.xposed.autodaily.hook.function.base.BaseFunction
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.favoriteManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.groupSignInManager
-import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.levelVideoManager
-import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.novelReadManager
+import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.levelTaskManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.publicAccountManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.qzIntimateSpaceManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.sendMessageManager
-import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.welfareSignManager
 import me.teble.xposed.autodaily.hook.function.proxy.FunctionPool.yunDongStepsManager
 import me.teble.xposed.autodaily.task.model.Task
 import me.teble.xposed.autodaily.task.request.ITaskReqUtil
@@ -99,17 +97,21 @@ object FuncTaskReqUtil : ITaskReqUtil {
                 manager = qzIntimateSpaceManager
                 qzIntimateSpaceManager.doCheckInRequest(spaceId)
             }
-            url.startsWith("xa://WelfareSignManager/signIn") -> {
-                manager = welfareSignManager
-                welfareSignManager.syncSignIn()
+            url.startsWith("xa://LevelTaskManager/syncCompleteVideo0720") -> {
+                manager = levelTaskManager
+                levelTaskManager.syncCompleteVideo0720()
             }
-            url.startsWith("xa://NovelReadManager/completeRead") -> {
-                manager = novelReadManager
-                novelReadManager.syncCompleteRead()
+            url.startsWith("xa://LevelTaskManager/syncCompleteVideo0730") -> {
+                manager = levelTaskManager
+                levelTaskManager.syncCompleteVideo0730()
             }
-            url.startsWith("xa://LevelVideoManager/completeVideo") -> {
-                manager = levelVideoManager
-                levelVideoManager.syncCompleteVideo()
+            url.startsWith("xa://LevelTaskManager/syncCompleteRead0916") -> {
+                manager = levelTaskManager
+                levelTaskManager.syncCompleteRead0916()
+            }
+            url.startsWith("xa://LevelTaskManager/syncSignIn1117") -> {
+                manager = levelTaskManager
+                levelTaskManager.syncSignIn1117()
             }
             else -> return TaskResponse(null, "不支持的功能", 500)
         }
