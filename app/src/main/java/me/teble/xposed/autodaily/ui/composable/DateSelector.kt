@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -27,6 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,11 +41,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import me.teble.xposed.autodaily.ui.graphics.SmootherShape
 import me.teble.xposed.autodaily.ui.theme.DefaultAlpha
 import me.teble.xposed.autodaily.ui.theme.DisabledFontAlpha
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.colors
 import me.teble.xposed.autodaily.ui.theme.XAutodailyTheme.signFontFamily
+import kotlin.math.abs
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -140,33 +145,28 @@ internal fun TextPicker(
     require(count > 0)
     val targetIndex = startIndex.coerceIn(0, count - 1)
     val centerIndex = Int.MAX_VALUE / 2 - Int.MAX_VALUE / 2 % count
-    val state =
-        rememberLazyListState(centerIndex + targetIndex)
-
-
+    val state = rememberLazyListState(centerIndex + targetIndex)
     val snappingLayout = remember(state) { SnapLayoutInfoProvider(state) }
     val flingBehavior = rememberSnapFlingBehavior(snappingLayout)
-
-
-    val currentIndex by remember {
+    val centeredIndex by remember(state) {
         derivedStateOf {
-            state.firstVisibleItemIndex % count
+            val layout = state.layoutInfo
+            val center = layout.centerOffset
+            layout.visibleItemsInfo.minByOrNull { abs(it.offset + it.size / 2 - center) }?.index
         }
     }
-
     val currentOnScrollFinish by rememberUpdatedState(onScrollFinish)
 
-    LaunchedEffect(targetIndex, count) {
-        if (state.firstVisibleItemIndex % count != targetIndex) {
-            state.scrollToItem(centerIndex + targetIndex)
+    LaunchedEffect(state, count, targetIndex) {
+        val layout = snapshotFlow { state.layoutInfo }.first { it.visibleItemsInfo.isNotEmpty() }
+        val snapOffset = layout.centerOffset - layout.visibleItemsInfo.first().size / 2
+        if (layout.visibleItemsInfo.none { it.index % count == targetIndex && it.offset == snapOffset }) {
+            state.scrollToItem(centerIndex + targetIndex, scrollOffset = -snapOffset)
         }
+        snapshotFlow { if (state.isScrollInProgress) null else centeredIndex?.rem(count) }
+            .filterNotNull()
+            .collect { if (it != targetIndex) currentOnScrollFinish(it) }
     }
-    LaunchedEffect(currentIndex, state.isScrollInProgress) {
-        if (!state.isScrollInProgress && currentIndex != targetIndex) {
-            currentOnScrollFinish(currentIndex)
-        }
-    }
-
 
     LazyColumn(
         modifier = modifier
@@ -178,42 +178,40 @@ internal fun TextPicker(
         contentPadding = PaddingValues(vertical = itemHeight * (visibleItemCount / 2)),
     ) {
 
-        items(
-            Int.MAX_VALUE,
-            key = { it },
-            contentType = { derivedStateOf { currentIndex == it }.value }
-        ) { index ->
+        items(Int.MAX_VALUE, key = { it }) { index ->
             TextPickerItem(
-                currentIndex = { currentIndex },
+                isSelected = centeredIndex == index,
                 index = index % count,
                 itemHeight = itemHeight
             )
-
         }
-
     }
 }
 
+/**
+ * 可视区域的中心和列表项的偏移使用相同的像素坐标，包含上下内容边距。
+ */
+private val LazyListLayoutInfo.centerOffset: Int
+    get() = (viewportStartOffset + viewportEndOffset) / 2
+
 @Composable
 private fun TextPickerItem(
-    currentIndex: () -> Int,
+    isSelected: Boolean,
     index: Int,
     itemHeight: Dp,
 ) {
     val colors = colors
-    val isSelect by remember { derivedStateOf { currentIndex() == index } }
-
     val fontScale by animateFloatAsState(
-        targetValue = if (isSelect) 1.0f else 0.8f,
+        targetValue = if (isSelected) 1.0f else 0.8f,
         animationSpec = spring(), label = "Picker fontSize"
     )
 
     val alpha by animateFloatAsState(
-        targetValue = if (isSelect) DefaultAlpha else DisabledFontAlpha,
+        targetValue = if (isSelected) DefaultAlpha else DisabledFontAlpha,
         animationSpec = spring(), label = "Picker fontAlpha"
     )
     val fontWeight by animateIntAsState(
-        targetValue = if (isSelect) FontWeight.Bold.weight else FontWeight.Normal.weight,
+        targetValue = if (isSelected) FontWeight.Bold.weight else FontWeight.Normal.weight,
         label = "fontWeight"
     )
 
