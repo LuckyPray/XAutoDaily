@@ -119,6 +119,10 @@
 -keep class * extends me.teble.xposed.autodaily.hook.base.BaseHook {
     <methods>;
 }
+# 保留 QQ 请求和响应方法的查找边界，防止 R8 将宿主类引用提前到桌面 UI 共用的回调中。
+-keepclassmembers,allowshrinking,allowobfuscation class me.teble.xposed.autodaily.hook.bridge.MobileQQServiceBridge {
+    private static java.lang.reflect.Method *();
+}
 -keep class com.tencent.mmkv.** { *; }
 -keep class io.luckypray.dexkit.** { *; }
 # 插件代理混
