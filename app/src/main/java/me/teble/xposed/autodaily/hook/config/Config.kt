@@ -88,7 +88,7 @@ object Config {
             "QZIntimateCheckInViewModel", "[doCheckInRequest] space id is "
         )
     )
-    const val hooksVersion = 2
+    const val hooksVersion = 3
     val confuseInfo = obfuscate.mapKeys { (k, _) ->
         getSimpleName(k)
     }.toImmutableMap()
