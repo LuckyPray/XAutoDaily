@@ -1,6 +1,5 @@
 package me.teble.xposed.autodaily.activity.common
 
-import android.content.res.Configuration
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -13,6 +12,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.core.app.ActivityCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.doOnPreDraw
@@ -54,12 +55,7 @@ class MainActivity : ComponentActivity() {
         setStatusBarTranslation()
         setNavigationBarTranslation()
         enableEdgeToEdge()
-        when (XAutodailyTheme.getAppTheme()) {
-            XAutodailyTheme.Theme.Light -> setSystemBarOldMode()
-            XAutodailyTheme.Theme.Dark -> setSystemBarOldMode(false)
-            XAutodailyTheme.Theme.System -> setSystemBarOldMode(!isNightMode())
-
-        }
+        setSystemBarOldMode(!XAutodailyTheme.getAppTheme().isDark(resources.configuration))
         super.onCreate(savedInstanceState)
         // 状态栏和导航栏沉浸
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -68,11 +64,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
 
-            when (viewModel.currentTheme) {
-                XAutodailyTheme.Theme.Light -> setSystemBarMode()
-                XAutodailyTheme.Theme.Dark -> setSystemBarMode(false)
-                XAutodailyTheme.Theme.System -> setSystemBarMode(!isNightMode())
-            }
+            val lightSystemBars = !viewModel.currentTheme.isDark(LocalConfiguration.current)
+            SideEffect { setSystemBarMode(lightSystemBars) }
 
             XAutodailyTheme(
                 isBlack = viewModel.blackTheme,
@@ -157,24 +150,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun setSystemBarOldMode(enable: Boolean = true) {
+    private fun setSystemBarOldMode(enable: Boolean) {
         window.statusBarLightOldMode(enable)
         window.navigationBarLightOldMode(enable)
     }
 
-    private fun setSystemBarMode(enable: Boolean = true) {
+    private fun setSystemBarMode(enable: Boolean) {
         window.statusBarLightMode(enable)
         window.navigationBarLightMode(enable)
     }
 
-    /**
-     * 判断当前是否是暗色模式
-     * @return 当前是否是暗色模式
-     */
-    private fun isNightMode(): Boolean {
-        return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-            Configuration.UI_MODE_NIGHT_YES -> true
-            else -> false
-        }
-    }
 }

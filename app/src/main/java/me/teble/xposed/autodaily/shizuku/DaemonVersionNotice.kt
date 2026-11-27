@@ -3,7 +3,9 @@ package me.teble.xposed.autodaily.shizuku
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.Application
+import android.content.ComponentCallbacks
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +14,7 @@ import me.teble.xposed.autodaily.BuildConfig
 import me.teble.xposed.autodaily.activity.common.MainActivity
 import me.teble.xposed.autodaily.hook.base.hostAppName
 import me.teble.xposed.autodaily.hook.utils.ToastUtil
+import me.teble.xposed.autodaily.ui.ConfUnit
 import me.teble.xposed.autodaily.utils.LogUtil
 import java.lang.ref.WeakReference
 
@@ -64,7 +67,14 @@ internal object DaemonVersionNotice : Application.ActivityLifecycleCallbacks {
         } else {
             "请打开 XAutoDaily，让任务守护加载新版本。"
         }
-        val notice = AlertDialog.Builder(activity, android.R.style.Theme_DeviceDefault_Dialog_Alert)
+        val theme = ConfUnit.theme
+        val isDark = theme.isDark(activity.resources.configuration)
+        val dialogTheme = if (isDark) {
+            android.R.style.Theme_DeviceDefault_Dialog_Alert
+        } else {
+            android.R.style.Theme_DeviceDefault_Light_Dialog_Alert
+        }
+        val notice = AlertDialog.Builder(activity, dialogTheme)
             .setTitle("XAutoDaily 任务守护版本不一致")
             .setMessage(message)
             .setPositiveButton("打开 XAutoDaily") { _, _ ->
@@ -80,10 +90,24 @@ internal object DaemonVersionNotice : Application.ActivityLifecycleCallbacks {
             .setOnCancelListener { acknowledged = true }
             .create()
         notice.setOwnerActivity(activity)
-        notice.setOnDismissListener { if (dialog === notice) dialog = null }
+        val configurationListener = object : ComponentCallbacks {
+            override fun onConfigurationChanged(newConfig: Configuration) {
+                if (dialog !== notice || theme.isDark(newConfig) == isDark) return
+                dialog = null
+                notice.dismiss()
+                main.post { showIfNeeded() }
+            }
+
+            override fun onLowMemory() = Unit
+        }
+        notice.setOnDismissListener {
+            activity.unregisterComponentCallbacks(configurationListener)
+            if (dialog === notice) dialog = null
+        }
         try {
             notice.show()
             dialog = notice
+            activity.registerComponentCallbacks(configurationListener)
         } catch (_: WindowManager.BadTokenException) {
             // 当前页面已退出，保留提示供下一个前台页面展示。
         }

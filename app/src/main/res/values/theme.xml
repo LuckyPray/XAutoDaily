@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Base.Theme.XAutoDaily" parent="Theme.AppCompat.Light">
+    <style name="Base.Theme.XAutoDaily" parent="Theme.AppCompat.DayNight">
         <item name="windowNoTitle">true</item>
         <item name="android:windowSoftInputMode">adjustNothing</item>
         <item name="android:fitsSystemWindows">false</item>

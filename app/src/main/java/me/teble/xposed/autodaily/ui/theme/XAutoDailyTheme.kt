@@ -1,9 +1,9 @@
 package me.teble.xposed.autodaily.ui.theme
 
 
+import android.content.res.Configuration
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
@@ -16,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import me.teble.xposed.autodaily.R
@@ -53,6 +54,12 @@ object XAutodailyTheme {
         Light,
         Dark,
         System;
+
+        fun isDark(configuration: Configuration): Boolean = when (this) {
+            Light -> false
+            Dark -> true
+            System -> (configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
+        }
     }
 
     @JvmStatic
@@ -82,15 +89,11 @@ object XAutodailyTheme {
 @Composable
 fun XAutodailyTheme(
     isBlack: Boolean = false,
-    colorTheme: XAutodailyTheme.Theme = XAutodailyTheme.Theme.Light,
+    colorTheme: XAutodailyTheme.Theme = XAutodailyTheme.Theme.System,
     content: @Composable () -> Unit
 ) {
 
-    val isDark = when (colorTheme) {
-        XAutodailyTheme.Theme.Light -> false
-        XAutodailyTheme.Theme.Dark -> true
-        XAutodailyTheme.Theme.System -> isSystemInDarkTheme()
-    }
+    val isDark = colorTheme.isDark(LocalConfiguration.current)
     val targetColors = if (isDark)
         if (isBlack) BlackColorPalette else DarkColorPalette
     else LightColorPalette
@@ -231,10 +234,10 @@ fun XAutodailyTheme(
 
         MaterialTheme(
             colorScheme = if (isDark) {
-                lightColorScheme()
+                darkColorScheme(primary = colors.themeColor)
             } else {
-                darkColorScheme()
-            }.copy(primary = colors.themeColor),
+                lightColorScheme(primary = colors.themeColor)
+            },
             content = content
         )
     }

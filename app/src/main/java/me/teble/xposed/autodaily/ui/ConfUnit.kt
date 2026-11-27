@@ -148,7 +148,7 @@ object ConfUnit {
         }
 
     var theme: XAutodailyTheme.Theme
-        get() = xaConfig.getInt(THEME, 0).toTheme()
+        get() = xaConfig.getInt(THEME, XAutodailyTheme.Theme.System.toCode()).toTheme()
         set(value) = xaConfig.putInt(THEME, value.toCode())
 
 

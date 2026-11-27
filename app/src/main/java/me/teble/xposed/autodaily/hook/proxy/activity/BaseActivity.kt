@@ -45,9 +45,10 @@ class BaseActivityClassLoader(referencer: ClassLoader) :
         } catch (ignored: ClassNotFoundException) {
         }
         try {
-            //start: overloaded
+            // 系统重建模块页面时，要用宿主的类加载器恢复宿主注册的生命周期 Fragment。
             if (name == "androidx.lifecycle.LifecycleOwner"
                 || name == "androidx.lifecycle.ViewModelStoreOwner"
+                || name == "androidx.lifecycle.ReportFragment"
                 || name == "androidx.savedstate.SavedStateRegistryOwner"
             ) {
                 return hostClassLoader.loadClass(name)
